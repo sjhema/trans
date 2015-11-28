@@ -1,0 +1,11 @@
+<%@ include file="/common/taglibs.jsp"%>
+<table width="100%">
+	<tr>
+		<td align="${left}" width="100%" align="right">
+			<a href="${ctx}/reportuser/report/billinghistory/export.do?type=pdf" target="reportData"><img src="${ctx}/images/pdf.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/reportuser/report/billinghistory/export.do?type=xls" target="reportData"><img src="${ctx}/images/excel.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/reportuser/report/billinghistory/export.do?type=csv" target="reportData"><img src="${ctx}/images/csv.png" border="0" class="toolbarButton"/></a>
+		</td>
+	</tr>
+	<tr><td align="${left}" width="100%" valign="top"><iframe src="${ctx}/trans/blank.jsp" width="100%" height="0" name="reportData" frameborder="0"></iframe></td></tr>
+</table>

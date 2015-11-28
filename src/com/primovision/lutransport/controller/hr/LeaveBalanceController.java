@@ -1,0 +1,330 @@
+package com.primovision.lutransport.controller.hr;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.gson.Gson;
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hr.LeaveCurrentBalance;
+import com.primovision.lutransport.model.hr.LeaveType;
+import com.primovision.lutransport.model.hr.Ptodapplication;
+
+@Controller
+@RequestMapping("/hr/leavebalance")
+public class LeaveBalanceController extends CRUDController<LeaveCurrentBalance> {
+	
+	public LeaveBalanceController() {
+		setUrlContext("/hr/leavebalance");
+	}
+	
+	
+	@Override
+	public void initBinder(WebDataBinder binder) {
+		// SimpleDateFormat("yyyy-MM-dd")
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	    dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+		binder.registerCustomEditor(Long.TYPE, new CustomNumberEditor(Long.class, false));
+		
+		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
+		binder.registerCustomEditor(EmployeeCatagory.class, new AbstractModelEditor(EmployeeCatagory.class));
+		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(Driver.class));
+		binder.registerCustomEditor(LeaveType.class, new AbstractModelEditor(LeaveType.class));
+		
+	}
+	
+	
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		//setupCreate(model, request);
+		Map criterias = new HashMap();
+		/*criterias.put("status", 1);
+		model.addAttribute("employees",genericDAO.findByCriteria(Employee.class, criterias, "fullName", false));*/
+		String query="select distinct(obj.fullName) from Driver obj order by obj.fullName";
+		model.addAttribute("employees", genericDAO.executeSimpleQuery(query));
+		criterias.clear();
+		model.addAttribute("catagories",genericDAO.findByCriteria(EmployeeCatagory.class, criterias, "name", false));
+		model.addAttribute("leavetypes",genericDAO.findByCriteria(LeaveType.class, criterias, "name", false));
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("dataType", "STATUS");
+		map.put("dataValue", "0,1");
+		model.addAttribute("leavebalstatus", genericDAO.findByCriteria(StaticData.class, map,"dataText",false));
+	}
+	@Override
+	public String list(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"company.name asc,terminal.name asc,empname.fullName asc,empname.dateHired asc,empname.dateReHired asc,leavetype asc,dateEffectiveFrom desc,dateEffectiveTo desc,createdAt",true));
+		return urlContext + "/list";
+	}
+	
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"company.name asc,terminal.name asc,empname.fullName asc,empname.dateHired asc,empname.dateReHired asc,leavetype asc,dateEffectiveFrom desc,dateEffectiveTo desc,createdAt",true));
+		return urlContext + "/list";
+	}
+
+@Override
+public void setupCreate(ModelMap model, HttpServletRequest request) {
+	Map criterias = new HashMap();
+	if(request.getParameter("id")!=null){
+		criterias.clear();
+		model.addAttribute("employees",genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));		
+	}
+	else{
+		criterias.clear();
+		criterias.put("status", 1);
+		model.addAttribute("employees",genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+	}
+	criterias.clear();
+	model.addAttribute("catagories",genericDAO.findByCriteria(EmployeeCatagory.class, criterias, "name", false));
+	criterias.clear();
+	model.addAttribute("leavetypes",genericDAO.findByCriteria(LeaveType.class, criterias, "name", false));
+	criterias.put("type", 3);
+	model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+	criterias.put("type", 4);
+	model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+	Map<String,Object> map=new HashMap<String,Object>();
+	map.put("dataType", "STATUS");
+	map.put("dataValue", "0,1");
+	model.addAttribute("leavebalstatus", genericDAO.findByCriteria(StaticData.class, map,"dataText",false));
+}
+
+
+
+
+
+
+@Override
+public String save(HttpServletRequest request,@ModelAttribute("modelObject") LeaveCurrentBalance entity,
+		BindingResult bindingResult, ModelMap model) {
+
+	
+	if(entity.getEmpname()==null){
+		bindingResult.rejectValue("empname", "error.select.option",
+				null, null);
+	}
+	if(entity.getEmpcategory()==null){
+		bindingResult.rejectValue("empcategory", "error.select.option",
+				null, null);
+	}
+	
+	if(entity.getLeavetype()==null){
+		bindingResult.rejectValue("leavetype", "error.select.option",
+				null, null);
+	}
+	
+	
+	if(entity.getCompany()==null){
+		bindingResult.rejectValue("company", "error.select.option",
+				null, null);
+	}
+	if(entity.getTerminal()==null){
+		bindingResult.rejectValue("terminal", "error.select.option",
+				null, null);
+	}
+	
+	if(entity.getDaysaccrude()==null){
+		bindingResult.rejectValue("daysaccrude", "Min.java.lang.Double",
+				null, null);
+	}
+	
+	if(entity.getHoursaccrude()==null){
+		bindingResult.rejectValue("hoursaccrude", "Min.java.lang.Double",
+				null, null);
+	}
+	
+	if(entity.getDateEffectiveFrom()==null){
+		bindingResult.rejectValue("dateEffectiveFrom", "error.NotNull.field",
+				null, null);
+	}
+	
+	if(entity.getDateEffectiveTo()==null){
+		bindingResult.rejectValue("dateEffectiveTo", "error.NotNull.field",
+				null, null);
+	}
+	
+	if(entity.getNextAllotmentDate()==null){
+		bindingResult.rejectValue("nextAllotmentDate", "error.NotNull.field",
+				null, null);
+	}
+	
+	try {
+		getValidator().validate(entity, bindingResult);
+	} catch (ValidationException e) {
+		e.printStackTrace();
+		log.warn("Error in validation :" + e);
+	}
+	
+	// return to form if we had errors
+	if (bindingResult.hasErrors()) {
+		System.out.println("\n error-->"+bindingResult.getAllErrors());
+		setupCreate(model, request);
+		return urlContext + "/form";
+	}
+	
+	if(entity.getLeavetype().getId()==4){
+	   Driver driver = genericDAO.getById(Driver.class, entity.getEmpname().getId());	    	
+	   driver.setNextAnniversaryDate(entity.getNextAllotmentDate());
+	   genericDAO.saveOrUpdate(driver); 	
+	}		
+	
+	if(entity.getStatus()==1){
+	Map criterias=new HashMap();
+	criterias.put("company.id",entity.getCompany().getId());
+	criterias.put("terminal.id", entity.getTerminal().getId());
+	criterias.put("empcategory.id", entity.getEmpcategory().getId());
+	criterias.put("empname.id", entity.getEmpname().getId());
+	criterias.put("leavetype.id", entity.getLeavetype().getId());
+	criterias.put("status",1);
+	List<LeaveCurrentBalance> leavebalobj=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
+	if(leavebalobj!=null && leavebalobj.size()>0){	
+		if(entity.getId()==null){
+		setupCreate(model, request);
+		request.getSession().setAttribute("error", "There is already Active Record exists for this Employee!");
+		return urlContext + "/form";
+		}
+		else if(entity.getId()!=leavebalobj.get(0).getId()){
+			setupCreate(model, request);
+			request.getSession().setAttribute("error", "There is already Active Record exists for this Employee!");
+			return urlContext + "/form";
+		}
+	}
+	}
+	
+	return super.save(request, entity, bindingResult, model);
+}
+@RequestMapping(method = RequestMethod.GET, value = "/history.do")
+public String  history(ModelMap model,HttpServletRequest request,LeaveCurrentBalance entity){
+	String id=request.getParameter("id");
+	if(!StringUtils.isEmpty(id)){
+	LeaveCurrentBalance balance=genericDAO.getById(LeaveCurrentBalance.class, Long.parseLong(id));
+	if(balance!=null){
+		Map criterias=new HashMap();
+		criterias.put("empname.id", balance.getEmpname().getId());
+		criterias.put("empcategory.id",balance.getEmpcategory().getId());
+		criterias.put("company.id", balance.getCompany().getId());
+		criterias.put("terminal.id", balance.getTerminal().getId());
+		criterias.put("leavetype.id", balance.getLeavetype().getId());
+		List<LeaveCurrentBalance> balances=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
+		criterias.clear();
+		criterias.put("driver.id", balance.getEmpname().getId());
+		criterias.put("category.id", balance.getEmpcategory().getId());
+		criterias.put("company.id", balance.getCompany().getId());
+		criterias.put("terminal.id", balance.getTerminal().getId());
+		criterias.put("leavetype.id", balance.getLeavetype().getId());
+		List<Ptodapplication>ptodapplications=genericDAO.findByCriteria(Ptodapplication.class, criterias);
+		model.addAttribute("list1", ptodapplications);
+		model.addAttribute("list", balances);
+		model.addAttribute("list3", "list3:list1>list");
+		
+	 }
+	}
+	return "/hr/ptodapplication/ptodhistory";
+}
+protected String processAjaxRequest(HttpServletRequest request,
+		String action, Model model) {
+	if("findDCompany".equalsIgnoreCase(action)){
+		if(!StringUtils.isEmpty(request.getParameter("driver"))){
+			List<Location> company=new ArrayList<Location>();
+			
+			Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+			company.add(driver.getCompany());
+			Gson gson = new Gson();
+			return gson.toJson(company);
+			
+		}
+		else{
+			Map criterias = new HashMap();
+			criterias.put("type", 3);
+			List<Location> company=new ArrayList<Location>();
+			company=genericDAO.findByCriteria(Location.class, criterias,"name",false);
+			Gson gson = new Gson();
+			return gson.toJson(company);
+			
+		}
+		
+	}
+	
+	if("findDterminal".equalsIgnoreCase(action)){
+		if(!StringUtils.isEmpty(request.getParameter("driver"))){
+			List<Location> terminal=new ArrayList<Location>();
+			
+			Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+			terminal.add(driver.getTerminal());
+			Gson gson = new Gson();
+			return gson.toJson(terminal);
+			
+		}
+		else{
+			Map criterias = new HashMap();
+			criterias.put("type", 4);
+			List<Location> terminal=new ArrayList<Location>();
+			terminal=genericDAO.findByCriteria(Location.class, criterias,"name",false);
+			Gson gson = new Gson();
+			return gson.toJson(terminal);
+			
+		}
+	}
+	if("findNextAnv".equalsIgnoreCase(action)){		
+		Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		Gson gson = new Gson();
+		return gson.toJson(dateFormat.format(driver.getNextAnniversaryDate()));
+	}
+	
+	if("findDCategory".equalsIgnoreCase(action)){
+			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+				List<EmployeeCatagory> category=new ArrayList<EmployeeCatagory>();
+				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+				category.add(driver.getCatagory());
+				Gson gson = new Gson();
+				return gson.toJson(category);
+			}
+			else{
+				Map criterias = new HashMap();
+				List<EmployeeCatagory> category=new ArrayList<EmployeeCatagory>();
+				category=genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false);
+				Gson gson = new Gson();
+				return gson.toJson(category);
+			}
+		
+		}
+	return "";
+}
+}
+

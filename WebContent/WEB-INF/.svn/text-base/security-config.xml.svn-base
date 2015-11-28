@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<security:global-method-security jsr250-annotations="enabled" />
+
+    <bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
+		<security:filter-chain-map path-type="ant">
+		    <security:filter-chain pattern="/index.jsp" filters="none"/>
+		    <security:filter-chain pattern="/login/*" filters="none"/>
+		    <security:filter-chain pattern="/image/**" filters="none"/>
+		    <security:filter-chain pattern="/global/*" filters="none"/>
+		    <security:filter-chain pattern="/*/view*.do" filters="none"/>
+		    <security:filter-chain pattern="/lutransport/**" filters="none"/>
+		    <security:filter-chain pattern="/main/**" filters="none"/>
+		    <security:filter-chain pattern="/content/**" filters="none"/>
+		    <security:filter-chain pattern="/layout/**" filters="none"/>
+		    <security:filter-chain pattern="/images/**" filters="none"/>
+		    <security:filter-chain pattern="/servlet/**" filters="none"/>
+		    <security:filter-chain pattern="/css/**" filters="none"/>
+		    <security:filter-chain pattern="/js/**" filters="none"/>
+			<security:filter-chain pattern="/**" 
+				filters="httpSessionContextFilter,
+						logoutFilter,
+						authenticationProcessingFilter,
+						exceptionTranslationFilter,
+						filterSecurityInterceptor" />
+		</security:filter-chain-map>
+	</bean>
+	
+	<bean id="httpSessionContextFilter" class="org.springframework.security.web.context.HttpSessionContextIntegrationFilter"/>
+	
+	<bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<constructor-arg ref="logoutSuccessHandler" /> 
+		<constructor-arg>   
+			<list>     
+				<bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />	 
+			</list> 
+		</constructor-arg>   
+	</bean>
+	
+	<bean id="exceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="authenticationEntryPoint"/>
+		<property name="accessDeniedHandler" ref="accessDeniedHandler" />
+	</bean>
+
+	<bean id="authenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint" >
+		<property name="loginFormUrl" value="/login/login.do" />
+	</bean>
+	<bean id="accessDeniedHandler" class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+		<property name="errorPage" value="/login/unauthorized.do"/>
+	</bean>
+	<bean id="authenticationProcessingFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationSuccessHandler">
+			<bean class="com.primovision.lutransport.core.AuthenticationSuccessHandler">  
+	             <property name="defaultTargetUrl" value="/home/home.do" />  
+         	</bean>
+		</property>
+		<property name="authenticationFailureHandler" ref="authenticationFailureHandler"/>
+	</bean>
+
+	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+		<property name="providers">
+			<list>
+				<ref bean="authenticationProvider"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<property name="userDetailsService" ref="userDetailService"/>
+	</bean>
+	
+	<bean id="userDetailService" class="com.primovision.lutransport.core.spring.DatabaseUserDetailService"/>
+	<bean id="passwordEncoder" class="com.primovision.lutransport.core.spring.CustomPasswordEncoder"/>
+	
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager"/>
+		<property name="accessDecisionManager" ref="accessDecisionManager"/>
+		<property name="securityMetadataSource" ref="customSecureResourceFilter"/>
+	</bean>
+	<bean id="customSecureResourceFilter" class="com.primovision.lutransport.core.spring.CustomSecureResourceFilter">
+		<property name="ignoreUrls" value="/login/*"/>
+	</bean>
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<property name="decisionVoters">
+		<list>
+			<bean class="org.springframework.security.access.vote.RoleVoter" />
+			<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+		</list>
+		</property>
+	</bean>
+    <bean id="authenticationFailureHandler" class="com.primovision.lutransport.core.AuthenticationFailureHandler"  >
+        <constructor-arg value="/login/login.do"/>
+    </bean>
+    
+    <bean id="logoutSuccessHandler" class="com.primovision.lutransport.core.LogoutSuccessHandler"  />
+</beans>

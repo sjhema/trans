@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring
+END
+CustomSecureResourceFilter.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring/CustomSecureResourceFilter.java
+END
+AjaxViewResolver.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring/AjaxViewResolver.java
+END
+DatabaseUserDetailService.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring/DatabaseUserDetailService.java
+END
+CustomPasswordEncoder.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring/CustomPasswordEncoder.java
+END
+AjaxView.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/spring/AjaxView.java
+END

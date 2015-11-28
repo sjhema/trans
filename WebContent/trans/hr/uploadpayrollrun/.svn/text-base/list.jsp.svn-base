@@ -1,0 +1,44 @@
+<%@include file="/common/taglibs.jsp"%>
+<script type="text/javascript">
+</script>
+<h3>
+	<primo:label code="Manage Hourly Pay Roll Run" />
+</h3>
+<form:form action="search.do" method="get" name="searchForm">
+	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
+		<tr class="table-heading">
+			<td colspan="4"><b>Search Pay Roll Run</b></td>
+		</tr>
+		<tr>
+		    
+			<td align="${left}" class="first">Check Date</td>
+			<td align="${left}"><input name="Payrollinvoicedate" id="datepicker" type="text" onblur="return formatDate('datepicker');"
+				value='${sessionScope.searchCriteria.searchMap.Payrollinvoicedate}' /></td>
+			
+		</tr>
+		
+		<tr>
+			<td align="${left}"></td>
+			<td align="${left}"><input type="button"
+				onclick="document.forms['searchForm'].submit();" value="Search" />
+			</td>
+		</tr>
+	</table>
+</form:form>
+<br />
+<div style="width: 100%; margin: 0px auto;">
+	<form:form name="delete.do" id="uploadpayrollrunForm">
+		<primo:datatable urlContext="hr/uploadpayrollrun" deletable="true"
+			editable="false" insertable="false" exportPdf="true" exportXls="true"
+			exportCsv="true" baseObjects="${list}"
+			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
+			pagingLink="search.do" multipleDelete="false" searcheable="false">
+			
+			<primo:textcolumn headerText="Check Date" dataField="payrollinvoicedate" dataFormat="MM-dd-yyyy"/>			
+			<primo:imagecolumn headerText="Download (CSV)" linkUrl="${ctx}/hr/uploadpayrollrun/downloadrun.do?id={id}&type=csv" imageSrc="${ctx}/images/csv.png" HAlign="center"/>
+			<primo:imagecolumn headerText="Download (XLS)" linkUrl="${ctx}/hr/uploadpayrollrun/downloadrun.do?id={id}&type=xls" imageSrc="${ctx}/images/excel.png" HAlign="center"/>
+			<primo:imagecolumn headerText="Download (PDF)" linkUrl="${ctx}/hr/uploadpayrollrun/downloadrun.do?id={id}&type=pdf" imageSrc="${ctx}/images/pdf.png" HAlign="center"/>
+		</primo:datatable>
+		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
+	</form:form>
+</div>

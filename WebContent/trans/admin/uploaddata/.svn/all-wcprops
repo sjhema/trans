@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/WebContent/lutransport/admin/uploaddata
+END
+eztoll.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/WebContent/lutransport/admin/uploaddata/eztoll.jsp
+END
+eztollOverride.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/WebContent/lutransport/admin/uploaddata/eztollOverride.jsp
+END
+fuellog.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LUTransport/!svn/ver/193/trunk/LUTransport/WebContent/lutransport/admin/uploaddata/fuellog.jsp
+END
+fuellogOverride.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/uploaddata/fuellogOverride.jsp
+END
+ticket.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/193/trunk/LUTransport/WebContent/lutransport/admin/uploaddata/ticket.jsp
+END

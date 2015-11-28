@@ -1,0 +1,422 @@
+package com.primovision.lutransport.controller.hr;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.primovision.lutransport.controller.BaseController;
+import com.primovision.lutransport.core.util.DateUtil;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hr.LeaveCurrentBalance;
+import com.primovision.lutransport.model.hr.Ptod;
+import com.primovision.lutransport.model.hr.UpdateLeaveBalanceHistory;
+
+/**
+ * 
+ */
+@Controller
+@RequestMapping("/hr/updateleavebalance")
+public class UpdateLeaveBalanceController extends BaseController{
+	
+	public UpdateLeaveBalanceController() {
+		setUrlContext("/hr/updateleavebalance");
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/start.do")
+	public String start(ModelMap map,HttpServletRequest request){
+		Map criterias = new HashMap();
+		map.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));	
+		criterias.clear();
+		criterias.put("type", 3);
+		map.addAttribute("companyLocation",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.clear();
+		criterias.put("type", 4);
+		map.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		return urlContext+"/updateleavebalance";
+	}
+	
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/checkforupdate.do")
+	public void checkForUpdating(ModelMap map,HttpServletRequest request){
+	DateTime jodaTime = new DateTime();
+	int day=jodaTime.getDayOfMonth();
+	int month=jodaTime.getMonthOfYear();	
+	if(day==1 && month==1){
+		try {
+			update(map,request);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
+	}
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/update.do")
+	public String update(ModelMap map,HttpServletRequest request) throws ParseException{
+		
+		request.getSession().removeAttribute("searchCriteria");
+		
+		
+		Map frstcriterias=new HashMap();
+		frstcriterias.put("status",1);
+		if(!StringUtils.isEmpty(request.getParameter("company.id")))
+			frstcriterias.put("company.id",Long.parseLong(request.getParameter("company.id")));
+		if(!StringUtils.isEmpty(request.getParameter("terminal.id")))
+			frstcriterias.put("terminal.id",Long.parseLong(request.getParameter("terminal.id")));
+		if(!StringUtils.isEmpty(request.getParameter("category.id")))
+			frstcriterias.put("category.id",Long.parseLong(request.getParameter("category.id")));		
+		frstcriterias.put("leavetype.id",1l);		
+		frstcriterias.put("leaveQualifier","3,5");
+		List<Ptod> ptods=genericDAO.findByCriteria(Ptod.class,frstcriterias);
+		List<String> str = new ArrayList<String>();
+		for(Ptod ptod:ptods){		
+			
+			StringBuffer buffer=new StringBuffer("");
+			String acc="No";
+			if(ptod.getAnnualoraccrual()==1)
+				acc="Yes";
+		
+			boolean accheck=false;
+			if(ptod.getAnnualoraccrual()==1)
+				accheck=true;
+			
+			int fromdays=0;
+			int todays=0;
+			int days=0;
+			if(ptod.getExperienceinyears()!=null)
+				fromdays=ptod.getExperienceinyears()*365;
+			if(ptod.getExperienceinyearsTo()!=null)
+				todays=ptod.getExperienceinyearsTo()*365;
+			if(ptod.getExperienceindays()!=null)
+				days=ptod.getExperienceindays();
+			int count=0;
+			
+			Map empcriterias=new HashMap();
+			empcriterias.put("status",1);
+			empcriterias.put("company.id", ptod.getCompany().getId());
+			empcriterias.put("terminal.id", ptod.getTerminal().getId());
+			empcriterias.put("catagory.id", ptod.getCategory().getId());
+			if(ptod.getLeaveQualifier().equals("5") && ptod.getCompany().getId() == 4l){
+				empcriterias.put("leaveQualifier","WBR");
+			}
+			
+			List<Driver> employees=genericDAO.findByCriteria(Driver.class, empcriterias);
+			
+		    for(Driver employee:employees){		    	
+		    	
+		    	DateTime dt = new DateTime();
+						    	
+		    	
+				boolean expelg=false;
+				int totex=0;				
+				
+				if(employee.getDateReHired()!=null && employee.getDateHired()!=null){
+					
+					totex=Days.daysBetween(new DateMidnight(employee.getDateHired()), new DateMidnight(dt)).getDays();
+				}
+				else if (employee.getDateReHired()!=null){
+					totex=Days.daysBetween(new DateMidnight(employee.getDateReHired()), new DateMidnight(dt)).getDays();
+				}
+				else{
+					
+					totex=Days.daysBetween(new DateMidnight(employee.getDateHired()), new DateMidnight(dt)).getDays();
+				}
+				
+				System.out.println("\n driver-->"+employee.getFullName());
+				if(days>0&&totex>0){
+					if(totex>=days)
+						expelg=true;
+				}
+				if(fromdays>0&&totex>0&&todays>0){
+					
+				if(ptod.getLeaveQualifier().equals("2")){
+					if(totex>=fromdays&&totex<todays)
+						expelg=true;
+				}					
+				else{
+					if(totex>=fromdays&&totex<=todays)
+						expelg=true;
+				}
+		    }
+				if(fromdays>0&&todays<=0&&totex>0){
+					if(totex>=fromdays)
+						expelg=true;
+					
+				}
+				if(fromdays<=0&&todays>0&&totex>0){
+					if(ptod.getLeaveQualifier().equals("5")){
+						if(totex<todays)
+							expelg=true;
+					}
+					else{
+						if(totex<=todays)
+							expelg=true;
+					}
+				}
+				if(expelg){	
+					
+					Map criterias=new HashMap();
+					criterias.put("status",1);
+					criterias.put("empname.id",employee.getId());
+					criterias.put("company.id", employee.getCompany().getId());
+					criterias.put("terminal.id", employee.getTerminal().getId());
+					criterias.put("empcategory.id", employee.getCatagory().getId());
+					criterias.put("leavetype.id", ptod.getLeavetype().getId());
+					List<LeaveCurrentBalance> balances=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
+			
+					if(balances.size()>0 && balances!=null){
+						
+						for(LeaveCurrentBalance balance:balances){							
+						LeaveCurrentBalance newLeaveBalance = new LeaveCurrentBalance();
+						
+						newLeaveBalance.setEmpname(balance.getEmpname());
+						newLeaveBalance.setCompany(balance.getCompany());
+						newLeaveBalance.setEmpcategory(balance.getEmpcategory());				
+						newLeaveBalance.setTerminal(balance.getTerminal());
+						newLeaveBalance.setLeavetype(balance.getLeavetype());				
+						
+						if(ptod.getDayearned()!=null){						
+							if(accheck){
+								Double earnedday=0.0;
+								if(balance.getDaysremain()!=null){	
+									newLeaveBalance.setDaysaccrude(balance.getDaysremain());
+									earnedday=balance.getDaysremain()+ptod.getDayearned();
+								}else{
+									earnedday=0+ptod.getDayearned();
+									newLeaveBalance.setDaysaccrude(0.0);
+								}
+								newLeaveBalance.setDaysavailable(earnedday);
+								newLeaveBalance.setDayssbalance(earnedday);
+								newLeaveBalance.setDaysused(0.00);
+								newLeaveBalance.setDaysremain(earnedday);							
+								
+							}else{	
+								newLeaveBalance.setDaysaccrude(0.0);
+								Double earnedday=ptod.getDayearned();
+								newLeaveBalance.setDaysavailable(earnedday);
+								newLeaveBalance.setDayssbalance(earnedday);
+								newLeaveBalance.setDaysused(0.00);
+								newLeaveBalance.setDaysremain(earnedday);							
+							}						
+						}
+						//Hours
+						if(ptod.getHoursearned()!=null){
+							if(accheck){
+								Double earnehour=0.0;
+								if(balance.getHourremain()!=null){
+									newLeaveBalance.setHoursaccrude(balance.getHourremain());
+									earnehour=balance.getHourremain()+ptod.getHoursearned();
+								}else{
+									newLeaveBalance.setHoursaccrude(0.0);
+									earnehour=0+ptod.getHoursearned();						
+								}
+								newLeaveBalance.setHoursavailable(earnehour);
+								newLeaveBalance.setHoursbalance(earnehour);								
+								newLeaveBalance.setHoursused(0.00);
+								newLeaveBalance.setHourremain(earnehour);							
+								
+							}else{	
+								newLeaveBalance.setHoursaccrude(0.0);
+								Double earnehour=balance.getHourremain();
+								newLeaveBalance.setHoursavailable(earnehour);
+								newLeaveBalance.setHoursbalance(earnehour);
+								newLeaveBalance.setHoursused(0.00);
+								newLeaveBalance.setHourremain(earnehour);
+								
+							}					
+						}
+						
+						Calendar now = Calendar.getInstance();
+						int currentYear = now.get(Calendar.YEAR);
+					
+						now.set(Calendar.YEAR,currentYear);
+						now.set(Calendar.MONTH, 0);
+						now.set(Calendar.DAY_OF_MONTH, 1);	
+						
+						newLeaveBalance.setDateEffectiveFrom(now.getTime());
+						
+						now.set(Calendar.YEAR,currentYear);
+						now.set(Calendar.MONTH, 11); 
+						now.set(Calendar.DAY_OF_MONTH, 31);		
+						
+						newLeaveBalance.setDateEffectiveTo(now.getTime());
+
+						
+						
+						genericDAO.saveOrUpdate(newLeaveBalance);
+						balance.setStatus(0);
+						genericDAO.saveOrUpdate(balance);
+						newLeaveBalance =null;
+						count++;				
+					
+					}
+					
+				}
+				else{
+					
+					
+					LeaveCurrentBalance leavebalanceObj = new LeaveCurrentBalance();
+					leavebalanceObj.setEmpname(employee);
+					leavebalanceObj.setCompany(employee.getCompany());
+					leavebalanceObj.setEmpcategory(employee.getCatagory());				
+					leavebalanceObj.setTerminal(employee.getTerminal());
+					leavebalanceObj.setLeavetype(ptod.getLeavetype());
+					leavebalanceObj.setDaysaccrude(0.0);
+					leavebalanceObj.setDayssbalance(ptod.getDayearned());
+					leavebalanceObj.setDaysavailable(ptod.getDayearned());
+					leavebalanceObj.setDaysused(0.0);
+					leavebalanceObj.setDaysremain(ptod.getDayearned());				
+					leavebalanceObj.setHoursaccrude(0.0);
+					leavebalanceObj.setHoursbalance(ptod.getHoursearned());
+					leavebalanceObj.setHoursavailable(ptod.getHoursearned());
+					leavebalanceObj.setHoursused(0.0);
+					leavebalanceObj.setHourremain(ptod.getHoursearned());
+					
+					Calendar now = Calendar.getInstance();
+					int currentYear = now.get(Calendar.YEAR);
+				
+					now.set(Calendar.YEAR,currentYear);
+					now.set(Calendar.MONTH, 0);
+					now.set(Calendar.DAY_OF_MONTH, 1);	
+					
+					leavebalanceObj.setDateEffectiveFrom(now.getTime());
+					
+					now.set(Calendar.YEAR,currentYear);
+					now.set(Calendar.MONTH, 11); 
+					now.set(Calendar.DAY_OF_MONTH, 31);		
+					
+					leavebalanceObj.setDateEffectiveTo(now.getTime());
+					genericDAO.saveOrUpdate(leavebalanceObj);
+					leavebalanceObj =null;
+					count++;
+				}
+		    }
+			
+		}
+		    ptod.setNoOfRecord(count);
+		    
+		    UpdateLeaveBalanceHistory leaveBalanceHistory = new UpdateLeaveBalanceHistory() ;
+		    leaveBalanceHistory.setPtodId(ptod.getId());
+		    leaveBalanceHistory.setUpdateRunDate(new Date());
+		    leaveBalanceHistory.setAnnualoraccrual(ptod.getAnnualoraccrual());
+		    leaveBalanceHistory.setCalculateFlag(ptod.getCalculateFlag());
+		    leaveBalanceHistory.setCategory(ptod.getCategory());
+		    leaveBalanceHistory.setCompany(ptod.getCompany());
+		    leaveBalanceHistory.setDayearned(ptod.getDayearned());
+		    leaveBalanceHistory.setEffectiveDate(ptod.getEffectiveDate());
+		    leaveBalanceHistory.setEndDate(ptod.getEndDate());
+		    leaveBalanceHistory.setExperienceindays(ptod.getExperienceindays());
+		    leaveBalanceHistory.setExperienceinyears(ptod.getExperienceinyears());
+		    leaveBalanceHistory.setExperienceinyearsTo(ptod.getExperienceinyearsTo());
+		    leaveBalanceHistory.setHourlyrate(ptod.getHourlyrate());
+		    leaveBalanceHistory.setHoursearned(ptod.getHoursearned());
+		    leaveBalanceHistory.setLeaveQualifier(ptod.getLeaveQualifier());
+		    leaveBalanceHistory.setLeavetype(ptod.getLeavetype());
+		    leaveBalanceHistory.setNoOfRecord(ptod.getNoOfRecord());
+		    leaveBalanceHistory.setNotes(ptod.getNotes());
+		    leaveBalanceHistory.setRate(ptod.getRate());
+		    leaveBalanceHistory.setStatus(ptod.getStatus());
+		    leaveBalanceHistory.setTerminal(ptod.getTerminal());
+		    
+		    genericDAO.saveOrUpdate(leaveBalanceHistory);
+		    
+		    leaveBalanceHistory = null;
+		}
+		request.getSession().setAttribute("ptodlists", str);
+		
+		map.addAttribute("list",ptods);
+		request.getSession().setAttribute("msg","Process is successful");
+		return "blank/updatelist";
+		//return urlContext + "/list";
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/showlist.do")
+	public String showLeaveList(ModelMap model,HttpServletRequest request){
+		String id=request.getParameter("id");
+		Ptod ptod=genericDAO.getById(Ptod.class, Long.parseLong(id));
+		Map criterias=new HashMap();
+		criterias.put("status",1);
+		criterias.put("company.id", ptod.getCompany().getId());
+		criterias.put("terminal.id", ptod.getTerminal().getId());
+		criterias.put("empcategory.id", ptod.getCategory().getId());
+		criterias.put("leavetype.id", ptod.getLeavetype().getId());
+		List<LeaveCurrentBalance> balances=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias,"empname.lastName",false);
+		List<LeaveCurrentBalance> currentBalances=new ArrayList<LeaveCurrentBalance>();
+		//currentBalances=null;
+		boolean accheck=false;
+		if(ptod.getAnnualoraccrual()==1)
+			accheck=true;
+		Calendar currentDate = Calendar.getInstance();
+		int fromdays=0;
+		int todays=0;
+		int days=0;
+		if(ptod.getExperienceinyears()!=null)
+			fromdays=ptod.getExperienceinyears()*365;
+		if(ptod.getExperienceinyearsTo()!=null)
+			todays=ptod.getExperienceinyearsTo()*365;
+		if(ptod.getExperienceindays()!=null)
+			days=ptod.getExperienceindays();
+		int count=0;
+		for(LeaveCurrentBalance balance:balances){
+			boolean expelg=false;
+			/*int totex=	DateUtil.daysBetween(balance.getEmpname().getDateHired(),currentDate.getTime());*/
+			int totex=0;
+			if(balance.getEmpname().getDateHired()!=null){
+				totex=	DateUtil.daysBetween(balance.getEmpname().getDateHired(),currentDate.getTime());
+			}else{
+				totex=	DateUtil.daysBetween(balance.getEmpname().getDateReHired(),currentDate.getTime());
+			}
+			System.out.println("\n totalExp-->"+totex);
+			if(days>0&&totex>0){
+				if(totex>=days)
+					expelg=true;
+			}
+			if(fromdays>0&&totex>0&&todays>0){
+				if(totex>=fromdays&&totex<todays)
+					expelg=true;
+			}
+			if(fromdays>0&&todays<0&&totex>0){
+				if(totex>=fromdays)
+					expelg=true;
+				
+			}
+			if(fromdays<=0&&todays>0&&totex>0){
+				if(totex<todays)
+					expelg=true;
+			}
+			if(expelg){
+			/*	if(balance.getEmpcategory().getId()==2||balance.getEmpcategory().getId()==4){
+					currentBalances.add(balance);	
+				}
+				if(balance.getEmpcategory().getId()==3){
+					currentBalances.add(balance);
+					
+				}*/
+				currentBalances.add(balance);
+			}
+			
+		}
+		model.addAttribute("list",currentBalances);
+		return "blank/leavebalancelist";
+		
+	}
+}

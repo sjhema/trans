@@ -1,0 +1,128 @@
+package com.primovision.lutransport.controller.hr;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.primovision.lutransport.controller.BaseController;
+import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.hr.LeaveCurrentBalance;
+import com.primovision.lutransport.model.hr.LeaveType;
+import com.primovision.lutransport.model.hr.Ptod;
+
+
+@Controller
+@RequestMapping("/hr/employee/anniversaryalert")
+public class EmployeeAnniversaryAlertController extends BaseController{
+	
+	@Autowired
+	private GenericDAO genericDAO;
+	
+	public void setGenericDAO(GenericDAO genericDAO) {
+		this.genericDAO = genericDAO;
+	}
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				dateFormat, true));
+	}
+	@RequestMapping(method = RequestMethod.GET,value="/list.do")
+	public String listEmployee(ModelMap model , HttpServletRequest request) throws ParseException{
+		
+		request.getSession().removeAttribute("searchCriteria");
+		
+		Calendar c=new GregorianCalendar();
+		Date currentDate = c.getTime();
+		c.add(Calendar.DATE, 30);
+		Date d=c.getTime();
+		SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd");
+		
+			
+		String query="select obj from Driver obj where obj.status=1 and obj.nextAnniversaryDate >='"+ mysqldf.format(currentDate) +"' and obj.nextAnniversaryDate <='"+mysqldf.format(d)+"' order by obj.company.name asc,obj.terminal.name asc,obj.fullName asc, obj.nextAnniversaryDate asc";
+		
+		List<Driver> employees=genericDAO.executeSimpleQuery(query);		
+		
+			model.addAttribute("list", employees);
+			//updateEmployeeLeaveBalance();
+		
+		
+		
+		
+		
+		return"/hr/employee/employeeAnniversaryAlert";
+	}
+	
+	
+	public void updateEmployeeLeaveBalance(List<Driver> employees) throws ParseException{
+		Map frstcriterias=new HashMap();
+		frstcriterias.put("leavetype.id",4l);
+		List<Ptod> ptods=genericDAO.findByCriteria(Ptod.class,frstcriterias);
+		
+			for(Driver empObj:employees){		
+			Map criterias=new HashMap();
+			criterias.put("company.id",empObj.getCompany().getId());
+			criterias.put("terminal.id", empObj.getTerminal().getId());
+			criterias.put("empcategory.id", empObj.getCatagory().getId());
+			criterias.put("empname.id", empObj.getId());
+			criterias.put("leavetype.id", 1l);
+			criterias.put("status",1);
+			List<LeaveCurrentBalance> leavebalobj=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
+			if(leavebalobj!=null && leavebalobj.size()>0){
+				//do nothing..				
+			}
+			else{					
+				LeaveType sickpersonalobj=genericDAO.getById(LeaveType.class,1l);
+				LeaveCurrentBalance leavebalanceObj=new LeaveCurrentBalance();
+				leavebalanceObj.setEmpname(empObj);
+				leavebalanceObj.setCompany(empObj.getCompany());
+				leavebalanceObj.setEmpcategory(empObj.getCatagory());				
+				leavebalanceObj.setTerminal(empObj.getTerminal());
+				leavebalanceObj.setLeavetype(sickpersonalobj);
+				leavebalanceObj.setDaysaccrude(0.0);
+				leavebalanceObj.setDayssbalance(2.0);
+				leavebalanceObj.setDaysavailable(2.0);
+				leavebalanceObj.setDaysused(0.0);
+				leavebalanceObj.setDaysremain(2.0);				
+				leavebalanceObj.setHoursaccrude(0.0);
+				leavebalanceObj.setHoursbalance(0.0);
+				leavebalanceObj.setHoursavailable(0.0);
+				leavebalanceObj.setHoursused(0.0);
+				leavebalanceObj.setHourremain(0.0);						
+				DateTime today_date=new DateTime();						
+				Date nextDayDate=today_date.plusDays(1).toDate();			
+				leavebalanceObj.setDateEffectiveFrom(nextDayDate);
+				//String actualhired=databasedf.format(empObj.getDateHired());
+				//DateTime localHiredDate=new DateTime(actualhired);				
+				//DateTime newYear = localHiredDate.plusYears(1);				
+				//leavebalanceObj.setDateEffectiveTo(newYear.toDate());
+				genericDAO.saveOrUpdate(leavebalanceObj);
+				leavebalanceObj=null;			
+			}			
+			leavebalobj=null;			
+		}
+	}	
+	
+}
+	

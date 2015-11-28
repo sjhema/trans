@@ -1,0 +1,445 @@
+package com.primovision.lutransport.controller.admin;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.google.gson.Gson;
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.ReportDateUtil;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.DriverFuelCard;
+import com.primovision.lutransport.model.DriverInspection;
+import com.primovision.lutransport.model.DriverInspectionTemp;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.SubContractor;
+import com.primovision.lutransport.model.Ticket;
+import com.primovision.lutransport.model.User;
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.service.DateUpdateService;
+
+
+@Controller
+@RequestMapping("/admin/driverinspection")
+public class DriverInspectionController extends CRUDController<DriverInspection>{
+
+	SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	
+	SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd"); 
+	
+	@Autowired
+	private DateUpdateService dateupdateService;
+	
+	public void setDateupdateService(DateUpdateService dateupdateService) {
+		this.dateupdateService = dateupdateService;
+	}
+	
+	public DriverInspectionController() {
+		setUrlContext("admin/driverinspection");
+	}
+	
+	
+	@Override
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				dateFormat, true));
+		binder.registerCustomEditor(Long.TYPE, new CustomNumberEditor(
+				Long.class, false));
+		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(
+				Driver.class));
+		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(
+				Vehicle.class));
+		
+		binder.registerCustomEditor(Location.class, new AbstractModelEditor(
+				Location.class));
+//		binder.registerCustomEditor(Customer.class, new AbstractModelEditor(
+//				Customer.class));
+		binder.registerCustomEditor(SubContractor.class, new AbstractModelEditor(
+				SubContractor.class));
+	}
+	
+	
+	@Override
+	public String create(ModelMap model, HttpServletRequest request) {
+		setupCreate(model, request);
+		DriverInspectionTemp driverInspectionTempObj = new DriverInspectionTemp();		
+		model.addAttribute("modelObject",driverInspectionTempObj);
+		return urlContext + "/form";
+	}
+	
+	@Override	
+	public String edit2(ModelMap model, HttpServletRequest request) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		setupCreate(model, request);
+		List dayLists = new ArrayList();
+		List driverInspectionIdList = new ArrayList();
+		
+		DriverInspectionTemp driverInspectionTempObj = new DriverInspectionTemp();		
+		DriverInspection inspectionObj = genericDAO.getById(DriverInspection.class,Long.parseLong(request.getParameter("id")));
+		driverInspectionTempObj.setId(inspectionObj.getId());
+		driverInspectionTempObj.setCompany(inspectionObj.getCompany());
+		driverInspectionTempObj.setTerminal(inspectionObj.getTerminal());
+		Map criteria = new HashMap();
+		criteria.clear();
+		criteria.put("name",inspectionObj.getEnteredBy());
+		User userObj = genericDAO.getByCriteria(User.class, criteria);
+		if(userObj!=null)
+			driverInspectionTempObj.setEnteredBy(String.valueOf(userObj.getId()));
+		driverInspectionTempObj.setDriver(inspectionObj.getDriver());
+		driverInspectionTempObj.setWeekOfDate(inspectionObj.getWeekOfDate());
+		criteria.clear();		
+		criteria.put("weekOfDate",inspectionObj.getWeekOfDate());
+		List<DriverInspection> driverInspectionList = genericDAO.findByCriteria(DriverInspection.class, criteria,"weekDate",false);
+		
+		if(driverInspectionList!=null && driverInspectionList.size()>0){			
+			for(DriverInspection drvinspectionObj : driverInspectionList){
+				if(drvinspectionObj.getInspectionStatus().equalsIgnoreCase("Inspected")){
+					dayLists.add(drvinspectionObj.getDayRefColumn());
+				}
+				driverInspectionIdList.add(drvinspectionObj.getId());
+			}			
+		}
+		
+		request.getSession().setAttribute("inspectionDriverIdlist",driverInspectionIdList);
+		driverInspectionTempObj.setDaysList(dayLists);
+		model.addAttribute("modelObject",driverInspectionTempObj);
+		return urlContext + "/form";
+	}
+	
+	
+	public void setupCreate(ModelMap model, HttpServletRequest request) {
+		Map criterias = new HashMap();		
+		criterias.clear();
+		EmployeeCatagory empobj = genericDAO.getById(EmployeeCatagory.class,2l);
+		criterias.put("catagory", empobj);
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		criterias.clear();
+		model.addAttribute("operators", genericDAO.findByCriteria(User.class, criterias, "name", false));
+		
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		
+		
+		
+	}
+	
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		//setupCreate(model, request);
+		Map criterias = new HashMap();		
+		criterias.clear();
+		EmployeeCatagory empobj = genericDAO.getById(EmployeeCatagory.class,2l);
+		criterias.put("catagory", empobj);
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		criterias.clear();
+		model.addAttribute("operators", genericDAO.findByCriteria(User.class, criterias, "name", false));
+		
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+	
+		List<String> inspectionStatus = new ArrayList<String>(Arrays.asList("Inspected","No Loads","Violated"));
+		model.addAttribute("inspectionStatuss",inspectionStatus);
+	}
+	
+	
+	
+	@Override
+	public String list(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"weekOfDate asc,weekDate asc,driver",false));
+		return urlContext + "/list";
+	}
+	
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		dateupdateService.updateDate(request, "weekDate", "weekOfDate");
+		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"weekOfDate asc,weekDate asc,driver asc",null,null));
+		return urlContext + "/list";
+	}
+	
+	
+	@RequestMapping(value="/savedriverinspection.do", method=RequestMethod.POST)
+	public String saveDriverInspection(@RequestParam( value="daysList",required=false) String daysSelected,HttpServletRequest request,ModelMap model)  {
+	
+		
+		if(!StringUtils.isEmpty(request.getParameter("id"))){
+			List idList = (List)request.getSession().getAttribute("inspectionDriverIdlist");
+			String driverIds ="";
+			for(int i=0; i < idList.size(); i++ ){
+				if(driverIds.equalsIgnoreCase(""))
+					driverIds=idList.get(i).toString();
+				else
+					driverIds=driverIds+","+idList.get(i).toString();
+			}
+			
+			String deleteQuery = "delete from DriverInspection where id in ("+driverIds+")";
+			
+			genericDAO.executeSimpleUpdateQuery(deleteQuery);
+		}
+		
+		List<String> daysList =  new ArrayList<String>(Arrays.asList("day1", "day2", "day3","day4","day5","day6","day7"));
+		Map<String,String> map = new HashMap<String,String>();
+		map.put(request.getParameter("day1"), "Mon");
+		map.put(request.getParameter("day2"), "Tue");
+		map.put(request.getParameter("day3"), "Wed");
+		map.put(request.getParameter("day4"), "Thu");
+		map.put(request.getParameter("day5"), "Fri");
+		map.put(request.getParameter("day6"), "Sat");
+		map.put(request.getParameter("day7"), "Sun");
+		String[] dayslected={};
+		if(!StringUtils.isEmpty(daysSelected))		
+			dayslected = daysSelected.split(",");		
+		
+		for(int i=0; i < dayslected.length;i++ ){
+			
+			String inspectiondate = request.getParameter(dayslected[i]);			
+			DriverInspection driverInspectionObj = new DriverInspection();
+			
+			
+			if(request.getParameter("company")!=null){
+				Location companyObj = genericDAO.getById(Location.class,Long.parseLong(request.getParameter("company")));
+				driverInspectionObj.setCompany(companyObj);
+			}
+			
+			if(request.getParameter("terminal")!=null){
+				Location terminalObj = genericDAO.getById(Location.class,Long.parseLong(request.getParameter("terminal")));
+				driverInspectionObj.setTerminal(terminalObj);
+			}
+			
+			if(request.getParameter("driver")!=null){
+				Driver driverObj = genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+				driverInspectionObj.setDriver(driverObj);
+			}
+			
+			if(request.getParameter("enteredBy")!=null){
+				User userObj = genericDAO.getById(User.class,Long.parseLong(request.getParameter("enteredBy")));
+				driverInspectionObj.setEnteredBy(userObj.getName());
+			}
+			
+			
+			if(request.getParameter("weekOfDate")!=null){	
+				try{
+					LocalDate localdate = new LocalDate(mysqldf.format(sdf.parse(request.getParameter("weekOfDate"))));					
+					driverInspectionObj.setWeekOfDate(localdate.toDate());
+				}
+				catch (Exception e) {
+					System.out.println("Error in parsing date - Driver Inspection"+e);
+				}
+			}
+			
+			
+			
+			
+			try {
+				LocalDate localdate = new LocalDate(mysqldf.format(sdf.parse(inspectiondate)));				
+				driverInspectionObj.setWeekDate(localdate.toDate());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			driverInspectionObj.setWeekDateDay(String.valueOf(inspectiondate+" - "+map.get(inspectiondate)));
+			
+			driverInspectionObj.setInspectionStatus("Inspected");
+			
+			driverInspectionObj.setDayRefColumn(dayslected[i]);
+			
+			beforeSave(request, driverInspectionObj, model);
+			genericDAO.saveOrUpdate(driverInspectionObj);
+			
+			daysList.remove(dayslected[i]);	
+			
+		}
+		
+		Location companyObj = null;
+		Location terminalObj = null;
+		Driver driverObj = null;
+		User userObj = null;
+		
+		for(int i=0; i < daysList.size();i++ ){	
+			
+			
+			String inspectiondate = request.getParameter(daysList.get(i));			
+			DriverInspection driverInspectionObj = new DriverInspection();
+			
+			if(request.getParameter("company")!=null){
+				companyObj = genericDAO.getById(Location.class,Long.parseLong(request.getParameter("company")));
+				driverInspectionObj.setCompany(companyObj);
+			}
+			
+			if(request.getParameter("terminal")!=null){
+				terminalObj = genericDAO.getById(Location.class,Long.parseLong(request.getParameter("terminal")));
+				driverInspectionObj.setTerminal(terminalObj);
+			}
+			
+			if(request.getParameter("driver")!=null){
+				driverObj = genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+				driverInspectionObj.setDriver(driverObj);
+			}
+			
+			if(request.getParameter("enteredBy")!=null){
+				userObj = genericDAO.getById(User.class,Long.parseLong(request.getParameter("enteredBy")));
+				driverInspectionObj.setEnteredBy(userObj.getName());
+			}
+			
+			
+			if(request.getParameter("weekOfDate")!=null){	
+				try{
+					LocalDate localdate = new LocalDate(mysqldf.format(sdf.parse(request.getParameter("weekOfDate"))));					
+					driverInspectionObj.setWeekOfDate(localdate.toDate());
+				}
+				catch (Exception e) {
+					System.out.println("Error in parsing date - Driver Inspection"+e);
+				}
+			}
+			
+			
+			try {
+				LocalDate localdate = new LocalDate(mysqldf.format(sdf.parse(inspectiondate)));				
+				driverInspectionObj.setWeekDate(localdate.toDate());
+				String query = "select obj from Ticket obj where obj.terminal="+terminalObj.getId()+" and obj.companyLocation="+companyObj.getId()+" and obj.driver="+driverObj.getId()+" and (obj.loadDate='"+mysqldf.format(localdate.toDate())+" 00:00:00' OR obj.unloadDate='"+mysqldf.format(localdate.toDate())+" 00:00:00')";
+				
+				List<Ticket> tickets = genericDAO.executeSimpleQuery(query);
+				if(tickets.size()>0 && !tickets.isEmpty()){
+					driverInspectionObj.setInspectionStatus("Violated");
+				}
+				else{
+					driverInspectionObj.setInspectionStatus("No Loads");
+				}
+				
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+			
+			driverInspectionObj.setWeekDateDay(String.valueOf(inspectiondate+" - "+map.get(inspectiondate)));
+			
+			
+			beforeSave(request, driverInspectionObj, model);
+			genericDAO.saveOrUpdate(driverInspectionObj);
+			
+		}	
+		
+		
+		return "redirect:/" + urlContext + "/list.do?rst=1";
+	}
+	
+	
+	protected String processAjaxRequest(HttpServletRequest request,
+			String action, Model model) {
+		
+			if ("findDriver".equalsIgnoreCase(action)) {
+
+				List<Driver> dlst=null;
+				String terminalId = request.getParameter("terminal");
+				if (!StringUtils.isEmpty(terminalId))
+				{		
+					
+					
+						String query="select obj from Driver obj where obj.status=1 and obj.catagory=2 and obj.terminal='"+terminalId+"' order by fullName ASC";
+						dlst=genericDAO.executeSimpleQuery(query);
+					
+				}
+				Gson gson = new Gson();
+				return gson.toJson(dlst);
+			}
+			
+			if("allDaysOfWeek".equalsIgnoreCase(action)){
+				try {
+					List<String> list = new ArrayList<String>();
+					SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");				
+					SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+				
+				String batchdate=dateFormat1.format(sdf.parse(request.getParameter("batchDate")));				
+				
+			
+				LocalDate now = new LocalDate(batchdate);
+				LocalDate monday = now.withDayOfWeek(DateTimeConstants.MONDAY);
+				list.add(sdf.format(monday.toDate()));			
+				LocalDate tuesday = now.withDayOfWeek(DateTimeConstants.TUESDAY);
+				list.add(sdf.format(tuesday.toDate()));	
+				LocalDate wednesday = now.withDayOfWeek(DateTimeConstants.WEDNESDAY);
+				list.add(sdf.format(wednesday.toDate()));	
+				LocalDate thursday = now.withDayOfWeek(DateTimeConstants.THURSDAY);
+				list.add(sdf.format(thursday.toDate()));	
+				LocalDate friday = now.withDayOfWeek(DateTimeConstants.FRIDAY);
+				list.add(sdf.format(friday.toDate()));	
+				LocalDate saturday = now.withDayOfWeek(DateTimeConstants.SATURDAY);
+				list.add(sdf.format(saturday.toDate()));
+				LocalDate sunday = now.withDayOfWeek(DateTimeConstants.SUNDAY);
+				list.add(sdf.format(sunday.toDate()));
+				Gson gson = new Gson();
+				return gson.toJson(list);
+				} catch (ParseException e) {				
+					return "";
+				}
+			}
+			
+			if ("findAllDriver".equalsIgnoreCase(action)) {
+
+				List<Driver> dlst=null;
+					String query="select obj from Driver obj where obj.catagory=2 and  obj.status=1 order by fullName ASC";
+					dlst=genericDAO.executeSimpleQuery(query);
+				
+				Gson gson = new Gson();
+				return gson.toJson(dlst);
+			}
+			
+		
+		return "";
+	}
+	
+	
+	@ModelAttribute("modelObject")
+	public DriverInspection setupModel(HttpServletRequest request) {
+		return new DriverInspection();
+	}
+	
+	
+	
+	
+}

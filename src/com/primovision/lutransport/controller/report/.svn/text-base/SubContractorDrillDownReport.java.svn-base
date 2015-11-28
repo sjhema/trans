@@ -1,0 +1,547 @@
+package com.primovision.lutransport.controller.report;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.primovision.lutransport.controller.BaseController;
+import com.primovision.lutransport.core.tags.StaticDataUtil;
+import com.primovision.lutransport.core.util.MathUtil;
+import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SubcontractorInvoice;
+import com.primovision.lutransport.model.SubcontractorRate;
+import com.primovision.lutransport.model.Ticket;
+import com.primovision.lutransport.model.User;
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.report.SubcontractorBilling;
+import com.primovision.lutransport.model.report.SubcontractorBillingNew;
+import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
+import com.primovision.lutransport.service.DynamicReportService;
+import com.primovision.lutransport.service.ReportService;
+
+
+@Controller
+@SuppressWarnings("unchecked")
+@RequestMapping("/reportuser/report/subcontractordrilldownreport")
+public class SubContractorDrillDownReport extends BaseController {
+
+	
+	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	
+	@Autowired
+	protected DynamicReportService dynamicReportService;
+
+	public void setDynamicReportService(
+			DynamicReportService dynamicReportService) {
+		this.dynamicReportService = dynamicReportService;
+	}
+	
+	
+	@Autowired
+	private ReportService reportService;
+	
+	public void setReportService(ReportService reportService) {
+		this.reportService = reportService;
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/subcontractordrilldownexport.do")
+	public String downloadSubcontractorDrillDown(ModelMap model, HttpServletRequest request,HttpServletResponse response,@RequestParam(required = false, 
+			value = "type") String typeKey,@RequestParam(required = false, value = "typeValue") String typeValue) throws IOException {
+		
+		String subcontractorquery=(String)request.getSession().getAttribute("netSubTicktQuery");
+	    System.out.println("**** the drill ticket query is "+subcontractorquery);	
+	    List<Ticket> subtickets = genericDAO.executeSimpleQuery(subcontractorquery.toString());
+	    
+	    String subticktIds="";
+		if(subtickets!=null && subtickets.size()>0 ){
+			for(Ticket ticObj:subtickets){
+			  if(subticktIds.equals("")){
+				  subticktIds=String.valueOf(ticObj.getId());
+			  }
+			  else
+			  {
+				  subticktIds=subticktIds+","+String.valueOf(ticObj.getId());				  
+			  }
+			}
+		}
+		Map criti=new HashMap(); 
+		StringBuffer query=new StringBuffer("select obj from Ticket obj where obj.id in ("
+				+subticktIds.toString()+")");
+			if(typeKey.equalsIgnoreCase("company"))
+			{				
+				criti.clear();
+				criti.put("name",typeValue);
+				Location locObj=genericDAO.getByCriteria(Location.class, criti);
+				if(locObj!=null)
+				query.append(" and obj.companyLocation='").append(locObj.getId()).append("'");
+			}			
+			if(typeKey.equalsIgnoreCase("terminal"))
+			{
+				criti.clear();
+				criti.put("name",typeValue);
+				Location terminalObj=genericDAO.getByCriteria(Location.class, criti);
+				if(terminalObj!=null)
+				query.append(" and obj.terminal='").append(terminalObj.getId()).append("'");
+			}
+			if(typeKey.equalsIgnoreCase("truck"))
+			{				
+				//criti.clear();
+				System.out.println("***** the value is "+typeValue);
+				/*criti.put("id",Integer.parseInt(typeValue));
+				criti.put("type",1);*/
+				Vehicle truckObj=genericDAO.getById(Vehicle.class,Long.parseLong(typeValue));
+				if(truckObj!=null)
+				query.append(" and obj.vehicle='").append(truckObj.getId()).append("'");
+			}
+			if(typeKey.equalsIgnoreCase("trailer"))
+			{				
+				/*criti.clear();
+				criti.put("unit",Integer.parseInt(typeValue));
+				criti.put("type",2);*/
+				Vehicle trailerObj=genericDAO.getById(Vehicle.class,Long.parseLong(typeValue));
+				if(trailerObj!=null)
+				query.append(" and obj.trailer='").append(trailerObj.getId()).append("'");
+			}
+			if(typeKey.equalsIgnoreCase("driver"))
+			{				
+				criti.clear();
+				criti.put("fullName",typeValue);				
+				Driver driverObj=genericDAO.getByCriteria(Driver.class, criti);
+				query.append(" and obj.driver='").append(driverObj.getId()).append("'");
+			}
+			
+			System.out.println("***** the termibnal query is ok ok "+query.toString());
+			List<Ticket> tickets=genericDAO.executeSimpleQuery(query.toString());
+			
+			List<SubcontractorBilling> summarys = new ArrayList<SubcontractorBilling>();
+			SubcontractorBillingWrapper wrapper = new SubcontractorBillingWrapper();
+			wrapper.setSubcontractorBillings(summarys);
+			double sumNet = 0.0;
+			double sumBillableTon = 0.0;
+			double sumOriginTon = 0.0;
+			double sumDestinationTon = 0.0;
+			double sumAmount = 0.0;
+			double sumFuelSurcharge = 0.0;
+			double sumTotal = 0.0;
+			double sumOtherCharges = 0.0;
+			double grandTotal = 0.0;
+			double amount = 0.0;
+			double miscelleneousCharge = 0.0;
+			List<String> str = new ArrayList<String>();
+			for (Ticket ticket : tickets) {
+				try {
+					SubcontractorBilling billing = new SubcontractorBilling();
+					Map criterias = new HashMap();
+					boolean cont = false;
+					if (ticket.getVoucherStatus() == 2) {
+						SubcontractorBilling invoice = null;
+						criterias.clear();
+						criterias.put("ticket.id", ticket.getId());
+						invoice = genericDAO.getByCriteria(
+								SubcontractorBilling.class, criterias);
+						if (invoice == null)
+							continue;
+
+						billing = invoice;
+						billing.setTerminal((ticket.getTerminal() != null) ? ticket
+								.getTerminal().getName() : "");
+
+						sumNet += (Double) billing.getEffectiveNetWt();
+						sumBillableTon += (Double) billing.getEffectiveTonsWt();
+
+						sumOriginTon += (Double) billing.getOriginTonsWt();
+						sumDestinationTon += (Double) billing
+								.getDestinationTonsWt();
+
+						sumAmount += billing.getAmount();
+						sumFuelSurcharge += billing.getFuelSurcharge();
+
+						sumTotal += billing.getTotAmt();
+						sumOtherCharges += billing.getOtherCharges();
+
+						if (ticket.getCreatedBy() != null) {
+							User user = genericDAO.getById(User.class,
+									ticket.getCreatedBy());
+							if (user != null) {
+								billing.setEnteredBy(user.getUsername());
+							}
+						}
+						billing.setTransferTimeIn(ticket.getTransferTimeIn());
+						billing.setTransferTimeOut(ticket.getTransferTimeOut());
+						billing.setLandfillTimeIn(ticket.getLandfillTimeIn());
+						billing.setLandfillTimeOut(ticket.getLandfillTimeOut());
+						billing.setProcessStatus(StaticDataUtil.getText(
+								"VOUCHER_STATUS", "" + ticket.getVoucherStatus()));
+						if (ticket.getCompanyLocation() != null)
+							billing.setCompany((ticket.getCompanyLocation() != null) ? ticket
+									.getCompanyLocation().getName() : "");
+
+						billing.setSubcontractor((ticket.getSubcontractor() != null) ? ticket
+								.getSubcontractor().getName() : "");
+						billing.setInvoiceDate((ticket.getVoucherDate() != null) ? (sdf
+								.format(ticket.getVoucherDate())) : null);
+						if (!StringUtils.isEmpty(ticket.getVoucherNumber())
+								&& !StringUtils.isEmpty(ticket.getVoucherDate()
+										.toString())
+								&& !StringUtils.isEmpty(ticket.getCompanyLocation()
+										.getName())) {
+							cont = str.contains(ticket.getVoucherNumber() + "_"
+									+ ticket.getSubcontractor().getId() + "_"
+									+ ticket.getCompanyLocation().getId());
+
+							if (!cont) {
+								str.add(ticket.getVoucherNumber() + "_"
+										+ ticket.getSubcontractor().getId() + "_"
+										+ ticket.getCompanyLocation().getId());
+								String subcquery = "select obj from SubcontractorInvoice obj where obj.voucherNumber='"
+										+ ticket.getVoucherNumber()
+										+ "' and obj.subContractorId="
+										+ ticket.getSubcontractor().getId()
+										+ " and obj.companyLocationId="
+										+ ticket.getCompanyLocation().getId();
+								System.out.println("****** the misc query is "+subcquery);
+								
+								List<SubcontractorInvoice> invoices = genericDAO
+										.executeSimpleQuery(subcquery);
+								if (!StringUtils.isEmpty(invoices.get(0).getMiscelleneousCharges())){
+									String[] miscllCharges=invoices.get(0).getMiscelleneousCharges().split(",");
+									for(int i=0;i<miscllCharges.length;i++){	
+										System.out.println("********* misc charge is "+miscllCharges[i]);
+										miscelleneousCharge += Double.parseDouble(miscllCharges[i]);		
+										}
+									}
+							}
+						}
+						summarys.add(billing);
+						System.out.println("\n continue");
+						continue;
+
+					}				
+					billing.setTicket(ticket);
+					billing.setLoaded(sdf.format(ticket.getLoadDate()));
+					if (ticket.getVehicle() != null) {
+						billing.setUnit("" + ticket.getVehicle().getUnit());
+
+					}
+					billing.setDate(sdf.format(ticket.getBillBatch()));
+					billing.setOrigin((ticket.getOrigin() != null) ? ticket
+							.getOrigin().getName() : "");
+					billing.setDestination((ticket.getDestination() != null) ? ticket
+							.getDestination().getName() : "");
+					billing.setOriginGrossWt(ticket.getTransferGross());
+					billing.setOriginTareWt(ticket.getTransferTare());
+					billing.setOriginNetWt(ticket.getTransferNet());
+					billing.setOriginTonsWt(ticket.getTransferTons());
+					billing.setDestinationGrossWt(ticket.getLandfillGross());
+					billing.setDestinationTareWt(ticket.getLandfillTare());
+					billing.setDestinationNetWt(ticket.getLandfillNet());
+					billing.setDestinationTonsWt(ticket.getLandfillTons());
+					billing.setUnloaded(sdf.format(ticket.getUnloadDate()));
+					billing.setTransferTimeIn(ticket.getTransferTimeIn());
+					billing.setTransferTimeOut(ticket.getTransferTimeOut());
+					billing.setLandfillTimeIn(ticket.getLandfillTimeIn());
+					billing.setLandfillTimeOut(ticket.getLandfillTimeOut());
+					billing.setOriginTicket(String.valueOf(ticket.getOriginTicket()));
+					billing.setDestinationTicket(String.valueOf(ticket
+							.getDestinationTicket()));
+					billing.setProcessStatus(StaticDataUtil.getText(
+							"VOUCHER_STATUS", "" + ticket.getVoucherStatus()));
+					billing.setCompany((ticket.getCompanyLocation() != null) ? ticket
+							.getCompanyLocation().getName() : "");
+
+					billing.setTerminal((ticket.getTerminal() != null) ? ticket
+							.getTerminal().getName() : "");
+
+					billing.setSubcontractor((ticket.getSubcontractor() != null) ? ticket
+							.getSubcontractor().getName() : "");
+
+					billing.setInvoiceDate((ticket.getVoucherDate() != null) ? (sdf
+							.format(ticket.getVoucherDate())) : null);
+					billing.setInvoiceNo(ticket.getVoucherNumber());
+					SubcontractorRate billingRate = null;
+					try {
+						String rateQuery = "select obj from SubcontractorRate obj where obj.subcontractor='"
+								+ ticket.getSubcontractor().getId()
+								+ "' and obj.transferStation='"
+								+ ticket.getOrigin().getId()
+								+ "' and obj.landfill='"
+								+ ticket.getDestination().getId()
+								+ "' order by obj.validFrom desc";
+						List<SubcontractorRate> fs = genericDAO
+								.executeSimpleQuery(rateQuery);
+						if (fs != null && fs.size() > 0) {
+							for (SubcontractorRate rate : fs) {
+								if (rate.getRateUsing() == null) {
+									billingRate = rate;
+									break;
+								} else if (rate.getRateUsing() == 1) {
+									// calculation for a load date
+									if ((ticket.getLoadDate().getTime() >= rate
+											.getValidFrom().getTime())
+											&& (ticket.getLoadDate().getTime() <= rate
+													.getValidTo().getTime())) {
+										billingRate = rate;
+										break;
+									}
+								} else if (rate.getRateUsing() == 2) {
+									// calculation for a unload date
+									if ((ticket.getUnloadDate().getTime() >= rate
+											.getValidFrom().getTime())
+											&& (ticket.getUnloadDate().getTime() <= rate
+													.getValidTo().getTime())) {
+										billingRate = rate;
+										break;
+									}
+								}
+							}
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+
+					//
+					if (billingRate != null) {
+						int billUsing = (billingRate.getBillUsing() == null) ? 1
+								: billingRate.getBillUsing();
+						int rateType = billingRate.getRateType();
+						if (billUsing == 1) {
+							billing.setBillUsing("Transfer");
+						}
+						if (billUsing == 2) {
+							billing.setBillUsing("Landfill");
+						}
+						if (billUsing == 1) {
+							if (rateType == 2 || rateType == 3) {
+								Double minbilgrosswt = billingRate
+										.getMinbillablegrossWeight();
+								if (minbilgrosswt != null
+										&& ticket.getTransferGross() < minbilgrosswt) {
+									billing.setEffectiveGrossWt(minbilgrosswt);
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getTransferTare());
+									Double originNetWt = minbilgrosswt
+											- ticket.getTransferTare();
+									billing.setEffectiveNetWt(originNetWt);
+									billing.setEffectiveTonsWt(originNetWt / 2000.0);
+								} else {
+									billing.setEffectiveGrossWt(ticket
+											.getTransferGross());
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getTransferTare());
+									billing.setEffectiveNetWt(ticket
+											.getTransferNet());
+									billing.setEffectiveTonsWt(ticket
+											.getTransferTons());
+								}
+							}
+						} else {
+							if (rateType == 2 || rateType == 3) {
+								Double minbilgrosswt = billingRate
+										.getMinbillablegrossWeight();
+								if (minbilgrosswt != null
+										&& ticket.getLandfillGross() < minbilgrosswt) {
+									billing.setEffectiveGrossWt(minbilgrosswt);
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getLandfillTare());
+									Double destinationNetWt = minbilgrosswt
+											- ticket.getLandfillTare();
+									billing.setEffectiveNetWt(destinationNetWt);
+									billing.setEffectiveTonsWt(destinationNetWt / 2000.0);
+
+								} else {
+									billing.setEffectiveGrossWt(ticket
+											.getLandfillGross());
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getLandfillTare());
+									billing.setEffectiveNetWt(ticket
+											.getLandfillNet());
+									billing.setEffectiveTonsWt(ticket
+											.getLandfillTons());
+								}
+							}
+						}
+						// int rateType = billingRate.getRateType();
+						if (rateType == 1) {
+							if (billUsing == 1) {
+								Double minbilgrosswt = billingRate
+										.getMinbillablegrossWeight();
+								if (minbilgrosswt != null
+										&& ticket.getTransferGross() < minbilgrosswt) {
+									billing.setEffectiveGrossWt(minbilgrosswt);
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getTransferTare());
+									Double originNetWt = minbilgrosswt
+											- ticket.getTransferTare();
+									billing.setEffectiveNetWt(originNetWt);
+								} else {
+									billing.setEffectiveGrossWt(ticket
+											.getTransferGross());
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getTransferTare());
+									billing.setEffectiveNetWt(ticket
+											.getTransferNet());
+								}
+							} else {
+								Double minbilgrosswt = billingRate
+										.getMinbillablegrossWeight();
+								if (minbilgrosswt != null
+										&& ticket.getLandfillGross() < minbilgrosswt) {
+									billing.setEffectiveGrossWt(minbilgrosswt);
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getLandfillTare());
+									Double destinationNetWt = minbilgrosswt
+											- ticket.getLandfillTare();
+									billing.setEffectiveNetWt(destinationNetWt);
+								} else {
+									billing.setEffectiveGrossWt(ticket
+											.getLandfillGross());
+									billing.setMinimumbillablegrossweight(minbilgrosswt);
+									billing.setEffectiveTareWt(ticket
+											.getLandfillTare());
+									billing.setEffectiveNetWt(ticket
+											.getLandfillNet());
+								}
+							}
+							billing.setRate(billingRate.getValue());
+							billing.setAmount((billing.getEffectiveNetWt() / 8.34)
+									* billingRate.getValue());
+						} else if (rateType == 2) {
+							// per load
+							billing.setRate(billingRate.getValue());
+							billing.setAmount(billingRate.getValue());
+						} else if (rateType == 3) {
+							// per tonne
+							billing.setRate(billingRate.getValue());
+							billing.setAmount(billing.getEffectiveTonsWt()
+									* billingRate.getValue());
+						}
+						sumBillableTon += billing.getEffectiveTonsWt();
+						sumOriginTon += billing.getOriginTonsWt();
+						sumDestinationTon += billing.getDestinationTonsWt();
+						sumNet += billing.getEffectiveNetWt();
+						sumAmount += billing.getAmount();
+						billing.setAmount(MathUtil.roundUp(billing.getAmount(), 2));
+
+						Double otherCharges = billingRate.getOtherCharges();
+						otherCharges = MathUtil.roundUp(otherCharges, 2);
+						billing.setOtherCharges(otherCharges);
+						sumOtherCharges += otherCharges;
+
+						Double fuelSurcharge = billingRate.getFuelSurchargeAmount();
+						fuelSurcharge = MathUtil.roundUp(fuelSurcharge, 2);
+						billing.setFuelSurcharge(fuelSurcharge);
+						sumFuelSurcharge += fuelSurcharge;
+
+						sumOtherCharges = MathUtil.roundUp(sumOtherCharges, 2);
+						sumFuelSurcharge = MathUtil.roundUp(sumFuelSurcharge, 2);
+
+					} else {
+
+						billing.setRate(0.0);
+						billing.setFuelSurcharge(0.0);
+						sumOriginTon += billing.getOriginTonsWt();
+						sumDestinationTon += billing.getDestinationTonsWt();
+
+					}
+					if (billingRate != null) {
+						amount = billing.getAmount() + billing.getFuelSurcharge()
+								+ billing.getOtherCharges();
+						billing.setTotAmt(amount);
+					}
+					summarys.add(billing);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+			//
+
+			sumBillableTon = MathUtil.roundUp(sumBillableTon, 2);
+			sumOriginTon = MathUtil.roundUp(sumOriginTon, 2);
+			sumDestinationTon = MathUtil.roundUp(sumDestinationTon, 2);
+			sumNet = MathUtil.roundUp(sumNet, 2);
+			sumAmount = MathUtil.roundUp(sumAmount, 2);
+
+			sumTotal = sumAmount + sumFuelSurcharge + sumOtherCharges;
+			wrapper.setSumBillableTon(sumBillableTon);
+			wrapper.setSumOriginTon(sumOriginTon);
+			wrapper.setSumDestinationTon(sumDestinationTon);
+			wrapper.setSumNet(sumNet);
+			wrapper.setSumAmount(sumAmount);
+			wrapper.setSumFuelSurcharge(sumFuelSurcharge);
+			wrapper.setSumTotal(sumTotal);
+			wrapper.setSumOtherCharges(sumOtherCharges);
+			wrapper.setMiscelleneousCharges(Double.toString(miscelleneousCharge));
+			wrapper.setGrandTotal(sumTotal + miscelleneousCharge);
+		
+	    
+			//Map<String,Object> data = new HashMap<String,Object>();
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("misceCharges",wrapper.getMiscelleneousCharges());
+			params.put("grandTotal",wrapper.getGrandTotal());
+			params.put("sumOtherCharges", wrapper.getSumOtherCharges());
+			params.put("sumBillableTon", wrapper.getSumBillableTon());
+			params.put("sumOriginTon", wrapper.getSumOriginTon());
+			params.put("sumDestinationTon", wrapper.getSumDestinationTon());
+			
+			params.put("sumTotal", wrapper.getSumTotal());
+			//params.put("sumNet", wrapper.getSumNet());
+			params.put("sumAmount", wrapper.getSumAmount());
+			params.put("sumFuelSurcharge", wrapper.getSumFuelSurcharge());
+			//data.put("data", wrapper.getSubcontractorBillings());
+			//data.put("params",params);
+			
+			
+			try{			
+				String type="";
+				//List propertyList = (List<String>) request.getSession()
+				//		.getAttribute("propertyList");
+				
+				type = "csv";
+				response.setHeader("Content-Disposition",
+							"attachment;filename= subcontractorreport." + type);
+				
+				response.setContentType(MimeUtil.getContentType(type));
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				//Map<String, Object> param = (Map<String,Object>)data.get("params");
+				out = dynamicReportService.generateStaticReport("subcontractorreport",
+							(List)wrapper.getSubcontractorBillings(), params, type, request);
+							
+				out.writeTo(response.getOutputStream());				
+				out.close();
+				return null;
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.warn("Unable to create file :" + e);
+				request.getSession().setAttribute("errors", e.getMessage());
+				return "report.error";
+			} 
+	
+	}
+	
+	
+}

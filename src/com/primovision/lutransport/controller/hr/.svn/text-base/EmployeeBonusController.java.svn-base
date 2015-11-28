@@ -1,0 +1,1156 @@
+package com.primovision.lutransport.controller.hr;
+
+import java.io.ByteArrayOutputStream;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
+
+import net.sf.jasperreports.engine.JasperPrint;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.gson.Gson;
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.DateUtil;
+import com.primovision.lutransport.core.util.MathUtil;
+import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.core.util.ReportDateUtil;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.hr.BonusType;
+import com.primovision.lutransport.model.hr.Eligibility;
+import com.primovision.lutransport.model.hr.EmpBonusTypesList;
+//import com.primovision.lutransport.model.hr.Driver;
+import com.primovision.lutransport.model.hr.EmployeeBonus;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hr.LeaveType;
+import com.primovision.lutransport.model.hr.Ptodapplication;
+import com.primovision.lutransport.model.hrreport.DriverPayWrapper;
+import com.primovision.lutransport.model.report.Summary;
+import com.primovision.lutransport.service.DynamicReportService;
+import com.primovision.lutransport.service.HrReportService;
+
+/**
+ * @author kishor
+ *
+ */
+@Controller
+@RequestMapping("/hr/empbonus")
+public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
+	public EmployeeBonusController() {
+	
+	setUrlContext("/hr/empbonus");
+	}
+	@Autowired
+	protected DynamicReportService dynamicReportService;
+
+	public void setDynamicReportService(
+			DynamicReportService dynamicReportService) {
+		this.dynamicReportService = dynamicReportService;
+	}
+	@Autowired
+	protected HrReportService hrReportService;
+	
+	public void setHrReportService(
+			HrReportService hrReportService) {
+		this.hrReportService = hrReportService;
+	}
+	public void setupCreate(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+		.getAttribute("searchCriteria");
+		
+		Map criterias = new HashMap();
+		criterias.put("status", 1);
+		model.addAttribute("employees", genericDAO.findByCriteria(Driver.class, criterias,"fullName",false));
+		criterias.clear();
+		model.addAttribute("categories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.clear();
+		model.addAttribute("bonustypes", genericDAO.findByCriteria(BonusType.class, criterias,"typename",false));
+		model.addAttribute("reffrals", genericDAO.findByCriteria(Driver.class, criterias,"fullName",false));
+		
+	}
+	@Override
+	public String list(ModelMap model, HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		setupList(model, request);
+		String rst=(String)request.getParameter("rst");
+		if(!StringUtils.isEmpty(rst)){
+			 request.getSession().removeAttribute("nextbonuses");
+		}
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		criteria.setPageSize(25);
+		List<EmployeeBonus> list=genericDAO.search(getEntityClass(), criteria);
+		for(EmployeeBonus bonus:list){
+			StringBuffer buffer=new StringBuffer("");
+			double amount=0.0;
+			for(EmpBonusTypesList bonusTypesList:bonus.getBonusTypesLists()){
+				buffer.append(bonusTypesList.getBonusType().getTypename());
+				buffer.append(",");
+				amount+=bonusTypesList.getBonusamount();
+			}
+			if(buffer.length()>0){
+				int i=buffer.lastIndexOf(",");
+				buffer.deleteCharAt(i);
+			}
+			bonus.setAmounts(amount);
+			bonus.setBonustypes(buffer.toString());
+		}
+		model.addAttribute("list",list);
+		return urlContext + "/list";
+	}
+	
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		criteria.setPageSize(25);
+		List<EmployeeBonus> list=genericDAO.search(getEntityClass(), criteria);
+		for(EmployeeBonus bonus:list){
+			StringBuffer buffer=new StringBuffer("");
+			double amount=0.0;
+			for(EmpBonusTypesList bonusTypesList:bonus.getBonusTypesLists()){
+				buffer.append(bonusTypesList.getBonusType().getTypename());
+				buffer.append(",");
+				amount+=bonusTypesList.getBonusamount();
+			}
+			if(buffer.length()>0){
+				int i=buffer.lastIndexOf(",");
+				buffer.deleteCharAt(i);
+			}
+			bonus.setAmounts(amount);
+			bonus.setBonustypes(buffer.toString());
+		}
+		model.addAttribute("list",list);
+		return urlContext + "/list";
+	}
+	@Override
+	public String create(ModelMap model, HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		 return "redirect:start.do";
+		//	return super.create(model, request);
+	}
+	@Override
+	public String edit2(ModelMap model, HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		String id=request.getParameter("id");
+		 return "redirect:edit1.do?id="+id;
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/edit1.do")
+	public String edit3(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		String id=request.getParameter("id");
+		setupCreate(model, request);
+		EmployeeBonus bonus=genericDAO.getById(EmployeeBonus.class, Long.parseLong(id));
+		 SearchCriteria searchCriteria =new SearchCriteria();
+		  DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+		 String dfrom = formatter.format(bonus.getBatchFrom());
+		 String dto = formatter.format(bonus.getBatchTo());
+		 searchCriteria.getSearchMap().put("fromDate",dfrom);
+		 searchCriteria.getSearchMap().put("toDate",dto);	
+		 searchCriteria.getSearchMap().put("stat","1");
+		 searchCriteria.getSearchMap().put("driver",bonus.getDriver().getFullName()+"");
+		 searchCriteria.getSearchMap().put("summary","false");
+		 model.addAttribute("modelObject", bonus);
+		 model.addAttribute("fromEditMethod","yes");
+		 model.addAttribute("bonustypese",bonus.getBonusTypesLists());
+		 model.addAttribute("bon", true);
+		 
+		 DriverPayWrapper wrapper = null;
+		 try {
+			wrapper=hrReportService.generateDriverPayReport(searchCriteria);
+		} catch (Exception e) {
+			// TODO: handle exception
+			request.getSession().setAttribute("error", bonus.getDriver().getFullName()+" driver not found");
+			
+		}
+		
+		dfrom=ReportDateUtil.getFromDate(dfrom);
+		dto=ReportDateUtil.getFromDate(dto);
+		 Double sickParsonalAmount=0.00;
+			Double vacationAmount=0.00;
+			List<Double> parameter1=new ArrayList<Double>();
+	           List<Double> parameter2=new ArrayList<Double>();
+			StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.driver="+bonus.getDriver().getId()+" and obj.category=2");
+			if(!StringUtils.isEmpty(dfrom)){
+			ptodquery.append(" and obj.batchdate>='"+dfrom+"'");
+			}
+			if(!StringUtils.isEmpty(dto)){
+				ptodquery.append(" and obj.batchdate<='"+dto+"'");
+			}
+			List<Ptodapplication> ptodapplications= genericDAO.executeSimpleQuery(ptodquery.toString());
+			for(Ptodapplication ptodapplication:ptodapplications){
+				if(ptodapplication.getLeavetype().getId()==1){
+					sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
+				}
+				if(ptodapplication.getLeavetype().getId()==4){
+					vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+					
+				}
+			}
+			parameter1.add(sickParsonalAmount);
+			parameter2.add(vacationAmount);
+			sickParsonalAmount=0.00;
+				vacationAmount=0.00;
+		 Map<String,Object> datas = new HashMap<String,Object>();
+		 Map<String,Object> params = new HashMap<String,Object>();
+		 params.put("totalRowCount", wrapper.getTotalRowCount());
+			params.put("driver", wrapper.getDriver());
+			params.put("company", wrapper.getCompany());
+			params.put("batchDateFrom", wrapper.getBatchDateFrom());
+			params.put("batchDateTo",wrapper.getBatchDateTo());
+			params.put("sumTotal",wrapper.getSumTotal());
+			params.put("payRollBatch", wrapper.getPayRollBatch());
+			datas.put("data", wrapper.getDriverPays());
+			params.put("sumAmount", wrapper.getSumAmount());
+			 params.put("parameter1", parameter1);
+	           params.put("parameter2", parameter2);
+			datas.put("params", params);
+			String type = "html";
+			String  report="driverpaybonus";
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename=" + "driverpay" + "." + type);
+			}
+			try{
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(report,
+						(List)datas.get("data"), params, request);
+				request.setAttribute("jasperPrint", jasperPrint);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				request.getSession().setAttribute("errors", e.getMessage());
+				return "error";
+			}
+			
+		
+			return urlContext+"/bonusformedit";
+		//
+		 
+		 
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/updatebonus.do")
+	public String updateBonusList(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		
+		
+		String[] bonusListsIDs = request.getParameterValues("bonuslistId");
+		String[] bonusAmts =  request.getParameterValues("bonusAmt");
+		String[] bonusNtes =  request.getParameterValues("bonusNtes");
+		
+		for(int i=0;i<bonusListsIDs.length;i++){
+			EmpBonusTypesList empBonusListObj = genericDAO.getById(EmpBonusTypesList.class, Long.parseLong(bonusListsIDs[i]));
+			empBonusListObj.setBonusamount(Double.parseDouble(bonusAmts[i]));
+			empBonusListObj.setNote(bonusNtes[i]);			
+			genericDAO.saveOrUpdate(empBonusListObj);
+		}
+		
+		return "redirect:/" + urlContext + "/list.do";
+	}
+	
+	
+	
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		
+		//setupCreate(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+		.getAttribute("searchCriteria");
+		
+		Map criterias = new HashMap();
+		/*criterias.put("status", 1);
+		model.addAttribute("employees", genericDAO.findByCriteria(Driver.class, criterias,"fullName",false));*/
+		String query="select distinct(obj.fullName) from Driver obj order by obj.fullName";
+		model.addAttribute("employees", genericDAO.executeSimpleQuery(query));
+		criterias.clear();
+		model.addAttribute("categories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.clear();
+		model.addAttribute("bonustypes", genericDAO.findByCriteria(BonusType.class, criterias,"typename",false));
+		model.addAttribute("reffrals", genericDAO.findByCriteria(Driver.class, criterias,"fullName",false));
+		if(criteria!=null){  
+			criteria.getSearchMap().remove("summary");
+		criteria.getSearchMap().remove("fromDate");
+		criteria.getSearchMap().remove("driver");
+		criteria.getSearchMap().remove("toDate");
+		criteria.getSearchMap().remove("stat");
+			request.getSession().setAttribute("searchCriteria", criteria);
+			}
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/start.do")
+	public String Start(ModelMap model,HttpServletRequest request){
+		Map criterias = new HashMap();
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		criterias.clear();
+		criterias.put("status", 1);
+		model.addAttribute("employees", genericDAO.findByCriteria(Driver.class,criterias,"fullName",false));
+
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class,criterias,"name",false));
+		return urlContext+"/start";
+	}
+	@RequestMapping(method=RequestMethod.POST, value="/next.do")
+	public String next(ModelMap model,HttpServletRequest request){
+		  populateSearchCriteria(request, request.getParameterMap());
+		   SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		   request.getSession().setAttribute("searchCriteria", searchCriteria);
+		  String company=(String) searchCriteria.getSearchMap().get("company");
+		  String batchFrom=(String)searchCriteria.getSearchMap().get("fromDate");
+		  String batchTo=(String)searchCriteria.getSearchMap().get("toDate");
+		  String employeeid=(String)searchCriteria.getSearchMap().get("driver");
+		  String terminal=(String)searchCriteria.getSearchMap().get("terminal");
+		  
+		  Map criterias = new HashMap();
+		  criterias.clear();
+		  
+			model.addAttribute("bonustypes", genericDAO.findByCriteria(BonusType.class, criterias,"typename",false));
+		  
+		  
+		  int i=0;
+		 /* if(StringUtils.isEmpty(company)){
+			  request.getSession().setAttribute("error","Please select company");
+			  return "redirect:start.do";
+		  }*/
+		  if(StringUtils.isEmpty(batchFrom)){
+			  request.getSession().setAttribute("error","Please Enter Batch Date from");
+			  return "redirect:start.do";
+		  }
+		  if(StringUtils.isEmpty(batchTo)){
+			  request.getSession().setAttribute("error","Please Enter Batch Date to");
+			  return "redirect:start.do";
+		  }
+		 /* String batchFrom=(String)searchCriteria.getSearchMap().get("fromDate");
+		  String batchTo=(String)searchCriteria.getSearchMap().get("toDate");*/
+		  StringBuffer query=new StringBuffer("");
+		  query.append("select obj from Driver obj where obj.status=1");
+		  if(!StringUtils.isEmpty(company)){
+			  query.append(" and  obj.company="+company);	 
+			  criterias.put("company",company);
+		  }else{
+			  i++;
+		  }
+		 if(!StringUtils.isEmpty(employeeid)){
+				query.append("and  obj.fullName='"+employeeid+"'");	  
+		  }else{
+			  i++;
+		  }
+		 if(!StringUtils.isEmpty(terminal)){
+			 query.append("and  obj.terminal="+terminal);
+		 }else{
+			  i++;
+		  }
+		 if(i==3){
+			 request.getSession().setAttribute("error","Please Select any one option");
+			  return "redirect:start.do";
+		 }
+		 query.append("order by obj.fullName asc");
+		  //String query="select obj from Driver obj where obj.company="+company+" and obj.catagory=2 order by obj.fullName asc";
+		 
+		 List<Driver>employees= genericDAO.executeSimpleQuery(query.toString());
+		 if(employees.isEmpty()||employees.size()<0){
+			 request.getSession().setAttribute("error","Record Not Found");
+			  return "redirect:start.do"; 
+		 }
+		 List<String> id=new ArrayList<String>();
+		 List<String> id1=new ArrayList<String>();
+		 
+		 for(Driver driver:employees){
+			 id.add(driver.getFullName()+"");
+		 }
+		 request.getSession().setAttribute("empid1", id1);
+		   request.getSession().setAttribute("empid", id);
+		   return "redirect:bonusnext.do";
+	}
+	
+	@RequestMapping(method=RequestMethod.GET, value="/bonuscontinue.do")
+	public String bonusContinue(HttpServletRequest request,HttpServletResponse response,
+			 ModelMap model){
+
+		
+		EmployeeBonus entity = null;
+		
+		List<String> id=(List<String>) request.getSession().getAttribute("empid");
+		List<String> id1=(List<String>) request.getSession().getAttribute("empid1");
+		
+		String idd=(String)request.getParameter("id");
+		
+		
+		
+		SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+        if(!StringUtils.isEmpty(idd)){
+        	
+        	Map map =new HashMap();
+			map=(Map)request.getSession().getAttribute("bonusmap");			
+			searchCriteria.getSearchMap().put("fromDate", map.get("batchfrom"));
+			searchCriteria.getSearchMap().put("toDate", map.get("batchto"));
+			
+		}
+		/*}else{
+			System.out.println("\n inside else--");
+			searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria11");
+		}*/
+		 String batchFrom=(String)searchCriteria.getSearchMap().get("fromDate");
+		 String batchTo=(String)searchCriteria.getSearchMap().get("toDate");
+		  try {
+			  
+			  id.get(0);
+		} catch (Exception e) {
+			id.add(0, id1.get(0));
+			id1.remove(0);
+			System.out.println("\n list over-->"+id.get(0));
+			model.addAttribute("listEnd", true);
+			//request.getSession().setAttribute("error","List Is Over1");
+		}
+		System.out.println("\n here near id-->"+id.get(0));
+		Map criti =new HashMap();
+		criti.put("fullName",id.get(0));
+		Driver driver=genericDAO.getByCriteria(Driver.class, criti);
+		EmployeeBonus bonus=(EmployeeBonus) request.getSession().getAttribute("ebonus");
+		// EmployeeBonus modelObject;
+		 if(bonus==null){
+			 System.out.println("\n inside if");
+			 entity = new EmployeeBonus();
+			 entity.setCategory(driver.getCatagory());
+			 entity.setDriver(driver);
+			 if(driver.getDateHired()!=null){
+			 entity.setDateHired(driver.getDateHired());
+			 }else{
+				 entity.setDateHired(driver.getDateReHired());
+			 }
+			 entity.setCompany(driver.getCompany());
+			 entity.setTerminal(driver.getTerminal());
+		 Date dateHired;
+		 if(driver.getDateHired()!=null){
+			 
+			 dateHired=driver.getDateHired();
+		 }else{
+			 dateHired=driver.getDateReHired();
+		 }
+			Calendar currentDate = Calendar.getInstance();
+				int d=DateUtil.daysBetween(dateHired, currentDate.getTime());
+			  int year	=(d /365);
+			  double days=(d %365);
+			  
+				 double month=(days/30);
+				int finmonths=(int)MathUtil.roundUp(month, 0);
+				StringBuffer exp=new StringBuffer("");
+				if(finmonths>11){
+					entity.setExperience((year+1)+".0");
+				}else{
+					entity.setExperience(year+"."+finmonths);
+				}
+				
+				DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+				try {
+					Date dfrom = (Date)formatter.parse(batchFrom);
+					entity.setBatchFrom(dfrom);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				try {
+					Date dto = (Date)formatter.parse(batchTo);
+					entity.setBatchTo(dto);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		 }else{
+			 System.out.println("\n inside save");
+			 request.getSession().removeAttribute("ebonus");
+			 entity= bonus;
+			 
+			/*	if(entity.getRefferal()==null){
+					bindingResult.rejectValue("refferal", "error.select.option",null, null);
+				}*/
+				if(entity.getDriver()!=null){
+					entity.setEmpnumber(entity.getDriver().getStaffId());
+				}
+				
+				
+				
+				
+				//return super.save(request, entity, bindingResult, model);
+				try {
+					
+				} catch (ValidationException e) {
+					e.printStackTrace();
+					log.warn("Error in validation :" + e);
+				}
+		 }
+		 model.addAttribute("modelObject", entity);
+		 setupCreate(model, request);
+		 searchCriteria.getSearchMap().put("stat","1");
+		 searchCriteria.getSearchMap().put("driver",id.get(0));
+		 searchCriteria.getSearchMap().put("summary","false");
+		 DriverPayWrapper wrapper = null;
+		 try {
+			wrapper=hrReportService.generateDriverPayReport(searchCriteria);
+		} catch (Exception e) {
+			// TODO: handle exception
+			request.getSession().setAttribute("error", entity.getDriver().getFullName()+" driver not found");
+			 id1.add(0, id.get(0));
+			 id.remove(0);
+			 request.getSession().setAttribute("empid", id);
+			 request.getSession().setAttribute("empid1", id1);
+			return "redirect:bonusnext.do";
+		}
+		// DriverPayWrapper wrapper=hrReportService.generateDriverPayReport(searchCriteria);
+		 id1.add(0, id.get(0));
+		 id.remove(0);
+		 request.getSession().setAttribute("empid", id);
+		 request.getSession().setAttribute("empid1", id1);
+		 System.out.println("\n sumamount-->"+wrapper.getSumAmount());
+		 batchFrom=ReportDateUtil.getFromDate(batchFrom);
+		 batchTo=ReportDateUtil.getFromDate(batchTo);
+		 Double sickParsonalAmount=0.00;
+			Double vacationAmount=0.00;
+			List<Double> parameter1=new ArrayList<Double>();
+	           List<Double> parameter2=new ArrayList<Double>();
+			StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.driver="+driver.getId()+" and obj.category=2");
+			if(!StringUtils.isEmpty(batchFrom)){
+			ptodquery.append(" and obj.batchdate>='"+batchFrom+"'");
+			}
+			if(!StringUtils.isEmpty(batchTo)){
+				ptodquery.append(" and obj.batchdate<='"+batchTo+"'");
+			}
+			List<Ptodapplication> ptodapplications= genericDAO.executeSimpleQuery(ptodquery.toString());
+			for(Ptodapplication ptodapplication:ptodapplications){
+				if(ptodapplication.getLeavetype().getId()==1){
+					sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
+				}
+				if(ptodapplication.getLeavetype().getId()==4){
+					vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+					
+				}
+			}
+			parameter1.add(sickParsonalAmount);
+			parameter2.add(vacationAmount);
+			sickParsonalAmount=0.00;
+				vacationAmount=0.00;
+		 Map<String,Object> datas = new HashMap<String,Object>();
+		 Map<String,Object> params = new HashMap<String,Object>();
+		 params.put("totalRowCount", wrapper.getTotalRowCount());
+			params.put("driver", wrapper.getDriver());
+			params.put("company", wrapper.getCompany());
+			params.put("batchDateFrom", wrapper.getBatchDateFrom());
+			params.put("batchDateTo",wrapper.getBatchDateTo());
+			params.put("sumTotal",wrapper.getSumTotal());
+			params.put("payRollBatch", wrapper.getPayRollBatch());
+			datas.put("data", wrapper.getDriverPays());
+			params.put("sumAmount", wrapper.getSumAmount());
+			 params.put("parameter1", parameter1);
+	           params.put("parameter2", parameter2);
+			datas.put("params", params);
+			String type = "html";
+			String  report="driverpaybonus";
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename=" + "driverpay" + "." + type);
+			}
+			try{
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(report,
+						(List)datas.get("data"), params, request);
+				request.setAttribute("jasperPrint", jasperPrint);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				request.getSession().setAttribute("errors", e.getMessage());
+				return "error";
+			}
+			
+		
+			return urlContext+"/bonusform";
+	
+		
+		
+	}
+	
+	
+	
+	
+	@RequestMapping(method=RequestMethod.GET, value="/bonusnext.do")
+	public String bonusNext(HttpServletRequest request,HttpServletResponse response,@ModelAttribute("modelObject") EmployeeBonus entity,
+			BindingResult bindingResult, ModelMap model){
+		
+		
+		
+		List<String> id=(List<String>) request.getSession().getAttribute("empid");
+		List<String> id1=(List<String>) request.getSession().getAttribute("empid1");
+		
+		String idd=(String)request.getParameter("id");
+		
+		
+		
+		SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+        if(!StringUtils.isEmpty(idd)){
+        	
+        	Map map =new HashMap();
+			map=(Map)request.getSession().getAttribute("bonusmap");			
+			searchCriteria.getSearchMap().put("fromDate", map.get("batchfrom"));
+			searchCriteria.getSearchMap().put("toDate", map.get("batchto"));
+			
+		}
+		/*}else{
+			System.out.println("\n inside else--");
+			searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria11");
+		}*/
+		 String batchFrom=(String)searchCriteria.getSearchMap().get("fromDate");
+		 String batchTo=(String)searchCriteria.getSearchMap().get("toDate");
+		  try {
+			  
+			  id.get(0);
+		} catch (Exception e) {
+			id.add(0, id1.get(0));
+			id1.remove(0);
+			System.out.println("\n list over-->"+id.get(0));
+			model.addAttribute("listEnd", true);
+			//request.getSession().setAttribute("error","List Is Over1");
+		}
+		System.out.println("\n here near id-->"+id.get(0));
+		Map criti =new HashMap();
+		criti.put("fullName",id.get(0));
+		Driver driver=genericDAO.getByCriteria(Driver.class, criti);
+		EmployeeBonus bonus=(EmployeeBonus) request.getSession().getAttribute("ebonus");
+		// EmployeeBonus modelObject;
+		 if(bonus==null){
+			 System.out.println("\n inside if");
+			 entity = new EmployeeBonus();
+			 entity.setCategory(driver.getCatagory());
+			 entity.setDriver(driver);
+			 if(driver.getDateHired()!=null){
+			 entity.setDateHired(driver.getDateHired());
+			 }else{
+				 entity.setDateHired(driver.getDateReHired());
+			 }
+			 entity.setCompany(driver.getCompany());
+			 entity.setTerminal(driver.getTerminal());
+		 Date dateHired;
+		 if(driver.getDateHired()!=null){
+			 
+			 dateHired=driver.getDateHired();
+		 }else{
+			 dateHired=driver.getDateReHired();
+		 }
+			Calendar currentDate = Calendar.getInstance();
+				int d=DateUtil.daysBetween(dateHired, currentDate.getTime());
+			  int year	=(d /365);
+			  double days=(d %365);
+			  
+				 double month=(days/30);
+				int finmonths=(int)MathUtil.roundUp(month, 0);
+				StringBuffer exp=new StringBuffer("");
+				if(finmonths>11){
+					entity.setExperience((year+1)+".0");
+				}else{
+					entity.setExperience(year+"."+finmonths);
+				}
+				
+				DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+				try {
+					Date dfrom = (Date)formatter.parse(batchFrom);
+					entity.setBatchFrom(dfrom);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				try {
+					Date dto = (Date)formatter.parse(batchTo);
+					entity.setBatchTo(dto);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		 }else{
+			 System.out.println("\n inside save");
+			 request.getSession().removeAttribute("ebonus");
+			 entity= bonus;
+			 if(entity.getDriver()==null){
+					bindingResult.rejectValue("driver", "error.select.option",null, null);
+				}
+				
+				if(entity.getCategory()==null){
+					bindingResult.rejectValue("category", "error.select.option",null, null);
+				}
+				if(entity.getCompany()==null){
+					bindingResult.rejectValue("company", "error.select.option",null, null);
+				}
+				if(entity.getTerminal()==null){
+					bindingResult.rejectValue("terminal", "error.select.option",null, null);
+				}
+				
+				if(entity.getBonustype()==null){
+					bindingResult.rejectValue("bonustype", "error.select.option",null, null);
+					//bindingResult.rejectValue("bonustype", "please select option");
+					request.getSession().setAttribute("error", "please select Bonus Type");
+				}
+			/*	if(entity.getRefferal()==null){
+					bindingResult.rejectValue("refferal", "error.select.option",null, null);
+				}*/
+				if(entity.getDriver()!=null){
+					entity.setEmpnumber(entity.getDriver().getStaffId());
+				}
+				
+				
+				
+				
+				//return super.save(request, entity, bindingResult, model);
+				try {
+					System.out.println("\n error-->"+bindingResult.getFieldError());
+					getValidator().validate(entity, bindingResult);
+				} catch (ValidationException e) {
+					e.printStackTrace();
+					log.warn("Error in validation :" + e);
+				}
+		 }
+		 model.addAttribute("modelObject", entity);
+		 setupCreate(model, request);
+		 searchCriteria.getSearchMap().put("stat","1");
+		 searchCriteria.getSearchMap().put("driver",id.get(0));
+		 searchCriteria.getSearchMap().put("summary","false");
+		 DriverPayWrapper wrapper = null;
+		 try {
+			wrapper=hrReportService.generateDriverPayReport(searchCriteria);
+		} catch (Exception e) {
+			// TODO: handle exception
+			request.getSession().setAttribute("error", entity.getDriver().getFullName()+" driver not found");
+			 id1.add(0, id.get(0));
+			 id.remove(0);
+			 request.getSession().setAttribute("empid", id);
+			 request.getSession().setAttribute("empid1", id1);
+			return "redirect:bonusnext.do";
+		}
+		// DriverPayWrapper wrapper=hrReportService.generateDriverPayReport(searchCriteria);
+		 id1.add(0, id.get(0));
+		 id.remove(0);
+		 request.getSession().setAttribute("empid", id);
+		 request.getSession().setAttribute("empid1", id1);
+		 System.out.println("\n sumamount-->"+wrapper.getSumAmount());
+		 batchFrom=ReportDateUtil.getFromDate(batchFrom);
+		 batchTo=ReportDateUtil.getFromDate(batchTo);
+		 Double sickParsonalAmount=0.00;
+			Double vacationAmount=0.00;
+			List<Double> parameter1=new ArrayList<Double>();
+	           List<Double> parameter2=new ArrayList<Double>();
+			StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.driver="+driver.getId()+" and obj.category=2");
+			if(!StringUtils.isEmpty(batchFrom)){
+			ptodquery.append(" and obj.batchdate>='"+batchFrom+"'");
+			}
+			if(!StringUtils.isEmpty(batchTo)){
+				ptodquery.append(" and obj.batchdate<='"+batchTo+"'");
+			}
+			List<Ptodapplication> ptodapplications= genericDAO.executeSimpleQuery(ptodquery.toString());
+			for(Ptodapplication ptodapplication:ptodapplications){
+				if(ptodapplication.getLeavetype().getId()==1){
+					sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
+				}
+				if(ptodapplication.getLeavetype().getId()==4){
+					vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+					
+				}
+			}
+			parameter1.add(sickParsonalAmount);
+			parameter2.add(vacationAmount);
+			sickParsonalAmount=0.00;
+				vacationAmount=0.00;
+		 Map<String,Object> datas = new HashMap<String,Object>();
+		 Map<String,Object> params = new HashMap<String,Object>();
+		 params.put("totalRowCount", wrapper.getTotalRowCount());
+			params.put("driver", wrapper.getDriver());
+			params.put("company", wrapper.getCompany());
+			params.put("batchDateFrom", wrapper.getBatchDateFrom());
+			params.put("batchDateTo",wrapper.getBatchDateTo());
+			params.put("sumTotal",wrapper.getSumTotal());
+			params.put("payRollBatch", wrapper.getPayRollBatch());
+			datas.put("data", wrapper.getDriverPays());
+			params.put("sumAmount", wrapper.getSumAmount());
+			 params.put("parameter1", parameter1);
+	           params.put("parameter2", parameter2);
+			datas.put("params", params);
+			String type = "html";
+			String  report="driverpaybonus";
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename=" + "driverpay" + "." + type);
+			}
+			try{
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(report,
+						(List)datas.get("data"), params, request);
+				request.setAttribute("jasperPrint", jasperPrint);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				request.getSession().setAttribute("errors", e.getMessage());
+				return "error";
+			}
+			if (bindingResult.hasErrors()) {
+				return urlContext+"/bonusform";
+			}
+		
+			return urlContext+"/bonusform";
+	}
+	@RequestMapping("previous.do")
+	String previous(HttpServletRequest request){
+		List<String> id=(List<String>) request.getSession().getAttribute("empid");
+		List<String> id1=(List<String>) request.getSession().getAttribute("empid1");
+		
+		try {
+			id.add(0, id1.get(0));
+			id.add(0, id1.get(1));
+		} catch (Exception e) {
+		System.out.println("Error Saving Employee Bonus "+e.getMessage());
+		}
+		
+		try {
+			//id1.remove(0);
+			id1.remove(0);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		 request.getSession().setAttribute("empid1", id1);
+		   request.getSession().setAttribute("empid", id);
+		 return "redirect:bonusnext.do";
+	}
+	@Override
+	 public void initBinder(WebDataBinder binder) { 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
+		binder.registerCustomEditor(EmployeeCatagory.class, new AbstractModelEditor(EmployeeCatagory.class));
+		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(Driver.class));
+		binder.registerCustomEditor(BonusType.class, new AbstractModelEditor(BonusType.class));
+	}
+	
+	@Override
+	public String save(HttpServletRequest request,@ModelAttribute("modelObject") EmployeeBonus entity,
+			BindingResult bindingResult, ModelMap model) {
+		boolean check=false;
+		if(entity.getId()!=null){
+			check=true;
+		}
+		
+		
+		
+		
+		if(entity.getDriver()==null){
+			bindingResult.rejectValue("driver", "error.select.option",null, null);
+		}
+		
+		if(entity.getCategory()==null){
+			bindingResult.rejectValue("category", "error.select.option",null, null);
+		}
+		if(entity.getCompany()==null){
+			bindingResult.rejectValue("company", "error.select.option",null, null);
+		}
+		if(entity.getTerminal()==null){
+			bindingResult.rejectValue("terminal", "error.select.option",null, null);
+		}
+		
+		/*if(entity.getBonustype()==null){
+			bindingResult.rejectValue("bonustype", "error.select.option",null, null);
+		}*/
+	/*	if(entity.getRefferal()==null){
+			bindingResult.rejectValue("refferal", "error.select.option",null, null);
+		}*/
+		if(entity.getDriver()!=null){
+			entity.setEmpnumber(entity.getDriver().getStaffId());
+		}
+		
+		String[] bonustype=(String[])request.getParameterValues("bonustype");
+		String[] bonusamount=(String[])request.getParameterValues("bonusAmount");
+		String[] note=(String[])request.getParameterValues("note");
+		List<BonusType> bonusTypes=new ArrayList<BonusType>();
+		if(bonustype==null||bonusamount==null){
+			request.getSession().setAttribute("error", "Please add Bonus Type and Amount");
+		return "redirect:/" + urlContext + "/previous.do";
+		}
+		for(String b:bonustype){
+			if(!StringUtils.isEmpty(b)){
+				BonusType type=genericDAO.getById(BonusType.class, Long.parseLong(b));
+				bonusTypes.add(type);
+			}
+				
+			System.out.println("\n b-->"+b);
+		}
+		List<Double> amount=new ArrayList<Double>();
+		for(String a:bonusamount){
+			if(!StringUtils.isEmpty(a)){
+				amount.add(Double.parseDouble(a));
+				
+			}
+		}
+	List<String> notes= new ArrayList<String>();
+	for(String n:note){
+		notes.add(n);
+	}
+		//return super.save(request, entity, bindingResult, model);
+	/*	try {
+			getValidator().validate(entity, bindingResult);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			log.warn("Error in validation :" + e);
+		}
+		if (bindingResult.hasErrors()) {
+			List<String> id=(List<String>) request.getSession().getAttribute("empid");
+			id.add(0,entity.getEmployee().getId()+"" );
+			 request.getSession().setAttribute("empid", id);
+			 request.getSession().setAttribute("ebonus", entity);
+			//setupCreate(model, request);
+			 return "redirect:/" + urlContext + "/bonusnext.do";
+		}*/
+		beforeSave(request, entity, model);
+		
+		genericDAO.saveOrUpdate(entity);
+		System.out.println("\n amount.size()-->"+amount.size());
+		System.out.println("\n bonusTypes.size()-->"+bonusTypes.size());
+		if(amount.size()== bonusTypes.size()){
+			if(!check){
+			for(int i=0;i<bonusTypes.size();i++){
+				EmpBonusTypesList bonusTypesList=new EmpBonusTypesList();
+				bonusTypesList.setBonusType(bonusTypes.get(i));
+				bonusTypesList.setBonusamount(amount.get(i));
+				bonusTypesList.setNote(notes.get(i));
+				bonusTypesList.setBonus(entity);
+				genericDAO.save(bonusTypesList);
+				
+			}
+			}
+		}
+		else{
+			request.getSession().setAttribute("error", "DataBase Error");
+			
+		}
+		if(check){
+			return "redirect:/" + urlContext + "/list.do";
+		}
+		request.getSession().setAttribute("msg", "Driver Bonus Added successful");
+		 SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		 Map map=new HashMap();
+		 map.put("batchfrom", searchCriteria.getSearchMap().get("fromDate"));
+		 map.put("batchto", searchCriteria.getSearchMap().get("toDate"));
+		 request.getSession().setAttribute("bonusmap",map);
+		/* SearchCriteria criteria=new SearchCriteria();
+		 criteria=searchCriteria;
+		 request.getSession().setAttribute("searchCriteria11",criteria );*/
+		// searchCriteria.getSearchMap().clear();
+		 searchCriteria.getSearchMap().put("id", entity.getId());
+		 request.getSession().setAttribute("searchCriteria", searchCriteria);
+		 request.getSession().setAttribute("nextbonuses", true);
+		return "redirect:/" + urlContext + "/list.do";
+		//return "redirect:/" + urlContext + "/bonusnext.do";
+	}
+	
+	@Override
+	protected String processAjaxRequest(HttpServletRequest request,String action, Model model) 
+	{
+		
+		if("findDCompany".equalsIgnoreCase(action)){
+ 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+ 				List<Location> company=new ArrayList<Location>();
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				company.add(driver.getCompany());
+ 				Gson gson = new Gson();
+ 				return gson.toJson(company);
+ 			}
+ 			else{
+ 				Map criterias = new HashMap();
+				criterias.put("type", 3);
+				List<Location> company=new ArrayList<Location>();
+				company=genericDAO.findByCriteria(Location.class, criterias,"name",false);
+				Gson gson = new Gson();
+				return gson.toJson(company);
+ 			}
+ 		
+ 		}
+ 		if("findDTerminal".equalsIgnoreCase(action)){
+ 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+ 				List<Location> terminal=new ArrayList<Location>();
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				terminal.add(driver.getTerminal());
+ 				Gson gson = new Gson();
+ 				return gson.toJson(terminal);
+ 			}
+ 			else{
+ 				Map criterias = new HashMap();
+				criterias.put("type", 4);
+				List<Location> terminal=new ArrayList<Location>();
+				terminal=genericDAO.findByCriteria(Location.class, criterias,"name",false);
+				Gson gson = new Gson();
+				return gson.toJson(terminal);
+ 			}
+ 		
+ 		}
+ 		
+ 		if("findDCategory".equalsIgnoreCase(action)){
+ 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+ 				List<EmployeeCatagory> category=new ArrayList<EmployeeCatagory>();
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				category.add(driver.getCatagory());
+ 				Gson gson = new Gson();
+ 				return gson.toJson(category);
+ 			}
+ 			else{
+ 				Map criterias = new HashMap();
+ 				List<EmployeeCatagory> category=new ArrayList<EmployeeCatagory>();
+ 				category=genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false);
+ 				Gson gson = new Gson();
+ 				return gson.toJson(category);
+ 			}
+ 		
+ 		}
+ 		
+ 		if("findhireex".equalsIgnoreCase(action)){
+ 			List<String> list = new ArrayList<String>();
+ 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				 SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+ 				Date dateHired = driver.getDateHired();
+ 				list.add(dateFormat.format(dateHired));
+ 				Calendar currentDate = Calendar.getInstance();
+ 				int d=DateUtil.daysBetween(dateHired, currentDate.getTime());
+ 			  int year	=(d /365);
+ 			  double days=(d %365);
+ 			  
+ 			  if(days>30){
+ 				 double month=(days/30);
+ 				int finmonths=(int)MathUtil.roundUp(month, 0);
+ 				StringBuffer exp=new StringBuffer("");
+ 				if(finmonths>11){
+ 					exp.append((year+1)+".0");
+ 				}else{
+ 					exp.append(year+"."+finmonths);
+ 				}
+ 				 list.add(exp.toString());
+ 			  }
+ 				
+ 			}
+ 			else{
+ 				list.add("");
+ 				list.add("");
+ 			}
+ 			Gson gson = new Gson();
+				return gson.toJson(list);
+ 		}
+		if("findref".equalsIgnoreCase(action)){
+			List<String> list = new ArrayList<String>();
+			if(!StringUtils.isEmpty(request.getParameter("driver"))){
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				 SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+ 				Date dateHired = driver.getDateHired();
+ 				list.add(dateFormat.format(dateHired));
+ 				Gson gson = new Gson();
+				return gson.toJson(list);
+			}
+		}
+		
+		if("findamount".equalsIgnoreCase(action)){
+			if(!StringUtils.isEmpty(request.getParameter("bid"))){
+				String idin=(String)request.getParameter("bid");
+				String ids[]=idin.split(",");
+				List<BonusType> bonusTypes=new ArrayList<BonusType>();
+				for(String id:ids){
+					System.out.println("\n id-->"+id);
+					if(!StringUtils.isEmpty(id)){
+					BonusType bonusType=genericDAO.getById(BonusType.class,Long.parseLong(id));
+					bonusTypes.add(bonusType);
+					}
+				}
+				//List<String> list = new ArrayList<String>();
+				/*BonusType bonusType=genericDAO.getById(BonusType.class,Long.parseLong(request.getParameter("bid")));*/
+			//	DecimalFormat df = new DecimalFormat("#0");
+			//	Double amount=bonusType.getAmount();
+				/*if(amount!=null){
+					list.add(df.format(amount));
+				}*/
+				Gson gson = new Gson();
+				return gson.toJson(bonusTypes);
+			}
+		}
+if("findticket".equalsIgnoreCase(action)){
+	String batchfrom=request.getParameter("p1");
+	String batchto=request.getParameter("p2");
+	String empid=request.getParameter("empid");
+	batchfrom=ReportDateUtil.getFromDate(batchfrom);
+	batchto=ReportDateUtil.getToDate(batchto);
+	Driver driver=null;
+	if(!StringUtils.isEmpty(empid)){
+	 Driver driver1=genericDAO.getById(Driver.class, Long.parseLong(empid));
+	 Map criterias=new HashMap();
+	 criterias.put("fullName", driver1.getFullName());
+	 driver =genericDAO.getByCriteria(Driver.class, criterias);
+	}
+			StringBuffer query=new StringBuffer("");
+			query.append("select  obj.origin.name,obj.destination.name ,count(obj)from Ticket obj where obj.status=1 ");
+			if(driver!=null){
+				query.append(" and obj.driver="+driver.getId());
+			}
+			if(!StringUtils.isEmpty(batchfrom)){
+				query.append(" and  obj.billBatch>='").append(batchfrom+"'");
+			}
+			if(!StringUtils.isEmpty(batchto)){
+				query.append(" and  obj.billBatch<='").append(batchto+"'");
+			}
+			query.append(" group by origin,destination order by obj.origin.name asc,obj.destination.name asc");
+			List<Summary> list = genericDAO.executeSimpleQuery(query.toString());
+			List<Summary> summarylist=new ArrayList<Summary>();		
+			for(Object obj:list){						
+				Object[] objArry=(Object[]) obj;
+				Summary summary=new Summary();				
+				summary.setOrigin(objArry[0].toString());
+				summary.setDestination(objArry[1].toString());				
+				summary.setCount(Integer.parseInt(objArry[2].toString()));		
+				summarylist.add(summary);
+				}
+			Gson gson = new Gson();
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return gson.toJson(summarylist);
+		}
+		
+		return "";
+	}
+}

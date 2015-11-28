@@ -1,0 +1,178 @@
+<%@ include file="/common/taglibs.jsp"%>
+<script language="javascript">
+
+function searchReport(){
+	
+	var d1 = document.getElementById('fromDate').value;
+	var driver = document.getElementById('driverId').value;
+	if (d1!=null && d1!='' && !isValidDate(d1)) {
+		alert("Invalid billBatch date");
+	}
+	var d6 = document.getElementById('toDate').value;
+	if (d6!=null && d6!='' && !isValidDate(d6)) {
+		alert("Invalid billBatch date");
+	}
+	var e;
+	
+	
+	if(d1==""&&e!="yes"){
+		alert("please select from batch date");
+		e=yes;
+	}
+	if(d6==""&&e!="yes"){
+		alert("please select to batch date");
+		e=yes;
+	}
+	if(d1!=""&&d6!=""/* &&driver!="" */){
+	document.getElementById('sum').value='true' ;
+	document.forms[0].target="reportDataHistory";
+	document.forms[0].submit();
+	}
+}
+	
+function searchReport1(){
+	
+	var d1 = document.getElementById('fromDate').value;
+	var driver = document.getElementById('driverId').value;
+	if (d1!=null && d1!='' && !isValidDate(d1)) {
+		alert("Invalid billBatch date");
+	}
+	var d6 = document.getElementById('toDate').value;
+	if (d6!=null && d6!='' && !isValidDate(d6)) {
+		alert("Invalid billBatch date");
+	}
+	var e;
+	/* if(driver==""){
+		alert("please select Driver");
+		e=yes;
+	} */
+	if(d1==""&&e!="yes"){
+		alert("please select from batch date");
+		e=yes;
+	}
+	if(d6==""&&e!="yes"){
+		alert("please select to batch date");
+		e=yes;
+	}
+	document.getElementById('sum').value='false' ;
+	if(d1!=""&&d6!=""/* &&driver!="" */){
+	document.forms[0].target="reportDataHistory";
+	document.forms[0].submit();
+	}
+}
+$(document).ready(function(){
+	   $("select").multiselect();
+});
+</script>
+
+<h3>
+	<primo:label code="Driver PayRoll Report" />
+</h3>
+<form:form action="search.do" name="searchForm" method="post" commandName="modelObject">
+	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
+		<tr class="table-heading">
+			<td colspan="4"><b><primo:label code="Search Driver Pay" />
+			</b></td>
+		</tr>
+		
+		    <tr>
+		    		
+		    	<td class="form-left"><primo:label code="Companies" /><span
+				class="errorMessage"></span></td>
+			  <td><form:select cssClass="flat" path="companies" multiple="true">
+					<form:options items="${companies}" itemValue="id"
+						itemLabel="name" />
+				</form:select> <br> <form:errors path="companies" cssClass="errorMessage" /></td>
+				
+				<td class="form-left"><primo:label code="Terminals" /><span
+			    	class="errorMessage"></span></td>
+			   <td><form:select cssClass="flat" path="terminals" multiple="true">
+					<form:options items="${terminals}" itemValue="id"
+						itemLabel="name" />
+				</form:select> <br> <form:errors path="terminals" cssClass="errorMessage" /></td>
+		    		
+		    </tr>
+		    <tr>
+		    	<td class="form-left"><primo:label code="Driver" /><span
+				class="errorMessage"></span></td>
+			    <td><form:select cssClass="flat" path="drivers" id="driverId" multiple="true">
+					<form:options items="${drivers}" itemValue="fullName" itemLabel="fullName"></form:options>
+				</form:select> <br> <form:errors path="drivers" cssClass="errorMessage" />
+			</td>
+		    	<td align="${left}" class="first"><label>Check Date</label></td>
+			<td align="${left}"><form:input size="15" id="payrollBatchDate" path="payrollBatchDate" onblur="javascript:formatReportDate('batchDateFrom');"/>
+				<script type="text/javascript">
+			$(function() {
+			$("#payrollBatchDate").datepicker({
+				dateFormat:'mm-dd-yy',
+            	changeMonth: true,
+    			changeYear: true
+    		});
+			});
+		    </script></td>	
+		    </tr>
+		    <tr>
+			<td align="${left}" class="first"><label>Bill Batch Date From</label></td>
+			<td align="${left}"><form:input size="15" id="fromDate" path="batchDateFrom" onblur="javascript:formatReportDate('batchDateFrom');"/>
+				<script type="text/javascript">
+			$(function() {
+			$("#fromDate").datepicker({
+				dateFormat:'mm-dd-yy',
+            	changeMonth: true,
+    			changeYear: true
+    		});
+			});
+		    </script></td>
+		   <td align="${left}" class="first"><label>Bill Batch Date To</label></td>
+		   <td align="${left}"><form:input size="15" id="toDate" path="batchDateTo" onblur="javascript:formatReportDate('batchDateTo');"/>
+				<script type="text/javascript">
+			$(function() {
+			$("#toDate").datepicker({
+				dateFormat:'mm-dd-yy',
+            	changeMonth: true,
+    			changeYear: true
+    		});
+			});
+		    </script></td>
+		    </tr>
+		      <tr>
+		
+		<td align="${left}" class="first"><label>Status</label></td>
+		<td><form:select cssClass="flat" path="payrollstatus" multiple="true">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${payrollrunStatus}" itemValue="dataValue" itemLabel="dataText" />
+				</form:select>
+			</td>
+		</tr>
+		    <tr><td colspan="2"></td></tr>
+		     <input type="hidden" name="summary" id="sum">
+		    <tr>
+		    <td align="${left}"></td>
+			<td align="${left}" colspan="3"><input type="button"
+			onclick="javascript:searchReport()" value="Summary" />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button"
+				onclick="javascript:searchReport1()" value="Detail" />
+				</td>
+		   <%--  <td align="${left}"></td>
+			<td align="${left}" colspan="3"><input type="button"
+				onclick="javascript:searchReport()" value="Summary" />
+		   </td> --%>
+		    </tr>
+		    
+		    </table>
+		    </form:form>
+		    
+		    <table width="100%">
+	<tr>
+		<td align="${left}" width="100%" align="right">			
+			
+			<a href="${ctx}/hr/report/driverpay/export.do?type=pdf" target="reportDataHistory"><img src="${ctx}/images/pdf.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/hr/report/driverpay/export.do?type=xls" target="reportDataHistory"><img src="${ctx}/images/excel.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/hr/report/driverpay/export.do?type=csv" target="reportDataHistory"><img src="${ctx}/images/csv.png" border="0" class="toolbarButton"/></a>
+		</td>
+		</tr>
+		<tr><td align="${left}" width="100%" valign="top"><iframe src="${ctx}/lutransport/blank.jsp" width="100%" height="600" name="reportDataHistory" frameborder="0"></iframe></td></tr>
+</table>
+		    

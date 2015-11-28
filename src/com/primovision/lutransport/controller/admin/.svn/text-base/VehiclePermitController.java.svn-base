@@ -1,0 +1,119 @@
+package com.primovision.lutransport.controller.admin;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.VehiclePermit;
+import com.primovision.lutransport.service.DateUpdateService;
+
+
+@Controller
+@RequestMapping("/admin/vehiclepermit")
+public class VehiclePermitController extends CRUDController<VehiclePermit> {
+	
+	public VehiclePermitController(){
+		setUrlContext("admin/vehiclepermit");
+	}
+	
+	
+	@Autowired
+	private DateUpdateService dateupdateService;
+	
+	public void setDateupdateService(DateUpdateService dateupdateService) {
+		this.dateupdateService = dateupdateService;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.primovision.lutransport.controller.BaseController#initBinder(org.springframework.web.bind.WebDataBinder)
+	 */
+	@Override
+	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				dateFormat, true));
+		binder.registerCustomEditor(Long.TYPE, new CustomNumberEditor(
+				Long.class, false));
+		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(
+				Vehicle.class));
+		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.primovision.lutransport.controller.CRUDController#setupCreate(org.springframework.ui.ModelMap, javax.servlet.http.HttpServletRequest)
+	 */
+	@Override
+	public void setupCreate(ModelMap model, HttpServletRequest request) {
+		Map criterias = new HashMap();
+		model.addAttribute("vehicle", genericDAO.findByCriteria(Vehicle.class, criterias));
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("dataType", "PERMIT_TYPE");
+		model.addAttribute("permitType", genericDAO.findByCriteria(StaticData.class, map, "dataText", false));		
+		criterias.clear();
+		criterias.put("name", "LU,WB,DREW");
+		model.addAttribute("companies",
+				genericDAO.findByCriteria(Location.class, criterias, "name", false));
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.primovision.lutransport.controller.CRUDController#setupList(org.springframework.ui.ModelMap, javax.servlet.http.HttpServletRequest)
+	 */
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		setupCreate(model, request);
+	}	
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.primovision.lutransport.controller.CRUDController#save(javax.servlet.http.HttpServletRequest, com.primovision.lutransport.model.BaseModel, org.springframework.validation.BindingResult, org.springframework.ui.ModelMap)
+	 */
+	@Override
+	public String save(HttpServletRequest request, @ModelAttribute("modelObject") VehiclePermit entity,
+			BindingResult bindingResult, ModelMap model) {
+		
+		if(entity.getVehicle() == null)
+			bindingResult.rejectValue("vehicle", "error.select.option", null,	null);	
+		if(entity.getPermitType() == null)
+			bindingResult.rejectValue("permitType", "error.select.option", null,	null);	
+		if(entity.getCompanyLocation() == null){
+			bindingResult.rejectValue("companyLocation", "error.select.option", null, null);
+		}
+		return super.save(request, entity, bindingResult, model);
+	}
+	
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		dateupdateService.updateDate(request, "issuedate", "issueDate");
+		dateupdateService.updateDate(request, "expirydate", "expirationDate");
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria));
+		return urlContext + "/list";
+	}
+	
+}

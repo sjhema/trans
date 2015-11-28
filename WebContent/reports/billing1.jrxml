@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="origin" class="java.lang.String"/>
+	<parameter name="destination" class="java.lang.String"/>
+	<parameter name="date" class="java.lang.String"/>
+	<parameter name="invoiceNo" class="java.lang.String"/>
+	<field name="loaded" class="java.lang.String"/>
+	<field name="unit" class="java.lang.String"/>
+	<field name="unloaded" class="java.lang.String"/>
+	<field name="originTicket" class="java.lang.String"/>
+	<field name="destinationTicket" class="java.lang.String"/>
+	<field name="originGrossWt" class="java.lang.Double"/>
+	<field name="originTareWt" class="java.lang.Double"/>
+	<field name="originNetWt" class="java.lang.Double"/>
+	<field name="originTonsWt" class="java.lang.Double"/>
+	<field name="rate" class="java.lang.Double"/>
+	<field name="fuelSurcharge" class="java.lang.Double"/>
+	<field name="totAmt" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="41" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="67" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[ORIGIN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="67" y="0" width="86" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESTINATION]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="20" width="67" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{origin}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="67" y="20" width="86" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{destination}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="602" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DATE
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="702" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[INVOICE
+]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="602" y="20" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="702" y="20" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{invoiceNo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="389" y="0" width="161" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ORIGIN WEIGHTS
+]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="21" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="67" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[LOADED]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="67" y="0" width="86" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[UNIT #
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="153" y="0" width="66" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[UNLOADED
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="219" y="0" width="89" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ORIGIN TICKET
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="0" width="81" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESTINATION TICKET
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="389" y="0" width="44" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gross
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="433" y="0" width="36" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tare
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="469" y="0" width="41" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Net
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="0" width="40" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tons
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="550" y="0" width="52" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Rate
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="602" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fuel Surcharge Amount
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="702" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Amount
+]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="67" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{loaded}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="67" y="0" width="86" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="153" y="0" width="66" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{unloaded}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="219" y="0" width="89" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{originTicket}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="308" y="0" width="81" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{destinationTicket}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="389" y="0" width="44" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{originGrossWt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="0" width="36" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{originTareWt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="469" y="0" width="41" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{originNetWt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="40" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{originTonsWt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="550" y="0" width="52" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{rate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{fuelSurcharge}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="702" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{totAmt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

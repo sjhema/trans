@@ -1,0 +1,100 @@
+package com.primovision.lutransport.model.hr;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.primovision.lutransport.model.AbstractBaseModel;
+/**
+ * @author Subodh
+ * 
+ */
+@Entity
+@Table(name="hourlypayroll_invoices")
+public class HourlyPayrollInvoice extends AbstractBaseModel {
+
+	@NotNull
+	@Column(name = "payroll_invoice_date")
+	private Date payrollinvoicedate;
+	
+	
+		
+	@Column(name="sum_regular_amount")
+	private Double sumregularamount=0.0;
+	
+	@Column(name="sum_ot_amount")
+	private Double sumotamount=0.0;
+	
+	@Column(name="sum_dt_amount")
+	private Double sumdtamount=0.0;
+	
+	@Column(name="sum_total_amount")
+	private Double sumtotalamount=0.0;
+
+	@Column(name="company")
+	String company = "";
+
+	
+public void setCompany(String company) {
+	this.company = company;
+}
+
+public String getCompany() {
+	return company;
+}
+	
+
+	public Date getPayrollinvoicedate() {
+		return payrollinvoicedate;
+	}
+
+	public void setPayrollinvoicedate(Date payrollinvoicedate) {
+		this.payrollinvoicedate = payrollinvoicedate;
+	}
+
+	
+
+	public Double getSumregularamount() {
+		return sumregularamount;
+	}
+
+	public void setSumregularamount(Double sumregularamount) {
+		this.sumregularamount = sumregularamount;
+	}
+
+	public Double getSumotamount() {
+		return sumotamount;
+	}
+
+	public void setSumotamount(Double sumotamount) {
+		this.sumotamount = sumotamount;
+	}
+
+	public Double getSumdtamount() {
+		return sumdtamount;
+	}
+
+	public void setSumdtamount(Double sumdtamount) {
+		this.sumdtamount = sumdtamount;
+	}
+
+	public Double getSumtotalamount() {
+		return sumtotalamount;
+	}
+
+	public void setSumtotalamount(Double sumtotalamount) {
+		this.sumtotalamount = sumtotalamount;
+	}
+	
+	
+	
+}

@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/108/trunk/LUTransport/src/com/primovision/lutransport/core/util
+END
+I18N.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/I18N.java
+END
+PasswordUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/PasswordUtil.java
+END
+CryptoUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/CryptoUtils.java
+END
+MimeUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/MimeUtil.java
+END
+ResourceBundleCache.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/ResourceBundleCache.java
+END
+MathUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/MathUtil.java
+END
+ReportDateUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/ReportDateUtil.java
+END
+CrudUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/CrudUtil.java
+END
+DateUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/108/trunk/LUTransport/src/com/primovision/lutransport/core/util/DateUtil.java
+END
+HibernateTemplateUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/HibernateTemplateUtil.java
+END
+LabelUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/util/LabelUtil.java
+END

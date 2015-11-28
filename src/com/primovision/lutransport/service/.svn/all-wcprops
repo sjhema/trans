@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/207/trunk/LUTransport/src/com/primovision/lutransport/service
+END
+AuthenticationService.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/AuthenticationService.java
+END
+DynamicReportService.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/DynamicReportService.java
+END
+DateUpdateService.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/DateUpdateService.java
+END
+StaticDataExpression.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/StaticDataExpression.java
+END
+HrImportMainSheetServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/HrImportMainSheetServiceImpl.java
+END
+NotificationService.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/NotificationService.java
+END
+HrReportServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/HrReportServiceImpl.java
+END
+AuditServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/AuditServiceImpl.java
+END
+ImportMainSheetServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/ImportMainSheetServiceImpl.java
+END
+ReportServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/ReportServiceImpl.java
+END
+AuthenticationServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/AuthenticationServiceImpl.java
+END
+HrImportMainSheetService.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LUTransport/!svn/ver/38/trunk/LUTransport/src/com/primovision/lutransport/service/HrImportMainSheetService.java
+END
+DynamicReportServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/DynamicReportServiceImpl.java
+END
+DateUpdateServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/DateUpdateServiceImpl.java
+END
+HrReportService.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/LUTransport/!svn/ver/191/trunk/LUTransport/src/com/primovision/lutransport/service/HrReportService.java
+END
+AuditService.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/AuditService.java
+END
+NotificationServiceImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/service/NotificationServiceImpl.java
+END
+ImportMainSheetService.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/src/com/primovision/lutransport/service/ImportMainSheetService.java
+END
+ReportService.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/service/ReportService.java
+END

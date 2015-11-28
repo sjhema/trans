@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/dao/admin
+END
+UserDAO.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/dao/admin/UserDAO.java
+END
+UserDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/dao/admin/UserDAOImpl.java
+END

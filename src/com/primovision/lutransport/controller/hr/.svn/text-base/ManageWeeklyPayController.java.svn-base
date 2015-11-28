@@ -1,0 +1,188 @@
+package com.primovision.lutransport.controller.hr;
+
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.hrreport.WeeklyPay;
+import com.primovision.lutransport.model.hrreport.WeeklyPayDetail;
+import com.primovision.lutransport.service.DateUpdateService;
+import com.primovision.lutransport.service.DynamicReportService;
+import com.primovision.lutransport.service.HrReportService;
+
+/**
+ * @author kishor
+ *
+ */
+@Controller
+@SuppressWarnings("unchecked")
+@RequestMapping("/hr/weeklypay")
+	public class ManageWeeklyPayController extends CRUDController<WeeklyPay>{
+		
+		public ManageWeeklyPayController() {
+			 setUrlContext("/hr/weeklypay");
+	}
+ 
+		public static SimpleDateFormat oracleFormatter = new SimpleDateFormat(
+		"yyyy-MM-dd");
+		
+		@Autowired
+		private DateUpdateService dateupdateService;
+		
+		
+		public void setDateupdateService(DateUpdateService dateupdateService) {
+			this.dateupdateService = dateupdateService;
+		}
+		@Autowired
+		protected DynamicReportService dynamicReportService;
+
+		public void setDynamicReportService(
+				DynamicReportService dynamicReportService) {
+			this.dynamicReportService = dynamicReportService;
+		}
+		@Autowired
+		protected HrReportService hrReportService;
+		
+		public void setHrReportService(
+				HrReportService hrReportService) {
+			this.hrReportService = hrReportService;
+		}
+		
+		@Override
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(
+					dateFormat, true));
+			binder.registerCustomEditor(Long.TYPE, new CustomNumberEditor(
+					Long.class, false));
+			binder.registerCustomEditor(Location.class, new AbstractModelEditor(
+					Location.class));
+		}
+		
+		@Override
+		public void setupCreate(ModelMap model, HttpServletRequest request) {
+			Map criterias = new HashMap();
+			criterias.put("type", 3);
+			model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+			criterias.put("type", 4);
+			model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		}
+		
+		@Override
+		public void setupList(ModelMap model, HttpServletRequest request) {
+			populateSearchCriteria(request, request.getParameterMap());
+			setupCreate(model, request);
+		}
+		
+		@Override
+		public String search2(ModelMap model, HttpServletRequest request) {
+			setupList(model, request);
+			SearchCriteria criteria = (SearchCriteria) request.getSession()
+					.getAttribute("searchCriteria");
+			dateupdateService.updateDate(request, "PayRollBatch", "payRollBatch");
+			
+			model.addAttribute("list",
+					genericDAO.search(getEntityClass(), criteria));
+			criteria.getSearchMap().put("PayRollBatch", request.getParameter("PayRollBatch"));
+			
+			return urlContext + "/list";
+		}
+		
+		@RequestMapping(value="/download.do")
+		public String downlodinvoice(HttpServletRequest request,Model model,HttpServletResponse response){
+			String invoiceId=request.getParameter("id");
+			String type=request.getParameter("type");
+			WeeklyPay payroll=genericDAO.getById(WeeklyPay.class, Long.valueOf(invoiceId));
+			System.out.println("******** check date "+payroll.getCheckDate());
+			System.out.println("******** batch date "+payroll.getPayRollBatch());
+			try{
+				Map criteria = new HashMap();
+				Map params = new HashMap();
+				criteria.put("company", payroll.getCompany());
+				criteria.put("payRollBatch", payroll.getPayRollBatch());
+				criteria.put("checkDate", payroll.getCheckDate());
+				
+				String weeklyPayDetailsQuery =  "Select obj from WeeklyPayDetail obj where obj.company="+payroll.getCompany().getId()+" and obj.payRollBatch='"+oracleFormatter.format(payroll.getPayRollBatch())
+				+" 00:00:00' and obj.checkDate='"+oracleFormatter.format(payroll.getCheckDate())+" 00:00:00'";
+				if(payroll.getTerminal()!=null)
+					weeklyPayDetailsQuery = weeklyPayDetailsQuery +" and obj.terminal="+payroll.getTerminal();
+			
+				System.out.println("**************** weely pay query is "+weeklyPayDetailsQuery);
+				
+				List<WeeklyPayDetail> datas=genericDAO.executeSimpleQuery(weeklyPayDetailsQuery);
+				System.out.println("Date len is "+datas.size());
+				params.put("sumAmount", payroll.getSumAmount());
+				params.put("sumTotal", payroll.getSumTotal());
+				params.put("company", payroll.getCompany().getName());
+				params.put("terminal", payroll.getTerminal()!=null?payroll.getTerminal().getName():"");
+				params.put("payrollNumber", new SimpleDateFormat("MM-dd-yyyy").format(payroll.getCheckDate()));
+				params.put("totalRowCount", payroll.getTotalRowCount());
+				params.put("payRollBatch", new SimpleDateFormat("MM-dd-yyyy").format(payroll.getPayRollBatch()));
+				
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				if (type.equals("pdf")){
+					out = dynamicReportService.generateStaticReport("weeklypay",
+						datas, params, type, request);
+					}
+				if (type.equals("csv")){
+					out = dynamicReportService.generateStaticReport("weeklypay",
+						datas, params, type, request);
+					}
+					else{
+						out = dynamicReportService.generateStaticReport("weeklypay",
+								datas, params, type, request);
+					}
+					response.setHeader("Content-Disposition",
+						"attachment;filename=weeklypay"+payroll.getCompany().getName()+"."+type);
+					out.writeTo(response.getOutputStream());
+					out.close();
+					return null;
+			}	catch(Exception ex){
+				ex.printStackTrace();
+				request.getSession().setAttribute("errors", "Unable to download Weekly pay. Plesae try again later");
+				return "error";
+			}
+		}
+		
+		@Override
+		public String delete(@ModelAttribute("modelObject") WeeklyPay entity,
+				BindingResult bindingResult, HttpServletRequest request) {
+			   try{
+				   WeeklyPay pay=genericDAO.getById(WeeklyPay.class,entity.getId());
+				   hrReportService.deleteWeeklyPayrollData(pay);
+			   } catch (Exception ex) {
+					request.getSession().setAttribute(
+							"errors",
+							"This" + entity.getClass().getSimpleName()
+									+ " can't be deleted");
+					log.warn("Error deleting record " + entity.getId(), ex);
+				}
+			
+				return "redirect:/" + urlContext + "/list.do";
+			
+		}
+}

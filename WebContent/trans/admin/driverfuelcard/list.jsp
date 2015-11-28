@@ -1,0 +1,116 @@
+<%@include file="/common/taglibs.jsp"%>
+
+<h3>
+	<primo:label code="Manage Driver Fuel Cards" />
+</h3>
+<form:form action="search.do" method="get" name="searchForm">
+	<table width="100%" id="form-table">
+		<tr class="table-heading">
+			<td colspan="4"><b><primo:label code="Search Driver Fuel Cards" /></b></td>
+		</tr>
+		<tr>
+		    <%-- <td align="${left}" class="first"><primo:label code="Driver"/></td>
+			<td align="${left}"><select id="origin" name="driver.id" style="min-width:154px; max-width:154px">
+					<option value="">
+						------
+						<primo:label code="Please Select" />
+						------
+					</option>
+					<c:forEach items="${drivers}" var="item">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['driver.id'] == item.id}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${item.id}"${selected}>${item.fullName}</option>
+					</c:forEach>
+			</select></td> --%>
+			
+			
+			<td align="${left}" class="first"><primo:label code="Driver"/></td>
+			<td align="${left}"><select id="origin" name="driver.fullName" style="min-width:154px; max-width:154px">
+					<option value="">
+						------
+						<primo:label code="Please Select" />
+						------
+					</option>
+					<c:forEach items="${searchdriver}" var="item">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['driver.fullName'] == item.fullName}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${item.fullName}"${selected}>${item.fullName}</option>
+					</c:forEach>
+			</select></td>
+		
+		
+		
+			<td align="${left}" class="first"><primo:label code="Fule Vendor" /></td>
+			<td align="${left}"><select id="fuelvendor" name="fuelvendor.id" style="min-width:154px; max-width:154px">
+					<option value="">------
+					<primo:label code="Please Select" />
+					------
+					</option>
+					<c:forEach items="${fuelvendor}" var="fuelvendor">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['fuelvendor.id'] ==fuelvendor.id}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${fuelvendor.id}"${selected}>${fuelvendor.name}</option>
+					</c:forEach>
+			</select></td>
+			
+			
+			<%-- <td align="${left}" class="first"><primo:label code="Name" /></td>
+			<td align="${left}"><input name="name" type="text"
+				value="${sessionScope.searchCriteria.searchMap.name}" /></td> --%>
+
+</tr>
+<tr>
+
+			<td align="${left}" class="first"><primo:label code="Fuel Card Number" /></td>
+			<td align="${left}"><select id="fuelcardnum" name="fuelcard.id" style="min-width:154px; max-width:154px">
+					<option value="">
+						------
+						<primo:label code="Please Select" />
+						------
+					</option>
+					<c:forEach items="${fuelcard}" var="fuelcard">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['fuelcard.id'] == fuelcard.id}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${fuelcard.id}"${selected}>${fuelcard.fuelcardNum}</option>
+					</c:forEach>
+			</select></td>
+		</tr>
+		
+		
+		
+		
+		
+		<tr>
+			<td align="${left}"></td>
+			<td align="${left}"><input type="button"
+				onclick="document.forms['searchForm'].submit();"
+				value="<primo:label code="Search"/>" /></td>
+		</tr>
+	</table>
+</form:form>
+<br />
+<form:form name="delete.do" id="serviceForm">
+	<primo:datatable urlContext="admin/driverfuelcard" deletable="true"
+		editable="true" exportPdf="true" exportXls="true"
+		exportCsv="true" insertable="true" baseObjects="${list}"
+		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
+		pagingLink="search.do" multipleDelete="false" searcheable="false">
+		<primo:textcolumn headerText="Driver" dataField="driver.fullName" />
+		<primo:textcolumn width="100px" headerText="Fuel Vendor" dataField="fuelvendor.name" />
+		<primo:textcolumn width="100px" headerText="Fuel Card Number" dataField="fuelcard.fuelcardNum" />		
+		<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS" />
+	</primo:datatable>
+	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
+</form:form>

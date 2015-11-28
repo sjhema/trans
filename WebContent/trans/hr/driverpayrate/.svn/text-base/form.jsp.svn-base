@@ -1,0 +1,240 @@
+<%@include file="/common/taglibs.jsp"%>
+<script type="text/javascript">
+function formatDate1(){
+	var date=document.getElementById("datepicker1").value;
+	if(date!=""){
+	if(date.length<8){
+		alert("Invalidte date format");
+		document.getElementById("datepicker1").value="";
+		return true;
+	}
+	else{
+		var str=new String(date);
+		if(!str.match("-")){
+			var mm=str.substring(0,2);
+			var dd=str.substring(2,4);
+			var yy=str.substring(4,8);
+			var enddigit=str.substring(6,8);
+			if(mm>12){
+				alert("invalid date format");
+				document.getElementById("datepicker1").value="";
+				return true;
+			}
+			if(!enddigit==00 && enddigit%4==0 ){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+				else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+			}if(enddigit==00 && yy%400==0){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}					
+			}else{
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>28){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+			}
+			var date=mm+"-"+dd+"-"+yy;
+			document.getElementById("datepicker1").value=date;
+		}
+	 }
+   }
+}
+</script>
+<h3>
+	<primo:label code="Manage Driver Pay Rate" />
+</h3>
+<form:form action="save.do" name="employeeForm" commandName="modelObject"
+	method="post">
+	<form:hidden path="id" id="id" />
+	<table width="100%" id="form-table">
+		<tr class="table-heading">
+			<td colspan="4"><b><primo:label code="Add/Update Employee"/></b></td>
+		</tr>
+		<tr>
+		<td class="form-left"><primo:label code="Company" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="company" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+		<td class="form-left"><primo:label code="Terminal" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="terminal" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<%-- 		<tr>
+		<td class="form-left"><primo:label code="Category" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="catagory">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${catagories}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="catagory" cssClass="errorMessage" />
+			</td>
+		</tr> --%>
+	<td class="form-left"><primo:label code="Category" /><span
+				class="errorMessage">*</span></td>
+			<td><form:select cssClass="flat" path="catagory" id="catagory" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<c:forEach var="item" items="${catagories}">
+						<c:set var="selected" value=""/>
+						<c:if test='${item.name eq "Driver"}'>
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${item.id}" ${selected}>${item.name }</option>
+					</c:forEach>
+				</form:select> <br> <form:errors path="catagory" cssClass="errorMessage" />
+			</td>
+		<tr>
+			<td class="form-left">Transfer Station<span class="errorMessage">*</span>
+			</td>
+			<td><form:select cssClass="flat" path="transferStation" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${transferStation}" itemValue="id" itemLabel="name" />
+				</form:select> 
+			<br><form:errors path="transferStation" cssClass="errorMessage" /></td>
+			<td class="form-left">Landfill<span class="errorMessage">*</span>
+			</td>
+			<td><form:select cssClass="flat" path="landfill" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${landfill}" itemValue="id" itemLabel="name" />
+				</form:select> 
+			<br><form:errors path="landfill" cssClass="errorMessage" /></td>
+		</tr>
+		
+		
+		<tr>
+		
+		<td class="form-left">Sunday Rate Factor<span class="errorMessage">*</span>
+			</td>
+			<td align="${left}"><form:input path="sundayRateFactor" style="min-width:150px; max-width:150px"/>
+			<br><form:errors path="sundayRateFactor" cssClass="errorMessage" /></td>	
+		
+		<td class="form-left"></td>
+		<td></td>	
+		
+		</tr>
+		
+		
+		
+		
+		
+		<tr>
+		<td class="form-left">Day Rate (USD)<span class="errorMessage">*</span>
+			</td>
+			<td align="${left}"><form:input path="payRate" style="min-width:150px; max-width:150px"/>
+			<br><form:errors path="payRate" cssClass="errorMessage" /></td>
+			
+		<td class="form-left">Night Rate (USD)<span class="errorMessage">*</span>
+			</td>
+			<td align="${left}"><form:input path="nightPayRate" style="min-width:150px; max-width:150px"/>
+			<br><form:errors path="nightPayRate" cssClass="errorMessage" /></td>	
+		
+		</tr>
+		<tr>			
+			<td class="form-left">Rate Type<span class="errorMessage">*</span>
+			</td>
+				<td><form:select cssClass="flat" path="rateType" id="rateType" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<c:forEach var="item" items="${rateTypes}">
+						<c:set var="selected" value=""/>
+						<c:if test='${item.dataText eq "Per Load"}'>
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${item.dataValue}" ${selected}>${item.dataText }</option>
+					</c:forEach>
+				</form:select> <br> <form:errors path="rateType" cssClass="errorMessage" />
+			</td>
+			<%-- <td align="${left}"><form:select cssClass="flat" path="rateType">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${rateTypes}" itemValue="dataValue"
+						itemLabel="dataText" />
+				</form:select> <br><form:errors path="rateType" cssClass="errorMessage" /></td> --%>
+				<td class="form-left">Rate Using<span class="errorMessage">*</span></td>
+			<td align="${left}"><form:select cssClass="flat" path="rateUsing" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${rateUsing}" itemValue="dataValue"
+						itemLabel="dataText" />
+			</form:select> <br><form:errors path="rateUsing" cssClass="errorMessage" /></td>
+		</tr>
+			<tr>
+			<td class="form-left">Valid From<span class="errorMessage">*</span>
+			</td> 
+			<td align="${left}"><form:input id="datepicker" path="validFrom" style="min-width:150px; max-width:150px"
+					cssClass="flat" onblur="return formatDate('datepicker');"/> 
+			<br><form:errors path="validFrom" cssClass="errorMessage" /></td>
+			<td class="form-left">Valid To<span class="errorMessage">*</span>
+			</td>
+			<td align="${left}"><form:input id="datepicker1" path="validTo" style="min-width:150px; max-width:150px"
+					cssClass="flat" onblur="return formatDate1();"/> 
+			<br><form:errors path="validTo" cssClass="errorMessage" /></td>
+		</tr>
+			<tr>
+		    <td class="form-left"><primo:label code="Notes" /><span
+				class="errorMessage"></span></td>
+			<td align="${left}" colspan="5">
+				<form:textarea path="notes" rows="2" cols="69"/>    	
+			</td>
+		</tr>
+		<tr><td colspan="2"></td></tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td align="${left}"><input type="submit"
+				name="create" id="create" onclick=""
+				value="<primo:label code="Save"/>" class="flat" /> <input
+				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
+				class="flat" /> <input type="button" id="cancelBtn"
+				value="<primo:label code="Cancel"/>" class="flat"
+				onClick="location.href='list.do'" />
+			</td>
+		</tr>
+		</table>
+		</form:form>
+		

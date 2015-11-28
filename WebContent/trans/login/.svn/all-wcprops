@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/LUTransport/!svn/ver/156/trunk/LUTransport/WebContent/lutransport/login
+END
+resetpassword.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/login/resetpassword.jsp
+END
+changePassword.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/login/changePassword.jsp
+END
+login.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/LUTransport/!svn/ver/156/trunk/LUTransport/WebContent/lutransport/login/login.jsp
+END
+success.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/login/success.jsp
+END
+forgetpassword.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/login/forgetpassword.jsp
+END
+unauthorized.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/login/unauthorized.jsp
+END

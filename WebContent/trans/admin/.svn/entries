@@ -1,0 +1,198 @@
+10
+
+dir
+207
+https://192.168.10.45:8443/svn/LUTransport/trunk/LUTransport/WebContent/lutransport/admin
+https://192.168.10.45:8443/svn/LUTransport
+
+
+
+2013-09-16T09:34:32.578125Z
+206
+kishan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5ba193a6-616f-ed41-9ec8-9ea098d5c8fc
+
+staticdata
+dir
+
+fuelcard
+dir
+
+driverinspection
+dir
+
+subcontractor
+dir
+
+triprate
+dir
+
+fuelSurcharge.jsp
+file
+
+
+
+
+2013-10-30T09:07:41.562500Z
+f09d0e73a00de5f55eda9ebb550a4522
+2013-01-24T10:13:24.875000Z
+2
+sathya
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1412
+
+driver
+dir
+
+fuelsurchargeweeklyrate
+dir
+
+payrollrate
+dir
+
+fuelsurcharge
+dir
+
+vehiclepermit
+dir
+
+uploadinvoice
+dir
+
+access
+dir
+
+driverfuelcard
+dir
+
+vehicletolltag
+dir
+
+demurragecharges
+dir
+
+roleprivilege
+dir
+
+location
+dir
+
+report
+dir
+
+terminal
+dir
+
+uploaddata
+dir
+
+vehicle
+dir
+
+home.jsp
+file
+
+
+
+
+2013-10-30T09:07:41.562500Z
+3fa8b54675e9a63504f878abb54517ef
+2013-01-24T10:13:24.875000Z
+2
+sathya
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+64
+
+fuelsurchargepadd
+dir
+
+subcontractorbilling
+dir
+
+tonnagepremium
+dir
+
+billingrate
+dir
+
+rateexpiration
+dir
+
+customer
+dir
+
+role
+dir
+
+tollcompany
+dir
+
+trailer
+dir
+
+fueldiscount
+dir
+
+subcontractorrate
+dir
+
+vehiclelocation
+dir
+
+fuelvendor
+dir
+

@@ -1,0 +1,4 @@
+storage.folder.repository=c:/lutransport/repository
+storage.folder.temp=c:/lutransport/temp
+storage.folder.errorlog=c:/lutransport/errorlog
+

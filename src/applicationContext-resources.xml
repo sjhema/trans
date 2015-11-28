@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jndi="http://www.springframework.org/schema/jee"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<context:annotation-config />
+	
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="messageInterpolator">
+			<bean
+				class="com.primovision.lutransport.web.validator.CustomSpringMessageSourceInterpolator" />
+		</property>
+	</bean>
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/lutransport" />
+		<property name="user" value="root"/>
+	    <property name="password" value=""/>	
+	    <property name="initialPoolSize" value="20"/>
+	    <property name="minPoolSize" value="20"/>
+	    <property name="maxPoolSize" value="500"/>
+	    <property name="acquireIncrement" value="5"/><!-- Determines how many connections at a time c3p0 will try to acquire when the pool is exhausted -->
+	    <property name="maxStatementsPerConnection" value="0" /><!-- The size of c3p0's PreparedStatement cache. Zero means statement caching is turned off. -->
+	    <property name="maxIdleTime" value="1000" />
+	    <property name="preferredTestQuery" value="SELECT 1;" />
+	    <property name="idleConnectionTestPeriod" value="60" />
+	    <property name="maxConnectionAge" value="14400" /><!-- To recreate connection after 4 hrs in order to prevent socket closing by DB server -->
+	    <property name="acquireRetryAttempts" value="10"/>
+	</bean>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="showSql" value="true" />
+				<property name="generateDdl" value="true" />				
+				<property name="databasePlatform" value="com.primovision.lutransport.core.util.CustomDialect" />
+			</bean>
+		</property>
+		<property name="jpaProperties">
+			<bean
+				class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+				<property name="location">
+					<value>classpath:hibernate.properties</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<tx:annotation-driven />
+	<!-- 
+	<bean id="smtpAuthenticator" class="com.primovision.lutransport.notification.SMTPAuthenticator">
+		<constructor-arg value="info@primo-vision.com" />
+		<constructor-arg value="PrimoInfo@2009" />
+	</bean>
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"> 
+		<property name="host" value="smtp.primo-vision.com" /> 
+		<property name="session" ref="mailSession" /> 
+	</bean> 
+	
+	<bean id="mailSession" class="javax.mail.Session" factory-method="getInstance"> 
+		<constructor-arg> 
+			<props> <prop key="mail.smtp.auth">true</prop> </props> 
+		</constructor-arg> 
+		<constructor-arg ref="smtpAuthenticator" /> 
+	</bean>
+	
+	<bean id="velocityEngine"
+		class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+		<property name="velocityProperties">
+			<value>
+				resource.loader=class
+				class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+			</value>
+		</property>
+	</bean>
+	--> 
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename">
+			<value>Messages</value>
+		</property>
+	</bean>
+
+	<bean id="cacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation">
+			<value>classpath:ehcache.xml</value>
+		</property>
+	</bean>
+	<bean id="globalCacheManager" class="com.primovision.lutransport.core.cache.GlobalCacheManager" />
+
+	<bean id="staticDataCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="cacheName" value="GLOBAL_CACHE" />
+	</bean>
+
+	<bean id="messageResourceCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="cacheName" value="GLOBAL_CACHE" />
+	</bean>
+</beans>

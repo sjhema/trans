@@ -1,0 +1,311 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/LUTransport/!svn/ver/207/trunk/LUTransport/src/com/primovision/lutransport/model
+END
+VehiclePermit.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/VehiclePermit.java
+END
+DriverFuelCard.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/189/trunk/LUTransport/src/com/primovision/lutransport/model/DriverFuelCard.java
+END
+TollCompany.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/TollCompany.java
+END
+Trailer.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Trailer.java
+END
+RolePrivilege.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/RolePrivilege.java
+END
+AuditLog.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/AuditLog.java
+END
+DemurrageCharges.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/DemurrageCharges.java
+END
+FuelVendor.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LUTransport/!svn/ver/22/trunk/LUTransport/src/com/primovision/lutransport/model/FuelVendor.java
+END
+EzToll.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/103/trunk/LUTransport/src/com/primovision/lutransport/model/EzToll.java
+END
+Terminal.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/Terminal.java
+END
+DriverInspectionTemp.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/209/trunk/LUTransport/src/com/primovision/lutransport/model/DriverInspectionTemp.java
+END
+TempFuelsurchargePadd.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/src/com/primovision/lutransport/model/TempFuelsurchargePadd.java
+END
+User.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/User.java
+END
+AbstractBaseModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/AbstractBaseModel.java
+END
+ChargeFormula.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/ChargeFormula.java
+END
+Vehicle.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/Vehicle.java
+END
+StaticData.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/StaticData.java
+END
+BusinessObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/BusinessObject.java
+END
+FuelCard.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/FuelCard.java
+END
+DriverInspection.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/209/trunk/LUTransport/src/com/primovision/lutransport/model/DriverInspection.java
+END
+SearchCriteria.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/SearchCriteria.java
+END
+TonnagePremium.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/TonnagePremium.java
+END
+Auditable.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Auditable.java
+END
+BillingRate.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/BillingRate.java
+END
+ReportModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/ReportModel.java
+END
+PayRollRate.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/PayRollRate.java
+END
+FuelSurcharge.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/FuelSurcharge.java
+END
+UserRole.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/UserRole.java
+END
+FuelAndTollNetValues.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/src/com/primovision/lutransport/model/FuelAndTollNetValues.java
+END
+Customer.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/Customer.java
+END
+Role.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Role.java
+END
+SubcontractorRate.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/SubcontractorRate.java
+END
+FuelDiscount.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/120/trunk/LUTransport/src/com/primovision/lutransport/model/FuelDiscount.java
+END
+SubcontractorInvoice.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/SubcontractorInvoice.java
+END
+VehicleTollTag.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/VehicleTollTag.java
+END
+Location.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Location.java
+END
+VehicleLocation.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/VehicleLocation.java
+END
+NetReportBuffer.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/206/trunk/LUTransport/src/com/primovision/lutransport/model/NetReportBuffer.java
+END
+RateDetail.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/RateDetail.java
+END
+State.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/State.java
+END
+Language.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Language.java
+END
+ErrorData.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/ErrorData.java
+END
+Ticket.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/Ticket.java
+END
+FuelSurchargePadd.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/93/trunk/LUTransport/src/com/primovision/lutransport/model/FuelSurchargePadd.java
+END
+SubContractor.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/22/trunk/LUTransport/src/com/primovision/lutransport/model/SubContractor.java
+END
+TripRate.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/TripRate.java
+END
+BaseModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/BaseModel.java
+END
+Driver.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/src/com/primovision/lutransport/model/Driver.java
+END
+Invoice.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/Invoice.java
+END
+FuelSurchargeWeeklyRate.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/model/FuelSurchargeWeeklyRate.java
+END
+FuelLog.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/100/trunk/LUTransport/src/com/primovision/lutransport/model/FuelLog.java
+END

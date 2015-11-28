@@ -1,0 +1,425 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/LUTransport/!svn/ver/202/trunk/LUTransport/WebContent/WEB-INF/lib
+END
+jsr107cache-1.0.jar
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/jsr107cache-1.0.jar
+END
+gson-1.7.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/gson-1.7.1.jar
+END
+spring-security-core-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/spring-security-core-3.0.3.RELEASE.jar
+END
+org.springframework.beans-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.beans-3.0.3.RELEASE.jar
+END
+jasperreports-3.7.5.jar
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/jasperreports-3.7.5.jar
+END
+org.springframework.jms-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.jms-3.0.3.RELEASE.jar
+END
+commons-digester-2.0.jar
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-digester-2.0.jar
+END
+log4j.jar
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/log4j.jar
+END
+commons-discovery-0.4.jar
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-discovery-0.4.jar
+END
+cglib-2.2.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/cglib-2.2.2.jar
+END
+org.springframework.jdbc-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.jdbc-3.0.3.RELEASE.jar
+END
+org.springframework.aspects-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.aspects-3.0.3.RELEASE.jar
+END
+commons-pool-1.5.4.jar
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-pool-1.5.4.jar
+END
+DynamicJasper-3.1.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/DynamicJasper-3.1.1.jar
+END
+commons-fileupload-1.2.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-fileupload-1.2.1.jar
+END
+backport-util-concurrent-3.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/backport-util-concurrent-3.1.jar
+END
+org.springframework.test-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.test-3.0.3.RELEASE.jar
+END
+aopalliance-1.0.jar
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/aopalliance-1.0.jar
+END
+poi-ooxml-schemas-3.7-20101029.jar
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/poi-ooxml-schemas-3.7-20101029.jar
+END
+jstl-1.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/jstl-1.2.jar
+END
+jta-1.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/jta-1.1.jar
+END
+asm-attrs-1.5.3.jar
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/asm-attrs-1.5.3.jar
+END
+commons-dbcp-1.2.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-dbcp-1.2.2.jar
+END
+quartz-jobs-2.2.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/WebContent/WEB-INF/lib/quartz-jobs-2.2.1.jar
+END
+spring-security-acl-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/spring-security-acl-3.0.3.RELEASE.jar
+END
+org.springframework.web.servlet-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.web.servlet-3.0.3.RELEASE.jar
+END
+poi-ooxml-3.7-20101029.jar
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/poi-ooxml-3.7-20101029.jar
+END
+org.springframework.oxm-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.oxm-3.0.3.RELEASE.jar
+END
+commons-collections-3.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-collections-3.2.jar
+END
+slf4j-api-1.5.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/slf4j-api-1.5.2.jar
+END
+hibernate-jpa-2.0-api-1.0.0.Final.jar
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/hibernate-jpa-2.0-api-1.0.0.Final.jar
+END
+itext-2.1.7.jar
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/itext-2.1.7.jar
+END
+org.springframework.web-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.web-3.0.3.RELEASE.jar
+END
+org.springframework.asm-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.asm-3.0.3.RELEASE.jar
+END
+hibernate-search.jar
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/hibernate-search.jar
+END
+org.springframework.context-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.context-3.0.3.RELEASE.jar
+END
+joda-time-2.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/202/trunk/LUTransport/WebContent/WEB-INF/lib/joda-time-2.1.jar
+END
+xmlbeans-2.3.0.jar
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/xmlbeans-2.3.0.jar
+END
+org.springframework.transaction-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.transaction-3.0.3.RELEASE.jar
+END
+c3p0-0.9.1.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/c3p0-0.9.1.2.jar
+END
+ehcache-core-1.7.2.jar
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/ehcache-core-1.7.2.jar
+END
+org.springframework.core-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.core-3.0.3.RELEASE.jar
+END
+dom4j-1.6.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/dom4j-1.6.1.jar
+END
+commons-io-1.4.jar
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-io-1.4.jar
+END
+sitemesh-2.4.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/sitemesh-2.4.1.jar
+END
+org.springframework.expression-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.expression-3.0.3.RELEASE.jar
+END
+lucene-core.jar
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/lucene-core.jar
+END
+jasperreports-fonts-3.7.5.jar
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/jasperreports-fonts-3.7.5.jar
+END
+javassist-3.9.0.GA.jar
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/javassist-3.9.0.GA.jar
+END
+org.springframework.web.struts-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.web.struts-3.0.3.RELEASE.jar
+END
+spring-security-taglibs-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/spring-security-taglibs-3.0.3.RELEASE.jar
+END
+hibernate-validator-4.0.2.GA.jar
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/hibernate-validator-4.0.2.GA.jar
+END
+ehcache-1.4.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/ehcache-1.4.1.jar
+END
+org.springframework.orm-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.orm-3.0.3.RELEASE.jar
+END
+validation-api-1.0.0.GA.jar
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/validation-api-1.0.0.GA.jar
+END
+org.springframework.context.support-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.context.support-3.0.3.RELEASE.jar
+END
+asm-1.5.3.jar
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/asm-1.5.3.jar
+END
+mysql-connector-java-5.0.4-bin.jar
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/mysql-connector-java-5.0.4-bin.jar
+END
+hibernate3.jar
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/hibernate3.jar
+END
+quartz-2.2.1.jar
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/LUTransport/!svn/ver/208/trunk/LUTransport/WebContent/WEB-INF/lib/quartz-2.2.1.jar
+END
+spring-security-config-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/spring-security-config-3.0.3.RELEASE.jar
+END
+poi-3.7-20101029.jar
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/poi-3.7-20101029.jar
+END
+flexjson.jar
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/flexjson.jar
+END
+antlr-2.7.7.jar
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/antlr-2.7.7.jar
+END
+commons-lang-2.4.jar
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-lang-2.4.jar
+END
+commons-logging-1.0.4.jar
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-logging-1.0.4.jar
+END
+commons-beanutils-1.7.0.jar
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/commons-beanutils-1.7.0.jar
+END
+spring-security-web-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/spring-security-web-3.0.3.RELEASE.jar
+END
+slf4j-log4j12.jar
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/slf4j-log4j12.jar
+END
+org.springframework.aop-3.0.3.RELEASE.jar
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/WEB-INF/lib/org.springframework.aop-3.0.3.RELEASE.jar
+END

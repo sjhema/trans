@@ -1,0 +1,229 @@
+package com.primovision.lutransport.controller.admin;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.gson.Gson;
+import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.BillingRate;
+import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.DriverFuelCard;
+import com.primovision.lutransport.model.FuelCard;
+import com.primovision.lutransport.model.FuelLog;
+import com.primovision.lutransport.model.FuelVendor;
+import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+
+@Controller
+@RequestMapping("/admin/driverfuelcard")
+public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
+	
+	
+	public DriverFuelCardController(){
+		setUrlContext("/admin/driverfuelcard");
+	}
+	
+	
+	@Override
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(
+				Driver.class));
+		binder.registerCustomEditor(FuelCard.class, new AbstractModelEditor(
+				FuelCard.class));
+		binder.registerCustomEditor(FuelVendor.class, new AbstractModelEditor(
+				FuelVendor.class));
+		binder.registerCustomEditor(Long.TYPE, new CustomNumberEditor(
+				Long.class, false));
+	}
+
+	
+	@Override
+	public void setupCreate(ModelMap model, HttpServletRequest request) {
+		Map criterias = new HashMap();	
+		model.addAttribute("fuelvendor", genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false));
+		//model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criterias,"fuelcardNum",false));
+		model.addAttribute("fuelcard",genericDAO.executeSimpleQuery("select fc from FuelCard fc order by ABS(fc.fuelcardNum)"));
+		//criterias.put("status", 1);
+		criterias.clear();
+		//EmployeeCatagory empobj = genericDAO.getById(EmployeeCatagory.class,2l);
+		//criterias.put("catagory", empobj);
+		if(request.getParameter("id")!=null){
+			criterias.clear();
+			model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		}
+		else{
+			criterias.put("status", 1);
+			model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		}
+		
+		criterias.clear();
+		model.addAttribute("searchdriver", genericDAO.executeSimpleQuery("select obj from Driver obj group by obj.fullName"));
+
+		criterias.clear();
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("dataType", "STATUS");
+		map.put("dataValue", "0,1");
+		model.addAttribute("fuelcardstatus", genericDAO.findByCriteria(StaticData.class, map,"dataText",false));
+	}
+	
+	
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		setupCreate(model, request);
+	}
+	
+	@Override
+	public String edit2(ModelMap model, HttpServletRequest request) {
+		setupUpdate(model, request);
+		DriverFuelCard driverfuelcard=genericDAO.getById(DriverFuelCard.class,Long.parseLong(request.getParameter("id")));
+		Map criteria = new HashMap();
+		criteria.put("fuelvendor.id",driverfuelcard.getFuelvendor().getId());
+		model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criteria,"fuelcardNum",false));
+		return urlContext + "/form";
+	}
+	
+	
+	
+	@Override
+	public String list(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		criteria.setPageSize(25);
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"driver.lastName",false));
+		return urlContext + "/list";
+	}
+	
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"driver.lastName",false));
+		return urlContext + "/list";
+	}
+	
+	
+	@Override
+	public String save(HttpServletRequest request, @ModelAttribute("modelObject") DriverFuelCard entity,
+			BindingResult bindingResult, ModelMap model) {	
+		if (entity.getDriver() == null) {
+			bindingResult.rejectValue("driver", "error.select.option",
+					null, null);
+		}
+		if (entity.getFuelvendor() == null) {
+			bindingResult.rejectValue("fuelvendor", "error.select.option",
+					null, null);
+		}		
+		if (entity.getFuelcard() == null) {
+			bindingResult.rejectValue("fuelcard", "error.select.option",
+					null, null);			
+		}
+		/*else{
+			if (entity.getFuelvendor() == null) {
+				
+			}
+			else
+			{				
+				Map criterias = new HashMap();
+				criterias.clear();
+				criterias.put("fuelvendor.id",entity.getFuelvendor().getId());
+				criterias.put("id",entity.getFuelcard().getId());
+				List<FuelCard> fuelcards=genericDAO.findByCriteria(FuelCard.class, criterias, "fuelvendor", false);
+				if(fuelcards.isEmpty() || fuelcards.size()==0){
+					bindingResult.rejectValue("fuelcard", "error.select.mismatch",
+							null, null);
+				}				
+			}
+			
+		}*/
+		
+		try {
+			getValidator().validate(entity, bindingResult);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			log.warn("Error in validation :" + e);
+		}
+		// return to form if we had errors
+		if (bindingResult.hasErrors()) {
+			setupCreate(model, request);
+			if (entity.getFuelcard() == null) {			
+				if (entity.getFuelvendor() != null) {
+				Map criteria = new HashMap();
+				criteria.put("fuelvendor.id",Long.parseLong(request.getParameter("fuelvendor")));
+				model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criteria,"fuelcardNum",false));
+				}
+			}
+			
+			return urlContext + "/form";
+		}
+		
+		 Map prop=new HashMap();
+    	 prop.put("fuelvendor",entity.getFuelvendor().getId() );
+    	 prop.put("driver",entity.getDriver().getId() );
+    	 prop.put("fuelcard",entity.getFuelcard().getId() );
+    	  boolean rst=genericDAO.isUnique(DriverFuelCard.class,entity, prop);      	  
+    	  if(!rst){
+    		  setupCreate(model, request);    
+    		  Map criteria = new HashMap();
+				criteria.put("fuelvendor.id",Long.parseLong(request.getParameter("fuelvendor")));
+				model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criteria,"fuelcardNum",false));
+    		  request.getSession().setAttribute("error","Duplicate Entry! Same Card is already been assigned to this Driver.");
+    		  return urlContext + "/form";
+    	  }
+    	 
+    	 
+		beforeSave(request, entity, model);
+		// merge into datasource
+		genericDAO.saveOrUpdate(entity);
+		cleanUp(request);
+		// return to list
+		return "redirect:/" + urlContext + "/list.do";
+		
+		//return super.save(request, entity, bindingResult, model);
+	}
+	
+	
+	protected String processAjaxRequest(HttpServletRequest request,
+			String action, Model model) {
+		if("findFuelCard".equalsIgnoreCase(action)){
+			if(!StringUtils.isEmpty(request.getParameter("fuelvendor"))){					
+				Map criterias = new HashMap();
+				//criterias.put("fuelvendor.id", Long.parseLong(request.getParameter("fuelvendor")));
+				//List<FuelCard> fuelcards=genericDAO.findByCriteria(FuelCard.class, criterias, "fuelvendor", false);
+				long fid=Long.parseLong(request.getParameter("fuelvendor"));
+				List<FuelCard> fuelcards=genericDAO.executeSimpleQuery("select fc from FuelCard fc where fc.fuelvendor.id="+fid+" order by ABS(fc.fuelcardNum)");
+				Gson gson = new Gson();
+				return gson.toJson(fuelcards);
+			}
+		}
+		
+		return "";
+	}
+}

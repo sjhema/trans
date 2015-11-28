@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache
+END
+GlobalCacheManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/GlobalCacheManager.java
+END
+ICacheQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/ICacheQuery.java
+END
+MessageResourceCacheQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/MessageResourceCacheQuery.java
+END
+Cacheable.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/Cacheable.java
+END
+StaticDataCacheQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/StaticDataCacheQuery.java
+END
+CacheManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/cache/CacheManager.java
+END

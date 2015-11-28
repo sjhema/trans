@@ -1,0 +1,35 @@
+<%@ include file="/common/taglibs.jsp"%>
+<%@page import="java.util.List"%>
+<div id="header">
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td align="${left}" width="70%" valign="top">
+            <a href="${ctx}/home/home.do"><%-- <img src="${ctx}/images/logo1.png" /> --%></a>
+        </td>
+        <td align="right" width="30%" valign="top">
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+                <tr height="20">
+                    <td align="right"><div class="toplink">
+                    <c:if test="${sessionScope.userInfo ==null}">
+                    	<a href="${ctx}/login/login.do">Login</a>
+                    </c:if>
+                    <c:if test="${sessionScope.userInfo!=null}">
+                    <a href="${ctx}/home/home.do">Home</a>
+                    &#160;
+                    |&#160;<a href="${ctx}/j_spring_security_logout">Logout</a>
+                    </c:if>
+                    </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="60" valign="bottom" align="right">
+                        <primo:label code="Welcome"/>
+                        <c:if test="${sessionScope.userInfo==null}"><b><primo:label code="Guest!"/></b></c:if> 
+                        <c:if test="${sessionScope.userInfo!=null}"><b>${sessionScope.userInfo.firstName} ${sessionScope.userInfo.lastName}!</b><br/><primo:label code="Last Login"/> : <fmt:formatDate value="${sessionScope.userInfo.lastLoginDate}" pattern="MM-dd-yyyy HH:mm:ss"/></c:if>
+                    </td>
+                </tr>                         
+            </table>
+        </td>
+    </tr>
+</table>
+</div>

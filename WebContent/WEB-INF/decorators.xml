@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/layout">
+	<decorator name="admin" page="twoColumnLayout.jsp">
+        <pattern>/trans/admin/**</pattern>
+    </decorator>
+    <decorator name="admin" page="twoColumnLayout.jsp">
+        <pattern>/trans/hr/**</pattern>
+    </decorator>
+    <decorator name="operator" page="twoColumnLayout.jsp">
+    	<pattern>/trans/operator/**</pattern>
+    </decorator>
+    <decorator name="reportuser" page="twoColumnLayout.jsp">
+    	<pattern>/trans/reportuser/**</pattern>
+    </decorator>
+    <decorator name="blank" page="blankLayout.jsp">
+    	<pattern>/trans/blank/**</pattern>
+    </decorator>
+    <decorator name="billbatchdate" page="blankLayout.jsp">
+        <pattern>/trans/billbatch/**</pattern>
+    </decorator>
+    <decorator name="home" page="singleColumnLayout.jsp">
+        <pattern>/trans/**</pattern>
+    </decorator>
+</decorators> 

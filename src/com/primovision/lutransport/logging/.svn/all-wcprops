@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/logging
+END
+LoggerFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/logging/LoggerFactory.java
+END
+ILogger.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/logging/ILogger.java
+END

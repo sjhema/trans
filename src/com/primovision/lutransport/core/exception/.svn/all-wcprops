@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/exception
+END
+ApplicationException.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/exception/ApplicationException.java
+END
+BusinessException.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/src/com/primovision/lutransport/core/exception/BusinessException.java
+END

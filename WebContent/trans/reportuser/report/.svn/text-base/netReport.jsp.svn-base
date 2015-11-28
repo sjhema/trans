@@ -1,0 +1,543 @@
+<%@include file="/common/taglibs.jsp"%>
+<script type="text/javascript">
+function validateInvoice(){
+	var d1=document.getElementById("invoiceDateFrom").value;
+	var d2=document.getElementById("invoiceDateTo").value;
+	var bb1=document.getElementById("batchDateFrom").value;
+	var bb2=document.getElementById("batchDateTo").value;
+	var ud1=document.getElementById("unloadedFrom").value;
+	var ud2=document.getElementById("unloadedTo").value;
+	var ld1=document.getElementById("loadedFrom").value;
+	var ld2=document.getElementById("loadedTo").value;
+	if(d1==""&&d2==""&&bb1==""&&bb2==""&&ud1==""&&ud2==""&&ld1==""&&ld2==""){
+		alert("Please Select a Date Range");
+		return false;
+	}
+	if(d1==""&&d2!=""){
+		alert("Please Enter Invoice Date From ");
+		return false;
+	}
+	if(d1!=""&&d2==""){
+		alert("Please Enter Invoice Date To ");
+		return false;
+	}
+	if(bb1==""&&bb2!=""){
+		alert("Please Enter Batch Date From ");
+		return false;
+	}
+	if(bb1!=""&&bb2==""){
+		alert("Please Enter Batch Date To ");
+		return false;
+	}
+	if(ud1==""&&ud2!=""){
+		alert("Please Enter Unload Date From ");
+		return false;
+	}
+	if(ud1!=""&&ud2==""){
+		alert("Please Enter Unload Date To ");
+		return false;
+	}
+	if(ld1==""&&ld2!=""){
+		alert("Please Enter Load Date From ");
+		return false;
+	}
+	if(ld1!=""&&ld2==""){
+		alert("Please Enter Load Date To ");
+		return false;
+	}
+	return true;
+}
+function searchReport(obj){
+	//alert(obj);
+	var id = obj.id;
+	var c;
+    if(id=="Truckac") {
+		document.forms[0].action="../netreport/search.do?Truck=Truckac";
+		 c=validateInvoice();
+		 if(c) 
+		 document.forms[0].submit();
+	}else if(id=="Truckcc") {
+		document.forms[0].action="../netreport/search.do?Truck=Truckcc";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Truckca") {
+		document.forms[0].action="../netreport/search.do?Truck=Truckca";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Trailerac") {
+		document.forms[0].action="../netreport/search.do?Trailer=Trailerac";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Trailercc") {
+		document.forms[0].action="../netreport/search.do?Trailer=Trailercc";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Trailerca") {
+		document.forms[0].action="../netreport/search.do?Trailer=Trailerca";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}
+    else if(id=="Terminalac") { 
+		document.forms[0].action="../netreport/search.do?Terminal=Terminalac";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Terminalcc") { 
+		document.forms[0].action="../netreport/search.do?Terminal=Terminalcc";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	}else if(id=="Terminalca") { 
+		document.forms[0].action="../netreport/search.do?Terminal=Terminalca";
+		c=validateInvoice();
+		 if(c)
+		document.forms[0].submit();
+	} 
+    else if(id=="Driverac"){
+		document.forms[0].action="../netreport/search.do?Driver=Driverac";
+		c=validateInvoice();
+		 if(c)
+	    document.forms[0].submit();
+	}else if(id=="Drivercc"){
+		document.forms[0].action="../netreport/search.do?Driver=Drivercc";
+		c=validateInvoice();
+		 if(c)
+	    document.forms[0].submit();
+	}else if(id=="Driverca"){
+		document.forms[0].action="../netreport/search.do?Driver=Driverca";
+		c=validateInvoice();
+		 if(c)
+	    document.forms[0].submit();
+	} 
+	else if(id=="Company"){
+		document.forms[0].action="../netreport/search.do?Company=Company";
+		c=validateInvoice();
+		 if(c)
+	    document.forms[0].submit();
+	}	
+}
+
+
+
+
+function formatDate(){
+	var date=document.getElementById("datepicker").value;
+	if(date!=""){
+	if(date.length<8){
+		alert("Invalidte date format");
+		document.getElementById("datepicker").value="";
+		return true;
+	}
+	else{
+		var str=new String(date);
+		if(!str.match("-")){
+			var mm=str.substring(0,2);
+			var dd=str.substring(2,4);
+			var yy=str.substring(4,8);
+			var enddigit=str.substring(6,8);
+			if(!enddigit==00 && enddigit%4==0 ){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}
+				else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}
+			}if(enddigit==00 && yy%400==0){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}					
+			}else{
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker").value="";
+						return true;
+					}
+				}if(mm==02 && dd>28){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker").value="";
+					return true;
+				}
+			}
+			var date=mm+"-"+dd+"-"+yy;
+			document.getElementById("datepicker").value=date;
+		}
+	 }
+   }
+}
+function formatDate1(){
+	var date=document.getElementById("datepicker1").value;
+	if(date!=""){
+	if(date.length<8){
+		alert("Invalidte date format");
+		document.getElementById("datepicker1").value="";
+		return true;
+	}
+	else{
+		var str=new String(date);
+		if(!str.match("-")){
+			var mm=str.substring(0,2);
+			var dd=str.substring(2,4);
+			var yy=str.substring(4,8);
+			var enddigit=str.substring(6,8);
+			if(!enddigit==00 && enddigit%4==0 ){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+				else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+			}if(enddigit==00 && yy%400==0){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}					
+			}else{
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker1").value="";
+						return true;
+					}
+				}if(mm==02 && dd>28){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}
+			}
+			var date=mm+"-"+dd+"-"+yy;
+			document.getElementById("datepicker1").value=date;
+		}
+	 }
+   }
+}
+
+$(document).ready(function(){
+	   $("select").multiselect();
+});
+</script>
+
+<br/>
+<form:form action="search" name="searchForm" method="post" commandName="modelObject">
+	<table id="form-table" width="850px" cellspacing="1" cellpadding="5" >
+		<tr class="table-heading">
+			<td colspan="4"><b><primo:label code="Net Report" />
+			</b></td>
+	    </tr>
+	    <tr>
+		  <td class="form-left"><primo:label code="Tickets Status" /><span
+				class="errorMessage"></span></td>
+			<td><form:select path="ticketStatus" multiple="true">
+					<form:options items="${ticketStatuss}" itemValue="dataValue"
+						itemLabel="dataText" />
+				</form:select> <br> <form:errors path="ticketStatus" cssClass="errorMessage" />
+			</td>
+		 </tr>
+		 
+		 
+		 
+		 <tr>
+	        <td class="form-left"><primo:label code="Bill Batch Range" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="batchDateFrom" cssClass="flat"  onblur="return formatDate('batchDateFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#batchDateFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="batchDateTo" cssClass="flat"  onblur="return formatDate('batchDateTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#batchDateTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+			</td>
+		</tr>
+			  
+	    <tr>
+	        <td class="form-left"><primo:label code="Load date range" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="loadedFrom" cssClass="flat"  onblur="return formatDate1('loadedFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#loadedFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="loadedTo" cssClass="flat"  onblur="return formatDate1('loadedTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#loadedTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+			</td>
+			</tr>
+			
+			<tr>
+	        <td class="form-left"><primo:label code="Unload date range" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="unloadedFrom" cssClass="flat"  onblur="return formatDate1('unloadedFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#unloadedFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="unloadedTo" cssClass="flat"  onblur="return formatDate1('unloadedTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#unloadedTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+			</td>
+			</tr>
+			 <tr>
+	        <td class="form-left"><primo:label code="Invoice Date range" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="invoiceDateFrom" cssClass="flat" id="invoiceDateFrom"  onblur="return formatDate1('invoiceDateFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#invoiceDateFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="invoiceDateTo" cssClass="flat" id="invoiceDateTo"  onblur="return formatDate1('invoiceDateTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#invoiceDateTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+			</td>
+			</tr>
+			
+		<tr>
+	          <td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
+			  <td><form:select cssClass="flat" path="company" id="id" multiple="true" >
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name"></form:options>
+				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
+			</td>
+		</tr>
+		
+		<tr>
+		    
+		   
+		    <td class="form-left"><primo:label code="Terminals" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="terminal" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>
+	   </tr>	
+			
+		
+		<tr>
+	          <td class="form-left"><primo:label code="Driver" /><span class="errorMessage"></span></td>
+			  <td><form:select cssClass="flat" path="driver" id="driverId" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${drivers}" itemValue="id" itemLabel="fullName"></form:options>
+				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+		 <td class="form-left"><primo:label code="Trucks" /><span
+				class="errorMessage"></span></td>
+			 <td><form:select cssClass="flat" path="unit" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${trucks}" itemValue="unit" itemLabel="unit" />
+				</form:select>
+			 </td>
+	   </tr>
+	   <tr>
+	   <td class="form-left"><primo:label code="Trailer"/></td>
+	   <td><form:select cssClass="flat" path="trailer" multiple="true">
+	   <form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${trailers}" itemValue="unit" itemLabel="unit" />
+	   </form:select></td>
+	   </tr>
+		
+		
+		
+			
+	   
+	   
+	  
+		 
+		
+		<tr><td ></td></tr>
+			<tr>
+				<td align="${left}" class="form-left">Company Report</td>
+			<td align="${left}" >
+			<input type="button"
+				onclick="javascript:searchReport(this)" value="Company" id="Company"/>
+			<!-- <input type="button"
+				onclick="javascript:searchReport(this)" value="Terminal" id="Terminal"/> -->
+			<!-- 	
+			
+			<input type="button"
+				onclick="javascript:searchReport(this)" value="Truck" id="Truck" /> --></td>		
+				
+				
+		</tr>
+		<tr><td><td></tr>
+		<tr >
+		<td align="${left}" class="form-left">Terminal Report</td>
+		<td align="${left}" ><input type="button"
+				onclick="javascript:searchReport(this)" value="All Terminal,Company Billing" id="Terminalac"/>
+				<input type="button"
+				onclick="javascript:searchReport(this)" value="Company Terminal,Company Billing" id="Terminalcc"/>
+				<input type="button"
+				onclick="javascript:searchReport(this)" value="Company Terminal, All Billing" id="Terminalca"/></td>
+		</tr>
+		
+		<tr><td><td></tr>
+		<tr>
+			<td align="${left}" class="form-left">Driver Report</td>
+			<td align="${left}"><input type="button"
+				onclick="javascript:searchReport(this)" value="All Driver,Company Billing" id="Driverac"/>
+				<input type="button"
+				onclick="javascript:searchReport(this)" value="Company Driver,Company Billing" id="Drivercc"/>
+				<input type="button"
+				onclick="javascript:searchReport(this)" value="Company Driver, All Billing" id="Driverca"/></td>
+		</tr>
+		
+		<tr><td><td></tr>
+		<tr>
+		<td align="${left}" class="form-left">Truck Report</td>
+		<td align="${left}">
+		        <input type="button"
+				onclick="javascript:searchReport(this)" value=" All Truck,Company Billing" id="Truckac" />
+				<input type="button"
+				onclick="javascript:searchReport(this)" value=" Company Truck,Company Billing" id="Truckcc" />
+				<input type="button"
+				onclick="javascript:searchReport(this)" value=" Company Truck,All Billing" id="Truckca" />
+		</td>
+		</tr>
+		<tr><td><td></tr>
+		<tr>
+		<td align="${left}" class="form-left">Trailer Report</td>
+		<td align="${left}">
+		        <input type="button"
+				onclick="javascript:searchReport(this)" value=" All Trailer,Company Billing" id="Trailerac" />
+				<input type="button"
+				onclick="javascript:searchReport(this)" value=" Company Trailer,Company Billing" id="Trailercc" />
+				<input type="button"
+				onclick="javascript:searchReport(this)" value=" Company Trailer,All Billing" id="Trailerca" />
+		</td>
+		</tr>
+			
+		<%-- <tr><td>
+		<table>
+          <tr>
+			<td align="${left}"></td>
+			<td align="${left}" ><input type="button"
+				onclick="javascript:searchReport(this)" value="Driver" id="Driver"/></td>	
+			<td align="${left}" ><input type="button"
+				onclick="javascript:searchReport(this)" value="Terminal" id="Terminal"/></td>
+			<td align="${left}" ><input type="button"
+				onclick="javascript:searchReport(this)" value="Truck" id="Truck" /></td>
+				
+					
+				
+				
+		</tr></table>
+		</td></tr> --%>
+
+		
+		
+	</table>
+</form:form>
+
+ 
+
+

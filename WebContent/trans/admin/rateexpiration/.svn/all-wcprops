@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration
+END
+subcontractorrate.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration/subcontractorrate.jsp
+END
+fuelsurchargweeklyrate.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration/fuelsurchargweeklyrate.jsp
+END
+fuelsurchargepadd.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration/fuelsurchargepadd.jsp
+END
+home.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration/home.jsp
+END
+billingrate.jsp
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LUTransport/!svn/ver/2/trunk/LUTransport/WebContent/lutransport/admin/rateexpiration/billingrate.jsp
+END

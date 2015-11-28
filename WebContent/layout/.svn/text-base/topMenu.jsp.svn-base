@@ -1,0 +1,41 @@
+<%@ include file="/common/taglibs.jsp" %>
+<%@page import="com.primovision.lutransport.model.BusinessObject,com.primovision.lutransport.model.menu.*"%>
+<div style="width:100%" id="navigation" class="navmenu">
+<%
+    MenuTree menuTree = (MenuTree) session.getAttribute("menuTree");
+    java.util.List<BusinessObject> businessObjects = MenuHelper.getMenuForLevel(menuTree, 2);
+if (menuTree!=null) {
+%>
+<ul>
+    <%
+	    String cssClass="";
+		BusinessObject currentBo = (BusinessObject)session.getAttribute("curObj"); 
+		String hierarchy ="";
+		if (currentBo!=null) {
+			hierarchy = currentBo.getObjectHierarchy();
+		}
+		for (BusinessObject businessObject : businessObjects) {
+			if (hierarchy.contains("/"+businessObject.getId()+"/")) {
+				cssClass="selected";
+			}
+			else {
+				cssClass="";
+			}
+			BusinessObject bo2=null;
+    		java.util.List<BusinessObject> submenus = MenuHelper.getMenuForParent(menuTree, businessObject.getId());
+    		if (submenus!=null && submenus.size()>0) {
+    			bo2 = submenus.get(0);
+    		}
+    		else {
+    			bo2 = businessObject;
+    		}
+	%>
+    <li>
+    <c:set var="obj" value="<%=businessObject.getObjectName()%>"></c:set>
+       <a href="${ctx}<%=bo2.getAction()%>" class="<%=cssClass%>">${obj}</a>
+    </li>
+    <%}%>
+</ul>
+<% }
+%>
+</div>
