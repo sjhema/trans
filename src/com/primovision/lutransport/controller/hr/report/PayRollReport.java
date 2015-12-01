@@ -202,6 +202,13 @@ public class PayRollReport extends BaseController{
 				Location companyObj = genericDAO.getById(Location.class, Long.valueOf(request.getParameter("company")));
 				params.put("company", companyObj.getName());
 			}
+			String category =  request.getParameter("category");
+			if(!StringUtils.isEmpty(category)) {
+				String categoryQuery = "select obj from EmployeeCatagory obj where obj.id=" + category;
+				List<EmployeeCatagory> categoryList = genericDAO.executeSimpleQuery(categoryQuery);
+				String categoryName = categoryList.get(0).getName();
+				driverPayQuery.append(" and category='").append(categoryName).append("'");
+			}
 			if(!StringUtils.isEmpty(request.getParameter("terminal"))){
 				driverPayQuery.append(" and terminal='").append(request.getParameter("terminal")).append("'");
 				Location terminalObj = genericDAO.getById(Location.class, Long.valueOf(request.getParameter("terminal")));
@@ -293,6 +300,13 @@ public class PayRollReport extends BaseController{
 				driverPayQuery.append(" and companyLoc='").append(request.getParameter("company")).append("'");
 				Location companyObj = genericDAO.getById(Location.class, Long.valueOf(request.getParameter("company")));
 				params.put("company", companyObj.getName()); 
+			}
+			String category =  request.getParameter("category");
+			if(!StringUtils.isEmpty(category)) {
+				String categoryQuery = "select obj from EmployeeCatagory obj where obj.id=" + category;
+				List<EmployeeCatagory> categoryList = genericDAO.executeSimpleQuery(categoryQuery);
+				String categoryName = categoryList.get(0).getName();
+				driverPayQuery.append(" and category='").append(categoryName).append("'");
 			}
 			if(!StringUtils.isEmpty(request.getParameter("terminal"))){
 				driverPayQuery.append(" and terminalLoc='").append(request.getParameter("terminal")).append("'");
