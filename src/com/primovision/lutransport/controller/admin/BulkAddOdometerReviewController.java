@@ -130,11 +130,43 @@ public class BulkAddOdometerReviewController extends CRUDController<Odometer>{
 						odometer.setStartReading(Integer.parseInt(request.getParameter("startReading"+i)));
 						
 						criterias.clear();
-						criterias.put("unit", Integer.parseInt(request.getParameter("truck"+i)));
+						/*criterias.put("unit", Integer.parseInt(request.getParameter("truck"+i)));
 						Vehicle truck = genericDAO.getByCriteria(Vehicle.class, criterias);
 						if(truck!=null){
 							odometer.setTruck(truck);
-						}	
+						}	*/
+						
+						
+						/***********/
+						
+						String vehiclequery="select obj from Vehicle obj where obj.type=1 and obj.unit in ("
+								+ request.getParameter("truck"+i)
+								+") order by obj.validFrom desc";
+						
+						List<Vehicle> vehicleLists=genericDAO.executeSimpleQuery(vehiclequery);
+							
+						if(vehicleLists!=null && vehicleLists.size() > 0){				
+							for(Vehicle vehicleObj : vehicleLists) {	
+								if(vehicleObj.getValidFrom() != null && vehicleObj.getValidTo() != null){
+									String dateStr = request.getParameter("day"+i);
+									Date dateObj;
+									try {
+										dateObj = (new SimpleDateFormat("MM-dd-yyyy")).parse(dateStr);
+										
+										if ((dateObj.getTime() >= vehicleObj.getValidFrom().getTime() && dateObj.getTime() <= vehicleObj.getValidTo().getTime())) {
+											odometer.setTruck(vehicleObj);
+											System.out.println("Vehicle Id being saved = " + vehicleObj.getId());
+											break;
+										}
+									} catch (ParseException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+						
+						/**********/
 						
 						criterias.clear();
 				   	  	criterias.put("id", entity.getDriver().getId());
