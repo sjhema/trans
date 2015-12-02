@@ -980,7 +980,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tickList.add(tripSheetObj.getDriverCompany().getId());
 					tickList.add(tripSheetObj.getDriver().getId());
 					tickList.add(tripSheetObj.getTerminal().getId());
-					tickList.add(tripSheetObj.getTruck().getId());
+					//tickList.add(tripSheetObj.getTruck().getId());
+					tickList.add(tripSheetObj.getTruck().getUnitNum());
 					tickList.add(tripSheetObj.getTrailer().getId());
 					tickList.add(dateFormat.format(tripSheetObj.getBatchDate()));
 					tickList.add(tripSheetObj.getOrigin().getId());
@@ -1012,7 +1013,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tickList.add(tripSheetObj.getDriverCompany().getId());
 					tickList.add(tripSheetObj.getDriver().getId());
 					tickList.add(tripSheetObj.getTerminal().getId());
-					tickList.add(tripSheetObj.getTruck().getId());
+//					tickList.add(tripSheetObj.getTruck().getId());
+					tickList.add(tripSheetObj.getTruck().getUnitNum());
 					tickList.add(tripSheetObj.getTrailer().getId());
 					tickList.add(dateFormat.format(tripSheetObj.getBatchDate()));
 					tickList.add(tripSheetObj.getOrigin().getId());
