@@ -62,7 +62,7 @@ public class AuthenticationSuccessHandler
 		Role role = user.getRole();
 		System.out.println("Role = " + role.getName());
 		// request.getSession().setAttribute("theme", role.getTheme());
-		//genericDAO.saveOrUpdate(user);
+		genericDAO.saveOrUpdate(user);
 		request.getSession().setAttribute("userInfo", user);
 		StringBuffer query = new StringBuffer(
 				"select distinct bo from BusinessObject bo, RolePrivilege rp where rp.businessObject.id=bo.id and rp.role.id="
