@@ -21,13 +21,23 @@ function emailValidate(){
 		<tr>
 			<td class="form-left"><primo:label code="First Name"/><span
 				class="errorMessage">*</span></td>
-			<td align="${left}"><form:input path="firstName" cssClass="flat" style="min-width:200px; max-width:200px" maxlength="20"/>
+			<td align="${left}">
+			<!--<form:input path="firstName" cssClass="flat" style="min-width:200px; max-width:200px" maxlength="20"/>-->
+			<form:select cssClass="flat form-control input-sm" style="min-width:200px; max-width:200px" maxlength="20" path="firstName" >
+				<form:option value="">----Please Select----</form:option>
+				<form:options items="${employeesFirstName}"/>
+			</form:select>
 			<br><form:errors path="firstName" cssClass="errorMessage"/></td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Last Name"/><span
 				class="errorMessage">*</span></td>
-			<td align="${left}"><form:input path="lastName" cssClass="flat" style="min-width:200px; max-width:200px" maxlength="20"/>
+			<td align="${left}">
+			<!--<form:input path="lastName" cssClass="flat" style="min-width:200px; max-width:200px" maxlength="20"/>-->
+			<form:select cssClass="flat form-control input-sm" style="min-width:200px; max-width:200px" maxlength="20" path="lastName" >
+				<form:option value="">----Please Select----</form:option>
+				<form:options items="${employeesLastName}"/>
+			</form:select>
 			<br><form:errors path="lastName" cssClass="errorMessage"/></td>
 		</tr>
 		<tr>

@@ -41,6 +41,11 @@ public class UsersController extends CRUDController<User> {
 		criterias.put("status", 1);
 		model.addAttribute("statuses", listStaticData("STATUS"));
 		model.addAttribute("roles", genericDAO.findAll(Role.class));
+		
+		String firstNameQuery="select distinct(obj.firstName) from Driver obj order by obj.firstName";
+		model.addAttribute("employeesFirstName", genericDAO.executeSimpleQuery(firstNameQuery));
+		String lastNameQuery="select distinct(obj.lastName) from Driver obj order by obj.lastName";
+		model.addAttribute("employeesLastName", genericDAO.executeSimpleQuery(lastNameQuery));
 	}
 	
 	
