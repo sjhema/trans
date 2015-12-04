@@ -348,7 +348,7 @@ public class GenericJpaDAO implements GenericDAO {
 			// writeEntityLog("ADD", entity, null);
 		} else {
 			
-			System.out.println("Last login date = " + ((com.primovision.lutransport.model.User)entity).getLastLoginDate());
+			//System.out.println("Last login date = " + ((com.primovision.lutransport.model.User)entity).getLastLoginDate());
 			entityManager.flush();
 			entityManager.merge(entity);
 			
