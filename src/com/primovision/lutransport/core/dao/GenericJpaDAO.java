@@ -355,7 +355,6 @@ public class GenericJpaDAO implements GenericDAO {
 			Session session = ((Session) entityManager.getDelegate())
 					.getSessionFactory().openSession();
 			
-			System.out.println("session opened?");
 			T oldEntity = (T) session.get(entity.getClass(), entity.getId());
 			System.out.println("session = " + session.isOpen());
 			

@@ -342,21 +342,22 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			
 			if (entity.getVehicle() != null) {
+				System.out.println("The vehicle UnitNum to be saved is " + entity.getVehicle().getUnitNum());
+				
 				boolean sendError=true;
 				
-				
-				Vehicle vehob=genericDAO.getById(Vehicle.class,entity.getVehicle().getId());
+				//Vehicle vehob=genericDAO.getById(Vehicle.class,entity.getVehicle().getId());
 				
 				String vehiclequery="select obj from Vehicle obj where obj.type=1 and obj.unit in ("
-					+vehob.getUnit()
-					+") order by obj.validFrom desc";
-				
-				
+					//+vehob.getUnit()
+						+ entity.getVehicle().getUnitNum()
+						+") order by obj.validFrom desc";
 				
 				List<Vehicle> vehicleLists=genericDAO.executeSimpleQuery(vehiclequery);
 				
 				if(vehicleLists!=null && vehicleLists.size()>0){				
 				for(Vehicle vehicleObj : vehicleLists) {	
+					System.out.println("Vehicle id mapped to unit number " + entity.getVehicle().getUnitNum() + " is " + vehicleObj.getId());
 					if(vehicleObj.getValidFrom()!=null && vehicleObj.getValidTo()!=null){
 					if ((entity.getLoadDate().getTime()>= vehicleObj.getValidFrom().getTime() && entity.getLoadDate().getTime()<= vehicleObj.getValidTo().getTime()) && (entity.getUnloadDate().getTime()>= vehicleObj.getValidFrom().getTime() && entity.getUnloadDate().getTime()<= vehicleObj.getValidTo().getTime())) {
 						entity.setVehicle(vehicleObj);
