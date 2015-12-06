@@ -342,6 +342,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			
 			if (entity.getVehicle() != null) {
+				// The incoming ID only maps to the right unit number, not to the vehicle ID
+				System.out.println("The vehicle UnitNum(ID) to be saved is " + entity.getVehicle().getId());
 				System.out.println("The vehicle UnitNum to be saved is " + entity.getVehicle().getUnitNum());
 				
 				boolean sendError=true;
@@ -355,18 +357,23 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				
 				List<Vehicle> vehicleLists=genericDAO.executeSimpleQuery(vehiclequery);
 				
-				if(vehicleLists!=null && vehicleLists.size()>0){				
-				for(Vehicle vehicleObj : vehicleLists) {	
-					System.out.println("Vehicle id mapped to unit number " + entity.getVehicle().getUnitNum() + " is " + vehicleObj.getId());
-					if(vehicleObj.getValidFrom()!=null && vehicleObj.getValidTo()!=null){
-					if ((entity.getLoadDate().getTime()>= vehicleObj.getValidFrom().getTime() && entity.getLoadDate().getTime()<= vehicleObj.getValidTo().getTime()) && (entity.getUnloadDate().getTime()>= vehicleObj.getValidFrom().getTime() && entity.getUnloadDate().getTime()<= vehicleObj.getValidTo().getTime())) {
-						entity.setVehicle(vehicleObj);
-						sendError=false;
+				if (vehicleLists != null && vehicleLists.size() > 0) {
+					for (Vehicle vehicleObj : vehicleLists) {
+						System.out.println("Vehicle id mapped to unit number " + entity.getVehicle().getUnitNum() + " is "
+								+ vehicleObj.getId());
+						if (vehicleObj.getValidFrom() != null && vehicleObj.getValidTo() != null) {
+							if ((entity.getLoadDate().getTime() >= vehicleObj.getValidFrom().getTime()
+									&& entity.getLoadDate().getTime() <= vehicleObj.getValidTo().getTime())
+									&& (entity.getUnloadDate().getTime() >= vehicleObj.getValidFrom().getTime()
+											&& entity.getUnloadDate().getTime() <= vehicleObj.getValidTo().getTime())) {
+								entity.setVehicle(vehicleObj);
+								sendError = false;
+								break;
+							}
+						}
 					}
 				}
-				}
-				}
-				
+
 				if(sendError){
 					setupCreate(model, request);
 					request.getSession().setAttribute("error",

@@ -771,12 +771,12 @@ function formatDate1(){
 		<tr>
 			<td class="form-left"><primo:label code="Truck" /><span
 				class="errorMessage">*</span></td>
-			<td><form:select cssClass="flat" path="vehicle" id="truckId" style="min-width:154px; max-width:154px" onchange="return checkVehicleEntry(); ">
+			<td><form:select cssClass="flat" path="vehicle.unitNum" id="truckId" style="min-width:154px; max-width:154px" onchange="return checkVehicleEntry(); ">
 					<form:option value="">------<primo:label
 							code="Please Select" />------</form:option>
 					<%-- <form:options items="${trucks}" itemValue="id" itemLabel="unit" /> --%>
-					<form:options items="${trucks}" itemValue="unit" itemLabel="unit" />
-				</form:select> <br> <form:errors path="vehicle" cssClass="errorMessage" /><span id="spanId3" style="color:red; font-size:10px; font-weight:bold "> </span>
+					<form:options items="${trucks}" itemValue="unitNum" itemLabel="unitNum" />
+				</form:select> <br> <form:errors path="vehicle.unitNum" cssClass="errorMessage" /><span id="spanId3" style="color:red; font-size:10px; font-weight:bold "> </span>
 			</td>
 			<td class="form-left"><primo:label code="Trailer" /><span
 				class="errorMessage">*</span></td>
