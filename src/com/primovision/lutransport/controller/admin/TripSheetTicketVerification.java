@@ -91,6 +91,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
+		
 		Map criterias = new HashMap();
 		criterias.clear();
 		if (request.getParameter("id") != null) {

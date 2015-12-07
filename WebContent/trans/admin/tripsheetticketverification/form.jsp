@@ -404,8 +404,8 @@ function checkLandfillTicket() {
 				var listData=jQuery.parseJSON(data);
 				if(listData){
 					$("#companyId").val(listData[0]);
-					$("#driverId").val(listData[1]);
 					$("#terminalId").val(listData[2]);
+					$("#driverId").val(listData[1]);
 					$("#truckId").val(listData[3]);
 					$("#trailerId").val(listData[4]);
 					$("#batch").val(listData[5]);
