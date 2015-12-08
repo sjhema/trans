@@ -26,10 +26,15 @@
 	
 	
 	function submitform(){	
-		var fileinfo=document.getElementById("uploadfile1");		
-		if(fileinfo.value==""){
+		var fileinfo=document.getElementById("uploadfile1");
+		var fuelvendor=document.getElementById("fuelvendor");	
+		if(fileinfo.value=="") {
 			document.getElementById("div_id").innerHTML="Please choose a file to upload!";
-		}		
+		}
+		else if(fuelvendor.value == "") {
+			alert(fuelvendor.value);
+			document.getElementById("div_id").innerHTML="Please choose a fuel vendor!";
+		}
 		else
 		{
 		document.forms["overrideForm"].action='${ctx}/uploadData/fuellog/override.do';
@@ -48,8 +53,25 @@
 			
 	</tr>
 	<tr>
-		<td><primo:label code="Upload Fuel log" />
-		<input type="file" id="uploadfile" name="dataFile" onchange="return checkfileoverride()"/></td>
+		<td align="${left}" class="first"><primo:label code="Name"/></td>
+		<td align="${left}">
+			<select id="fuelvendor" name="fuelvendor" style="min-width:200px; max-width:200px">
+				<option value="">------<primo:label code="Please Select"/>------</option>
+				<c:forEach items="${fuelvendor}" var="fuelvendor">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['fuelvendor'] == fuelvendor.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${fuelvendor.id}" ${selected}>${fuelvendor.name}</option>
+				</c:forEach>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="${left}" class="first"><primo:label code="Upload Fuel log" />
+		<td align="${left}">
+			<input type="file" id="uploadfile" name="dataFile" onchange="return checkfileoverride()"/>
+		</td>
 	</tr>
 	<tr>
 		<td><input type="submit" value="Upload"/></td>

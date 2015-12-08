@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +33,7 @@ import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.configuration.Configuration;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelSurcharge;
+import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.Trailer;
 import com.primovision.lutransport.model.Vehicle;
@@ -64,8 +67,9 @@ public class UploadDataController extends BaseController {
 	
 	
 	@RequestMapping("/fuellog.do")
-	public String fuellog(HttpServletRequest request,
-			HttpServletResponse response) {
+	public String fuellog(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		Map criterias = new HashMap();
+		model.addAttribute("fuelvendor", genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false));
 		return "admin/uploaddata/fuellog";
 	}
 	
@@ -219,7 +223,8 @@ public class UploadDataController extends BaseController {
 	@RequestMapping("/fuellog/upload.do")
 	public String fuellogSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
-			@RequestParam("dataFile") MultipartFile file) {
+			@RequestParam("dataFile") MultipartFile file,
+			@RequestParam("fuelvendor") String fuelvendor) {
 		
 		List<String> str=new ArrayList<String>();
 		boolean flag=false;
