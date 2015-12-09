@@ -257,8 +257,9 @@ public class UploadDataController extends BaseController {
 			
 			InputStream is = file.getInputStream();
 			
-			// TODO: Convert data format
-			is = convertToGenericFuelLogFormat(is, fuelvendor);
+			if (isConversionRequired(fuelvendor)) {
+				is = convertToGenericFuelLogFormat(is, fuelvendor);
+			}
 			
 			str=importMainSheetService.importfuellogMainSheet(is,flag);
 			System.out.println("\nimportMainSheetService.importMainSheet(is)\n");
@@ -281,6 +282,13 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/fuellog";
 	}
 	
+	private boolean isConversionRequired(Long fuelvendor) {
+		if (fuelvendor.longValue() == 11l) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	
 	private InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor) throws Exception {
 		
