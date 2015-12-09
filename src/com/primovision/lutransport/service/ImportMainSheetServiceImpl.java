@@ -3449,7 +3449,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	@Override
 	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is,
-			LinkedHashMap<String, String> vendorSpecificColumns, String vendor) throws Exception {
+			LinkedHashMap<String, String> vendorSpecificColumns, Long vendor) throws Exception {
 		List<LinkedList<Object>> data = new ArrayList<LinkedList<Object>>();
 		// List<FuelLog> data = new ArrayList<FuelLog>();
 		try {
@@ -3468,7 +3468,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				Map criterias = new HashMap();
-				criterias.put("id", Long.parseLong(vendor));
+				criterias.put("id", vendor);
 				FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 				
 				rowObjects.add(fuelVendor.getName());

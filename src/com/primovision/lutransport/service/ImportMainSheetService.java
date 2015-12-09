@@ -11,6 +11,6 @@ public interface ImportMainSheetService {
 	public List<String> importfuellogMainSheet(InputStream is,Boolean flag) throws Exception;
 	public List<String> importeztollMainSheet(InputStream is,Boolean override) throws Exception;
 	public List<String> importVehiclePermitMainSheet(InputStream is)throws Exception;
-	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is, LinkedHashMap<String, String> vendorSpecificColumns, String vendor) throws Exception;
+	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is, LinkedHashMap<String, String> vendorSpecificColumns, Long vendor) throws Exception;
 }
 

@@ -232,7 +232,9 @@ public class UploadDataController extends BaseController {
 	public String fuellogSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("dataFile") MultipartFile file,
-			@RequestParam("fuelvendor") String fuelvendor) {
+			@RequestParam("fuelvendor") Long fuelvendor) {
+		Map criterias = new HashMap();
+		model.addAttribute("fuelvendor", genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false));
 		
 		List<String> str=new ArrayList<String>();
 		boolean flag=false;
@@ -280,7 +282,7 @@ public class UploadDataController extends BaseController {
 	}
 	
 	
-	private InputStream convertToGenericFuelLogFormat(InputStream is, String vendor) throws Exception {
+	private InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor) throws Exception {
 		
 		LinkedList<String> expectedColumnList = getExpectedColumnList();
 		LinkedHashMap<String, String> actualColumnListMap = getVendorSpecificColumnList(vendor);
@@ -420,7 +422,7 @@ public class UploadDataController extends BaseController {
 	      return style;
 	  }
 
-	private LinkedHashMap<String, String> getVendorSpecificColumnList(String vendor) {
+	private LinkedHashMap<String, String> getVendorSpecificColumnList(Long vendor) {
 		
 		//ist<LinkedHashMap<String, String>> vendorToFuelLogMapping = new ArrayList<LinkedHashMap<String, String>>();
  		

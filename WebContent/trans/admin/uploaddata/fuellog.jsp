@@ -32,7 +32,6 @@
 			document.getElementById("div_id").innerHTML="Please choose a file to upload!";
 		}
 		else if(fuelvendor.value == "") {
-			alert(fuelvendor.value);
 			document.getElementById("div_id").innerHTML="Please choose a fuel vendor!";
 		}
 		else
@@ -42,11 +41,26 @@
 		}
 	}
 	
+	function submitUploadform(){	
+		var fileinfo=document.getElementById("uploadfile");
+		var fuelvendor=document.getElementById("fuelvendor");	
+		if(fileinfo.value=="") {
+			document.getElementById("div_id").innerHTML="Please choose a file to upload!";
+		}
+		else if(fuelvendor.value == "") {
+			document.getElementById("div_id").innerHTML="Please choose a fuel vendor!";
+		}
+		else
+		{
+			document.forms["uploadForm"].submit();
+		}
+	}
+	
 	
 	
 </script>
 <br/>
-<form:form action="${ctx}/uploadData/fuellog/upload.do"  enctype="multipart/form-data" modelAttribute="modelObject">
+<form:form action="${ctx}/uploadData/fuellog/upload.do" name="uploadForm" enctype="multipart/form-data" modelAttribute="modelObject">
 <table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 	<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Upload Fuel Log" /></b></td>
@@ -70,11 +84,11 @@
 	<tr>
 		<td align="${left}" class="first"><primo:label code="Upload Fuel log" />
 		<td align="${left}">
-			<input type="file" id="uploadfile" name="dataFile" onchange="return checkfileoverride()"/>
+			<input type="file" id="uploadfile" name="dataFile" onchange="return checkfile()"/>
 		</td>
 	</tr>
 	<tr>
-		<td><input type="submit" value="Upload"/></td>
+		<td><input type="button" value="Upload" onclick="javascript:submitUploadform();"/></td>
 	</tr>
 </table>
 </form:form>
