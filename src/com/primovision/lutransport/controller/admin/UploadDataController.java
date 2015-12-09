@@ -309,11 +309,14 @@ public class UploadDataController extends BaseController {
 		
 		for (int i = 0; i < tempData.size(); i++) {
 			
+			System.out.println("Creating Row " + i);
 			int columnIndex = 0;
 			LinkedList<Object> oneRow = tempData.get(i);
 			Row row = sheet.createRow(rowIndex++);
 			
 			for (Object oneCellValue : oneRow) {
+				
+				System.out.println("Creating Column @ " + columnIndex + " with value = " + oneCellValue);
 				
 				Cell cell = row.createCell(columnIndex);
 				sheet.setColumnWidth(columnIndex, 256*20);
@@ -323,10 +326,12 @@ public class UploadDataController extends BaseController {
 				} else {
 					if (oneCellValue instanceof Double) {
 						cell.setCellValue((Double)oneCellValue);
-					} else if (columnIndex == 2 || columnIndex == 4) { //if (oneCellValue instanceof Date) {
+					} else if (columnIndex == 2 || columnIndex == 4) { 
 						setCellValueDateFormat(wb, cell, oneCellValue);
 					}  else if (columnIndex == 5) {
 						setCellValueTimeFormat(cell, oneCellValue);
+					} else if (columnIndex == 10) {
+						setCellValueFuelTypeFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 13) {
 						setCellValueDoubleFormat(wb, cell, oneCellValue);
 					} else if (columnIndex > 13 && columnIndex < 19) {
@@ -361,6 +366,14 @@ public class UploadDataController extends BaseController {
 		//return is;
 	}
 	
+	private void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+		if (oneCellValue.toString().toUpperCase().equals("ULSD")) {
+			cell.setCellValue("DSL");
+		} else {
+			cell.setCellValue(oneCellValue.toString());
+		}
+	}
+
 	private void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue) {
 		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
 		CellStyle style = wb.createCellStyle();

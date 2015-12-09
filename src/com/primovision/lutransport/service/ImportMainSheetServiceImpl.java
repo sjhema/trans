@@ -1940,6 +1940,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										}
 									} else {
 										criterias.clear();
+										System.out.println("Firstname = " + firstName + ", lastname = " + lastName);
 										criterias.put("firstName", firstName);
 										criterias.put("lastName", lastName);
 										Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
@@ -2663,6 +2664,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 				} // TRY INSIDE WHILE(LOOP)
 				catch (Exception ex) {
+					ex.printStackTrace();
 					System.out.println("***** Entered here in exception" + ex.getMessage());
 
 					error = true;
@@ -3459,8 +3461,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 			LinkedHashMap<String, Integer> orderedColIndexes = getOrderedColumnIndexes(titleRow, vendorSpecificColumns);
 			Set<Entry<String, Integer>> keySet = orderedColIndexes.entrySet();
+			
+			System.out.println("Physical number of rows in Excel = " + sheet.getPhysicalNumberOfRows());
 
-			for (int i = titleRow.getRowNum() + 1; i < sheet.getLastRowNum(); i++) {
+			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - 1; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				Map criterias = new HashMap();
@@ -3486,13 +3490,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					if (entry.getKey().equals("DRIVER LAST NAME")
 							&& (!orderedColIndexes.containsKey("DRIVER FIRST NAME"))) {
 						String[] nameArray = cellValueObj.toString().split("\\ ");
-						rowObjects.add(nameArray[0]);
 
 						if (nameArray.length > 1) {
 							rowObjects.add(nameArray[1]);
 						} else {
 							rowObjects.add(StringUtils.EMPTY);
 						}
+						
+						rowObjects.add(nameArray[0]);
 					} else {
 						rowObjects.add(cellValueObj);
 					}
