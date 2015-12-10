@@ -340,9 +340,9 @@ public class UploadDataController extends BaseController {
 						setCellValueDateFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 5) {
 						setCellValueTimeFormat(cell, oneCellValue);
-					} else if (columnIndex == 7 || columnIndex == 8) {
+					} /*else if (columnIndex == 7 || columnIndex == 8) {
 						setCellValueDriverFormat(wb, cell, oneCellValue);
-					} else if (columnIndex == 9) {
+					}*/ else if (columnIndex == 9) {
 						setCellValueCardNumberFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 10) {
 						setCellValueFuelTypeFormat(wb, cell, oneCellValue);
