@@ -67,7 +67,7 @@
 			
 	</tr>
 	<tr>
-		<td align="${left}" class="first"><primo:label code="Name"/></td>
+		<td align="${left}" class="first"><primo:label code="Vendor Name"/></td>
 		<td align="${left}">
 			<select id="fuelvendor" name="fuelvendor" style="min-width:200px; max-width:200px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
