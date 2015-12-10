@@ -2,6 +2,7 @@ package com.primovision.lutransport.controller.admin;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -328,8 +329,10 @@ public class UploadDataController extends BaseController {
 						cell.setCellValue((Double)oneCellValue);
 					} else if (columnIndex == 2 || columnIndex == 4) { 
 						setCellValueDateFormat(wb, cell, oneCellValue);
-					}  else if (columnIndex == 5) {
+					} else if (columnIndex == 5) {
 						setCellValueTimeFormat(cell, oneCellValue);
+					} else if (columnIndex == 7 || columnIndex == 8) {
+						setCellValueDriverFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 10) {
 						setCellValueFuelTypeFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 13) {
@@ -359,16 +362,44 @@ public class UploadDataController extends BaseController {
 			e.printStackTrace();
 		}
 	      
-		// TODO: Convert to input stream before returning
 	    InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
-		
+	    
 	    return targetStream;
 		//return is;
 	}
 	
+	private void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+		int columnIndex = cell.getColumnIndex();
+		String driverName = oneCellValue.toString();
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		
+		if (columnIndex == 7) { // firstname 
+			criterias.put("lastName", driverName);
+			Driver lname = genericDAO.getByCriteria(Driver.class, criterias);
+			if (lname == null) {
+				// no driver with this lastname is found, blank out the name
+				cell.setCellValue(StringUtils.EMPTY);
+			} else {
+				cell.setCellValue(driverName.toUpperCase());
+			}
+		} else if (columnIndex == 8) { // firstname 
+			criterias.put("firstName", driverName);
+			Driver fname = genericDAO.getByCriteria(Driver.class, criterias);
+			if (fname == null) {
+				// no driver with this firstname is found, blank out the name
+				cell.setCellValue(StringUtils.EMPTY);
+			} else {
+				cell.setCellValue(driverName.toUpperCase());
+			}
+		}
+	}
+
 	private void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
-		if (oneCellValue.toString().toUpperCase().equals("ULSD")) {
+		String actualFuelType = oneCellValue.toString().toUpperCase();
+		if (actualFuelType.equals("ULSD")) {
 			cell.setCellValue("DSL");
+		} else if (actualFuelType.equals("FUEL")) {
+			cell.setCellValue("Regular");
 		} else {
 			cell.setCellValue(oneCellValue.toString());
 		}

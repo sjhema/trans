@@ -3451,7 +3451,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is,
 			LinkedHashMap<String, String> vendorSpecificColumns, String vendor) throws Exception {
 		List<LinkedList<Object>> data = new ArrayList<LinkedList<Object>>();
-		// List<FuelLog> data = new ArrayList<FuelLog>();
 		try {
 			POIFSFileSystem fs = new POIFSFileSystem(is);
 
@@ -3501,8 +3500,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					} else {
 						rowObjects.add(cellValueObj);
 					}
-					// setFuelLogProperty(fuelLogForOneRow, entry.getKey(),
-					// cellValueObj);
 
 				}
 
@@ -3519,11 +3516,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	private LinkedHashMap<String, Integer> getOrderedColumnIndexes(Row titleRow,
 			LinkedHashMap<String, String> vendorSpecificColumns) {
-
-		// ArrayList<String> vendorSpecificList = (new
-		// ArrayList<String>(vendorSpecificColumns.values()));
-
-		// LinkedList<Integer> orderedColumnIndexes = new LinkedList<Integer>();
 
 		LinkedHashMap<String, Integer> orderedColumnIndexesMap = new LinkedHashMap<String, Integer>();
 
@@ -3552,31 +3544,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				System.out.println("Could not find expected column " + entry.getValue());
 			}
 		}
-
-		/*
-		 * for (int i = startCellNumber; i < titleRow.getLastCellNum(); i++) {
-		 * 
-		 * String columnHeader =
-		 * (String)getCellValue(((HSSFCell)titleRow.getCell(i)));
-		 * 
-		 * if (vendorSpecificColumns.containsValue(columnHeader)) {
-		 * Iterator<Entry<String, String>> iterator = keySet.iterator(); int
-		 * index = 0; while(iterator.hasNext()) {
-		 * 
-		 * //if ( vendorSpecificList.contains(columnHeader)) { //for (int j = 0;
-		 * j < vendorSpecificList.size(); j++) { Entry<String, String> entry =
-		 * iterator.next(); index++;
-		 * 
-		 * if (entry.getValue().equals(columnHeader)) { // if
-		 * (vendorSpecificList.get(j).equals(columnHeader)) { // match found ;
-		 * break; // store the column index
-		 * System.out.println("Column Index for " + entry.getKey() + " = " + i);
-		 * orderedColumnIndexes.add(index, i); break; } }
-		 * 
-		 * }
-		 * 
-		 * }
-		 */
 
 		return orderedColumnIndexesMap;
 	}
