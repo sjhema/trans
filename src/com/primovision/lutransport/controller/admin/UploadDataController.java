@@ -329,8 +329,7 @@ public class UploadDataController extends BaseController {
 				
 				System.out.println("Creating Column @ " + columnIndex + " with value = " + oneCellValue);
 				
-				Cell cell = row.createCell(columnIndex);
-				sheet.setColumnWidth(columnIndex, 256*20);
+				Cell cell = createExcelCell(sheet, row, columnIndex);
 				
 				if (oneCellValue == null) {
 					cell.setCellValue(StringUtils.EMPTY);
@@ -343,6 +342,8 @@ public class UploadDataController extends BaseController {
 						setCellValueTimeFormat(cell, oneCellValue);
 					} else if (columnIndex == 7 || columnIndex == 8) {
 						setCellValueDriverFormat(wb, cell, oneCellValue);
+					} else if (columnIndex == 9) {
+						setCellValueCardNumberFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 10) {
 						setCellValueFuelTypeFormat(wb, cell, oneCellValue);
 					} else if (columnIndex == 13) {
@@ -377,29 +378,56 @@ public class UploadDataController extends BaseController {
 	    return targetStream;
 		//return is;
 	}
+
+	private void setCellValueCardNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+		String cardNumber = oneCellValue.toString();
+		System.out.println("Incoming card number = " + cardNumber);
+		cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
+		System.out.println("TCH Formatted card number = " + cardNumber);
+		cell.setCellValue(cardNumber);
+	}
+
+	private Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+		Cell cell = row.createCell(columnIndex);
+		sheet.setColumnWidth(columnIndex, 256*20);
+		return cell;
+	}
 	
 	private void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		if (columnIndex == 7) { // firstname 
-			criterias.put("lastName", driverName);
-			Driver lname = genericDAO.getByCriteria(Driver.class, criterias);
-			if (lname == null) {
-				// no driver with this lastname is found, blank out the name
-				cell.setCellValue(StringUtils.EMPTY);
-			} else {
-				cell.setCellValue(driverName.toUpperCase());
-			}
-		} else if (columnIndex == 8) { // firstname 
+		if (columnIndex == 7) { // lastname
+			// put the value as is, validation can be done after getting the firstname @ columnIndex=8
+			cell.setCellValue(driverName.toUpperCase());
+			
+		} else if (columnIndex == 8) {
+			
+			Cell lastNameCell = cell.getRow().getCell(cell.getColumnIndex()-1);
+			// firstname 
 			criterias.put("firstName", driverName);
 			Driver fname = genericDAO.getByCriteria(Driver.class, criterias);
 			if (fname == null) {
 				// no driver with this firstname is found, blank out the name
-				cell.setCellValue(StringUtils.EMPTY);
-			} else {
-				cell.setCellValue(driverName.toUpperCase());
+				System.out.println("Driver not found, setting it to EMPTY");
+				
+				cell.setCellValue(StringUtils.EMPTY); // firstname = EMPTY
+				lastNameCell.setCellValue(StringUtils.EMPTY); // lastname = EMPTY
+				
+			} else { // first name is valid, check the lastname
+				criterias.clear();
+				criterias.put("lastName", lastNameCell.getStringCellValue());
+				Driver lname = genericDAO.getByCriteria(Driver.class, criterias);
+				if (lname == null) {
+					// no driver with this lastname is found, blank out the name
+					System.out.println("Driver not found, setting it to EMPTY");
+
+					cell.setCellValue(StringUtils.EMPTY);
+					lastNameCell.setCellValue(StringUtils.EMPTY); // lastname = EMPTY
+				} else {
+					cell.setCellValue(driverName.toUpperCase());
+				}
 			}
 		}
 	}
@@ -447,19 +475,6 @@ public class UploadDataController extends BaseController {
 		style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
 		cell.setCellStyle(style);
 	}
-
-	private static CellStyle createBorderedStyle(Workbook wb){
-	      CellStyle style = wb.createCellStyle();
-	      style.setBorderRight(CellStyle.BORDER_THIN);
-	      style.setRightBorderColor(IndexedColors.BLACK.getIndex());
-	      style.setBorderBottom(CellStyle.BORDER_THIN);
-	      style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-	      style.setBorderLeft(CellStyle.BORDER_THIN);
-	      style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-	      style.setBorderTop(CellStyle.BORDER_THIN);
-	      style.setTopBorderColor(IndexedColors.BLACK.getIndex());
-	      return style;
-	  }
 
 	private LinkedHashMap<String, String> getVendorSpecificColumnList(Long vendor) {
 		
