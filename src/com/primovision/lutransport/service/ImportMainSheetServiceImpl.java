@@ -3464,12 +3464,19 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			System.out.println("Physical number of rows in Excel = " + sheet.getPhysicalNumberOfRows());
 			System.out.println("While reading values from vendor specific Excel Sheet: ");
 
-			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - 1; i++) {
+			Map criterias = new HashMap();
+			criterias.put("id", vendor);
+			FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
+			
+			int excludeLastRowsCount = 0;
+			if (fuelVendor.getName().equalsIgnoreCase("TCH")) {
+				excludeLastRowsCount = 1;
+			} else if (fuelVendor.getName().equalsIgnoreCase("DC FUEL WB")) {
+				excludeLastRowsCount = 4;
+			}
+			
+			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - excludeLastRowsCount; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
-				
-				Map criterias = new HashMap();
-				criterias.put("id", vendor);
-				FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 				
 				rowObjects.add(fuelVendor.getName());
 				rowObjects.add(fuelVendor.getCompany().getName());
@@ -3480,8 +3487,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				while (iterator.hasNext()) {
 					Entry<String, Integer> entry = iterator.next();
 					
-					//if (entry.getValue() == -1 && !entry.getKey().equals("DRIVER FIRST NAME")) {
-				
 					if (entry.getValue() == -1) {
 						// corresponding column not found
 						rowObjects.add(StringUtils.EMPTY); 

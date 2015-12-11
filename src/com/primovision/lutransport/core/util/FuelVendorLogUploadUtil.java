@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,41 +24,45 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
-import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
 public class FuelVendorLogUploadUtil {
 	
 	GenericDAO genericDAO;
+	private static String VENDOR_TCH = "TCH";
+	private static String VENDOR_DCFUELWB = "DC FUEL WB";
+	
+	SimpleDateFormat expectedDateFormat = new SimpleDateFormat("MM/dd/yy");
 	
 	static HashMap<String, LinkedHashMap<String, String>> vendorToFuelLogMapping = new HashMap<String, LinkedHashMap<String, String>>();
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
 	
 	static {
 		
-		expectedColumnList.add("VENDOR");
-		expectedColumnList.add("COMPANY");
-		expectedColumnList.add("INVOICED DATE");
-		expectedColumnList.add("INVOICE#");
-		expectedColumnList.add("TRANSACTION DATE");
-		expectedColumnList.add("TRANSACTION TIME");
-		expectedColumnList.add("UNIT#");
-		expectedColumnList.add("DRIVER LAST NAME");
-		expectedColumnList.add("DRIVER FIRST NAME");
-		expectedColumnList.add("CARD NUMBER");
-		expectedColumnList.add("FUEL TYPE");
-		expectedColumnList.add("CITY");
-		expectedColumnList.add("STATE");
-		expectedColumnList.add("Gallons");
-		expectedColumnList.add("Unit Price");
-		expectedColumnList.add("Gross Amount");
-		expectedColumnList.add("fees");
-		expectedColumnList.add("DISCOUNT");
-		expectedColumnList.add("AMOUNT");
+		expectedColumnList.add("VENDOR"); // 0
+		expectedColumnList.add("COMPANY"); // 1
+		expectedColumnList.add("INVOICED DATE"); // 2
+		expectedColumnList.add("INVOICE#"); // 3
+		expectedColumnList.add("TRANSACTION DATE"); // 4
+		expectedColumnList.add("TRANSACTION TIME"); // 5
+		expectedColumnList.add("UNIT#"); // 6
+		expectedColumnList.add("DRIVER LAST NAME"); // 7
+		expectedColumnList.add("DRIVER FIRST NAME"); // 8
+		expectedColumnList.add("CARD NUMBER"); // 9
+		expectedColumnList.add("FUEL TYPE"); // 10
+		expectedColumnList.add("CITY"); // 11
+		expectedColumnList.add("STATE"); // 12
+		expectedColumnList.add("Gallons"); // 13
+		expectedColumnList.add("Unit Price"); // 14
+		expectedColumnList.add("Gross Amount"); // 15
+		expectedColumnList.add("fees"); // 16
+		expectedColumnList.add("DISCOUNT"); // 17
+		expectedColumnList.add("AMOUNT"); // 18
 
 		// TCH
 		mapForTCH(expectedColumnList);
+		mapForDCFuelWB(expectedColumnList);
 
 	}
 
@@ -81,9 +86,32 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TransactionFee");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TransactionDiscount");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "TransactionGross");
-		vendorToFuelLogMapping.put("TCH", actualColumnMap);
+		vendorToFuelLogMapping.put(VENDOR_TCH, actualColumnMap);
 	}
 	
+	private static void mapForDCFuelWB(LinkedList<String> expectedColumnList2) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Fuel Type");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "State");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Gallons");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Total");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total");
+		vendorToFuelLogMapping.put(VENDOR_DCFUELWB, actualColumnMap);
+	}
+
 	public InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
 		
 		this.genericDAO = genericDAO;
@@ -148,39 +176,53 @@ public class FuelVendorLogUploadUtil {
 	private void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
 		
-		if (vendor.equalsIgnoreCase("TCH")) { // TCH
-			formatCellValueForTCH(wb, cell, oneCellValue);
+		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { // TCH
+			formatCellValueForTCH(wb, cell, oneCellValue, vendor);
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) { 
+			formatCellValueForDCFuelWB(wb, cell, oneCellValue, vendor);
 		}
 		
 	}
 
-	private void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue) throws Exception {
+	private void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		
 		int columnIndex = cell.getColumnIndex();
 		
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 		} else {
-			if (oneCellValue instanceof Double) {
-				cell.setCellValue((Double)oneCellValue);
-			} else if (columnIndex == 2 || columnIndex == 4) { 
-				setCellValueDateFormat(wb, cell, oneCellValue);
+			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex == 5) { // transaction time 
+				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+			} else {
+				cell.setCellValue(oneCellValue.toString().toUpperCase());
+			}
+		}
+		
+	}
+
+	private void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
+		
+		int columnIndex = cell.getColumnIndex();
+		
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+		} else {
+			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 5) {
-				setCellValueTimeFormat(cell, oneCellValue);
+				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 7 || columnIndex == 8) {
 				setCellValueDriverFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 9) {
 				setCellValueCardNumberFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 10) {
 				setCellValueFuelTypeFormat(wb, cell, oneCellValue);
-			} else if (columnIndex == 13) {
+			} else if (oneCellValue instanceof Double || columnIndex == 13) {
 				setCellValueDoubleFormat(wb, cell, oneCellValue);
 			} else if (columnIndex > 13 && columnIndex < 19) {
 				setCellValueFeeFormat(wb, cell, oneCellValue);
-			} else if (oneCellValue instanceof Boolean) {
-				cell.setCellValue((Boolean)oneCellValue);
-			} else if (oneCellValue instanceof Byte) {
-				cell.setCellValue((Byte)oneCellValue);
 			} else {
 				cell.setCellValue(oneCellValue.toString().toUpperCase());
 			}
@@ -292,22 +334,51 @@ public class FuelVendorLogUploadUtil {
 		cell.setCellStyle(style);
 	}
 
-	private void setCellValueTimeFormat(Cell cell, Object oneCellValue) {
+	private void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		
-		String [] timeArr = oneCellValue.toString().split(":");
-		String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
-		cell.setCellValue(cellValueStr);
+		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
+			String [] timeArr = oneCellValue.toString().split(":");
+			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
+			cell.setCellValue(cellValueStr);
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+			cell.setCellValue("00:00");
+		}
 	}
 
-	private void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue) throws ParseException {
-		System.out.println("Date = " + oneCellValue.toString());
-		Date actualDateFormat = new SimpleDateFormat("yyyy-MM-dd").parse(oneCellValue.toString());
-		String expectedDateFormatStr = new SimpleDateFormat("MM/dd/yy").format(actualDateFormat);
-		cell.setCellValue(new SimpleDateFormat("MM/dd/yy").parse(expectedDateFormatStr));
-
-		CellStyle style = wb.createCellStyle();
-		style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
-		cell.setCellStyle(style);
+	private void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		
+		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
+			Date actualDateFormat = new SimpleDateFormat("yyyy-MM-dd").parse(oneCellValue.toString());
+			String expectedDateFormatStr = expectedDateFormat.format(actualDateFormat);
+			cell.setCellValue(expectedDateFormat.parse(expectedDateFormatStr));
+	
+			CellStyle style = wb.createCellStyle();
+			style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
+			cell.setCellStyle(style);
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+			
+			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
+				Date invoiceDate = cell.getRow().getCell(0).getDateCellValue(); // invoiceDate
+				System.out.println("Invoice date = " + invoiceDate);
+				
+				Calendar c = Calendar.getInstance(); 
+				c.setTime(invoiceDate); 
+				c.add(Calendar.DATE, 1);
+				cell.setCellValue(c.getTime());
+				
+				System.out.println("Transaction date = " + c.getTime());
+			} else {
+				
+				System.out.println("Date = " + oneCellValue.toString());
+				Date actualDateFormat = new SimpleDateFormat("dd/MM/yy").parse(oneCellValue.toString());
+				String expectedDateFormatStr = expectedDateFormat.format(actualDateFormat);
+				cell.setCellValue(expectedDateFormat.parse(expectedDateFormatStr));
+			}
+	
+			CellStyle style = wb.createCellStyle();
+			style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
+			cell.setCellStyle(style);
+		}
 	}
 
 }

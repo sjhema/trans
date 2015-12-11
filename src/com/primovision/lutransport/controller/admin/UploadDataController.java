@@ -250,7 +250,7 @@ public class UploadDataController extends BaseController {
 			if (!StringUtils.isEmpty(file.getOriginalFilename())) 
 			{
 				String ext=	file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-				if(!(ext.equalsIgnoreCase(".xls")))
+				if(!(ext.equalsIgnoreCase(".xls")) && !(ext.equalsIgnoreCase(".xlsx")) )
                 {
                 	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
                 	return "admin/uploaddata/fuellog";
@@ -285,7 +285,7 @@ public class UploadDataController extends BaseController {
 	}
 	
 	private boolean isConversionRequired(Long fuelvendor) {
-		if (fuelvendor.longValue() == 11l) {
+		if (fuelvendor.longValue() == 11l || fuelvendor.longValue() == 12l) {
 			return true;
 		} else {
 			return false;
