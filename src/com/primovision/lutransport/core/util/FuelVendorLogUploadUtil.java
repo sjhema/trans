@@ -21,7 +21,6 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
 import com.primovision.lutransport.model.Driver;
