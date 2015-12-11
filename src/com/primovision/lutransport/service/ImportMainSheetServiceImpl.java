@@ -3174,6 +3174,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			result = "ERROR: " + cell.getErrorCellValue();
 			break;
 		case HSSFCell.CELL_TYPE_FORMULA:
+			
 			result = cell.getCellFormula();
 			break;
 		case HSSFCell.CELL_TYPE_NUMERIC:
@@ -3204,6 +3205,68 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return result.toString();
 	}
 
+	private Object getCellValue(HSSFCell cell, boolean resolveFormula) {
+		if (cell == null) {
+			return null;
+		}
+		Object result = null;
+		int cellType = cell.getCellType();
+		switch (cellType) {
+		case HSSFCell.CELL_TYPE_BLANK:
+			result = "";
+			break;
+		case HSSFCell.CELL_TYPE_BOOLEAN:
+			result = cell.getBooleanCellValue() ? Boolean.TRUE : Boolean.FALSE;
+			break;
+		case HSSFCell.CELL_TYPE_ERROR:
+			result = "ERROR: " + cell.getErrorCellValue();
+			break;
+		case HSSFCell.CELL_TYPE_FORMULA:
+			
+			switch(cell.getCachedFormulaResultType()) {
+            case HSSFCell.CELL_TYPE_NUMERIC:
+                System.out.println("Last evaluated as: " + cell.getNumericCellValue());
+                result = cell.getNumericCellValue();
+                break;
+            case HSSFCell.CELL_TYPE_STRING:
+                System.out.println("Last evaluated as \"" + cell.getRichStringCellValue() + "\"");
+                result = cell.getRichStringCellValue();
+                break;
+			}
+			
+			//result = cell.getCellFormula();
+			
+			
+			break;
+		case HSSFCell.CELL_TYPE_NUMERIC:
+			HSSFCellStyle cellStyle = cell.getCellStyle();
+			short dataFormat = cellStyle.getDataFormat();
+
+			// assumption is made that dataFormat = 14,
+			// when cellType is HSSFCell.CELL_TYPE_NUMERIC
+			// is equal to a DATE format.
+			if (dataFormat == 164) {
+				result = cell.getDateCellValue();
+			} else {
+				result = cell.getNumericCellValue();
+			}
+			break;
+		case HSSFCell.CELL_TYPE_STRING:
+			result = cell.getStringCellValue();
+			break;
+		default:
+			break;
+		}
+		if (result instanceof Double) {
+			return String.valueOf(((Double) result).longValue());
+		}
+		if (result instanceof Date) {
+			return result;
+		}
+		return result.toString();
+	}
+
+	
 	private boolean validTime(String cellValue) {
 		if (StringUtils.isEmpty(cellValue))
 			return false;
@@ -3493,7 +3556,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					}
 
-					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()));
+					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
 					if (cellValueObj != null) {
 						System.out.println("Adding " + cellValueObj.toString());
 					} else {

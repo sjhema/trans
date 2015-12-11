@@ -2,6 +2,8 @@ package com.primovision.lutransport.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -160,10 +162,19 @@ public class FuelVendorLogUploadUtil {
 
 	private InputStream createInputStream(HSSFWorkbook wb) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		//FileOutputStream fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+		FileOutputStream fOut;
+		try {
+			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+			wb.write(fOut);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		try {
 			wb.write(out);
-			//wb.write(fOut);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -195,6 +206,10 @@ public class FuelVendorLogUploadUtil {
 				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 5) { // transaction time 
 				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 			} else {
 				cell.setCellValue(oneCellValue.toString().toUpperCase());
 			}
@@ -206,9 +221,10 @@ public class FuelVendorLogUploadUtil {
 		
 		int columnIndex = cell.getColumnIndex();
 		
-		if (oneCellValue == null) {
-			cell.setCellValue(StringUtils.EMPTY);
-		} else {
+			if (oneCellValue == null) {
+				oneCellValue = StringUtils.EMPTY;
+			} 
+			
 			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
 				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 5) {
@@ -219,14 +235,13 @@ public class FuelVendorLogUploadUtil {
 				setCellValueCardNumberFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 10) {
 				setCellValueFuelTypeFormat(wb, cell, oneCellValue);
-			} else if (oneCellValue instanceof Double || columnIndex == 13) {
-				setCellValueDoubleFormat(wb, cell, oneCellValue);
-			} else if (columnIndex > 13 && columnIndex < 19) {
-				setCellValueFeeFormat(wb, cell, oneCellValue);
+			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex > 13 && columnIndex < 19) { // fee
+				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 			} else {
 				cell.setCellValue(oneCellValue.toString().toUpperCase());
 			}
-		}
 		
 	}
 
@@ -319,14 +334,17 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue) {
+	private void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (StringUtils.isEmpty(oneCellValue.toString())) {
+			oneCellValue = "0";
+		}
 		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
 		CellStyle style = wb.createCellStyle();
 		style.setDataFormat(wb.createDataFormat().getFormat("$#,#0.00"));
 		cell.setCellStyle(style);
 	}
 
-	private void setCellValueDoubleFormat(Workbook wb, Cell cell, Object oneCellValue) {
+	private void setCellValueDoubleFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
 		
 		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
 		CellStyle style = wb.createCellStyle();
@@ -358,7 +376,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			
 			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
-				Date invoiceDate = cell.getRow().getCell(0).getDateCellValue(); // invoiceDate
+				Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
 				System.out.println("Invoice date = " + invoiceDate);
 				
 				Calendar c = Calendar.getInstance(); 
