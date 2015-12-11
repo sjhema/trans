@@ -3553,7 +3553,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			int excludeLastRowsCount = 0;
 			if (fuelVendor.getName().equalsIgnoreCase("TCH")) {
 				excludeLastRowsCount = 1;
-			} else if (fuelVendor.getName().equalsIgnoreCase("DC FUEL WB")) {
+			} else if (fuelVendor.getName().equalsIgnoreCase("DC FUEL WB") || fuelVendor.getName().equalsIgnoreCase("DC FUEL LU")) {
 				excludeLastRowsCount = 4;
 			}
 			
