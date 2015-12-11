@@ -1990,31 +1990,37 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						if (override == false) {// StringUtils.isEmpty
 							/* if(!cardNo.isEmpty()){ */
 							if (!StringUtils.isEmpty(cardNo)) {
-								criterias.clear();
-
-								if (fuellog.getFuelvendor() != null)
-									criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
-								criterias.put("fuelcardNum", cardNo);
-								List<FuelCard> fuelcard = genericDAO.findByCriteria(FuelCard.class, criterias);
-								if (!fuelcard.isEmpty() && fuelcard.size() > 0) {
-									if (fuellog.getDriversid() != null && fuellog.getFuelvendor() != null) {
-										criterias.clear();
-										criterias.put("driver.id", fuellog.getDriversid().getId());
-										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
-										criterias.put("fuelcard.id", fuelcard.get(0).getId());
-										List<DriverFuelCard> driverfuelcard = genericDAO
-												.findByCriteria(DriverFuelCard.class, criterias);
-										if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
-											fuellog.setFuelcard(fuelcard.get(0));
-										else {
-											error = true;
-											lineError.append(
-													" Invalid  Fuel Card# for entered Fuel Vendor and Driver ,");
-										}
-									}
+								
+								if (handleExcludedCardNumberChecks(fuellog, cardNo)) {
+									// reset cardNo
+									cardNo = StringUtils.EMPTY;
 								} else {
-									error = true;
-									lineError.append(" Invalid Card Number,");
+									criterias.clear();
+	
+									if (fuellog.getFuelvendor() != null)
+										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
+									criterias.put("fuelcardNum", cardNo);
+									List<FuelCard> fuelcard = genericDAO.findByCriteria(FuelCard.class, criterias);
+									if (!fuelcard.isEmpty() && fuelcard.size() > 0) {
+										if (fuellog.getDriversid() != null && fuellog.getFuelvendor() != null) {
+											criterias.clear();
+											criterias.put("driver.id", fuellog.getDriversid().getId());
+											criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
+											criterias.put("fuelcard.id", fuelcard.get(0).getId());
+											List<DriverFuelCard> driverfuelcard = genericDAO
+													.findByCriteria(DriverFuelCard.class, criterias);
+											if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
+												fuellog.setFuelcard(fuelcard.get(0));
+											else {
+												error = true;
+												lineError.append(
+														" Invalid  Fuel Card# for entered Fuel Vendor and Driver ,");
+											}
+										}
+									} else {
+										error = true;
+										lineError.append(" Invalid Card Number,");
+									}
 								}
 							} else {
 								error = true;
@@ -2627,7 +2633,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							prop.put("invoiceNo", fuellog.getInvoiceNo());
 							prop.put("transactiondate", dateFormat1.format(fuellog.getTransactiondate()));
 							prop.put("transactiontime", fuellog.getTransactiontime());
-							prop.put("fuelcard", fuellog.getFuelcard().getId());
+							if (fuellog.getFuelcard() != null) {
+								prop.put("fuelcard", fuellog.getFuelcard().getId());
+							} 
 							prop.put("fueltype", fuellog.getFueltype());
 							prop.put("city", fuellog.getCity());
 							prop.put("gallons", fuellog.getGallons());
@@ -2715,6 +2723,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			}
 		}
 		return list;
+	}
+
+	private boolean handleExcludedCardNumberChecks(FuelLog fuellog, String cardNo) {
+		if (!StringUtils.equalsIgnoreCase("EXCLUDE_ERROR_CHECK", cardNo)) {
+			return false;
+		}
+		
+		System.out.println("\nOVerride card Number\n");
+		FuelCard fuelCard = null;
+		fuellog.setFuelcard(fuelCard);
+		return true;
 	}
 
 	@Override

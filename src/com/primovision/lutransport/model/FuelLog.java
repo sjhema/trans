@@ -448,8 +448,9 @@ public String getDriverFullName() {
 		if (getClass() != obj.getClass())
 			return false;
 		FuelLog other = (FuelLog) obj;
-			
-		if(other.getFuelcard().equals(this.getFuelcard()) && other.getAmount().equals(this.getAmount()) && 
+		
+//		if(other.getFuelcard().equals(this.getFuelcard()) && other.getAmount().equals(this.getAmount()) && 
+		if(other.getAmount().equals(this.getAmount()) &&
 				other.getCity().equalsIgnoreCase(this.getCity()) &&	other.getCompany().equals(this.getCompany()) 
 				&& other.getDiscounts().equals(this.getDiscounts()) && other.getDriversid().equals(this.getDriversid()) && 
 				other.getFees().equals(this.getFees()) && other.getTransactiondate().equals(this.getTransactiondate()) &&
@@ -460,8 +461,17 @@ public String getDriverFullName() {
 				other.getUnit().equals(this.getUnit()) && other.getUnitprice().equals(this.getUnitprice()) && 
 				other.getTransactiontime().equals(this.getTransactiontime())) 
 		{
-			
-			return true;
+			if (this.getFuelcard() == null && other.getFuelcard() == null) {
+				return true;
+			} else if (this.getFuelcard() == null || other.getFuelcard() == null) {
+				return false;
+			} else if(other.getFuelcard().equals(this.getFuelcard())) {
+				return true;
+			} else {
+				return false;
+			}
+		
+			//return true;
 		}
 		/*if (other.getOrigin()!=null && this.getOrigin()!=null 
 				&& other.getDestination()!=null && this.getDestination()!=null 

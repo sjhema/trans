@@ -34,6 +34,7 @@ public class FuelVendorLogUploadUtil {
 	GenericDAO genericDAO;
 	private static String VENDOR_TCH = "TCH";
 	private static String VENDOR_DCFUELWB = "DC FUEL WB";
+	private static String VENDOR_DCFUELLU = "DC FUEL LU";
 	
 	SimpleDateFormat expectedDateFormat = new SimpleDateFormat("MM/dd/yy");
 	
@@ -119,7 +120,7 @@ public class FuelVendorLogUploadUtil {
 		this.genericDAO = genericDAO;
 		
 		String vendorName = getVendorName(genericDAO, vendor);
-		LinkedHashMap<String, String> actualColumnListMap = vendorToFuelLogMapping.get(vendorName);
+		LinkedHashMap<String, String> actualColumnListMap = getVendorSpecificMapping(vendorName);
 		
 		List<LinkedList<Object>> tempData = importMainSheetService.importVendorSpecificFuelLog(is, actualColumnListMap, vendor);
 		System.out.println("Number of rows = " + tempData.size());
@@ -152,6 +153,14 @@ public class FuelVendorLogUploadUtil {
 		//return is;
 	}
 
+	private LinkedHashMap<String, String> getVendorSpecificMapping(String vendorName) {
+		if (vendorName.equalsIgnoreCase(VENDOR_DCFUELLU)) {
+			vendorName = VENDOR_DCFUELWB;
+		}
+		
+		return vendorToFuelLogMapping.get(vendorName);
+	}
+
 	private String getVendorName(GenericDAO genericDAO, Long vendor) {
 		Map criterias = new HashMap();
 		criterias.put("id", vendor);
@@ -163,7 +172,7 @@ public class FuelVendorLogUploadUtil {
 	private InputStream createInputStream(HSSFWorkbook wb) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		FileOutputStream fOut;
-		try {
+		/*try {
 			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
@@ -172,7 +181,8 @@ public class FuelVendorLogUploadUtil {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
+		
 		try {
 			wb.write(out);
 		} catch (IOException e) {
@@ -189,8 +199,8 @@ public class FuelVendorLogUploadUtil {
 		
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { // TCH
 			formatCellValueForTCH(wb, cell, oneCellValue, vendor);
-		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) { 
-			formatCellValueForDCFuelWB(wb, cell, oneCellValue, vendor);
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_DCFUELLU)) { 
+			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
 		}
 		
 	}
@@ -206,6 +216,8 @@ public class FuelVendorLogUploadUtil {
 				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 5) { // transaction time 
 				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex == 9) { // cardnumber 
+				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
 				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -232,7 +244,7 @@ public class FuelVendorLogUploadUtil {
 			} else if (columnIndex == 7 || columnIndex == 8) {
 				setCellValueDriverFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 9) {
-				setCellValueCardNumberFormat(wb, cell, oneCellValue);
+				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 			} else if (columnIndex == 10) {
 				setCellValueFuelTypeFormat(wb, cell, oneCellValue);
 			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
@@ -259,12 +271,21 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private void setCellValueCardNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
-		String cardNumber = oneCellValue.toString();
-		System.out.println("Incoming card number = " + cardNumber);
-		cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
-		System.out.println("TCH Formatted card number = " + cardNumber);
-		cell.setCellValue(cardNumber);
+	private void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		
+		if(vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+			if (StringUtils.isEmpty(oneCellValue.toString())) {
+				cell.setCellValue("EXCLUDE_ERROR_CHECK");
+			} else {
+				cell.setCellValue(oneCellValue.toString());
+			}
+		} else if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
+			String cardNumber = oneCellValue.toString();
+			System.out.println("Incoming card number = " + cardNumber);
+			cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
+			System.out.println("TCH Formatted card number = " + cardNumber);
+			cell.setCellValue(cardNumber);
+		}
 	}
 
 	private Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
