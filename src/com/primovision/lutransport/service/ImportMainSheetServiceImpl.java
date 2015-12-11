@@ -3462,6 +3462,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			Set<Entry<String, Integer>> keySet = orderedColIndexes.entrySet();
 			
 			System.out.println("Physical number of rows in Excel = " + sheet.getPhysicalNumberOfRows());
+			System.out.println("While reading values from vendor specific Excel Sheet: ");
 
 			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - 1; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
@@ -3478,29 +3479,22 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
 				while (iterator.hasNext()) {
 					Entry<String, Integer> entry = iterator.next();
+					
+					//if (entry.getValue() == -1 && !entry.getKey().equals("DRIVER FIRST NAME")) {
+				
+					if (entry.getValue() == -1) {
+						// corresponding column not found
+						rowObjects.add(StringUtils.EMPTY); 
+						continue;
+					}
 
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()));
 					if (cellValueObj != null) {
 						System.out.println("Adding " + cellValueObj.toString());
 					} else {
-						System.out.println("Value is null");
+						System.out.println("Adding NULL");
 					}
-
-					if (entry.getKey().equals("DRIVER LAST NAME")
-							&& (!orderedColIndexes.containsKey("DRIVER FIRST NAME"))) {
-						String[] nameArray = cellValueObj.toString().split("\\ ");
-
-						if (nameArray.length > 1) {
-							rowObjects.add(nameArray[1]);
-						} else {
-							rowObjects.add(StringUtils.EMPTY);
-						}
-						
-						rowObjects.add(nameArray[0]);
-					} else {
-						rowObjects.add(cellValueObj);
-					}
-
+					rowObjects.add(cellValueObj);
 				}
 
 				data.add(rowObjects);
@@ -3525,6 +3519,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		Iterator<Entry<String, String>> iterator = keySet.iterator();
 		while (iterator.hasNext()) {
 			Entry<String, String> entry = iterator.next();
+			
+			if (StringUtils.isEmpty(entry.getValue())) {
+				orderedColumnIndexesMap.put(entry.getKey(), -1);
+			}
+			
 			boolean foundExpectedColumn = false;
 			for (int i = startCellNumber; i < titleRow.getLastCellNum(); i++) {
 				String columnHeader = (String) getCellValue(((HSSFCell) titleRow.getCell(i)));
@@ -3542,9 +3541,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			if (!foundExpectedColumn) {
 				// throw error??
 				System.out.println("Could not find expected column " + entry.getValue());
+				orderedColumnIndexesMap.put(entry.getKey(), -1);
 			}
 		}
 
+		System.out.println("Ordered Column Indexes Map = " + orderedColumnIndexesMap);
 		return orderedColumnIndexesMap;
 	}
 

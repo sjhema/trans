@@ -104,7 +104,7 @@ public class FuelVendorLogUploadUtil {
 		
 		for (int i = 0; i < tempData.size(); i++) {
 			
-			System.out.println("Creating Row " + i);
+			System.out.println("Creating Row " + i + " with data = \n" + tempData.get(i));
 			int columnIndex = 0;
 			LinkedList<Object> oneRow = tempData.get(i);
 			Row row = sheet.createRow(rowIndex++);
@@ -167,9 +167,9 @@ public class FuelVendorLogUploadUtil {
 				setCellValueDateFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 5) {
 				setCellValueTimeFormat(cell, oneCellValue);
-			} /*else if (columnIndex == 7 || columnIndex == 8) {
+			} else if (columnIndex == 7 || columnIndex == 8) {
 				setCellValueDriverFormat(wb, cell, oneCellValue);
-			}*/ else if (columnIndex == 9) {
+			} else if (columnIndex == 9) {
 				setCellValueCardNumberFormat(wb, cell, oneCellValue);
 			} else if (columnIndex == 10) {
 				setCellValueFuelTypeFormat(wb, cell, oneCellValue);
@@ -194,7 +194,6 @@ public class FuelVendorLogUploadUtil {
 		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
 			sheet.setColumnWidth(columnHeaderIndex, 256*20);
 			Cell cell = headerRow.createCell(columnHeaderIndex++);
-			System.out.println("Setting cell value " + columnHeader);
 			cell.setCellValue(columnHeader);
 			style.setAlignment(CellStyle.ALIGN_CENTER);
 			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -229,8 +228,19 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 8) {
 			
 			Cell lastNameCell = cell.getRow().getCell(cell.getColumnIndex()-1);
+			
+			// split into firstname and lastname
+			String [] nameArr = lastNameCell.getStringCellValue().split("\\ ");
+			if (nameArr.length > 1) {
+				lastNameCell.setCellValue(nameArr[1]);
+				cell.setCellValue(nameArr[0]);
+			} else {
+				cell.setCellValue(StringUtils.EMPTY);
+			}
+			
+			// Logic for resetting the driver name to Empty if lastname / firstname not found in DB
 			// firstname 
-			criterias.put("firstName", driverName);
+			/*criterias.put("firstName", driverName);
 			Driver fname = genericDAO.getByCriteria(Driver.class, criterias);
 			if (fname == null) {
 				// no driver with this firstname is found, blank out the name
@@ -252,7 +262,7 @@ public class FuelVendorLogUploadUtil {
 				} else {
 					cell.setCellValue(driverName.toUpperCase());
 				}
-			}
+			} */
 		}
 	}
 
