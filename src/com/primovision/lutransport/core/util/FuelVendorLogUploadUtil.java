@@ -29,11 +29,12 @@ import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
 public class FuelVendorLogUploadUtil {
-	
 	GenericDAO genericDAO;
+	
 	private static String VENDOR_TCH = "TCH";
 	private static String VENDOR_DCFUELWB = "DC FUEL WB";
 	private static String VENDOR_DCFUELLU = "DC FUEL LU";
+	private static String VENDOR_QUARLES = "QUARLES";
 	
 	SimpleDateFormat expectedDateFormat = new SimpleDateFormat("MM/dd/yy");
 	
@@ -41,7 +42,6 @@ public class FuelVendorLogUploadUtil {
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
 	
 	static {
-		
 		expectedColumnList.add("VENDOR"); // 0
 		expectedColumnList.add("COMPANY"); // 1
 		expectedColumnList.add("INVOICED DATE"); // 2
@@ -65,7 +65,7 @@ public class FuelVendorLogUploadUtil {
 		// TCH
 		mapForTCH(expectedColumnList);
 		mapForDCFuelWB(expectedColumnList);
-
+		mapForQuarles(expectedColumnList);
 	}
 
 	private static void mapForTCH(LinkedList<String> expectedColumnList) {
@@ -112,6 +112,30 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total");
 		vendorToFuelLogMapping.put(VENDOR_DCFUELWB, actualColumnMap);
+	}
+	
+	private static void mapForQuarles(LinkedList<String> expectedColumnList) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+		
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Tran Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Card Desc");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Card No"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Product");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Site Desc"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "ST");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Units");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Total Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total Price");
+		vendorToFuelLogMapping.put(VENDOR_QUARLES, actualColumnMap);
 	}
 
 	public InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
@@ -226,6 +250,28 @@ public class FuelVendorLogUploadUtil {
 			}
 		}
 		
+	}
+	
+	private void formatCellValueForQuarles(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		int columnIndex = cell.getColumnIndex();
+		
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+		} else {
+			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex == 5) { // transaction time 
+				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex == 9) { // cardnumber 
+				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+			} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+			} else {
+				cell.setCellValue(oneCellValue.toString().toUpperCase());
+			}
+		}
 	}
 
 	private void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
