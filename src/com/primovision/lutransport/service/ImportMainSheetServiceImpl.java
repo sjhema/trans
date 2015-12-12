@@ -3550,14 +3550,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			criterias.put("id", vendor);
 			FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 			
-			int excludeLastRowsCount = 0;
+			/*int excludeLastRowsCount = 0;
 			if (fuelVendor.getName().equalsIgnoreCase("TCH")) {
 				excludeLastRowsCount = 1;
 			} else if (fuelVendor.getName().equalsIgnoreCase("DC FUEL WB") || fuelVendor.getName().equalsIgnoreCase("DC FUEL LU")) {
 				excludeLastRowsCount = 4;
-			}
+			}*/
 			
-			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - excludeLastRowsCount; i++) {
+			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows(); i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(fuelVendor.getName());

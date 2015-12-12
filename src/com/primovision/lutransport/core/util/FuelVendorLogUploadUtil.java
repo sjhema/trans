@@ -29,14 +29,13 @@ import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
 public class FuelVendorLogUploadUtil {
-	GenericDAO genericDAO;
-	
 	private static String VENDOR_TCH = "TCH";
 	private static String VENDOR_DCFUELWB = "DC FUEL WB";
 	private static String VENDOR_DCFUELLU = "DC FUEL LU";
-	private static String VENDOR_QUARLES = "QUARLES";
+	private static String VENDOR_QUARLES = "Quarles";
 	
-	SimpleDateFormat expectedDateFormat = new SimpleDateFormat("MM/dd/yy");
+	static String expectedDateFormatStr = "MM/dd/yy";
+	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
 	
 	static HashMap<String, LinkedHashMap<String, String>> vendorToFuelLogMapping = new HashMap<String, LinkedHashMap<String, String>>();
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
@@ -68,6 +67,18 @@ public class FuelVendorLogUploadUtil {
 		mapForQuarles(expectedColumnList);
 	}
 
+	public static boolean isConversionRequired(Long fuelvendor) {
+		if (fuelvendor.longValue() == 11l // TCH
+				|| fuelvendor.longValue() == 12l || fuelvendor.longValue() == 13l // DC
+				// Quarles
+				|| fuelvendor.longValue() == 3l || fuelvendor.longValue() == 15l || fuelvendor.longValue() == 9l
+				|| fuelvendor.longValue() == 7l || fuelvendor.longValue() == 6l) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	private static void mapForTCH(LinkedList<String> expectedColumnList) {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
@@ -138,10 +149,7 @@ public class FuelVendorLogUploadUtil {
 		vendorToFuelLogMapping.put(VENDOR_QUARLES, actualColumnMap);
 	}
 
-	public InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
-		
-		this.genericDAO = genericDAO;
-		
+	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
 		String vendorName = getVendorName(genericDAO, vendor);
 		LinkedHashMap<String, String> actualColumnListMap = getVendorSpecificMapping(vendorName);
 		
@@ -176,7 +184,7 @@ public class FuelVendorLogUploadUtil {
 		//return is;
 	}
 
-	private LinkedHashMap<String, String> getVendorSpecificMapping(String vendorName) {
+	private static LinkedHashMap<String, String> getVendorSpecificMapping(String vendorName) {
 		if (vendorName.equalsIgnoreCase(VENDOR_DCFUELLU)) {
 			vendorName = VENDOR_DCFUELWB;
 		}
@@ -184,7 +192,7 @@ public class FuelVendorLogUploadUtil {
 		return vendorToFuelLogMapping.get(vendorName);
 	}
 
-	private String getVendorName(GenericDAO genericDAO, Long vendor) {
+	private static String getVendorName(GenericDAO genericDAO, Long vendor) {
 		Map criterias = new HashMap();
 		criterias.put("id", vendor);
 		FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
@@ -192,11 +200,11 @@ public class FuelVendorLogUploadUtil {
 		return vendorName;
 	}
 
-	private InputStream createInputStream(HSSFWorkbook wb) {
+	private static InputStream createInputStream(HSSFWorkbook wb) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		FileOutputStream fOut;
 		/*try {
-			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -213,96 +221,99 @@ public class FuelVendorLogUploadUtil {
 			e.printStackTrace();
 		}
 	      
-	    InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
+	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
 		return targetStream;
 	}
 
-	private void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
+	private static void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
-		
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { // TCH
 			formatCellValueForTCH(wb, cell, oneCellValue, vendor);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_DCFUELLU)) { 
 			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
+		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
+			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
 		}
-		
 	}
 
-	private void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
-		
+	private static void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		int columnIndex = cell.getColumnIndex();
 		
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
-		} else {
-			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
-				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 5) { // transaction time 
-				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 9) { // cardnumber 
-				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
-			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
-				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex > 13 && columnIndex < 19) { // Fee
-				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-			} else {
-				cell.setCellValue(oneCellValue.toString().toUpperCase());
-			}
-		}
+			return;
+		} 
 		
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
 	}
 	
-	private void formatCellValueForQuarles(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForQuarles(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		int columnIndex = cell.getColumnIndex();
 		
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+			
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue);
+		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		} else {
-			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
-				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 5) { // transaction time 
-				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 9) { // cardnumber 
-				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
-			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
-				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex > 13 && columnIndex < 19) { // Fee
-				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-			} else {
-				cell.setCellValue(oneCellValue.toString().toUpperCase());
-			}
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
 	}
 
-	private void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
-		
+	private static void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
 		int columnIndex = cell.getColumnIndex();
 		
-			if (oneCellValue == null) {
-				oneCellValue = StringUtils.EMPTY;
-			} 
+		if (oneCellValue == null) {
+			oneCellValue = StringUtils.EMPTY;
+			return;
+		} 
 			
-			if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
-				setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 5) {
-				setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 7 || columnIndex == 8) {
-				setCellValueDriverFormat(wb, cell, oneCellValue);
-			} else if (columnIndex == 9) {
-				setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex == 10) {
-				setCellValueFuelTypeFormat(wb, cell, oneCellValue);
-			} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
-				setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
-			} else if (columnIndex > 13 && columnIndex < 19) { // fee
-				setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-			} else {
-				cell.setCellValue(oneCellValue.toString().toUpperCase());
-			}
-		
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) {
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) {
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue);
+		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
 	}
 
-	private void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
+	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
 		Row headerRow = sheet.createRow(0);
 		int columnHeaderIndex = 0;
 		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
@@ -316,8 +327,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		
+	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if(vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			if (StringUtils.isEmpty(oneCellValue.toString())) {
 				cell.setCellValue("EXCLUDE_ERROR_CHECK");
@@ -330,16 +340,18 @@ public class FuelVendorLogUploadUtil {
 			cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
 			System.out.println("TCH Formatted card number = " + cardNumber);
 			cell.setCellValue(cardNumber);
+		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
+			// No-op since card no. is in expected format
 		}
 	}
 
-	private Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
 		Cell cell = row.createCell(columnIndex);
 		sheet.setColumnWidth(columnIndex, 256*20);
 		return cell;
 	}
 	
-	private void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
 		Map<String, Object> criterias = new HashMap<String, Object>();
@@ -389,7 +401,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+	private static void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		String actualFuelType = oneCellValue.toString().toUpperCase();
 		if (actualFuelType.equals("ULSD")) {
 			cell.setCellValue("DSL");
@@ -400,47 +412,49 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
-		if (StringUtils.isEmpty(oneCellValue.toString())) {
+	private static void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
+		String feeStr = oneCellValue.toString();
+		if (StringUtils.isEmpty(feeStr)) {
 			oneCellValue = "0";
 		}
-		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
+		
+		if (StringUtils.startsWith(feeStr, "$")) {
+			feeStr = StringUtils.substring(feeStr, 1);
+		}
+		
+		cell.setCellValue(Double.parseDouble(feeStr));
 		CellStyle style = wb.createCellStyle();
 		style.setDataFormat(wb.createDataFormat().getFormat("$#,#0.00"));
 		cell.setCellStyle(style);
 	}
 
-	private void setCellValueDoubleFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
-		
+	private static void setCellValueDoubleFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
 		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
 		CellStyle style = wb.createCellStyle();
 		style.setDataFormat(wb.createDataFormat().getFormat("0.00"));
 		cell.setCellStyle(style);
 	}
 
-	private void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		
+	private static void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
 			String [] timeArr = oneCellValue.toString().split(":");
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			cell.setCellValue("00:00");
+		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
+			// No-op since time is in expected format
 		}
 	}
 
-	private void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		CellStyle style = wb.createCellStyle();
+		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));
+		cell.setCellStyle(style);
 		
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
-			Date actualDateFormat = new SimpleDateFormat("yyyy-MM-dd").parse(oneCellValue.toString());
-			String expectedDateFormatStr = expectedDateFormat.format(actualDateFormat);
-			cell.setCellValue(expectedDateFormat.parse(expectedDateFormatStr));
-	
-			CellStyle style = wb.createCellStyle();
-			style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
-			cell.setCellStyle(style);
+			cell.setCellValue(convertToExpectedDateFormat(oneCellValue.toString(), "yyyy-MM-dd"));
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
-			
 			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
 				Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
 				System.out.println("Invoice date = " + invoiceDate);
@@ -452,17 +466,17 @@ public class FuelVendorLogUploadUtil {
 				
 				System.out.println("Transaction date = " + c.getTime());
 			} else {
-				
 				System.out.println("Date = " + oneCellValue.toString());
-				Date actualDateFormat = new SimpleDateFormat("dd/MM/yy").parse(oneCellValue.toString());
-				String expectedDateFormatStr = expectedDateFormat.format(actualDateFormat);
-				cell.setCellValue(expectedDateFormat.parse(expectedDateFormatStr));
+				cell.setCellValue(convertToExpectedDateFormat(oneCellValue.toString(), "dd/MM/yy"));
 			}
-	
-			CellStyle style = wb.createCellStyle();
-			style.setDataFormat(wb.createDataFormat().getFormat("MM/dd/yy"));
-			cell.setCellStyle(style);
-		}
+		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
+			// No-op since date is in expected format
+		} 
 	}
-
+	
+	private static Date convertToExpectedDateFormat(String actualDateStr, String actualDateFormat) throws ParseException {
+		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
+		String expectedDateStr = expectedDateFormat.format(actualDate);
+		return expectedDateFormat.parse(expectedDateStr);
+	}
 }

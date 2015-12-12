@@ -245,8 +245,8 @@ public class UploadDataController extends BaseController {
 			
 			InputStream is = file.getInputStream();
 			
-			if (isConversionRequired(fuelvendor)) {
-				is = new FuelVendorLogUploadUtil().convertToGenericFuelLogFormat(is, fuelvendor, this.genericDAO, this.importMainSheetService);
+			if (FuelVendorLogUploadUtil.isConversionRequired(fuelvendor)) {
+				is = FuelVendorLogUploadUtil.convertToGenericFuelLogFormat(is, fuelvendor, this.genericDAO, this.importMainSheetService);
 			}
 			
 			str=importMainSheetService.importfuellogMainSheet(is,flag);
@@ -270,18 +270,6 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/fuellog";
 	}
 	
-	private boolean isConversionRequired(Long fuelvendor) {
-		if (fuelvendor.longValue() == 11l // TCH
-				|| fuelvendor.longValue() == 12l || fuelvendor.longValue() == 13l // DC
-				// Quarles
-				|| fuelvendor.longValue() == 3l || fuelvendor.longValue() == 15l || fuelvendor.longValue() == 9l
-				|| fuelvendor.longValue() == 7l || fuelvendor.longValue() == 6l) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	@RequestMapping("/ticket/upload.do")
 	public String ticketSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
