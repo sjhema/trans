@@ -2,6 +2,7 @@ package com.primovision.lutransport.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -231,8 +232,8 @@ public class FuelVendorLogUploadUtil {
 	private static InputStream createInputStream(HSSFWorkbook wb) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		FileOutputStream fOut;
-		/*try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+		try {
+			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -240,7 +241,7 @@ public class FuelVendorLogUploadUtil {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
 		try {
 			wb.write(out);
@@ -275,13 +276,17 @@ public class FuelVendorLogUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
-		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+		} else if (columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
@@ -289,6 +294,23 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
 		
+	}
+
+	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		setIntegerValue(cell, oneCellValue);
+	}
+
+	private static void setIntegerValue(Cell cell, Object oneCellValue) {
+		if (oneCellValue == null || (StringUtils.isEmpty(oneCellValue.toString()))) {
+			cell.setCellValue(StringUtils.EMPTY);
+		} else {
+			cell.setCellValue(Double.valueOf(oneCellValue.toString()).intValue());
+		}
+	}
+
+	private static void setCellValueInvoiceNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue,
+			String vendor) {
+		setIntegerValue(cell, oneCellValue);
 	}
 
 	private static void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
@@ -300,11 +322,15 @@ public class FuelVendorLogUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
-		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+		} else if (columnIndex == 13) {  // else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
@@ -322,6 +348,10 @@ public class FuelVendorLogUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
@@ -348,6 +378,10 @@ public class FuelVendorLogUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) {
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
@@ -476,9 +510,15 @@ public class FuelVendorLogUploadUtil {
 	private static void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String feeStr = oneCellValue.toString();
 		if (StringUtils.isEmpty(feeStr)) {
-			oneCellValue = "0";
+			feeStr = "0.0";
 		}
 		
+		/*if (!StringUtils.startsWith(feeStr, "$")) {
+			feeStr = "$" + feeStr;
+		}
+		
+		cell.setCellValue(feeStr);*/
+				
 		if (StringUtils.startsWith(feeStr, "$")) {
 			feeStr = StringUtils.substring(feeStr, 1);
 		}
@@ -504,7 +544,7 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(cellValueStr);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			cell.setCellValue("00:00");
-		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
+		} else if (StringUtils.contains(vendor, VENDOR_QUARLES) || StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			cell.setCellValue(timeStr);
 		}
 	}
@@ -515,14 +555,8 @@ public class FuelVendorLogUploadUtil {
 		cell.setCellStyle(style);
 		
 		String dateStr = oneCellValue.toString();
-		if (StringUtils.isEmpty(dateStr)) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		}
 		
-		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
-			cell.setCellValue(convertToExpectedDateFormat(dateStr, "yyyy-MM-dd"));
-		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
+		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
 				Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
 				System.out.println("Invoice date = " + invoiceDate);
@@ -535,11 +569,21 @@ public class FuelVendorLogUploadUtil {
 				System.out.println("Transaction date = " + c.getTime());
 			} else {
 				System.out.println("Date = " + oneCellValue.toString());
-				cell.setCellValue(convertToExpectedDateFormat(dateStr, "dd/MM/yy"));
+				cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
 			}
-		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
-			cell.setCellValue(dateStr);
-		} 
+		} else {
+			if (StringUtils.isEmpty(dateStr)) {
+				cell.setCellValue(StringUtils.EMPTY);
+			} else {
+				if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
+					cell.setCellValue(convertToExpectedDateFormat(dateStr, "yyyy-MM-dd"));
+				} else if (vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
+					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
+				} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) {
+					cell.setCellValue(dateStr);
+				}
+			}
+		}
 	}
 	
 	private static Date convertToExpectedDateFormat(String actualDateStr, String actualDateFormat) throws ParseException {

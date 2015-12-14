@@ -3269,15 +3269,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			} else {
 				result = cell.getNumericCellValue();
 			}
+			System.out.println("Numeric cell value == " + result);
 			break;
 		case HSSFCell.CELL_TYPE_STRING:
-			result = cell.getStringCellValue();
+			//result = cell.getStringCellValue();
+			result = cell.getRichStringCellValue();
+			System.out.println("String -> " + result);
 			break;
 		default:
 			break;
 		}
-		if (result instanceof Double) {
-			return String.valueOf(((Double) result).longValue());
+		
+		if (result instanceof Integer) {
+			return String.valueOf((Integer) result);
+		} else if (result instanceof Double) {
+			return String.valueOf(((Double) result)); //.longValue());
 		}
 		if (result instanceof Date) {
 			return result;
@@ -3550,7 +3556,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			criterias.put("id", vendor);
 			FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 			
-			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - 1; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(fuelVendor.getName());
@@ -3607,7 +3613,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			boolean foundExpectedColumn = false;
 			for (int i = startCellNumber; i < titleRow.getLastCellNum(); i++) {
 				String columnHeader = (String) getCellValue(((HSSFCell) titleRow.getCell(i)));
-				if (columnHeader.equalsIgnoreCase(entry.getValue())) {
+				if (columnHeader.trim().equalsIgnoreCase(entry.getValue().trim())) {
 					// match found
 					foundExpectedColumn = true;
 					// orderedColumnIndexes.add(i);
