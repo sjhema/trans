@@ -515,6 +515,11 @@ public class FuelVendorLogUploadUtil {
 		cell.setCellStyle(style);
 		
 		String dateStr = oneCellValue.toString();
+		if (StringUtils.isEmpty(dateStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
 			cell.setCellValue(convertToExpectedDateFormat(dateStr, "yyyy-MM-dd"));
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
