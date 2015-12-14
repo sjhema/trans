@@ -159,11 +159,11 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice#");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Number");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver’s Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "DriverLastName");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Comchek Card Number"); 
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Service");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Service Used");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Truck Stop City"); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Truck Stop State");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Number of Tractor Gallons");
