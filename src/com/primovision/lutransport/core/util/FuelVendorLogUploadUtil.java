@@ -33,6 +33,8 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_DCFUELWB = "DC FUEL WB";
 	private static String VENDOR_DCFUELLU = "DC FUEL LU";
 	private static String VENDOR_QUARLES = "Quarles";
+	private static String VENDOR_COMDATA_DREW = "COMDATA DREW";
+	private static String VENDOR_COMDATA_LU = "COMDATA LU";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -61,10 +63,10 @@ public class FuelVendorLogUploadUtil {
 		expectedColumnList.add("DISCOUNT"); // 17
 		expectedColumnList.add("AMOUNT"); // 18
 
-		// TCH
 		mapForTCH(expectedColumnList);
 		mapForDCFuelWB(expectedColumnList);
 		mapForQuarles(expectedColumnList);
+		mapForComData(expectedColumnList);
 	}
 
 	public static boolean isConversionRequired(Long fuelvendor) {
@@ -72,7 +74,8 @@ public class FuelVendorLogUploadUtil {
 				|| fuelvendor.longValue() == 12l || fuelvendor.longValue() == 13l // DC
 				// Quarles
 				|| fuelvendor.longValue() == 3l || fuelvendor.longValue() == 15l || fuelvendor.longValue() == 9l
-				|| fuelvendor.longValue() == 7l || fuelvendor.longValue() == 6l) {
+				|| fuelvendor.longValue() == 7l || fuelvendor.longValue() == 6l
+				|| fuelvendor.longValue() == 4l || fuelvendor.longValue() == 10l) {
 			return true;
 		} else {
 			return false;
@@ -148,6 +151,29 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total Price");
 		vendorToFuelLogMapping.put(VENDOR_QUARLES, actualColumnMap);
 	}
+	
+	private static void mapForComData(LinkedList<String> expectedColumnList) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice#");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver’s Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "DriverLastName");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Comchek Card Number"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Service");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Truck Stop City"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Truck Stop State");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Number of Tractor Gallons");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Tractor Fuel Price Per Gallon");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Cost of Tractor Fuel");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Fees for Fuel & Oil & Products");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Rebate Amount");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total Amount Due Comdata");
+		vendorToFuelLogMapping.put(VENDOR_COMDATA_DREW, actualColumnMap);
+	}
 
 	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
 		String vendorName = getVendorName(genericDAO, vendor);
@@ -187,6 +213,8 @@ public class FuelVendorLogUploadUtil {
 	private static LinkedHashMap<String, String> getVendorSpecificMapping(String vendorName) {
 		if (vendorName.equalsIgnoreCase(VENDOR_DCFUELLU)) {
 			vendorName = VENDOR_DCFUELWB;
+		} else if (vendorName.equalsIgnoreCase(VENDOR_COMDATA_LU)) {
+			vendorName = VENDOR_COMDATA_DREW;
 		}
 		
 		return vendorToFuelLogMapping.get(vendorName);
@@ -233,7 +261,34 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
 			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
+		} else if (StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
+			formatCellValueForComData(wb, cell, oneCellValue, vendor);
 		}
+	}
+
+	private static void formatCellValueForComData(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
+		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+		
 	}
 
 	private static void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
@@ -274,7 +329,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
-			setCellValueFuelTypeFormat(wb, cell, oneCellValue);
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -300,7 +355,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 9) {
 			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
-			setCellValueFuelTypeFormat(wb, cell, oneCellValue);
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // fee
@@ -360,8 +415,15 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 8) {
 			Cell lastNameCell = cell.getRow().getCell(cell.getColumnIndex()-1);
 			
+			String [] nameArr = null;
 			// split into firstname and lastname
-			String [] nameArr = lastNameCell.getStringCellValue().split("\\ ");
+			if (lastNameCell.getStringCellValue().contains(",")) {
+				// split based on comma
+				nameArr = lastNameCell.getStringCellValue().split(",");
+			} else {
+				nameArr = lastNameCell.getStringCellValue().split("\\ ");
+			}
+			
 			if (nameArr.length > 1) {
 				lastNameCell.setCellValue(nameArr[1]);
 				cell.setCellValue(nameArr[0]);
@@ -397,12 +459,15 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private static void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+	private static void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String actualFuelType = oneCellValue.toString();
-		if (actualFuelType.equalsIgnoreCase("ULSD")) {
+		
+		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S")) {
 			cell.setCellValue("DSL");
 		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
 			cell.setCellValue("Regular");
+		} else if (actualFuelType.equalsIgnoreCase("B")) {
+			cell.setCellValue("DEF");
 		} else {
 			cell.setCellValue(actualFuelType);
 		}
@@ -452,7 +517,7 @@ public class FuelVendorLogUploadUtil {
 		String dateStr = oneCellValue.toString();
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
 			cell.setCellValue(convertToExpectedDateFormat(dateStr, "yyyy-MM-dd"));
-		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
 			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
 				Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
 				System.out.println("Invoice date = " + invoiceDate);
