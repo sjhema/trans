@@ -36,6 +36,7 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_QUARLES = "Quarles";
 	private static String VENDOR_COMDATA_DREW = "COMDATA DREW";
 	private static String VENDOR_COMDATA_LU = "COMDATA LU";
+	private static String VENDOR_SUNOCO = "SUNOCO";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -68,6 +69,7 @@ public class FuelVendorLogUploadUtil {
 		mapForDCFuelWB(expectedColumnList);
 		mapForQuarles(expectedColumnList);
 		mapForComData(expectedColumnList);
+		mapForSunoco(expectedColumnList);
 	}
 
 	public static boolean isConversionRequired(Long fuelvendor) {
@@ -76,7 +78,10 @@ public class FuelVendorLogUploadUtil {
 				// Quarles
 				|| fuelvendor.longValue() == 3l || fuelvendor.longValue() == 15l || fuelvendor.longValue() == 9l
 				|| fuelvendor.longValue() == 7l || fuelvendor.longValue() == 6l
-				|| fuelvendor.longValue() == 4l || fuelvendor.longValue() == 10l) {
+				// Comdata
+				|| fuelvendor.longValue() == 4l || fuelvendor.longValue() == 10l
+				// Sunoco
+				|| fuelvendor.longValue() == 17l || fuelvendor.longValue() == 1l || fuelvendor.longValue() == 5l) {
 			return true;
 		} else {
 			return false;
@@ -153,6 +158,32 @@ public class FuelVendorLogUploadUtil {
 		vendorToFuelLogMapping.put(VENDOR_QUARLES, actualColumnMap);
 	}
 	
+	private static void mapForSunoco(LinkedList<String> expectedColumnList) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+	
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice#");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Last Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver First Name");
+		// TODO Account Number + last 5 digits
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Card Number"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Product");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Merchant City"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Merchant State / Province");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Units");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Cost");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Total Fuel Cost");
+		// TODO: Service Cost + Other Cost + Total Non-Fuel Cost = Fees
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Service Cost");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Discount");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Net Cost");
+		vendorToFuelLogMapping.put(VENDOR_SUNOCO, actualColumnMap);
+	}
+	
 	private static void mapForComData(LinkedList<String> expectedColumnList) {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
@@ -218,6 +249,8 @@ public class FuelVendorLogUploadUtil {
 			vendorName = VENDOR_COMDATA_DREW;
 		} else if (StringUtils.contains(vendorName, VENDOR_QUARLES)) {
 			vendorName = VENDOR_QUARLES;
+		} else if (StringUtils.contains(vendorName, VENDOR_SUNOCO)) {
+			vendorName = VENDOR_SUNOCO;
 		}
 		
 		return vendorToFuelLogMapping.get(vendorName);
@@ -232,17 +265,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		/*FileOutputStream fOut;
-		try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
-			wb.write(fOut);
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -255,10 +278,24 @@ public class FuelVendorLogUploadUtil {
 	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
 		return targetStream;
 	}
+	
+	private static void dumpToFile(HSSFWorkbook wb) {
+		FileOutputStream fOut;
+		try {
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+			wb.write(fOut);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	private static void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
-		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { // TCH
+		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { 
 			formatCellValueForTCH(wb, cell, oneCellValue, vendor);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_DCFUELLU)) { 
 			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
@@ -266,6 +303,8 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
 		} else if (StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			formatCellValueForComData(wb, cell, oneCellValue, vendor);
+		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
+			formatCellValueForSunoco(wb, cell, oneCellValue, vendor);
 		}
 	}
 
@@ -342,6 +381,36 @@ public class FuelVendorLogUploadUtil {
 	}
 	
 	private static void formatCellValueForQuarles(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
+		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+	}
+	
+	private static void formatCellValueForSunoco(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -514,12 +583,6 @@ public class FuelVendorLogUploadUtil {
 		if (StringUtils.isEmpty(feeStr)) {
 			feeStr = "0.0";
 		}
-		
-		/*if (!StringUtils.startsWith(feeStr, "$")) {
-			feeStr = "$" + feeStr;
-		}
-		
-		cell.setCellValue(feeStr);*/
 				
 		if (StringUtils.startsWith(feeStr, "$")) {
 			feeStr = StringUtils.substring(feeStr, 1);
