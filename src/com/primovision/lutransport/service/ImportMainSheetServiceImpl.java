@@ -3556,7 +3556,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			criterias.put("id", vendor);
 			FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 			
-			for (int i = titleRow.getRowNum() + 1; i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
+			boolean stopParsing = false;
+			for (int i = titleRow.getRowNum() + 1; !stopParsing && i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(fuelVendor.getName());
@@ -3573,8 +3574,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						rowObjects.add(StringUtils.EMPTY); 
 						continue;
 					}
-
+					
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
+					
+					if (cellValueObj != null && cellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
+						System.out.println("Received END_OF_DATA");
+						stopParsing = true;
+						break;
+					}
+					
 					if (cellValueObj != null) {
 						System.out.println("Adding " + cellValueObj.toString());
 					} else {
