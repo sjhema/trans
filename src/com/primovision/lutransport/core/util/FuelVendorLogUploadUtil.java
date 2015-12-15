@@ -216,6 +216,8 @@ public class FuelVendorLogUploadUtil {
 			vendorName = VENDOR_DCFUELWB;
 		} else if (vendorName.equalsIgnoreCase(VENDOR_COMDATA_LU)) {
 			vendorName = VENDOR_COMDATA_DREW;
+		} else if (StringUtils.contains(vendorName, VENDOR_QUARLES)) {
+			vendorName = VENDOR_QUARLES;
 		}
 		
 		return vendorToFuelLogMapping.get(vendorName);
@@ -230,10 +232,9 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		FileOutputStream fOut;
+		/*FileOutputStream fOut;
 		try {
-			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -241,8 +242,9 @@ public class FuelVendorLogUploadUtil {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			wb.write(out);
 		} catch (IOException e) {
@@ -427,7 +429,7 @@ public class FuelVendorLogUploadUtil {
 			System.out.println("TCH Formatted card number = " + cardNumber);
 			cell.setCellValue(cardNumber);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
-			cell.setCellValue(cardNumber);
+			setIntegerValue(cell, oneCellValue);
 		}
 	}
 
@@ -550,10 +552,6 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
-		CellStyle style = wb.createCellStyle();
-		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));
-		cell.setCellStyle(style);
-		
 		String dateStr = oneCellValue.toString();
 		
 		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
@@ -580,10 +578,14 @@ public class FuelVendorLogUploadUtil {
 				} else if (vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
 					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
 				} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) {
-					cell.setCellValue(dateStr);
+					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
 				}
 			}
 		}
+		
+		CellStyle style = wb.createCellStyle();
+		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));
+		cell.setCellStyle(style);
 	}
 	
 	private static Date convertToExpectedDateFormat(String actualDateStr, String actualDateFormat) throws ParseException {

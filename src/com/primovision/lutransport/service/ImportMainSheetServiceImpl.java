@@ -3556,7 +3556,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			criterias.put("id", vendor);
 			FuelVendor fuelVendor = genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false).get(0);
 			
-			for (int i = titleRow.getRowNum() + 1; i < sheet.getPhysicalNumberOfRows() - 1; i++) {
+			for (int i = titleRow.getRowNum() + 1; i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(fuelVendor.getName());
