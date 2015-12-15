@@ -44,6 +44,8 @@ public class FuelVendorLogUploadUtil {
 	static HashMap<String, LinkedHashMap<String, String>> vendorToFuelLogMapping = new HashMap<String, LinkedHashMap<String, String>>();
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
 	
+	static HashMap<String, String> vendorToDateFormatMapping = new HashMap<String, String>();
+	
 	static {
 		expectedColumnList.add("VENDOR"); // 0
 		expectedColumnList.add("COMPANY"); // 1
@@ -65,6 +67,14 @@ public class FuelVendorLogUploadUtil {
 		expectedColumnList.add("DISCOUNT"); // 17
 		expectedColumnList.add("AMOUNT"); // 18
 
+		vendorToDateFormatMapping.put(VENDOR_TCH, "yyyy-MM-dd");
+		vendorToDateFormatMapping.put(VENDOR_COMDATA_LU, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_COMDATA_DREW, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_DCFUELLU, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_DCFUELWB, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_QUARLES, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_SUNOCO, "MM/dd/yyyy");
+		
 		mapForTCH(expectedColumnList);
 		mapForDCFuelWB(expectedColumnList);
 		mapForQuarles(expectedColumnList);
@@ -265,7 +275,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -282,7 +292,7 @@ public class FuelVendorLogUploadUtil {
 	private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -601,9 +611,40 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		
+		String vendorDateFormat = vendorToDateFormatMapping.get(vendor);
+		
+		if (oneCellValue instanceof Date) {
+			System.out.println("Incoming date is a Date Object.");
+			vendorDateFormat = "EEE MMM dd hh:mm:ss z yyyy";
+		}
+		
 		String dateStr = oneCellValue.toString();
 		
-		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) && cell.getColumnIndex() == 4) {
+			 // Transaction Date, fill in value = InvoiceDate + 1Day
+			Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
+			System.out.println("Invoice date = " + invoiceDate);
+			
+			if (invoiceDate == null) {
+				cell.setCellValue(StringUtils.EMPTY);
+			} else {
+				Calendar c = Calendar.getInstance(); 
+				c.setTime(invoiceDate); 
+				c.add(Calendar.DATE, 1);
+				cell.setCellValue(c.getTime());
+				System.out.println("Transaction date = " + c.getTime());
+			}
+			
+		} else {
+			if (StringUtils.isEmpty(dateStr)) {
+				cell.setCellValue(StringUtils.EMPTY);
+			} else {
+				cell.setCellValue(convertToExpectedDateFormat(dateStr, vendorDateFormat));
+			}
+		}
+		
+		/*if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			if (cell.getColumnIndex() == 4) { // Transaction Date, fill in value = InvoiceDate + 1Day
 				Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
 				System.out.println("Invoice date = " + invoiceDate);
@@ -622,6 +663,7 @@ public class FuelVendorLogUploadUtil {
 			if (StringUtils.isEmpty(dateStr)) {
 				cell.setCellValue(StringUtils.EMPTY);
 			} else {
+				
 				if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
 					cell.setCellValue(convertToExpectedDateFormat(dateStr, "yyyy-MM-dd"));
 				} else if (vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
@@ -632,7 +674,7 @@ public class FuelVendorLogUploadUtil {
 					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yyyy"));
 				}
 			}
-		}
+		}*/
 		
 		CellStyle style = wb.createCellStyle();
 		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));

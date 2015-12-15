@@ -3261,10 +3261,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFCellStyle cellStyle = cell.getCellStyle();
 			short dataFormat = cellStyle.getDataFormat();
 
+			System.out.println("Data format = " + dataFormat);
 			// assumption is made that dataFormat = 14,
 			// when cellType is HSSFCell.CELL_TYPE_NUMERIC
 			// is equal to a DATE format.
-			if (dataFormat == 164) {
+			if (dataFormat == 165) {
 				result = cell.getDateCellValue();
 			} else {
 				result = cell.getNumericCellValue();
@@ -3580,6 +3581,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					if (cellValueObj != null && cellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
 						System.out.println("Received END_OF_DATA");
 						stopParsing = true;
+						rowObjects.clear();
 						break;
 					}
 					
@@ -3591,7 +3593,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					rowObjects.add(cellValueObj);
 				}
 
-				data.add(rowObjects);
+				if (!stopParsing) {
+					data.add(rowObjects);
+				}
 			}
 
 		} catch (IOException e) {
