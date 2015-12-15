@@ -344,8 +344,14 @@ public class FuelVendorLogUploadUtil {
 	private static void setIntegerValue(Cell cell, Object oneCellValue) {
 		if (oneCellValue == null || (StringUtils.isEmpty(oneCellValue.toString()))) {
 			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String cellValueStr = oneCellValue.toString();
+		if (!StringUtils.contains(cellValueStr, ".")) {
+			cell.setCellValue(cellValueStr);
 		} else {
-			cell.setCellValue(Double.valueOf(oneCellValue.toString()).intValue());
+			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
 		}
 	}
 
