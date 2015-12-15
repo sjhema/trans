@@ -139,7 +139,7 @@ public class FuelVendorLogUploadUtil {
 		int expectedColumnStartIndex = 2;
 		
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Number");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Tran Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Time");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
@@ -265,7 +265,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		dumpToFile(wb);
+		//dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
