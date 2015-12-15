@@ -1669,8 +1669,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
 								if (driver == null) {
 									error = true;
-									lineError.append("Unit is blank,");
+									lineError.append("Unit is blank (check driver name),");
 								} else {
+									// HEMA: Added
+									fuellog.setDriversid(driver);
+									fuellog.setTerminal(driver.getTerminal());
 									String transdate = null;
 
 									if (validDate(getCellValue(row.getCell(4)))) {
@@ -1954,6 +1957,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										}
 									}
 								} catch (Exception ex) {
+									ex.printStackTrace();
 									log.warn(ex.getMessage());
 								}
 
@@ -3265,7 +3269,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			// assumption is made that dataFormat = 14,
 			// when cellType is HSSFCell.CELL_TYPE_NUMERIC
 			// is equal to a DATE format.
-			if (dataFormat == 165) {
+			if (dataFormat == 165 || dataFormat == 164 || dataFormat == 14) {
 				result = cell.getDateCellValue();
 			} else {
 				result = cell.getNumericCellValue();

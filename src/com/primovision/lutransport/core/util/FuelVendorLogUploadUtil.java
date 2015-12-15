@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -70,8 +72,8 @@ public class FuelVendorLogUploadUtil {
 		vendorToDateFormatMapping.put(VENDOR_TCH, "yyyy-MM-dd");
 		vendorToDateFormatMapping.put(VENDOR_COMDATA_LU, "MM/dd/yy");
 		vendorToDateFormatMapping.put(VENDOR_COMDATA_DREW, "MM/dd/yy");
-		vendorToDateFormatMapping.put(VENDOR_DCFUELLU, "MM/dd/yy");
-		vendorToDateFormatMapping.put(VENDOR_DCFUELWB, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_DCFUELLU, "MM/dd/yyyy");
+		vendorToDateFormatMapping.put(VENDOR_DCFUELWB, "MM/dd/yyyy");
 		vendorToDateFormatMapping.put(VENDOR_QUARLES, "MM/dd/yy");
 		vendorToDateFormatMapping.put(VENDOR_SUNOCO, "MM/dd/yyyy");
 		
@@ -191,6 +193,11 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Service Cost");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Discount");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Net Cost");
+		
+		actualColumnMap.put("Account Number", "Account Number");
+		actualColumnMap.put("Other Cost", "Other Cost");
+		actualColumnMap.put("Total Non-Fuel Cost", "Total Non-Fuel Cost");
+		
 		vendorToFuelLogMapping.put(VENDOR_SUNOCO, actualColumnMap);
 	}
 	
@@ -240,8 +247,12 @@ public class FuelVendorLogUploadUtil {
 			Row row = sheet.createRow(rowIndex++);
 			
 			for (Object oneCellValue : oneRow) {
+				if (columnIndex >= expectedColumnList.size()) { // For vendors where more than required columns are read from excel
+					break;
+				}
 				System.out.println("Creating Column @ " + columnIndex + " with value = " + oneCellValue);
 				Cell cell = createExcelCell(sheet, row, columnIndex);
+				oneCellValue = consolidateDataForVendors(wb, cell, oneRow, oneCellValue, vendorName);
 				formatCellValueForVendor(wb, cell, oneCellValue, vendorName);
 				columnIndex++;
 			}
@@ -252,7 +263,42 @@ public class FuelVendorLogUploadUtil {
 		//return is;
 	}
 
+	private static Object consolidateDataForVendors(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String vendor) {
+		if (!StringUtils.contains(vendor, VENDOR_SUNOCO)) {
+			return oneCellValue;
+		}
+		
+		if (cell.getColumnIndex() == 9) { // Card Number
+			String cardNumber = oneRow.get(9) == null ? StringUtils.EMPTY : oneRow.get(9).toString();
+			cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
+			
+			int accountNumberIndex = expectedColumnList.size();
+			String accountNumber = oneRow.get(accountNumberIndex) == null ? StringUtils.EMPTY : oneRow.get(accountNumberIndex).toString();
+			
+			return accountNumber + cardNumber;
+		} else if (cell.getColumnIndex() == 16) { // fees
+			// Service Cost + Other Cost + Total Non-Fuel Cost = Fees
+			String serviceCost = oneRow.get(16) == null ? "0.0" : oneRow.get(16).toString();
+			
+			int otherCostIndex = expectedColumnList.size() + 1;
+			String otherCost = oneRow.get(otherCostIndex) == null ? "0.0" : oneRow.get(otherCostIndex).toString();
+			
+			int nonFuelCostIndex = otherCostIndex + 1;
+			String nonFuelCost = oneRow.get(nonFuelCostIndex) == null ? "0.0" : oneRow.get(nonFuelCostIndex).toString();
+			
+			BigDecimal fees = new BigDecimal(serviceCost).add(new BigDecimal(otherCost)).add(new BigDecimal(nonFuelCost));
+			return fees.toPlainString();
+		}
+		
+		return oneCellValue;
+	}
+
 	private static LinkedHashMap<String, String> getVendorSpecificMapping(String vendorName) {
+		String commonVendorName = getCommonVendorName(vendorName);
+		return vendorToFuelLogMapping.get(commonVendorName);
+	}
+
+	private static String getCommonVendorName(String vendorName) {
 		if (vendorName.equalsIgnoreCase(VENDOR_DCFUELLU)) {
 			vendorName = VENDOR_DCFUELWB;
 		} else if (vendorName.equalsIgnoreCase(VENDOR_COMDATA_LU)) {
@@ -262,8 +308,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (StringUtils.contains(vendorName, VENDOR_SUNOCO)) {
 			vendorName = VENDOR_SUNOCO;
 		}
-		
-		return vendorToFuelLogMapping.get(vendorName);
+		return vendorName;
 	}
 
 	private static String getVendorName(GenericDAO genericDAO, Long vendor) {
@@ -312,9 +357,9 @@ public class FuelVendorLogUploadUtil {
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
 			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
 		} else if (StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
-			formatCellValueForComData(wb, cell, oneCellValue, vendor);
+			formatCellValueForComData(wb, cell, oneCellValue, VENDOR_COMDATA_DREW);
 		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
-			formatCellValueForSunoco(wb, cell, oneCellValue, vendor);
+			formatCellValueForSunoco(wb, cell, oneCellValue, VENDOR_SUNOCO);
 		}
 	}
 
@@ -433,6 +478,7 @@ public class FuelVendorLogUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
+		
 		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 3) {
@@ -612,7 +658,9 @@ public class FuelVendorLogUploadUtil {
 
 	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		
+		System.out.println("Incoming vendor = " + vendor);
 		String vendorDateFormat = vendorToDateFormatMapping.get(vendor);
+		System.out.println("Value = " + vendorDateFormat);
 		
 		if (oneCellValue instanceof Date) {
 			System.out.println("Incoming date is a Date Object.");
