@@ -486,7 +486,7 @@ public class FuelVendorLogUploadUtil {
 
 	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String cardNumber = oneCellValue.toString();
-		if(vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
+		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)) {
 			if (StringUtils.isEmpty(cardNumber)) {
 				cell.setCellValue("EXCLUDE_ERROR_CHECK");
 			} else {
@@ -499,6 +499,9 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(cardNumber);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
 			setIntegerValue(cell, oneCellValue);
+		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
+			// TODO: Account Number + last 5 digits of Card Number
+			cell.setCellValue(cardNumber);
 		}
 	}
 
@@ -511,62 +514,39 @@ public class FuelVendorLogUploadUtil {
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
-		Map<String, Object> criterias = new HashMap<String, Object>();
-		
 		if (columnIndex == 7) { // lastname
-			// put the value as is, validation can be done after getting the firstname @ columnIndex=8
-			cell.setCellValue(driverName.toUpperCase());
+			// Put the value as is, validation can be done after getting the firstname @ columnIndex=8
+			cell.setCellValue(StringUtils.upperCase(driverName));
+			return;
+		}  
+		
+		if (columnIndex == 8) { // firstname
+			if (!StringUtils.isEmpty(driverName)) {
+				cell.setCellValue(StringUtils.upperCase(driverName));
+				return;
+			}
 			
-		} else if (columnIndex == 8) {
-			Cell lastNameCell = cell.getRow().getCell(cell.getColumnIndex()-1);
-			
+			Cell lastNameCell = cell.getRow().getCell(7);
 			String [] nameArr = null;
-			// split into firstname and lastname
+			// Split into firstname and lastname
 			if (lastNameCell.getStringCellValue().contains(",")) {
-				// split based on comma
+				// Split based on comma
 				nameArr = lastNameCell.getStringCellValue().split(",");
 			} else {
 				nameArr = lastNameCell.getStringCellValue().split("\\ ");
 			}
 			
 			if (nameArr.length > 1) {
+				cell.setCellValue(nameArr[0]); // firstname
 				lastNameCell.setCellValue(nameArr[1]);
-				cell.setCellValue(nameArr[0]);
 			} else {
 				cell.setCellValue(StringUtils.EMPTY);
 			}
-			
-			// Logic for resetting the driver name to Empty if lastname / firstname not found in DB
-			// firstname 
-			/*criterias.put("firstName", driverName);
-			Driver fname = genericDAO.getByCriteria(Driver.class, criterias);
-			if (fname == null) {
-				// no driver with this firstname is found, blank out the name
-				System.out.println("Driver not found, setting it to EMPTY");
-				
-				cell.setCellValue(StringUtils.EMPTY); // firstname = EMPTY
-				lastNameCell.setCellValue(StringUtils.EMPTY); // lastname = EMPTY
-				
-			} else { // first name is valid, check the lastname
-				criterias.clear();
-				criterias.put("lastName", lastNameCell.getStringCellValue());
-				Driver lname = genericDAO.getByCriteria(Driver.class, criterias);
-				if (lname == null) {
-					// no driver with this lastname is found, blank out the name
-					System.out.println("Driver not found, setting it to EMPTY");
-
-					cell.setCellValue(StringUtils.EMPTY);
-					lastNameCell.setCellValue(StringUtils.EMPTY); // lastname = EMPTY
-				} else {
-					cell.setCellValue(driverName.toUpperCase());
-				}
-			} */
 		}
 	}
 
 	private static void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String actualFuelType = oneCellValue.toString();
-		
 		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S")) {
 			cell.setCellValue("DSL");
 		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
@@ -584,7 +564,7 @@ public class FuelVendorLogUploadUtil {
 			feeStr = "0.0";
 		}
 				
-		if (StringUtils.startsWith(feeStr, "$")) {
+		if (StringUtils.startsWith(feeStr, "$") || StringUtils.startsWith(feeStr, "-")) {
 			feeStr = StringUtils.substring(feeStr, 1);
 		}
 		
@@ -603,7 +583,7 @@ public class FuelVendorLogUploadUtil {
 
 	private static void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String timeStr = oneCellValue.toString();
-		if (vendor.equalsIgnoreCase(VENDOR_TCH)) {
+		if (vendor.equalsIgnoreCase(VENDOR_TCH) || StringUtils.contains(vendor, VENDOR_SUNOCO)) {
 			String [] timeArr = timeStr.split(":");
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
@@ -642,6 +622,8 @@ public class FuelVendorLogUploadUtil {
 					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
 				} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) {
 					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yy"));
+				} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) {
+					cell.setCellValue(convertToExpectedDateFormat(dateStr, "MM/dd/yyyy"));
 				}
 			}
 		}
