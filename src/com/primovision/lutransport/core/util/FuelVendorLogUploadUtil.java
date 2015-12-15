@@ -209,7 +209,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Number");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver’s Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "DriverLastName");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Comchek Card Number"); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Service Used");
@@ -320,7 +320,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		dumpToFile(wb);
+		//dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -356,7 +356,7 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
 			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
-		} else if (StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
+		} else if (StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_DREW) || StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_LU) ) { 
 			formatCellValueForComData(wb, cell, oneCellValue, VENDOR_COMDATA_DREW);
 		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
 			formatCellValueForSunoco(wb, cell, oneCellValue, VENDOR_SUNOCO);
@@ -594,16 +594,24 @@ public class FuelVendorLogUploadUtil {
 			if (lastNameCell.getStringCellValue().contains(",")) {
 				// Split based on comma
 				nameArr = lastNameCell.getStringCellValue().split(",");
+				if (nameArr.length > 1) {
+					cell.setCellValue(nameArr[1]); // firstname
+					lastNameCell.setCellValue(nameArr[0]);
+				} else {
+					lastNameCell.setCellValue(StringUtils.EMPTY);
+					cell.setCellValue(nameArr[0]); // firstname
+				}
 			} else {
 				nameArr = lastNameCell.getStringCellValue().split("\\ ");
+				if (nameArr.length > 1) {
+					cell.setCellValue(nameArr[0]); // firstname
+					lastNameCell.setCellValue(nameArr[1]);
+				} else {
+					cell.setCellValue(StringUtils.EMPTY);
+				}
 			}
 			
-			if (nameArr.length > 1) {
-				cell.setCellValue(nameArr[0]); // firstname
-				lastNameCell.setCellValue(nameArr[1]);
-			} else {
-				cell.setCellValue(StringUtils.EMPTY);
-			}
+			
 		}
 	}
 
