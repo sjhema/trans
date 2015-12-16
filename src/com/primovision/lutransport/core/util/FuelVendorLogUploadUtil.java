@@ -589,29 +589,28 @@ public class FuelVendorLogUploadUtil {
 			}
 			
 			Cell lastNameCell = cell.getRow().getCell(7);
+			String lastNameCellValue = lastNameCell.getStringCellValue();
 			String [] nameArr = null;
 			// Split into firstname and lastname
-			if (lastNameCell.getStringCellValue().contains(",")) {
+			if (lastNameCellValue.contains(",")) {
 				// Split based on comma
-				nameArr = lastNameCell.getStringCellValue().split(",");
+				nameArr = lastNameCellValue.split(",");
 				if (nameArr.length > 1) {
 					cell.setCellValue(nameArr[1]); // firstname
 					lastNameCell.setCellValue(nameArr[0]);
 				} else {
-					lastNameCell.setCellValue(StringUtils.EMPTY);
 					cell.setCellValue(nameArr[0]); // firstname
+					lastNameCell.setCellValue(StringUtils.EMPTY);
 				}
 			} else {
-				nameArr = lastNameCell.getStringCellValue().split("\\ ");
+				nameArr = lastNameCellValue.split("\\ ");
 				if (nameArr.length > 1) {
 					cell.setCellValue(nameArr[0]); // firstname
-					lastNameCell.setCellValue(nameArr[1]);
+					lastNameCell.setCellValue(StringUtils.substringAfter(lastNameCellValue, " ")); // lastname can have spaces
 				} else {
 					cell.setCellValue(StringUtils.EMPTY);
 				}
 			}
-			
-			
 		}
 	}
 
