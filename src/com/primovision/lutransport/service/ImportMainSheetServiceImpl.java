@@ -22,6 +22,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3265,11 +3266,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFCellStyle cellStyle = cell.getCellStyle();
 			short dataFormat = cellStyle.getDataFormat();
 
-			System.out.println("Data format = " + dataFormat);
+			System.out.println("Data format for " + cell.getColumnIndex() + " = " + dataFormat);
 			// assumption is made that dataFormat = 14,
 			// when cellType is HSSFCell.CELL_TYPE_NUMERIC
 			// is equal to a DATE format.
-			if (dataFormat == 165 || dataFormat == 164 || dataFormat == 14) {
+			//if (dataFormat == 165 || dataFormat == 164 || dataFormat == 14) {
+			if (DateUtil.isCellDateFormatted(cell)) {
 				result = cell.getDateCellValue();
 			} else {
 				result = cell.getNumericCellValue();
