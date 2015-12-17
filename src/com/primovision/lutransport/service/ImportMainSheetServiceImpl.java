@@ -1406,7 +1406,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, noRollbackFor={Exception.class})
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<String> importfuellogMainSheet(InputStream is, Boolean override) throws Exception {
 		// initializing the InputStream from a file using
 		// POIFSFileSystem, before converting the result
