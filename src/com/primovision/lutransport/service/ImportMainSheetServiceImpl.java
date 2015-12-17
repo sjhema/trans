@@ -2806,20 +2806,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		// could not set using Ticket, DriverFuelLog, Odometer, try to set the driver using Active flag
-		return getRecentDriver(drivers) ;
-	}
-
-	private Driver getRecentDriver(List<Driver> drivers) {
-		
-		Driver mostRecentDriver = null;
-		for (Driver driver : drivers) {
-			if (driver.getCreatedAt().after(mostRecentDriver.getCreatedAt())) {
-				mostRecentDriver = driver;
-			}
-		}
-		
-		System.out.println("<<Custom code for Driver>>: Most Recent driver ID = " + mostRecentDriver.getId());
-		return mostRecentDriver;
+		// already sorted in desc order of ID
+		System.out.println("<<Custom code for Driver>>: Most Recent driver ID = " + drivers.get(0).getId());
+		return drivers.get(0);
+		//return getRecentDriver(drivers) ;
 	}
 
 	private boolean setUnitNumberInFuelLogRefactored(Map criterias, HSSFRow row, FuelLog fuellog, StringBuffer lineError, String unit) {
@@ -2931,7 +2921,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		criterias.clear();
 		criterias.put("firstName", firstName);
 		criterias.put("lastName", lastName);
-		List<Driver> driver = genericDAO.findByCriteria(Driver.class, criterias);
+		List<Driver> driver = genericDAO.findByCriteria(Driver.class, criterias, "id", true);
 		return driver;
 	}
 
