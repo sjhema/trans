@@ -1406,7 +1406,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, noRollbackFor={Exception.class})
 	public List<String> importfuellogMainSheet(InputStream is, Boolean override) throws Exception {
 		// initializing the InputStream from a file using
 		// POIFSFileSystem, before converting the result
@@ -1437,6 +1437,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			StringBuffer lineError;
 
 			while (rows.hasNext()) {
+				System.out.println("Parsing row..");
 				boolean error = false;
 				buffer = new StringBuffer();
 				int cellCount = 0;
@@ -1945,7 +1946,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										if (driver == null) {
 											error = true;
 											lineError.append("Invalid Driver,");
-											throw new Exception("Invalid Driver");
+											//throw new Exception("Invalid Driver");
 										} else {
 											fuellog.setDriversid(driver);
 											fuellog.setTerminal(driver.getTerminal());
@@ -2718,7 +2719,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			e.printStackTrace();
 		}
 
+		System.out.println("Done here.. " + errorcount);
 		if (errorcount == 0) {
+			System.out.println("Error count = 0");
 			for (FuelLog fuelog : fuellogs) {
 				String ticktQuery = "select obj from Ticket obj where obj.driver=" + fuelog.getDriversid().getId()
 						+ " and obj.loadDate <='" + drvdf.format(fuelog.getTransactiondate())
@@ -2747,8 +2750,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					fuelog.setUnitNum(vehObj.getUnitNum());
 
 				genericDAO.saveOrUpdate(fuelog);
-			}
+			} 
+		} else {
+			System.out.println("Line Error = " + list );
 		}
+		
+		System.out.println("Returning list");
 		return list;
 	}
 	
@@ -2994,7 +3001,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	private Odometer getOdometerForDriver(String listOfDrivers, String transdate) {
 		String odometerQuery = "select obj from Odometer obj where "
 				+ "obj.recordDate='" + transdate 
-				+ "' and obj.driver=IN ("
+				+ "' and obj.driver IN ("
 				+ listOfDrivers + ")";
 		
 		System.out.println("Select Odomoeter with list of drivers -> " + odometerQuery);
@@ -3024,7 +3031,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	private DriverFuelLog getDriverFuelLogForDriver(String listOfDrivers, String transdate) {
 		String driveFuelLogquery = "select obj from DriverFuelLog obj where  "
 				+ "obj.transactionDate='" + transdate 
-				+ "' and obj.driver= IN ("
+				+ "' and obj.driver IN ("
 				+ listOfDrivers + ")";
 		
 		System.out.println("Select DriverFuelLog with list of drivers -> " + driveFuelLogquery);
