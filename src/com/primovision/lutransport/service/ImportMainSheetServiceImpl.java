@@ -1665,10 +1665,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							String lastName = ((String) getCellValue(row.getCell(7)));
 							String firstName = ((String) getCellValue(row.getCell(8)));
 							if (!lastName.isEmpty() && !firstName.isEmpty()) {
-								criterias.clear();
-								criterias.put("firstName", firstName);
-								criterias.put("lastName", lastName);
-								Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
+								Driver driver = getDriverObjectFromName(criterias, firstName, lastName, row);
 								if (driver == null) {
 									error = true;
 									lineError.append("Unit is blank (check driver name),");
@@ -1944,11 +1941,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											}
 										}
 									} else {
-										criterias.clear();
-										System.out.println("Firstname = " + firstName + ", lastname = " + lastName);
-										criterias.put("firstName", firstName);
-										criterias.put("lastName", lastName);
-										Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
+										Driver driver = getDriverObjectFromName(criterias, firstName, lastName, row);
 										if (driver == null) {
 											error = true;
 											lineError.append("Invalid Driver,");
@@ -2007,13 +2000,25 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 									if (fuellog.getFuelvendor() != null)
 										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
 									criterias.put("fuelcardNum", cardNo);
+									System.out.println("Criterias for getting fuelcard = " + "fuelvendor.id = " + fuellog.getFuelvendor().getId() + ", fuelcardNum = " + cardNo);
 									List<FuelCard> fuelcard = genericDAO.findByCriteria(FuelCard.class, criterias);
 									if (!fuelcard.isEmpty() && fuelcard.size() > 0) {
 										if (fuellog.getDriversid() != null && fuellog.getFuelvendor() != null) {
+											
+											// HEMA: Added to get fuel card using IN clause for driver
+											String firstName = fuellog.getDriversid().getFirstName();
+											String lastName = fuellog.getDriversid().getLastName();
+											List<Driver> listOfDrivers = getDriversFromName(criterias, lastName, firstName);
+											String listOfDriversStr = getCommaSeparatedListOfDriverID(listOfDrivers);
+
 											criterias.clear();
-											criterias.put("driver.id", fuellog.getDriversid().getId());
+											//criterias.put("driver.id", fuellog.getDriversid().getId());
+											criterias.put("driver.id", listOfDriversStr);
 											criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
 											criterias.put("fuelcard.id", fuelcard.get(0).getId());
+											
+											System.out.println("Criterias for choosing card number -> DriverID: " + listOfDriversStr + ", FuelVendorID: " + fuellog.getFuelvendor().getId() + ", FuelCardID: " + fuelcard.get(0).getId());
+											
 											List<DriverFuelCard> driverfuelcard = genericDAO
 													.findByCriteria(DriverFuelCard.class, criterias);
 											if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
@@ -2045,8 +2050,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								List<FuelCard> fuelcard = genericDAO.findByCriteria(FuelCard.class, criterias);
 								if (!fuelcard.isEmpty() && fuelcard.size() > 0) {
 									if (fuellog.getDriversid() != null && fuellog.getFuelvendor() != null) {
+										// HEMA: Added to get fuel card using IN clause for driver
+										String firstName = fuellog.getDriversid().getFirstName();
+										String lastName = fuellog.getDriversid().getLastName();
+										List<Driver> listOfDrivers = getDriversFromName(criterias, lastName, firstName);
+										String listOfDriversStr = getCommaSeparatedListOfDriverID(listOfDrivers);
+
 										criterias.clear();
-										criterias.put("driver.id", fuellog.getDriversid().getId());
+										//criterias.put("driver.id", fuellog.getDriversid().getId());
+										criterias.put("driver.id", listOfDriversStr);
 										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
 										criterias.put("fuelcard.id", fuelcard.get(0).getId());
 										List<DriverFuelCard> driverfuelcard = genericDAO
@@ -2732,6 +2744,69 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return list;
 	}
 	
+	private Driver getDriverObjectFromName(Map criterias, String firstName, String lastName, HSSFRow row) {
+		
+		/*// Existing Buggy code
+		criterias.clear();
+		System.out.println("Firstname = " + firstName + ", lastname = " + lastName);
+		criterias.put("firstName", firstName);
+		criterias.put("lastName", lastName);
+		Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
+		
+		return driver; */
+		
+		List<Driver> drivers = getDriversFromName(criterias, lastName, firstName);
+
+		if (drivers.size() == 0) { // no driver, continue to existing flow
+			System.out.println("<<Custom code for Driver>>: No driver matching firstname = " + firstName + ", lastname = " + lastName + " was found.");
+			return null;
+		}
+		
+		if (drivers.size() == 1) { // exactly 1 matching driver, continue to existing flow
+			System.out.println("<<Custom code for Driver>>: Exactly 1 matching driver was found with id = " + drivers.get(0).getId());
+			return drivers.get(0);
+		}
+		
+		// more than 1 driver found
+		return retrieveActualDriver(drivers, row);
+	}
+
+	private Driver retrieveActualDriver(List<Driver> drivers, HSSFRow row) {
+		String transdate = getTransactionDateFromExcel(row);
+		String listOfDrivers = getCommaSeparatedListOfDriverID(drivers);
+		
+		Ticket ticket = getTicketForDriver(listOfDrivers, transdate);
+		if(ticket != null) { // got matching ticket
+			return ticket.getDriver();
+		}
+		
+		DriverFuelLog driverFuelLog = getDriverFuelLogForDriver(listOfDrivers, transdate);
+		if(driverFuelLog != null) { // got matching DriverFuelLog 
+			return driverFuelLog.getDriver();
+		}
+		
+		Odometer odometer = getOdometerForDriver(listOfDrivers, transdate);
+		if(odometer != null) { // got matching Odometer
+			return odometer.getDriver();
+		}
+		
+		// could not set using Ticket, DriverFuelLog, Odometer, try to set the driver using Active flag
+		return getRecentDriver(drivers) ;
+	}
+
+	private Driver getRecentDriver(List<Driver> drivers) {
+		
+		Driver mostRecentDriver = null;
+		for (Driver driver : drivers) {
+			if (driver.getCreatedAt().after(mostRecentDriver.getCreatedAt())) {
+				mostRecentDriver = driver;
+			}
+		}
+		
+		System.out.println("<<Custom code for Driver>>: Most Recent driver ID = " + mostRecentDriver.getId());
+		return mostRecentDriver;
+	}
+
 	private boolean setUnitNumberInFuelLogRefactored(Map criterias, HSSFRow row, FuelLog fuellog, StringBuffer lineError, String unit) {
 		boolean isError = false;
 
@@ -2898,6 +2973,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	}
 	
 	private boolean setFuelLogDetailsUsingOdometer(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		Odometer matchingOdometer = getOdometerForDriver(listOfDrivers, transdate);
+		if (matchingOdometer == null) {
+			return false;
+		}
+		fuelLog.setDriversid(matchingOdometer.getDriver());
+		fuelLog.setTerminal(matchingOdometer.getTerminal());
+		fuelLog.setUnit(matchingOdometer.getTruck());
+		return true;
+	}
+
+	private Odometer getOdometerForDriver(String listOfDrivers, String transdate) {
 		String odometerQuery = "select obj from Odometer obj where "
 				+ "obj.recordDate='" + transdate 
 				+ "' and obj.driver=IN ("
@@ -2907,17 +2993,27 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		List<Odometer> driverOdometer = genericDAO.executeSimpleQuery(odometerQuery);
 		
 		if (driverOdometer.size() == 0) {
-			return false;
+			return null;
 		} 
 		
 		Odometer matchingOdometer = driverOdometer.get(0);
-		fuelLog.setDriversid(matchingOdometer.getDriver());
-		fuelLog.setTerminal(matchingOdometer.getTerminal());
-		fuelLog.setUnit(matchingOdometer.getTruck());
-		return true;
+		System.out.println("<<Custom code for Driver>>: Matching Odometer = " + matchingOdometer.getId());
+		return matchingOdometer;
 	}
 
 	private boolean setFuelLogDetailsUsingDriverFuelLog(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		DriverFuelLog matchingDriverFuelLog = getDriverFuelLogForDriver(listOfDrivers, transdate);
+		if (matchingDriverFuelLog == null) {
+			return false;
+		}
+		fuelLog.setDriversid(matchingDriverFuelLog.getDriver());
+		fuelLog.setTerminal(matchingDriverFuelLog.getTerminal());
+		fuelLog.setUnit(matchingDriverFuelLog.getTruck());
+		
+		return true;
+	}
+
+	private DriverFuelLog getDriverFuelLogForDriver(String listOfDrivers, String transdate) {
 		String driveFuelLogquery = "select obj from DriverFuelLog obj where  "
 				+ "obj.transactionDate='" + transdate 
 				+ "' and obj.driver= IN ("
@@ -2927,15 +3023,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		List<DriverFuelLog> driverFuelLog = genericDAO.executeSimpleQuery(driveFuelLogquery);
 		
 		if (driverFuelLog.size() == 0) {
-			return false; // could not set
+			return null; // could not set
 		} 
 		
 		DriverFuelLog matchingDriverFuelLog = driverFuelLog.get(0);
-		fuelLog.setDriversid(matchingDriverFuelLog.getDriver());
-		fuelLog.setTerminal(matchingDriverFuelLog.getTerminal());
-		fuelLog.setUnit(matchingDriverFuelLog.getTruck());
-		
-		return true;
+		System.out.println("<<Custom code for Driver>>: Matching DriverFuelLog ID = " + matchingDriverFuelLog.getId());
+		return matchingDriverFuelLog;
 	}
 
 	private boolean setFuelLogDetailsUsingTicket(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
@@ -2970,20 +3063,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	}
 
 	private boolean setFuelLogUsingDriver(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
-		String driverquery = "select obj from Ticket obj where "
-				+ "obj.loadDate<='" + transdate
-				+ "' and obj.unloadDate>='" + transdate 
-				+ "' and obj.driver IN ("
-				+ listOfDrivers + ")";
-		System.out.println("Select Ticket with list of drivers -> " + driverquery);
-		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
-		
-		if (tickets.size() == 0) { // no matching tickets found
+		Ticket matchingTicket = getTicketForDriver(listOfDrivers, transdate);
+		if (matchingTicket == null) {
 			return false;
-		} 
+		}
 		
-		// set Driver, Terminal, Vehicle
-		Ticket matchingTicket = tickets.get(0);
 		fuelLog.setDriversid(matchingTicket.getDriver());
 		fuelLog.setTerminal(matchingTicket.getTerminal());
 		
@@ -2995,6 +3079,24 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		fuelLog.setUnit(matchingTicket.getVehicle());
 		return true;
+	}
+
+	private Ticket getTicketForDriver(String listOfDrivers, String transdate) {
+		String driverquery = "select obj from Ticket obj where "
+				+ "obj.loadDate<='" + transdate
+				+ "' and obj.unloadDate>='" + transdate 
+				+ "' and obj.driver IN ("
+				+ listOfDrivers + ")";
+		System.out.println("<<Custom code for Driver>>: Select Ticket with list of drivers -> " + driverquery);
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
+		
+		if (tickets.size() == 0) { // no matching tickets found
+			return null;
+		} 
+		
+		Ticket matchingTicket = tickets.get(0);
+		System.out.println("<<Custom code for Driver>>: Matching Ticket ID = " + matchingTicket.getId());
+		return matchingTicket;
 	}
 
 	private String getCommaSeparatedListOfDriverID(List<Driver> drivers) {
@@ -3011,6 +3113,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		if (validDate(getCellValue(row.getCell(4)))) {
 			transdate = dateFormat.format(((Date) getCellValue(row.getCell(4))).getTime());
 		}
+		
+		System.out.println("<<Custom code for Driver>>: Transaction date = " + transdate);
 		return transdate;
 	}
 
