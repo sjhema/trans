@@ -1657,6 +1657,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 					String unit = ((String) getCellValue(row.getCell(6)));
 					// if(override==false){
+					//error = setUnitNumberInFuelLog(criterias, row, fuellog, lineError, error, unit);
 					try {
 						if (StringUtils.isEmpty(unit)) {
 
@@ -1970,7 +1971,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						lineError.append("Unit,");
 						log.warn(ex.getMessage());
 					}
-
+ 
+					
 					// FOR FUEL CARD NUMBER
 					String cardNo = ((String) getCellValue(row.getCell(9)));
 					/*
@@ -2727,6 +2729,288 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			}
 		}
 		return list;
+	}
+	
+	private boolean setUnitNumberInFuelLogRefactored(Map criterias, HSSFRow row, FuelLog fuellog, StringBuffer lineError, String unit) {
+		boolean isError = false;
+
+		try {
+			String lastName = ((String) getCellValue(row.getCell(7)));
+			String firstName = ((String) getCellValue(row.getCell(8)));
+
+			// Unit is EMPTY, Driver Name is EMPTY
+			if(StringUtils.isEmpty(unit) && StringUtils.isEmpty(lastName) && StringUtils.isEmpty(firstName)) {
+				isError = true;
+				lineError.append("Unit is empty, Driver is empty");
+				return isError;
+			}
+	
+			// if unit number is NOT EMPTY
+			if(!StringUtils.isEmpty(unit)) {
+				String transdate = getTransactionDateFromExcel(row);
+				if (!setVehicleInFuelLogFromUnitNumber(row, transdate, fuellog)) {
+					isError = true;
+					lineError.append("no such Vehicle,");
+					return isError;
+				} // else : able to set the unit number, proceed down to set driver
+			} // else : derive unit number using driver, so first proceed down to set driver
+			
+			
+			// If driverName is NOT EMPTY
+			isError = setDriverAndOrUnitInFuelLog(criterias, row, fuellog, lineError, lastName, firstName, unit); 
+			
+			/*if (StringUtils.isEmpty(unit)) {
+				isError = true;
+				lineError.append("Unit is blank, No matching Ticket, Fuel Log,  Odometer entry for given driver");
+				return isError;
+				
+			} */
+			
+		} catch (Exception ex) {
+			isError = true;
+			lineError.append("Unit,");
+			log.warn(ex.getMessage());
+		}
+		return isError;
+	}
+
+	private boolean setDriverAndOrUnitInFuelLog(Map criterias, HSSFRow row, FuelLog fuellog, StringBuffer lineError,
+			String lastName, String firstName, String unit) {
+		
+		boolean isError = false;
+		
+		List<Driver> driver = new ArrayList<Driver>();
+		
+		if (!lastName.isEmpty() && !firstName.isEmpty()) { // user has given driver name 
+			driver = getDriversFromName(criterias, lastName, firstName);
+			
+			if (driver.size() == 0) { // No drivers found for given name, do not try to derive name, send error
+				isError = true;
+				lineError.append("Invalid Driver,");
+				return isError ;
+			} 
+		}
+		
+		// driver -> can be 0 , 1 , > 1
+		return setDriverAndOrUnitUsingNameInFuelLog(criterias, row, fuellog, lineError, lastName, firstName, driver, unit);
+	
+	}
+
+	private boolean setDriverAndOrUnitUsingNameInFuelLog(Map criterias, HSSFRow row, FuelLog fuellog, StringBuffer lineError, String lastName,
+			String firstName, List<Driver> driver, String unit) {
+			
+		boolean isError = false;
+		String listOfDrivers = null;
+		// 1 or more drivers found
+		if (driver.size() > 0) {
+			listOfDrivers = getCommaSeparatedListOfDriverID(driver);
+		}
+		
+		String transdate = getTransactionDateFromExcel(row);
+		
+		// pass the Stringbuffer lineError -> to capture the right error
+		
+		if (setFuelLogDetailsUsingTicket(listOfDrivers, transdate, fuellog, unit)) {
+			// driver, terminal, unit set using ticket, so return
+			return isError;
+		}
+	
+		if (setFuelLogDetailsUsingDriverFuelLog(listOfDrivers, transdate, fuellog, unit)) {
+			// driver, terminal, unit set using driverfuellog, so return
+			return isError;
+		}
+		
+		if (setFuelLogDetailsUsingOdometer(listOfDrivers, transdate, fuellog, unit)) {
+			// driver, terminal, unit set using Odometer, so return
+			return isError;
+		}
+		
+		// could not set using Ticket, DriverFuelLog, Odometer, try to set the driver using Active flag
+		if (setActiveDriverInFuelLog(criterias, fuellog, lastName, firstName)) {
+			// could set the right driver using active flag
+			return isError;
+		}
+		
+		isError = true;
+		lineError.append("Invalid Driver,");
+		return isError;
+	}
+
+	private List<Driver> getDriversFromName(Map criterias, String lastName, String firstName) {
+		criterias.clear();
+		criterias.put("firstName", firstName);
+		criterias.put("lastName", lastName);
+		List<Driver> driver = genericDAO.findByCriteria(Driver.class, criterias);
+		return driver;
+	}
+
+	private boolean setActiveDriverInFuelLog(Map criterias, FuelLog fuellog, String lastName,
+			String firstName) {
+		boolean error;
+		criterias.clear();
+		criterias.put("firstName", firstName);
+		criterias.put("lastName", lastName);
+		criterias.put("status", 1);
+		List<Driver> activeDrivers = genericDAO.findByCriteria(Driver.class, criterias);
+		if (activeDrivers.size() == 0) {
+			// no drivers found
+			return false;
+		} else {
+			// take first one blindly !! :(
+			fuellog.setDriversid(activeDrivers.get(0));
+			fuellog.setTerminal(activeDrivers.get(0).getTerminal());
+			return true;
+		}
+	}
+
+	private boolean setVehicleInFuelLogFromUnitNumber(HSSFRow row, String transdate, FuelLog fuelLog) {
+		
+		String vehicleQuery = "Select obj from Vehicle obj where obj.type=1 and obj.unit="
+				+ Integer.parseInt((String) getCellValue(row.getCell(6))) + " and obj.validFrom<='"
+				+ transdate + "' and obj.validTo>='" + transdate + "'";
+
+		System.out.println("******* The vehicle query for fuel upload is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		
+		if (vehicleList == null || vehicleList.size() == 0) {
+			System.out.println("Entered here ");
+			return true;
+		} else {
+			fuelLog.setUnit(vehicleList.get(0));
+			return true;
+		}
+	}
+
+	private Vehicle getVehicleInFuelLogFromUnitNumber(String unit, String transdate) {
+		String vehicleQuery = "Select obj from Vehicle obj where obj.type=1 and obj.unit="
+				+ Integer.parseInt(unit) + " and obj.validFrom<='"
+				+ transdate + "' and obj.validTo>='" + transdate + "'";
+
+		System.out.println("******* The vehicle query for fuel upload is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		
+		if (vehicleList == null || vehicleList.size() == 0) {
+			return null;
+		} else {
+			return vehicleList.get(0);
+		}
+	}
+	
+	private boolean setFuelLogDetailsUsingOdometer(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		String odometerQuery = "select obj from Odometer obj where "
+				+ "obj.recordDate='" + transdate 
+				+ "' and obj.driver=IN ("
+				+ listOfDrivers + ")";
+		
+		System.out.println("Select Odomoeter with list of drivers -> " + odometerQuery);
+		List<Odometer> driverOdometer = genericDAO.executeSimpleQuery(odometerQuery);
+		
+		if (driverOdometer.size() == 0) {
+			return false;
+		} 
+		
+		Odometer matchingOdometer = driverOdometer.get(0);
+		fuelLog.setDriversid(matchingOdometer.getDriver());
+		fuelLog.setTerminal(matchingOdometer.getTerminal());
+		fuelLog.setUnit(matchingOdometer.getTruck());
+		return true;
+	}
+
+	private boolean setFuelLogDetailsUsingDriverFuelLog(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		String driveFuelLogquery = "select obj from DriverFuelLog obj where  "
+				+ "obj.transactionDate='" + transdate 
+				+ "' and obj.driver= IN ("
+				+ listOfDrivers + ")";
+		
+		System.out.println("Select DriverFuelLog with list of drivers -> " + driveFuelLogquery);
+		List<DriverFuelLog> driverFuelLog = genericDAO.executeSimpleQuery(driveFuelLogquery);
+		
+		if (driverFuelLog.size() == 0) {
+			return false; // could not set
+		} 
+		
+		DriverFuelLog matchingDriverFuelLog = driverFuelLog.get(0);
+		fuelLog.setDriversid(matchingDriverFuelLog.getDriver());
+		fuelLog.setTerminal(matchingDriverFuelLog.getTerminal());
+		fuelLog.setUnit(matchingDriverFuelLog.getTruck());
+		
+		return true;
+	}
+
+	private boolean setFuelLogDetailsUsingTicket(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		
+		if (StringUtils.isEmpty(listOfDrivers)) {
+			// retrieve and set using unit
+			return setFuelLogUsingUnit(listOfDrivers, transdate, fuelLog, unit);
+		} else {
+			return setFuelLogUsingDriver(listOfDrivers, transdate, fuelLog, unit);
+		}
+	}
+
+	private boolean setFuelLogUsingUnit(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		
+		Vehicle vehicle = getVehicleInFuelLogFromUnitNumber(unit, transdate);
+		String driverquery = "select obj from Ticket obj where "
+				+ "obj.loadDate<='" + transdate + "' and obj.unloadDate>='" + transdate
+				+ "' and obj.vehicle=" + vehicle.getId();
+		System.out.println("******** query is " + driverquery);
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
+		if (tickets.size() == 0) { // no matching tickets found
+			return false;
+		}
+		
+		// set Driver, Terminal, Vehicle
+		Ticket matchingTicket = tickets.get(0);
+		fuelLog.setDriversid(matchingTicket.getDriver());
+		fuelLog.setTerminal(matchingTicket.getTerminal());
+		fuelLog.setUnit(matchingTicket.getVehicle());
+		
+		return false;
+	}
+
+	private boolean setFuelLogUsingDriver(String listOfDrivers, String transdate, FuelLog fuelLog, String unit) {
+		String driverquery = "select obj from Ticket obj where "
+				+ "obj.loadDate<='" + transdate
+				+ "' and obj.unloadDate>='" + transdate 
+				+ "' and obj.driver IN ("
+				+ listOfDrivers + ")";
+		System.out.println("Select Ticket with list of drivers -> " + driverquery);
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
+		
+		if (tickets.size() == 0) { // no matching tickets found
+			return false;
+		} 
+		
+		// set Driver, Terminal, Vehicle
+		Ticket matchingTicket = tickets.get(0);
+		fuelLog.setDriversid(matchingTicket.getDriver());
+		fuelLog.setTerminal(matchingTicket.getTerminal());
+		
+		if (!StringUtils.isEmpty(unit)) {
+			// validate if ticket.unit == unit
+			System.out.println("Unit number does not match the unit number retrieved through ticket = " + matchingTicket.getVehicle().getUnitNum());
+			return false;
+		}
+		
+		fuelLog.setUnit(matchingTicket.getVehicle());
+		return true;
+	}
+
+	private String getCommaSeparatedListOfDriverID(List<Driver> drivers) {
+		StringBuffer driverIdList = new StringBuffer();
+		for ( Driver d : drivers) {
+			driverIdList.append("," + d.getId());
+		}
+		
+		return driverIdList.toString().replaceFirst(",", "");
+	}
+
+	private String getTransactionDateFromExcel(HSSFRow row) {
+		String transdate = null;
+		if (validDate(getCellValue(row.getCell(4)))) {
+			transdate = dateFormat.format(((Date) getCellValue(row.getCell(4))).getTime());
+		}
+		return transdate;
 	}
 
 	private boolean handleExcludedCardNumberChecks(FuelLog fuellog, String cardNo) {
