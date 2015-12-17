@@ -2001,6 +2001,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
 									criterias.put("fuelcardNum", cardNo);
 									System.out.println("Criterias for getting fuelcard = " + "fuelvendor.id = " + fuellog.getFuelvendor().getId() + ", fuelcardNum = " + cardNo);
+									
 									List<FuelCard> fuelcard = genericDAO.findByCriteria(FuelCard.class, criterias);
 									if (!fuelcard.isEmpty() && fuelcard.size() > 0) {
 										if (fuellog.getDriversid() != null && fuellog.getFuelvendor() != null) {
@@ -2012,15 +2013,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											String listOfDriversStr = getCommaSeparatedListOfDriverID(listOfDrivers);
 
 											criterias.clear();
-											//criterias.put("driver.id", fuellog.getDriversid().getId());
-											criterias.put("driver.id", listOfDriversStr);
-											criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
-											criterias.put("fuelcard.id", fuelcard.get(0).getId());
-											
 											System.out.println("Criterias for choosing card number -> DriverID: " + listOfDriversStr + ", FuelVendorID: " + fuellog.getFuelvendor().getId() + ", FuelCardID: " + fuelcard.get(0).getId());
 											
+											String fuelCardQuery = "select obj from DriverFuelCard obj where "
+													+ "obj.driver IN (" + listOfDriversStr + ") "
+															+ " and obj.fuelvendor =" + fuellog.getFuelvendor().getId()
+															+ " and obj.fuelcard = " +  fuelcard.get(0).getId();
+											System.out.println("********fuelcard query is " + fuelCardQuery);
 											List<DriverFuelCard> driverfuelcard = genericDAO
-													.findByCriteria(DriverFuelCard.class, criterias);
+													.executeSimpleQuery(fuelCardQuery);
+											
 											if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
 												fuellog.setFuelcard(fuelcard.get(0));
 											else {
@@ -2057,12 +2059,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										String listOfDriversStr = getCommaSeparatedListOfDriverID(listOfDrivers);
 
 										criterias.clear();
-										//criterias.put("driver.id", fuellog.getDriversid().getId());
-										criterias.put("driver.id", listOfDriversStr);
-										criterias.put("fuelvendor.id", fuellog.getFuelvendor().getId());
-										criterias.put("fuelcard.id", fuelcard.get(0).getId());
+										System.out.println("Criterias for choosing card number -> DriverID: " + listOfDriversStr + ", FuelVendorID: " + fuellog.getFuelvendor().getId() + ", FuelCardID: " + fuelcard.get(0).getId());
+										
+										String fuelCardQuery = "select obj from DriverFuelCard obj where "
+												+ "obj.driver IN (" + listOfDriversStr + ") "
+														+ " and obj.fuelvendor =" + fuellog.getFuelvendor().getId()
+														+ " and obj.fuelcard = " +  fuelcard.get(0).getId();
+										System.out.println("********fuelcard query is " + fuelCardQuery);
 										List<DriverFuelCard> driverfuelcard = genericDAO
-												.findByCriteria(DriverFuelCard.class, criterias);
+												.executeSimpleQuery(fuelCardQuery);
+										
+										
 										if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
 											fuellog.setFuelcard(fuelcard.get(0));
 
@@ -2082,7 +2089,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 
 					} catch (Exception ex) {
-
+						ex.printStackTrace();	
 						error = true;
 						System.out.println("\n\n Error in Card Number\n");
 						lineError.append("Card Number,");
@@ -2717,6 +2724,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						+ " and obj.loadDate <='" + drvdf.format(fuelog.getTransactiondate())
 						+ "' and obj.unloadDate>='" + drvdf.format(fuelog.getTransactiondate()) + "'";
 
+				System.out.println("Fuel Log Violation query = " + ticktQuery);
 				List<Ticket> tickObj = genericDAO.executeSimpleQuery(ticktQuery);
 
 				if (tickObj.size() > 0 && tickObj != null) {
