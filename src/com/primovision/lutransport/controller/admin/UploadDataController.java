@@ -263,7 +263,9 @@ public class UploadDataController extends BaseController {
 		} 
 		catch (Exception ex) 
 		{
-			model.addAttribute("errors", "An error occurred while upload !!");
+			//model.addAttribute("errors", "An error occurred while upload !!");
+			str.add("Exception while uploading");
+			model.addAttribute("errorList", str);
 			ex.printStackTrace();
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
 		}
