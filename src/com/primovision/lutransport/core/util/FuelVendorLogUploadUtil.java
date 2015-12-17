@@ -151,7 +151,7 @@ public class FuelVendorLogUploadUtil {
 		int expectedColumnStartIndex = 2;
 		
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Number");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Tran Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Time");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
@@ -159,7 +159,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Card No"); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Product");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Site Desc"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Site  Desc"); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "ST");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Units");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Price");
@@ -175,7 +175,7 @@ public class FuelVendorLogUploadUtil {
 		int expectedColumnStartIndex = 2;
 	
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice#");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
@@ -205,7 +205,7 @@ public class FuelVendorLogUploadUtil {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice#");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Time");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Number");
@@ -355,7 +355,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_DCFUELLU)) { 
 			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
-			formatCellValueForQuarles(wb, cell, oneCellValue, vendor);
+			formatCellValueForQuarles(wb, cell, oneCellValue, VENDOR_QUARLES);
 		} else if (StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_DREW) || StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_LU) ) { 
 			formatCellValueForComData(wb, cell, oneCellValue, VENDOR_COMDATA_DREW);
 		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
@@ -589,29 +589,28 @@ public class FuelVendorLogUploadUtil {
 			}
 			
 			Cell lastNameCell = cell.getRow().getCell(7);
+			String lastNameCellValue = lastNameCell.getStringCellValue();
 			String [] nameArr = null;
 			// Split into firstname and lastname
-			if (lastNameCell.getStringCellValue().contains(",")) {
+			if (lastNameCellValue.contains(",")) {
 				// Split based on comma
-				nameArr = lastNameCell.getStringCellValue().split(",");
+				nameArr = lastNameCellValue.split(",");
 				if (nameArr.length > 1) {
 					cell.setCellValue(nameArr[1]); // firstname
 					lastNameCell.setCellValue(nameArr[0]);
 				} else {
-					lastNameCell.setCellValue(StringUtils.EMPTY);
 					cell.setCellValue(nameArr[0]); // firstname
+					lastNameCell.setCellValue(StringUtils.EMPTY);
 				}
 			} else {
-				nameArr = lastNameCell.getStringCellValue().split("\\ ");
+				nameArr = lastNameCellValue.split("\\ ");
 				if (nameArr.length > 1) {
 					cell.setCellValue(nameArr[0]); // firstname
-					lastNameCell.setCellValue(nameArr[1]);
+					lastNameCell.setCellValue(StringUtils.substringAfter(lastNameCellValue, " ")); // lastname can have spaces
 				} else {
 					cell.setCellValue(StringUtils.EMPTY);
 				}
 			}
-			
-			
 		}
 	}
 
