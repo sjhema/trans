@@ -1406,7 +1406,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public List<String> importfuellogMainSheet(InputStream is, Boolean override) throws Exception {
 		// initializing the InputStream from a file using
 		// POIFSFileSystem, before converting the result
@@ -1680,9 +1680,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										transdate = dateFormat.format(((Date) getCellValue(row.getCell(4))).getTime());
 									}
 
-									String drivequery = "select obj from Ticket obj where   obj.loadDate<='" + transdate
+									/*String drivequery = "select obj from Ticket obj where   obj.loadDate<='" + transdate
 											+ "' and obj.unloadDate>='" + transdate + "' and obj.driver="
+											+ driver.getId();*/
+									String drivequery = "select obj from Ticket obj where (obj.loadDate ='" + transdate
+											+ "' OR obj.unloadDate ='" + transdate + "') and obj.driver="
 											+ driver.getId();
+									
 									System.out.println("******** query is " + drivequery);
 									List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);
 									if (!tickets.isEmpty()) {
@@ -1845,9 +1849,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 													.format(((Date) getCellValue(row.getCell(4))).getTime());
 										}
 
-										String drivequery = "select obj from Ticket obj where   obj.loadDate<='"
+										/*String drivequery = "select obj from Ticket obj where   obj.loadDate<='"
 												+ transactiondate + "' and obj.unloadDate>='" + transactiondate
-												+ "' and obj.vehicle=" + vehicle.getId();
+												+ "' and obj.vehicle=" + vehicle.getId();*/
+										
+										String drivequery = "select obj from Ticket obj where (obj.loadDate ='"
+												+ transactiondate + "' OR obj.unloadDate ='" + transactiondate
+												+ "') and obj.vehicle=" + vehicle.getId();
+										
 										System.out.println("******** query is " + drivequery);
 										List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);
 										if (!tickets.isEmpty()) {
@@ -2723,9 +2732,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		if (errorcount == 0) {
 			System.out.println("Error count = 0");
 			for (FuelLog fuelog : fuellogs) {
-				String ticktQuery = "select obj from Ticket obj where obj.driver=" + fuelog.getDriversid().getId()
+				/*String ticktQuery = "select obj from Ticket obj where obj.driver=" + fuelog.getDriversid().getId()
 						+ " and obj.loadDate <='" + drvdf.format(fuelog.getTransactiondate())
-						+ "' and obj.unloadDate>='" + drvdf.format(fuelog.getTransactiondate()) + "'";
+						+ "' and obj.unloadDate>='" + drvdf.format(fuelog.getTransactiondate()) + "'";*/
+				
+				String ticktQuery = "select obj from Ticket obj where obj.driver=" + fuelog.getDriversid().getId()
+						+ " and (obj.loadDate ='" + drvdf.format(fuelog.getTransactiondate())
+						+ "' OR obj.unloadDate ='" + drvdf.format(fuelog.getTransactiondate()) + "')";
 
 				System.out.println("Fuel Log Violation query = " + ticktQuery);
 				List<Ticket> tickObj = genericDAO.executeSimpleQuery(ticktQuery);
@@ -3050,8 +3063,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		Vehicle vehicle = getVehicleInFuelLogFromUnitNumber(unit, transdate);
 		String driverquery = "select obj from Ticket obj where "
-				+ "obj.loadDate<='" + transdate + "' and obj.unloadDate>='" + transdate
-				+ "' and obj.vehicle=" + vehicle.getId();
+				+ "(obj.loadDate ='" + transdate + "' OR obj.unloadDate ='" + transdate
+				+ "') and obj.vehicle=" + vehicle.getId();
 		System.out.println("******** query is " + driverquery);
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
 		if (tickets.size() == 0) { // no matching tickets found
@@ -3088,9 +3101,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	private Ticket getTicketForDriver(String listOfDrivers, String transdate) {
 		String driverquery = "select obj from Ticket obj where "
-				+ "obj.loadDate<='" + transdate
-				+ "' and obj.unloadDate>='" + transdate 
-				+ "' and obj.driver IN ("
+				+ "(obj.loadDate ='" + transdate
+				+ "' OR obj.unloadDate ='" + transdate 
+				+ "') and obj.driver IN ("
 				+ listOfDrivers + ")";
 		System.out.println("<<Custom code for Driver>>: Select Ticket with list of drivers -> " + driverquery);
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(driverquery);
