@@ -27,10 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.FuelVendorLogUploadUtil;
+import com.primovision.lutransport.core.util.TollCompanyTagUploadUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelSurcharge;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.Trailer;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.service.ImportMainSheetService;
@@ -70,8 +72,9 @@ public class UploadDataController extends BaseController {
 	}
 	
 	@RequestMapping("/eztoll.do")
-	public String eztoll(HttpServletRequest request,
-			HttpServletResponse response) {
+	public String eztoll(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		Map criterias = new HashMap();
+		model.addAttribute("tollcompanies", genericDAO.findByCriteria(TollCompany.class, criterias, "name",false));
 		return "admin/uploaddata/eztoll";
 	}
 	
@@ -106,9 +109,12 @@ public class UploadDataController extends BaseController {
 	@RequestMapping("/eztoll/upload.do")
 	public String eztollSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
-			@RequestParam("dataFile") MultipartFile file) {
+			@RequestParam("dataFile") MultipartFile file,
+			@RequestParam("tollcompany") Long tollCompanyId) {
+		Map criterias = new HashMap();
+		model.addAttribute("tollcompanies", genericDAO.findByCriteria(TollCompany.class, criterias, "name", false));
 		
-		List<String> str=new ArrayList<String>();
+		List<String> str = new ArrayList<String>();
 		boolean flag=false;
 		try 
 		{
@@ -126,11 +132,18 @@ public class UploadDataController extends BaseController {
                 	return "admin/uploaddata/eztoll";
 				}
 			}
+			
 			InputStream is = file.getInputStream();
-			str=importMainSheetService.importeztollMainSheet(is,flag);
+			
+			if (TollCompanyTagUploadUtil.isConversionRequired(tollCompanyId)) {
+				is = TollCompanyTagUploadUtil.convertToGenericTollTagFormat(is, tollCompanyId, this.genericDAO, this.importMainSheetService);
+			}
+			
+			str = importMainSheetService.importeztollMainSheet(is,flag);
+			System.out.println("\nimportMainSheetService.importMainSheet(is)\n");
 			if(str.isEmpty())
 			{
-				model.addAttribute("msg","Successfully uploaded all tolls");
+				model.addAttribute("msg", "Successfully uploaded all tolls");
 			}
 			else
 			{
@@ -139,14 +152,15 @@ public class UploadDataController extends BaseController {
 		} 
 		catch (Exception ex) 
 		{
-			model.addAttribute("errors", "An error occurred while upload !!");
+			//model.addAttribute("errors", "An error occurred while upload !!");
+			str.add("Exception while uploading");
+			model.addAttribute("errorList", str);
 			ex.printStackTrace();
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
 		}
+		
 		return "admin/uploaddata/eztoll";
 	}
-	
-	
 	
 	
 	@RequestMapping("/eztoll/override.do")

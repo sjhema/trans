@@ -12,5 +12,7 @@ public interface ImportMainSheetService {
 	public List<String> importeztollMainSheet(InputStream is,Boolean override) throws Exception;
 	public List<String> importVehiclePermitMainSheet(InputStream is)throws Exception;
 	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is, LinkedHashMap<String, String> vendorSpecificColumns, Long vendor) throws Exception;
+	public List<LinkedList<Object>> importTollCompanySpecificTollTag(InputStream is,
+			LinkedHashMap<String, String> tollCompanySpecificColumns, Long tollCompanyId) throws Exception;
 }
 

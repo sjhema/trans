@@ -4017,10 +4017,78 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		return data;
 	}
+	
+	@Override
+	public List<LinkedList<Object>> importTollCompanySpecificTollTag(InputStream is,
+			LinkedHashMap<String, String> tollCompanySpecificColumns, Long tollCompanyId) throws Exception {
+		List<LinkedList<Object>> data = new ArrayList<LinkedList<Object>>();
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
 
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			Sheet sheet = wb.getSheetAt(0);
+			Row titleRow = sheet.getRow(sheet.getFirstRowNum());
+
+			LinkedHashMap<String, Integer> orderedColIndexes = getOrderedColumnIndexes(titleRow, tollCompanySpecificColumns);
+			Set<Entry<String, Integer>> keySet = orderedColIndexes.entrySet();
+			
+			System.out.println("Physical number of rows in Excel = " + sheet.getPhysicalNumberOfRows());
+			System.out.println("While reading values from vendor specific Excel Sheet: ");
+
+			Map criterias = new HashMap();
+			criterias.put("id", tollCompanyId);
+			TollCompany tollCompany = genericDAO.findByCriteria(TollCompany.class, criterias, "name", false).get(0);
+			
+			boolean stopParsing = false;
+			for (int i = titleRow.getRowNum() + 1; !stopParsing && i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
+				LinkedList<Object> rowObjects = new LinkedList<Object>();
+				
+				rowObjects.add(tollCompany.getName());
+				
+				Row row = sheet.getRow(i);
+
+				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
+				while (iterator.hasNext()) {
+					Entry<String, Integer> entry = iterator.next();
+					
+					if (entry.getValue() == -1) {
+						// corresponding column not found
+						rowObjects.add(StringUtils.EMPTY); 
+						continue;
+					}
+					
+					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
+					
+					if (cellValueObj != null && cellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
+						System.out.println("Received END_OF_DATA");
+						stopParsing = true;
+						rowObjects.clear();
+						break;
+					}
+					
+					if (cellValueObj != null) {
+						System.out.println("Adding " + cellValueObj.toString());
+					} else {
+						System.out.println("Adding NULL");
+					}
+					rowObjects.add(cellValueObj);
+				}
+
+				if (!stopParsing) {
+					data.add(rowObjects);
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return data;
+	}
+	
 	private LinkedHashMap<String, Integer> getOrderedColumnIndexes(Row titleRow,
 			LinkedHashMap<String, String> vendorSpecificColumns) {
-
 		LinkedHashMap<String, Integer> orderedColumnIndexesMap = new LinkedHashMap<String, Integer>();
 
 		int startCellNumber = titleRow.getFirstCellNum();
@@ -4058,5 +4126,4 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		System.out.println("Ordered Column Indexes Map = " + orderedColumnIndexesMap);
 		return orderedColumnIndexesMap;
 	}
-
 }
