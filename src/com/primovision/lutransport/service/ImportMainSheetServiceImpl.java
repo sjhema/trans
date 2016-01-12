@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormatter;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -25,6 +26,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -3682,7 +3684,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			} else {
 				result = cell.getNumericCellValue();
 			}
+			
+			if (dataFormat == 0) { // alternative way of getting value : can this be replaced for the entire block
+				result = new HSSFDataFormatter().formatCellValue(cell);
+			}
 			System.out.println("Numeric cell value == " + result);
+			
 			break;
 		case HSSFCell.CELL_TYPE_STRING:
 			//result = cell.getStringCellValue();
@@ -4044,8 +4051,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(tollCompany.getName());
+				rowObjects.add("LU"); // TODO: For now, need to get logic 
 				
 				Row row = sheet.getRow(i);
+				Object firstCellValueObj = getCellValue((HSSFCell) row.getCell(0), true);
+				
+				if (firstCellValueObj != null && firstCellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
+					System.out.println("Received END_OF_DATA");
+					stopParsing = true;
+					rowObjects.clear();
+					break;
+				}
 
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
 				while (iterator.hasNext()) {
@@ -4058,13 +4074,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					}
 					
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
-					
-					if (cellValueObj != null && cellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
-						System.out.println("Received END_OF_DATA");
-						stopParsing = true;
-						rowObjects.clear();
-						break;
-					}
 					
 					if (cellValueObj != null) {
 						System.out.println("Adding " + cellValueObj.toString());
