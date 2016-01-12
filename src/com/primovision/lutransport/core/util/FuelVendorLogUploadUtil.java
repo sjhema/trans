@@ -43,6 +43,7 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_KW_RASTALL = "KW Rastall";
 	private static String VENDOR_AC_T = "AC&T";
 	private static String VENDOR_ATLANTIC_COAST = "Atlantic Coast";
+	private static String VENDOR_QUICK_FUEL = "Quick Fuel";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -83,6 +84,7 @@ public class FuelVendorLogUploadUtil {
 		vendorToDateFormatMapping.put(VENDOR_KW_RASTALL, "MM/dd/yy");
 		vendorToDateFormatMapping.put(VENDOR_AC_T, "MM/dd/yy");
 		vendorToDateFormatMapping.put(VENDOR_ATLANTIC_COAST, "MM/dd/yy");
+		vendorToDateFormatMapping.put(VENDOR_QUICK_FUEL, "MM/dd/yyyy");
 		
 		mapForTCH(expectedColumnList);
 		mapForDCFuelWB(expectedColumnList);
@@ -92,6 +94,7 @@ public class FuelVendorLogUploadUtil {
 		mapForKWRastall(expectedColumnList);
 		mapForACAndT(expectedColumnList);
 		mapForAtlanticCoast(expectedColumnList);
+		mapForQuickFuel(expectedColumnList);
 	}
 
 	public static boolean isConversionRequired(Long fuelvendor) {
@@ -110,7 +113,9 @@ public class FuelVendorLogUploadUtil {
 				// AC & T
 				|| fuelVendorId == 2l
 				// Atlantic Coast
-				|| fuelVendorId == 18l) {
+				|| fuelVendorId == 18l
+				// Quick Fuel
+				|| fuelVendorId == 16l || fuelVendorId == 20l) {
 			return true;
 		} else {
 			return false;
@@ -138,6 +143,32 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TransactionDiscount");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "TransactionGross");
 		vendorToFuelLogMapping.put(VENDOR_TCH, actualColumnMap);
+	}
+	
+	private static void mapForQuickFuel(LinkedList<String> expectedColumnList) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Vehicle");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Fuel Type");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Gallons");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Price/Gal");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Ext. Price");
+		// Total fees is entered in UI, divide it by no. of records
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		// Net amount = Gross cost + Fees
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Ext. Price");
+		
+		vendorToFuelLogMapping.put(VENDOR_QUICK_FUEL, actualColumnMap);
 	}
 	
 	private static void mapForAtlanticCoast(LinkedList<String> expectedColumnList) {
@@ -475,6 +506,8 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForACAndT(wb, cell, oneCellValue, VENDOR_AC_T);
 		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) { 
 			formatCellValueForAtlanticCoast(wb, cell, oneCellValue, VENDOR_ATLANTIC_COAST);
+		} else if (StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) { 
+			formatCellValueForQuickFuel(wb, cell, oneCellValue, VENDOR_QUICK_FUEL);
 		}
 	}
 
@@ -558,6 +591,38 @@ public class FuelVendorLogUploadUtil {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
 			cell.setCellValue("NY");
+		} else if (columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+	}
+	
+	private static void formatCellValueForQuickFuel(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 11) {
+			cell.setCellValue("Tampa");
+		} else if (columnIndex == 12) {
+			cell.setCellValue("FL");
 		} else if (columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -730,8 +795,8 @@ public class FuelVendorLogUploadUtil {
 
 	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String cardNumber = oneCellValue.toString();
-		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB)
-				|| StringUtils.contains(vendor, VENDOR_KW_RASTALL) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) {
+		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL) 
+				|| StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
 			if (StringUtils.isEmpty(cardNumber)) {
 				cell.setCellValue("EXCLUDE_ERROR_CHECK");
 			} else {
@@ -813,7 +878,8 @@ public class FuelVendorLogUploadUtil {
 		}
 		
 		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S") 
-				|| actualFuelType.equalsIgnoreCase("Ultra Low Su") || actualFuelType.equalsIgnoreCase("ULSD CLEAR")) {
+				|| actualFuelType.equalsIgnoreCase("Ultra Low Su") || actualFuelType.equalsIgnoreCase("ULSD CLEAR")
+				|| actualFuelType.equalsIgnoreCase("2 - #2 ULSD CLEAR")) {
 			cell.setCellValue("DSL");
 		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
 			cell.setCellValue("Regular");
@@ -854,7 +920,7 @@ public class FuelVendorLogUploadUtil {
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL)
-				|| StringUtils.contains(vendor, VENDOR_AC_T) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) {
+				|| StringUtils.contains(vendor, VENDOR_AC_T) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
 			cell.setCellValue("00:00");
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES) || StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			cell.setCellValue(timeStr);
@@ -921,7 +987,7 @@ public class FuelVendorLogUploadUtil {
 				System.out.println("Transaction date = " + c.getTime());
 			}
 		} else if (cell.getColumnIndex() == 4 && 
-				(StringUtils.contains(vendor, VENDOR_KW_RASTALL) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST))) {
+				(StringUtils.contains(vendor, VENDOR_KW_RASTALL) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL))) {
 			 // Transaction Date, fill in value = Transaction Date + 1 Day
 			if (StringUtils.isEmpty(dateStr)) {
 				cell.setCellValue(StringUtils.EMPTY);
