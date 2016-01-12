@@ -1,6 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -234,7 +235,8 @@ public class UploadDataController extends BaseController {
 	public String fuellogSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("dataFile") MultipartFile file,
-			@RequestParam("fuelvendor") Long fuelvendor) {
+			@RequestParam("fuelvendor") Long fuelvendor,
+			@RequestParam("totalFees") BigDecimal totalFees) {
 		Map criterias = new HashMap();
 		model.addAttribute("fuelvendor", genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false));
 		

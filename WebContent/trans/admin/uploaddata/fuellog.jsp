@@ -69,7 +69,7 @@
 	<tr>
 		<td align="${left}" class="first"><primo:label code="Fuel Vendor"/></td>
 		<td align="${left}">
-			<select id="fuelvendor" name="fuelvendor" style="min-width:200px; max-width:200px">
+			<select id="fuelvendor" name="fuelvendor" style="min-width:150px; max-width:150px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
 				<c:forEach items="${fuelvendor}" var="fuelvendor">
 					<c:set var="selected" value=""/>
@@ -79,6 +79,12 @@
 						<option value="${fuelvendor.id}" ${selected}>${fuelvendor.name}</option>
 				</c:forEach>
 			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="${left}" class="first"><primo:label code="Total Fees"/></td>
+		<td align="${left}">
+			<input name="totalFees" type="text" style="min-width:141px; max-width:141px" />
 		</td>
 	</tr>
 	<tr>
@@ -98,10 +104,10 @@
 		<FONT color=#F2290F><STRONG>${item}</strong></FONT>
 	</c:forEach>
 	
- <form:form action="${ctx}/uploadData/fuellog/override.do" name="overrideForm"  enctype="multipart/form-data" modelAttribute="modelObject">
+<form:form action="${ctx}/uploadData/fuellog/override.do" name="overrideForm"  enctype="multipart/form-data" modelAttribute="modelObject">
 <table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 	<tr class="table-heading">
-			<td colspan="4"><b><primo:label code="Above Fuel Log have error,if you want to Override,please select the file" /></b></td>
+		<td colspan="4"><b><primo:label code="Above Fuel Log have error,if you want to Override,please select the file" /></b></td>
     </tr>
 	<tr>
 		<td><primo:label code="Upload Fuellog" />
