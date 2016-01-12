@@ -506,7 +506,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
-			cell.setCellValue("NJ");
+			cell.setCellValue("MD");
 		} else if (columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -726,7 +726,12 @@ public class FuelVendorLogUploadUtil {
 		}
 		
 		String actualFuelType = oneCellValue.toString();
-		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S")) {
+		if (StringUtils.isEmpty(actualFuelType)) {
+			cell.setCellValue(StringUtils.EMPTY);
+		}
+		
+		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S") 
+				|| actualFuelType.equalsIgnoreCase("Ultra Low Su")) {
 			cell.setCellValue("DSL");
 		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
 			cell.setCellValue("Regular");
@@ -766,7 +771,8 @@ public class FuelVendorLogUploadUtil {
 			String [] timeArr = timeStr.split(":");
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
-		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL)) {
+		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL)
+				|| StringUtils.contains(vendor, VENDOR_AC_T)) {
 			cell.setCellValue("00:00");
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES) || StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			cell.setCellValue(timeStr);
@@ -807,7 +813,6 @@ public class FuelVendorLogUploadUtil {
 		}
 		
 		String dateStr = oneCellValue.toString();
-		
 		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) && cell.getColumnIndex() == 4) {
 			 // Transaction Date, fill in value = InvoiceDate + 1 Day
 			Date invoiceDate = cell.getRow().getCell(2).getDateCellValue(); // invoiceDate
