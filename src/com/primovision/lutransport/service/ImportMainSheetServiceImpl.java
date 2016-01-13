@@ -3988,40 +3988,26 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
 				while (iterator.hasNext()) {
 					Entry<String, Integer> entry = iterator.next();
-					
+
+					// corresponding column not found in actual column list, find in additionalVendorData
 					if (entry.getValue() == -1) {
-						// corresponding column not found in actual column list, find in additionalVendorData
 						System.out.println("Additional vendor data = " + additionalVendorData);
-						if(additionalVendorData.containsKey(entry.getKey())) {
-							System.out.println("Column " + entry.getKey() + " not found in Vendor Excel, checking in additionalVendorData");
-							Object cellValueObj = additionalVendorData.get(entry.getKey());
-							
-							if (cellValueObj != null) {
-								System.out.println("Adding " + cellValueObj.toString());
-							} else {
-								System.out.println("Adding NULL");
-							}
+						System.out.println("Column " + entry.getKey() + " not found in Vendor Excel, checking in additionalVendorData");
+						Object cellValueObj = additionalVendorData.get(entry.getKey());
+						if(cellValueObj != null) {
 							rowObjects.add(cellValueObj);
-							
 						} else {
 							rowObjects.add(StringUtils.EMPTY); 
-							continue;
 						}
+						continue;
 					}
 					
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
-					
 					if (cellValueObj != null && cellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
 						System.out.println("Received END_OF_DATA");
 						stopParsing = true;
 						rowObjects.clear();
 						break;
-					}
-					
-					if (cellValueObj != null) {
-						System.out.println("Adding " + cellValueObj.toString());
-					} else {
-						System.out.println("Adding NULL");
 					}
 					rowObjects.add(cellValueObj);
 				}

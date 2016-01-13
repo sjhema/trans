@@ -347,10 +347,12 @@ public class FuelVendorLogUploadUtil {
 		vendorToFuelLogMapping.put(VENDOR_COMDATA_DREW, actualColumnMap);
 	}
 
-	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService, HashMap<String, Object> additionalVendorData) throws Exception {
+	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService, HashMap<String, Object> dataFromUser) throws Exception {
 		String vendorName = getVendorName(genericDAO, vendor);
 		LinkedHashMap<String, String> actualColumnListMap = getVendorSpecificMapping(vendorName);
 		
+		HashMap<String, Object> additionalVendorData = setupAdditionalVendorData(dataFromUser, vendorName);
+			
 		List<LinkedList<Object>> tempData = importMainSheetService.importVendorSpecificFuelLog(is, actualColumnListMap, vendor, additionalVendorData);
 		System.out.println("Number of rows = " + tempData.size());
 		
@@ -389,6 +391,16 @@ public class FuelVendorLogUploadUtil {
 		//return is;
 	}
 
+	private static HashMap<String, Object> setupAdditionalVendorData(HashMap<String, Object> dataFromUser, String vendorName) {
+		HashMap<String, Object> additionalVendorData = new HashMap<String, Object>();
+		// For ATLANTIC_COAST & QUICK_FUEL only, we need to process fees as part of incoming data, for the rest, remove it
+		if (StringUtils.containsIgnoreCase(vendorName, VENDOR_ATLANTIC_COAST) 
+				|| StringUtils.containsIgnoreCase(vendorName, VENDOR_QUICK_FUEL)) {
+				additionalVendorData.put("fees", dataFromUser.get("fees"));
+		}
+		return additionalVendorData;
+	}
+
 	private static Object consolidateDataForVendors(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String vendor, HashMap<String, Object> additionalVendorData) {
 		if (StringUtils.contains(vendor, VENDOR_SUNOCO)) {
 			if (cell.getColumnIndex() == 9) { // Card Number
@@ -414,11 +426,9 @@ public class FuelVendorLogUploadUtil {
 			} else {
 				return oneCellValue;
 			}
-		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
-			
+		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) {
 			if (cell.getColumnIndex() == 14) { // Unit Price
-				
-				if (StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
+				if (StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) {
 					// no op
 					return oneCellValue;
 				}
@@ -479,6 +489,8 @@ public class FuelVendorLogUploadUtil {
 			vendorName = VENDOR_AC_T;
 		} else if (StringUtils.contains(vendorName, VENDOR_ATLANTIC_COAST)) {
 			vendorName = VENDOR_ATLANTIC_COAST;
+		} else if (StringUtils.containsIgnoreCase(vendorName, VENDOR_QUICK_FUEL)) {
+			vendorName = VENDOR_QUICK_FUEL;
 		}
 		return vendorName;
 	}
@@ -537,7 +549,7 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForACAndT(wb, cell, oneCellValue, VENDOR_AC_T);
 		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) { 
 			formatCellValueForAtlanticCoast(wb, cell, oneCellValue, VENDOR_ATLANTIC_COAST);
-		} else if (StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) { 
+		} else if (StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) { 
 			formatCellValueForQuickFuel(wb, cell, oneCellValue, VENDOR_QUICK_FUEL);
 		}
 	}
@@ -827,7 +839,7 @@ public class FuelVendorLogUploadUtil {
 	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String cardNumber = oneCellValue.toString();
 		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL) 
-				|| StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
+				|| StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) {
 			if (StringUtils.isEmpty(cardNumber)) {
 				cell.setCellValue("EXCLUDE_ERROR_CHECK");
 			} else {
@@ -951,7 +963,7 @@ public class FuelVendorLogUploadUtil {
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL)
-				|| StringUtils.contains(vendor, VENDOR_AC_T) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
+				|| StringUtils.contains(vendor, VENDOR_AC_T) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) {
 			cell.setCellValue("00:00");
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES) || StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			cell.setCellValue(timeStr);
@@ -1018,7 +1030,7 @@ public class FuelVendorLogUploadUtil {
 				System.out.println("Transaction date = " + c.getTime());
 			}
 		} else if (cell.getColumnIndex() == 4 && 
-				(StringUtils.contains(vendor, VENDOR_KW_RASTALL) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL))) {
+				(StringUtils.contains(vendor, VENDOR_KW_RASTALL) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL))) {
 			 // Transaction Date, fill in value = Transaction Date + 1 Day
 			if (StringUtils.isEmpty(dateStr)) {
 				cell.setCellValue(StringUtils.EMPTY);
