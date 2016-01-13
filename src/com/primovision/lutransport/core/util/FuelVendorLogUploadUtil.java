@@ -231,8 +231,8 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit No");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Card"); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Description");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
@@ -503,7 +503,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -520,7 +520,7 @@ public class FuelVendorLogUploadUtil {
 	private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
-			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -821,21 +821,7 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
 	}
-
-	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
-		Row headerRow = sheet.createRow(0);
-		int columnHeaderIndex = 0;
-		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
-			sheet.setColumnWidth(columnHeaderIndex, 256*20);
-			Cell cell = headerRow.createCell(columnHeaderIndex++);
-			cell.setCellValue(columnHeader);
-			style.setAlignment(CellStyle.ALIGN_CENTER);
-			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-			style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-			cell.setCellStyle(style);
-		}
-	}
-
+	
 	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String cardNumber = oneCellValue.toString();
 		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL) 
@@ -856,22 +842,17 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(cardNumber);
 		}
 	}
-
-	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
-		Cell cell = row.createCell(columnIndex);
-		sheet.setColumnWidth(columnIndex, 256*20);
-		return cell;
-	}
 	
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
-		if (StringUtils.isEmpty(driverName)) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		}
 		
 		if (columnIndex == 7) { // lastname
+			if (StringUtils.isEmpty(driverName)) {
+				cell.setCellValue(StringUtils.EMPTY);
+				return;
+			}
+			
 			// Put the value as is, validation can be done after getting the firstname @ columnIndex=8
 			cell.setCellValue(StringUtils.upperCase(driverName));
 			return;
@@ -885,6 +866,11 @@ public class FuelVendorLogUploadUtil {
 			
 			Cell lastNameCell = cell.getRow().getCell(7);
 			String lastNameCellValue = lastNameCell.getStringCellValue();
+			if (StringUtils.isEmpty(lastNameCellValue)) {
+				cell.setCellValue(StringUtils.EMPTY);
+				return;
+			}
+			
 			String [] nameArr = null;
 			// Split into firstname and lastname
 			if (lastNameCellValue.contains(",")) {
@@ -971,7 +957,7 @@ public class FuelVendorLogUploadUtil {
 	}
 	
 	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		if (oneCellValue == null || (StringUtils.isEmpty(oneCellValue.toString()))) {
+		if (oneCellValue == null || StringUtils.isEmpty(StringUtils.trimToEmpty(oneCellValue.toString()))) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
 		} 
@@ -986,12 +972,12 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static void setIntegerValue(Cell cell, Object oneCellValue) {
-		if (oneCellValue == null || (StringUtils.isEmpty(oneCellValue.toString()))) {
+		if (oneCellValue == null || StringUtils.isEmpty(StringUtils.trimToEmpty(oneCellValue.toString()))) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
 		} 
 		
-		String cellValueStr = oneCellValue.toString();
+		String cellValueStr = oneCellValue.toString().trim();
 		if (!StringUtils.contains(cellValueStr, ".")) {
 			cell.setCellValue(cellValueStr);
 		} else {
@@ -1059,5 +1045,25 @@ public class FuelVendorLogUploadUtil {
 		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
 		String expectedDateStr = expectedDateFormat.format(actualDate);
 		return expectedDateFormat.parse(expectedDateStr);
+	}
+	
+	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+		Cell cell = row.createCell(columnIndex);
+		sheet.setColumnWidth(columnIndex, 256*20);
+		return cell;
+	}
+	
+	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
+		Row headerRow = sheet.createRow(0);
+		int columnHeaderIndex = 0;
+		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
+			sheet.setColumnWidth(columnHeaderIndex, 256*20);
+			Cell cell = headerRow.createCell(columnHeaderIndex++);
+			cell.setCellValue(columnHeader);
+			style.setAlignment(CellStyle.ALIGN_CENTER);
+			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			cell.setCellStyle(style);
+		}
 	}
 }
