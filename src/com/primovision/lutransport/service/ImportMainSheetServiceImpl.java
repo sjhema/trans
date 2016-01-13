@@ -1659,10 +1659,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						fuellog.setTransactiontime((String) getCellValue(row.getCell(5)));
 					}
 
-					String unit = ((String) getCellValue(row.getCell(6)));
+					//String unit = ((String) getCellValue(row.getCell(6)));
 					// if(override==false){
 					//error = setUnitNumberInFuelLog(criterias, row, fuellog, lineError, error, unit);
 					try {
+						String unit = validateAndResetUnitNumber(criterias, row);
 						if (StringUtils.isEmpty(unit)) {
 
 							String lastName = ((String) getCellValue(row.getCell(7)));
@@ -2001,6 +2002,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						// getCellValue(row.getCell(10))));
 						if (override == false) {// StringUtils.isEmpty
 							/* if(!cardNo.isEmpty()){ */
+							
 							if (!StringUtils.isEmpty(cardNo)) {
 								
 								if (handleExcludedCardNumberChecks(fuellog, cardNo)) {
@@ -2774,6 +2776,32 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return list;
 	}
 	
+	private String validateAndResetUnitNumber(Map criterias, HSSFRow row) {
+		String unit = (String) getCellValue(row.getCell(6));
+		criterias.clear();
+
+		String transactionDate = null;
+		System.out.println("********** date value is " + getCellValue(row.getCell(4)));
+		if (validDate(getCellValue(row.getCell(4)))) {
+			transactionDate = dateFormat.format(((Date) getCellValue(row.getCell(4))).getTime());
+		}
+		Vehicle vehicle = null;
+		String vehicleQuery = "Select obj from Vehicle obj where obj.type=1 and obj.unit="
+				+ Integer.parseInt(unit) + " and obj.validFrom<='"
+				+ transactionDate + "' and obj.validTo>='" + transactionDate + "'";
+
+		System.out.println("******* The vehicle query for fuel upload is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+
+		if (vehicleList == null || vehicleList.size() == 0) {
+			System.out.println("User given unit number " + unit + " is not valid, returning EMPTY");
+			return StringUtils.EMPTY;
+		} else {
+			System.out.println("User given unit number " + unit + " is valid");
+			return unit;
+		}
+	}
+
 	private Driver getDriverObjectFromName(Map criterias, String firstName, String lastName, HSSFRow row) {
 		
 		/*// Existing Buggy code
