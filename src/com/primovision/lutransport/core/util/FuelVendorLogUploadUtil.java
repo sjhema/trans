@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,9 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -43,7 +43,7 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_KW_RASTALL = "KW Rastall";
 	private static String VENDOR_AC_T = "AC&T";
 	private static String VENDOR_ATLANTIC_COAST = "Atlantic Coast";
-	private static String VENDOR_QUICK_FUEL = "Quick Fuel";
+	private static String VENDOR_QUICK_FUEL = "QUICK FUEL";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -163,7 +163,8 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Price/Gal");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Ext. Price");
 		// Total fees is entered in UI, divide it by no. of records
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "fees");
+		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		// Net amount = Gross cost + Fees
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Ext. Price");
@@ -190,7 +191,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Price");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Amount");
 		// Total fees is entered in UI, divide it by no. of records
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "fees");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		// Net amount = Gross cost + Fees
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Amount");
@@ -347,12 +348,15 @@ public class FuelVendorLogUploadUtil {
 		vendorToFuelLogMapping.put(VENDOR_COMDATA_DREW, actualColumnMap);
 	}
 
-	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
+	public static InputStream convertToGenericFuelLogFormat(InputStream is, Long vendor, GenericDAO genericDAO, ImportMainSheetService importMainSheetService, HashMap<String, Object> additionalVendorData) throws Exception {
 		String vendorName = getVendorName(genericDAO, vendor);
 		LinkedHashMap<String, String> actualColumnListMap = getVendorSpecificMapping(vendorName);
 		
-		List<LinkedList<Object>> tempData = importMainSheetService.importVendorSpecificFuelLog(is, actualColumnListMap, vendor);
+		List<LinkedList<Object>> tempData = importMainSheetService.importVendorSpecificFuelLog(is, actualColumnListMap, vendor, additionalVendorData);
 		System.out.println("Number of rows = " + tempData.size());
+		
+		// add the total number or row data in additionalVendorData for any vendor to use the information
+		additionalVendorData.put("dataSetSize", tempData.size());
 		
 		HSSFWorkbook wb = new HSSFWorkbook();
 		Sheet sheet = wb.createSheet();
@@ -372,9 +376,10 @@ public class FuelVendorLogUploadUtil {
 				if (columnIndex >= expectedColumnList.size()) { // For vendors where more than required columns are read from excel
 					break;
 				}
-				System.out.println("Creating Column @ " + columnIndex + " with value = " + oneCellValue);
+				System.out.println("Creating Column @ " + columnIndex + " with value (original) = " + oneCellValue);
 				Cell cell = createExcelCell(sheet, row, columnIndex);
-				oneCellValue = consolidateDataForVendors(wb, cell, oneRow, oneCellValue, vendorName);
+				oneCellValue = consolidateDataForVendors(wb, cell, oneRow, oneCellValue, vendorName, additionalVendorData);
+				System.out.println("Creating Column @ " + columnIndex + " with value (manipulated) = " + oneCellValue);
 				formatCellValueForVendor(wb, cell, oneCellValue, vendorName);
 				columnIndex++;
 			}
@@ -385,7 +390,7 @@ public class FuelVendorLogUploadUtil {
 		//return is;
 	}
 
-	private static Object consolidateDataForVendors(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String vendor) {
+	private static Object consolidateDataForVendors(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String vendor, HashMap<String, Object> additionalVendorData) {
 		if (StringUtils.contains(vendor, VENDOR_SUNOCO)) {
 			if (cell.getColumnIndex() == 9) { // Card Number
 				String cardNumber = oneRow.get(9) == null ? StringUtils.EMPTY : oneRow.get(9).toString();
@@ -410,8 +415,15 @@ public class FuelVendorLogUploadUtil {
 			} else {
 				return oneCellValue;
 			}
-		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) {
+		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
+			
 			if (cell.getColumnIndex() == 14) { // Unit Price
+				
+				if (StringUtils.contains(vendor, VENDOR_QUICK_FUEL)) {
+					// no op
+					return oneCellValue;
+				}
+				
 				// Unit Price = Price + Taxes
 				String price = oneRow.get(14) == null ? "0.0" : oneRow.get(14).toString();
 				
@@ -420,6 +432,26 @@ public class FuelVendorLogUploadUtil {
 				
 				BigDecimal unitPrice = new BigDecimal(price).add(new BigDecimal(taxes));
 				return unitPrice.toPlainString();
+			} else if (cell.getColumnIndex() == 15) { // Amount
+				
+				String amount = oneRow.get(15) == null ? "0.0" : oneRow.get(15).toString();
+				String totalFees = oneRow.get(16) == null ? "0.0" : oneRow.get(16).toString();
+				System.out.println("Total Fees = " + totalFees);
+				
+				String totalNumOfTransactions = additionalVendorData.get("dataSetSize").toString();
+				System.out.println("Total number of transactions = " + totalNumOfTransactions);
+				
+				MathContext mc = new MathContext(9, RoundingMode.HALF_EVEN);      
+				BigDecimal feesPerTransaction = (new BigDecimal(totalFees)).divide(new BigDecimal(totalNumOfTransactions), mc).setScale(4, RoundingMode.CEILING);
+				BigDecimal amountWithFees = new BigDecimal(amount).add(feesPerTransaction);
+				
+				System.out.println("Amount = " + amount);
+				System.out.println("Fees per transaction = " + feesPerTransaction);
+				System.out.println("Amount with fees = " + amountWithFees);
+				
+				oneRow.set(16, feesPerTransaction.toPlainString());
+				oneRow.set(18, amountWithFees);
+				return amount;
 			} else {
 				return oneCellValue;
 			}
@@ -460,7 +492,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -477,7 +509,7 @@ public class FuelVendorLogUploadUtil {
 	private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block

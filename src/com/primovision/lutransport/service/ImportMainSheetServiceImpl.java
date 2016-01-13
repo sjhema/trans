@@ -3957,7 +3957,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	@Override
 	public List<LinkedList<Object>> importVendorSpecificFuelLog(InputStream is,
-			LinkedHashMap<String, String> vendorSpecificColumns, Long vendor) throws Exception {
+			LinkedHashMap<String, String> vendorSpecificColumns, Long vendor, HashMap<String, Object> additionalVendorData) throws Exception {
 		List<LinkedList<Object>> data = new ArrayList<LinkedList<Object>>();
 		try {
 			POIFSFileSystem fs = new POIFSFileSystem(is);
@@ -3990,9 +3990,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Entry<String, Integer> entry = iterator.next();
 					
 					if (entry.getValue() == -1) {
-						// corresponding column not found
-						rowObjects.add(StringUtils.EMPTY); 
-						continue;
+						// corresponding column not found in actual column list, find in additionalVendorData
+						System.out.println("Additional vendor data = " + additionalVendorData);
+						if(additionalVendorData.containsKey(entry.getKey())) {
+							System.out.println("Column " + entry.getKey() + " not found in Vendor Excel, checking in additionalVendorData");
+							Object cellValueObj = additionalVendorData.get(entry.getKey());
+							
+							if (cellValueObj != null) {
+								System.out.println("Adding " + cellValueObj.toString());
+							} else {
+								System.out.println("Adding NULL");
+							}
+							rowObjects.add(cellValueObj);
+							
+						} else {
+							rowObjects.add(StringUtils.EMPTY); 
+							continue;
+						}
 					}
 					
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
