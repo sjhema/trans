@@ -164,7 +164,6 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Ext. Price");
 		// Total fees is entered in UI, divide it by no. of records
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "fees");
-		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		// Net amount = Gross cost + Fees
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Ext. Price");
