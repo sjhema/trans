@@ -436,7 +436,7 @@ public class FuelVendorLogUploadUtil {
 				// Unit Price = Price + Taxes
 				String price = oneRow.get(14) == null ? "0.0" : oneRow.get(14).toString();
 				
-				int taxesIndex = expectedColumnList.size() + 1;
+				int taxesIndex = expectedColumnList.size();
 				String taxes = oneRow.get(taxesIndex) == null ? "0.0" : oneRow.get(taxesIndex).toString();
 				
 				BigDecimal unitPrice = new BigDecimal(price).add(new BigDecimal(taxes));
@@ -600,6 +600,8 @@ public class FuelVendorLogUploadUtil {
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
@@ -630,6 +632,8 @@ public class FuelVendorLogUploadUtil {
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
@@ -660,6 +664,8 @@ public class FuelVendorLogUploadUtil {
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 11) {
@@ -690,6 +696,8 @@ public class FuelVendorLogUploadUtil {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 10) {
@@ -901,11 +909,11 @@ public class FuelVendorLogUploadUtil {
 			return;
 		}
 		
-		String actualFuelType = oneCellValue.toString();
-		if (StringUtils.isEmpty(actualFuelType)) {
+		if (oneCellValue == null || StringUtils.isEmpty(StringUtils.trimToEmpty(oneCellValue.toString()))) {
 			cell.setCellValue(StringUtils.EMPTY);
 		}
 		
+		String actualFuelType = oneCellValue.toString().trim();
 		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S") 
 				|| actualFuelType.equalsIgnoreCase("Ultra Low Su") || actualFuelType.equalsIgnoreCase("ULSD CLEAR")
 				|| actualFuelType.equalsIgnoreCase("2 - #2 ULSD CLEAR")) {
