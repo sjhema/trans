@@ -262,6 +262,11 @@ public class UploadDataController extends BaseController {
 			InputStream is = file.getInputStream();
 			
 			if (FuelVendorLogUploadUtil.isConversionRequired(fuelvendor)) {
+				if (!FuelVendorLogUploadUtil.validateTotalFees(fuelvendor, totalFees)) {
+					request.getSession().setAttribute("error", "Please specify total fees!!");
+             	return "admin/uploaddata/fuellog";
+				}
+				
 				HashMap<String, Object> dataFromUser = new HashMap<String, Object>();
 				dataFromUser.put("fees", totalFees); // use the column name that matches ExpectedColumn, ie., as in generic excel
 				is = FuelVendorLogUploadUtil.convertToGenericFuelLogFormat(is, fuelvendor, this.genericDAO, this.importMainSheetService, dataFromUser);

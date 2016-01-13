@@ -122,6 +122,21 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
+	public static boolean validateTotalFees(Long fuelvendor, BigDecimal totalFees) {
+		long fuelVendorId = fuelvendor.longValue();
+		if (fuelVendorId == 18l // Atlantic Coast
+				// Quick Fuel
+				|| fuelVendorId == 16l || fuelVendorId == 20l) {
+			if (totalFees == null) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+	}
+	
 	private static void mapForTCH(LinkedList<String> expectedColumnList) {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
