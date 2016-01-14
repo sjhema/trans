@@ -2778,6 +2778,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	
 	private String validateAndResetUnitNumber(Map criterias, HSSFRow row) {
 		String unit = (String) getCellValue(row.getCell(6));
+		if (StringUtils.isEmpty(unit)) {
+			return StringUtils.EMPTY;
+		}
+		
 		criterias.clear();
 
 		String transactionDate = null;

@@ -140,8 +140,8 @@ public class UploadDataController extends BaseController {
 				is = TollCompanyTagUploadUtil.convertToGenericTollTagFormat(is, tollCompanyId, this.genericDAO, this.importMainSheetService);
 			}
 			
-			str = importMainSheetService.importeztollMainSheet(is,flag);
 			System.out.println("\nimportMainSheetService.importMainSheet(is)\n");
+			str = importMainSheetService.importeztollMainSheet(is,flag);
 			if(str.isEmpty())
 			{
 				model.addAttribute("msg", "Successfully uploaded all tolls");
@@ -153,11 +153,14 @@ public class UploadDataController extends BaseController {
 		} 
 		catch (Exception ex) 
 		{
-			//model.addAttribute("errors", "An error occurred while upload !!");
-			str.add("Exception while uploading");
-			model.addAttribute("errorList", str);
-			ex.printStackTrace();
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/eztoll";
 		}
 		
 		return "admin/uploaddata/eztoll";
@@ -242,20 +245,16 @@ public class UploadDataController extends BaseController {
 		
 		List<String> str=new ArrayList<String>();
 		boolean flag=false;
-		try 
-		{
-			if (StringUtils.isEmpty(file.getOriginalFilename())) 
-			{
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
 			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
 			    return "admin/uploaddata/fuellog";
-		    }
-			if (!StringUtils.isEmpty(file.getOriginalFilename())) 
-			{
+		   }
+			if (!StringUtils.isEmpty(file.getOriginalFilename())) {
 				String ext=	file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-				if(!(ext.equalsIgnoreCase(".xls")) && !(ext.equalsIgnoreCase(".xlsx")) )
-                {
-                	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
-                	return "admin/uploaddata/fuellog";
+				if(!(ext.equalsIgnoreCase(".xls")) && !(ext.equalsIgnoreCase(".xlsx")) ) {
+                request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+                return "admin/uploaddata/fuellog";
 				}
 			}
 			
@@ -264,7 +263,7 @@ public class UploadDataController extends BaseController {
 			if (FuelVendorLogUploadUtil.isConversionRequired(fuelvendor)) {
 				if (!FuelVendorLogUploadUtil.validateTotalFees(fuelvendor, totalFees)) {
 					request.getSession().setAttribute("error", "Please specify total fees!!");
-             	return "admin/uploaddata/fuellog";
+					return "admin/uploaddata/fuellog";
 				}
 				
 				HashMap<String, Object> dataFromUser = new HashMap<String, Object>();
@@ -272,26 +271,27 @@ public class UploadDataController extends BaseController {
 				is = FuelVendorLogUploadUtil.convertToGenericFuelLogFormat(is, fuelvendor, this.genericDAO, this.importMainSheetService, dataFromUser);
 			}
 			
-			str=importMainSheetService.importfuellogMainSheet(is,flag);
+			str = importMainSheetService.importfuellogMainSheet(is,flag);
 			System.out.println("\nimportMainSheetService.importMainSheet(is)\n");
-			if(str.isEmpty())
-			{
+			if (str.isEmpty()) {
 				model.addAttribute("msg","successfully uploaded all fuellogs");
 			}
-			else
-			{
+			else {
 				
 				model.addAttribute("errorList", str);
 			}
 		} 
-		catch (Exception ex) 
-		{
-			//model.addAttribute("errors", "An error occurred while upload !!");
-			str.add("Exception while uploading");
-			model.addAttribute("errorList", str);
-			ex.printStackTrace();
+		catch (Exception ex) {
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/fuellog";
 		}
+		
 		return "admin/uploaddata/fuellog";
 	}
 	

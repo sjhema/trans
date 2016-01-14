@@ -980,27 +980,38 @@ public class FuelVendorLogUploadUtil {
 	}
 	
 	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		if (oneCellValue == null || StringUtils.isEmpty(StringUtils.trimToEmpty(oneCellValue.toString()))) {
+		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
 		} 
 		
-		if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) {
-			System.out.println("Original unit #: " + oneCellValue.toString());
-			oneCellValue = StringUtils.replace(oneCellValue.toString(), "LUTY ", StringUtils.EMPTY);
-			System.out.println("Modified unit #: " + oneCellValue.toString());
+		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(cellValueStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
 		}
 		
-		setIntegerValue(cell, oneCellValue);
+		if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) {
+			System.out.println("Original unit #: " + cellValueStr);
+			cellValueStr = StringUtils.replace(cellValueStr, "LUTY ", StringUtils.EMPTY);
+			System.out.println("Modified unit #: " + cellValueStr);
+		}
+		
+		setIntegerValue(cell, cellValueStr);
 	}
 
 	private static void setIntegerValue(Cell cell, Object oneCellValue) {
-		if (oneCellValue == null || StringUtils.isEmpty(StringUtils.trimToEmpty(oneCellValue.toString()))) {
+		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
 		} 
 		
-		String cellValueStr = oneCellValue.toString().trim();
+		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(cellValueStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
 		if (!StringUtils.contains(cellValueStr, ".")) {
 			cell.setCellValue(cellValueStr);
 		} else {
