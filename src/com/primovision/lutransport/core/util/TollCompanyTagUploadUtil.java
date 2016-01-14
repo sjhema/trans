@@ -62,12 +62,14 @@ public class TollCompanyTagUploadUtil {
 	}
 
 	public static boolean isConversionRequired(Long tollCompanyId) {
-		// EZ Pass
+		return false;
+		
+		/*// EZ Pass
 		if (tollCompanyId.longValue() == 3) {
 			return true;
 		} else {
 			return false;
-		}
+		}*/
 	}
 	
 	private static void mapForEZPass(LinkedList<String> expectedColumnList) {
