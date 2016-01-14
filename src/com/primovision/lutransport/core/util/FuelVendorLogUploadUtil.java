@@ -466,7 +466,7 @@ public class FuelVendorLogUploadUtil {
 				System.out.println("Total number of transactions = " + totalNumOfTransactions);
 				
 				MathContext mc = new MathContext(9, RoundingMode.HALF_EVEN);      
-				BigDecimal feesPerTransaction = (new BigDecimal(totalFees)).divide(new BigDecimal(totalNumOfTransactions), mc).setScale(4, RoundingMode.CEILING);
+				BigDecimal feesPerTransaction = (new BigDecimal(totalFees)).divide(new BigDecimal(totalNumOfTransactions), mc).setScale(6, RoundingMode.CEILING);
 				BigDecimal amountWithFees = new BigDecimal(amount).add(feesPerTransaction);
 				
 				System.out.println("Amount = " + amount);
@@ -518,7 +518,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
