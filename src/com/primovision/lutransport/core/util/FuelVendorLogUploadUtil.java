@@ -518,7 +518,7 @@ public class FuelVendorLogUploadUtil {
 	}
 
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		dumpToFile(wb);
+		//dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
