@@ -743,6 +743,8 @@ public class FuelVendorLogUploadUtil {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 13) {  // else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
