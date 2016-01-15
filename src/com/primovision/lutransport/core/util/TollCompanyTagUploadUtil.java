@@ -33,7 +33,7 @@ import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
 public class TollCompanyTagUploadUtil {
-	private static String TOLL_COMPANY_EZ_PASS = "E-Z Pass";
+	private static String TOLL_COMPANY_EZ_PASS_NY = "E-Z Pass NY";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -46,33 +46,33 @@ public class TollCompanyTagUploadUtil {
 	static {
 		expectedColumnList.add("TOLL COMPANY"); // 0
 		expectedColumnList.add("COMPANY"); // 1
-		expectedColumnList.add("TERMINAL");// 2
-		expectedColumnList.add("TAG#"); // 3
-		expectedColumnList.add("PLATE#"); // 4
-		expectedColumnList.add("Driver Name"); // 5
-		expectedColumnList.add("TRANSACTION DATE"); // 6
-		expectedColumnList.add("TRANSACTION TIME"); // 7
-		expectedColumnList.add("AGENCY"); // 8
-		expectedColumnList.add("AMOUNT"); // 9
+		expectedColumnList.add("Invoice Date"); // 2
+		expectedColumnList.add("TERMINAL");// 3
+		expectedColumnList.add("TAG#"); // 4
+		expectedColumnList.add("PLATE#"); // 5
+		expectedColumnList.add("Driver Name"); // 6
+		expectedColumnList.add("TRANSACTION DATE"); // 7
+		expectedColumnList.add("TRANSACTION TIME"); // 8
+		expectedColumnList.add("AGENCY"); // 9
+		expectedColumnList.add("AMOUNT"); // 10
 
-		//tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS, "yyyy-MM-dd");
-		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS, "dd/MM/yy");
+		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_NY, "MM/dd/yy");
 		
-		mapForEZPass(expectedColumnList);
+		mapForEZPassNY(expectedColumnList);
 	}
 
 	public static boolean isConversionRequired(Long tollCompanyId) {
-		return false;
+		long tollCompnyIdLong = tollCompanyId.longValue();
 		
-		/*// EZ Pass
-		if (tollCompanyId.longValue() == 3) {
+		// EZ Pass NY
+		if (tollCompnyIdLong == 3 || tollCompnyIdLong == 7 || tollCompnyIdLong == 8) {
 			return true;
 		} else {
 			return false;
-		}*/
+		}
 	}
 	
-	private static void mapForEZPass(LinkedList<String> expectedColumnList) {
+	private static void mapForEZPassNY(LinkedList<String> expectedColumnList) {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TERMINAL");
@@ -83,12 +83,12 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TRANSACTION TIME");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "AGENCY");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT"); 
-		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS, actualColumnMap);
+		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS_NY, actualColumnMap);
 	}
 	
 	public static InputStream convertToGenericTollTagFormat(InputStream is, Long tollCompanyId, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
 		String tollCompanyName = getTollCompanyName(genericDAO, tollCompanyId);
-		LinkedHashMap<String, String> actualColumnListMap = getTollCompanySpecificMapping(TOLL_COMPANY_EZ_PASS);
+		LinkedHashMap<String, String> actualColumnListMap = getTollCompanySpecificMapping(TOLL_COMPANY_EZ_PASS_NY);
 		
 		List<LinkedList<Object>> tempData = importMainSheetService.importTollCompanySpecificTollTag(is, actualColumnListMap, tollCompanyId);
 		System.out.println("Number of rows = " + tempData.size());
@@ -124,7 +124,7 @@ public class TollCompanyTagUploadUtil {
 	}
 
 	private static Object consolidateDataForTollCompanies(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String tollCompany) {
-		if (!StringUtils.contains(tollCompany, TOLL_COMPANY_EZ_PASS)) {
+		if (!StringUtils.contains(tollCompany, TOLL_COMPANY_EZ_PASS_NY)) {
 			return oneCellValue;
 		}
 		
@@ -160,8 +160,8 @@ public class TollCompanyTagUploadUtil {
 
 	private static String getCommonTollCompanyName(String tollCompanyName) {
 		String commonTollCompanyName = StringUtils.EMPTY;
-		if (StringUtils.contains(tollCompanyName, TOLL_COMPANY_EZ_PASS)) {
-			commonTollCompanyName = TOLL_COMPANY_EZ_PASS;
+		if (StringUtils.contains(tollCompanyName, TOLL_COMPANY_EZ_PASS_NY)) {
+			commonTollCompanyName = TOLL_COMPANY_EZ_PASS_NY;
 		}
 		return commonTollCompanyName;
 	}
@@ -191,7 +191,7 @@ public class TollCompanyTagUploadUtil {
 	private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
-			fOut = new FileOutputStream("/Users/hemarajesh/Desktop/Test.xls");
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
 			wb.write(fOut);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -204,7 +204,7 @@ public class TollCompanyTagUploadUtil {
 
 	private static void formatCellValueForTollCompany(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
-		if (vendor.contains(TOLL_COMPANY_EZ_PASS)) { 
+		if (vendor.contains(TOLL_COMPANY_EZ_PASS_NY)) { 
 			formatCellValueForEZPass(wb, cell, oneCellValue, vendor);
 		} 
 	}
@@ -246,26 +246,6 @@ public class TollCompanyTagUploadUtil {
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
-	}
-
-	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
-		Row headerRow = sheet.createRow(0);
-		int columnHeaderIndex = 0;
-		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
-			sheet.setColumnWidth(columnHeaderIndex, 256*20);
-			Cell cell = headerRow.createCell(columnHeaderIndex++);
-			cell.setCellValue(columnHeader);
-			style.setAlignment(CellStyle.ALIGN_CENTER);
-			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-			style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-			cell.setCellStyle(style);
-		}
-	}
-
-	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
-		Cell cell = row.createCell(columnIndex);
-		sheet.setColumnWidth(columnIndex, 256*20);
-		return cell;
 	}
 	
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
@@ -347,13 +327,13 @@ public class TollCompanyTagUploadUtil {
 
 	private static void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String timeStr = oneCellValue.toString();
-		if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS)) {
+		if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS_NY) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
 			String [] timeArr = timeStr.split(":");
 			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
 			cell.setCellValue(cellValueStr);
-		} else if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS)) {
+		} else if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS_NY)) {
 			cell.setCellValue("00:00");
-		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS)) { 
+		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) { 
 			cell.setCellValue(timeStr);
 		}
 	}
@@ -385,5 +365,25 @@ public class TollCompanyTagUploadUtil {
 		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
 		String expectedDateStr = expectedDateFormat.format(actualDate);
 		return expectedDateFormat.parse(expectedDateStr);
+	}
+	
+	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
+		Row headerRow = sheet.createRow(0);
+		int columnHeaderIndex = 0;
+		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
+			sheet.setColumnWidth(columnHeaderIndex, 256*20);
+			Cell cell = headerRow.createCell(columnHeaderIndex++);
+			cell.setCellValue(columnHeader);
+			style.setAlignment(CellStyle.ALIGN_CENTER);
+			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			cell.setCellStyle(style);
+		}
+	}
+
+	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+		Cell cell = row.createCell(columnIndex);
+		sheet.setColumnWidth(columnIndex, 256*20);
+		return cell;
 	}
 }
