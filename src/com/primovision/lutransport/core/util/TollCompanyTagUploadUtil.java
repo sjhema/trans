@@ -6,10 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,8 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.comparator.LastModifiedFileComparator;
+
 import org.apache.commons.lang.StringUtils;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -28,7 +29,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
-import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
@@ -50,12 +50,13 @@ public class TollCompanyTagUploadUtil {
 		expectedColumnList.add("TERMINAL");// 3
 		expectedColumnList.add("TAG#"); // 4
 		expectedColumnList.add("PLATE#"); // 5
-		expectedColumnList.add("Driver Name"); // 6
-		expectedColumnList.add("Unit #"); // 7
-		expectedColumnList.add("TRANSACTION DATE"); // 8
-		expectedColumnList.add("TRANSACTION TIME"); // 9
-		expectedColumnList.add("AGENCY"); // 10
-		expectedColumnList.add("AMOUNT"); // 11
+		expectedColumnList.add("DRIVER LAST NAME"); // 6
+		expectedColumnList.add("DRIVER FIRST NAME"); // 7
+		expectedColumnList.add("Unit #"); // 8
+		expectedColumnList.add("TRANSACTION DATE"); // 9
+		expectedColumnList.add("TRANSACTION TIME"); // 10
+		expectedColumnList.add("AGENCY"); // 11
+		expectedColumnList.add("AMOUNT"); // 12
 
 		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_NY, "MM/dd/yy");
 		
@@ -82,6 +83,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TAG NUMBER/");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TAG NUMBER/");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TRANS");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TIME ");
@@ -153,62 +155,90 @@ public class TollCompanyTagUploadUtil {
 		} 
 	}
 
-	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		setIntegerValue(cell, oneCellValue);
-	}
-
-	private static void setIntegerValue(Cell cell, Object oneCellValue) {
-		if (oneCellValue == null || (StringUtils.isEmpty(oneCellValue.toString()))) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		} 
-		
-		String cellValueStr = oneCellValue.toString();
-		if (!StringUtils.contains(cellValueStr, ".")) {
-			cell.setCellValue(cellValueStr);
-		} else {
-			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
-		}
-	}
-
-	private static void setCellValueInvoiceNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue,
-			String vendor) {
-		setIntegerValue(cell, oneCellValue);
-	}
-
 	private static void formatCellValueForEZPass(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
 		if (oneCellValue == null) {
 			oneCellValue = StringUtils.EMPTY;
 			return;
-		} 
+		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (oneCellValue instanceof Date || columnIndex == 6) { 
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 9) { // Invoice date, transaction date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 9) { // fee
+		} else if (columnIndex == 6 || columnIndex == 7) { // Driver
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 8) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 10) { // Transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 12) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
 	}
 	
+	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(cellValueStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
+		setIntegerValue(cell, cellValueStr);
+	}
+
+	private static void setIntegerValue(Cell cell, Object oneCellValue) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(cellValueStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
+		if (!StringUtils.contains(cellValueStr, ".")) {
+			cell.setCellValue(cellValueStr);
+		} else {
+			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
+		}
+	}
+	
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
-		if (columnIndex == 7) { // lastname
-			// Put the value as is, validation can be done after getting the firstname @ columnIndex=8
+		
+		if (columnIndex == 6) { // lastname
+			if (StringUtils.isEmpty(driverName)) {
+				cell.setCellValue(StringUtils.EMPTY);
+				return;
+			}
+			
+			// Put the value as is, validation can be done after getting the firstname @ columnIndex=7
 			cell.setCellValue(StringUtils.upperCase(driverName));
 			return;
 		}  
 		
-		if (columnIndex == 8) { // firstname
+		if (columnIndex == 7) { // firstname
 			if (!StringUtils.isEmpty(driverName)) {
 				cell.setCellValue(StringUtils.upperCase(driverName));
 				return;
 			}
 			
-			Cell lastNameCell = cell.getRow().getCell(7);
+			Cell lastNameCell = cell.getRow().getCell(6);
 			String lastNameCellValue = lastNameCell.getStringCellValue();
+			if (StringUtils.isEmpty(lastNameCellValue)) {
+				cell.setCellValue(StringUtils.EMPTY);
+				return;
+			}
+			
 			String [] nameArr = null;
 			// Split into firstname and lastname
 			if (lastNameCellValue.contains(",")) {
@@ -233,19 +263,6 @@ public class TollCompanyTagUploadUtil {
 		}
 	}
 
-	private static void setCellValueFuelTypeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		String actualFuelType = oneCellValue.toString();
-		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S")) {
-			cell.setCellValue("DSL");
-		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
-			cell.setCellValue("Regular");
-		} else if (actualFuelType.equalsIgnoreCase("B")) {
-			cell.setCellValue("DEF");
-		} else {
-			cell.setCellValue(actualFuelType);
-		}
-	}
-
 	private static void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String feeStr = oneCellValue.toString();
 		if (StringUtils.isEmpty(feeStr)) {
@@ -262,22 +279,9 @@ public class TollCompanyTagUploadUtil {
 		cell.setCellStyle(style);
 	}
 
-	private static void setCellValueDoubleFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
-		cell.setCellValue(Double.parseDouble(oneCellValue.toString()));
-		CellStyle style = wb.createCellStyle();
-		style.setDataFormat(wb.createDataFormat().getFormat("0.00"));
-		cell.setCellStyle(style);
-	}
-
 	private static void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		String timeStr = oneCellValue.toString();
-		if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS_NY) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
-			String [] timeArr = timeStr.split(":");
-			String cellValueStr = (timeArr.length > 1 ? timeArr[0] + ":" + timeArr[1] : timeArr[0]);
-			cell.setCellValue(cellValueStr);
-		} else if (vendor.equalsIgnoreCase(TOLL_COMPANY_EZ_PASS_NY)) {
-			cell.setCellValue("00:00");
-		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY) || StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) { 
+		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) { 
 			cell.setCellValue(timeStr);
 		}
 	}

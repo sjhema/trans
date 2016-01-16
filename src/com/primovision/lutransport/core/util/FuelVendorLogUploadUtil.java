@@ -408,7 +408,7 @@ public class FuelVendorLogUploadUtil {
 
 	private static HashMap<String, Object> setupAdditionalVendorData(HashMap<String, Object> dataFromUser, String vendorName) {
 		HashMap<String, Object> additionalVendorData = new HashMap<String, Object>();
-		// For ATLANTIC_COAST & QUICK_FUEL only, we need to process fees as part of incoming data, for the rest, remove it
+		// For ATLANTIC_COAST & QUICK_FUEL only, we need to process fees as part of incoming data
 		if (StringUtils.containsIgnoreCase(vendorName, VENDOR_ATLANTIC_COAST) 
 				|| StringUtils.containsIgnoreCase(vendorName, VENDOR_QUICK_FUEL)) {
 				additionalVendorData.put("fees", dataFromUser.get("fees"));
