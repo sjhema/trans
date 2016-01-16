@@ -51,10 +51,11 @@ public class TollCompanyTagUploadUtil {
 		expectedColumnList.add("TAG#"); // 4
 		expectedColumnList.add("PLATE#"); // 5
 		expectedColumnList.add("Driver Name"); // 6
-		expectedColumnList.add("TRANSACTION DATE"); // 7
-		expectedColumnList.add("TRANSACTION TIME"); // 8
-		expectedColumnList.add("AGENCY"); // 9
-		expectedColumnList.add("AMOUNT"); // 10
+		expectedColumnList.add("Unit #"); // 7
+		expectedColumnList.add("TRANSACTION DATE"); // 8
+		expectedColumnList.add("TRANSACTION TIME"); // 9
+		expectedColumnList.add("AGENCY"); // 10
+		expectedColumnList.add("AMOUNT"); // 11
 
 		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_NY, "MM/dd/yy");
 		
@@ -75,12 +76,15 @@ public class TollCompanyTagUploadUtil {
 	private static void mapForEZPassNY(LinkedList<String> expectedColumnList) {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TERMINAL");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TAG/PLATE NUMBER");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "PLATE#");
+		
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TAG NUMBER/");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TAG NUMBER/");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TRANSACTION DATE");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TRANSACTION TIME");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TRANS");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TIME ");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "AGENCY");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT"); 
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS_NY, actualColumnMap);
@@ -113,7 +117,6 @@ public class TollCompanyTagUploadUtil {
 				}
 				System.out.println("Creating Column @ " + columnIndex + " with value = " + oneCellValue);
 				Cell cell = createExcelCell(sheet, row, columnIndex);
-				//oneCellValue = consolidateDataForTollCompanies(wb, cell, oneRow, oneCellValue, tollCompanyName);
 				formatCellValueForTollCompany(wb, cell, oneCellValue, tollCompanyName);
 				columnIndex++;
 			}
@@ -121,36 +124,6 @@ public class TollCompanyTagUploadUtil {
 
 		InputStream targetStream = createInputStream(wb);
 	   return targetStream;
-	}
-
-	private static Object consolidateDataForTollCompanies(HSSFWorkbook wb, Cell cell, LinkedList<Object> oneRow, Object oneCellValue, String tollCompany) {
-		if (!StringUtils.contains(tollCompany, TOLL_COMPANY_EZ_PASS_NY)) {
-			return oneCellValue;
-		}
-		
-		if (cell.getColumnIndex() == 9) { // Card Number
-			String cardNumber = oneRow.get(9) == null ? StringUtils.EMPTY : oneRow.get(9).toString();
-			cardNumber = cardNumber.length() > 5 ? cardNumber.substring(cardNumber.length()-5, cardNumber.length()) : cardNumber;
-			
-			int accountNumberIndex = expectedColumnList.size();
-			String accountNumber = oneRow.get(accountNumberIndex) == null ? StringUtils.EMPTY : oneRow.get(accountNumberIndex).toString();
-			
-			return accountNumber + cardNumber;
-		} else if (cell.getColumnIndex() == 16) { // fees
-			// Service Cost + Other Cost + Total Non-Fuel Cost = Fees
-			String serviceCost = oneRow.get(16) == null ? "0.0" : oneRow.get(16).toString();
-			
-			int otherCostIndex = expectedColumnList.size() + 1;
-			String otherCost = oneRow.get(otherCostIndex) == null ? "0.0" : oneRow.get(otherCostIndex).toString();
-			
-			int nonFuelCostIndex = otherCostIndex + 1;
-			String nonFuelCost = oneRow.get(nonFuelCostIndex) == null ? "0.0" : oneRow.get(nonFuelCostIndex).toString();
-			
-			BigDecimal fees = new BigDecimal(serviceCost).add(new BigDecimal(otherCost)).add(new BigDecimal(nonFuelCost));
-			return fees.toPlainString();
-		}
-		
-		return oneCellValue;
 	}
 
 	private static LinkedHashMap<String, String> getTollCompanySpecificMapping(String tollCompanyName) {
@@ -171,35 +144,6 @@ public class TollCompanyTagUploadUtil {
 		criterias.put("id", tollCompanyId);
 		TollCompany tollCompany = genericDAO.findByCriteria(TollCompany.class, criterias, "name",false).get(0);
 		return tollCompany.getName();
-	}
-
-	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
-		
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			wb.write(out);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	      
-	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
-		return targetStream;
-	}
-	
-	private static void dumpToFile(HSSFWorkbook wb) {
-		FileOutputStream fOut;
-		try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
-			wb.write(fOut);
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private static void formatCellValueForTollCompany(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
@@ -365,6 +309,35 @@ public class TollCompanyTagUploadUtil {
 		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
 		String expectedDateStr = expectedDateFormat.format(actualDate);
 		return expectedDateFormat.parse(expectedDateStr);
+	}
+	
+	private static InputStream createInputStream(HSSFWorkbook wb) {
+		//dumpToFile(wb);
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			wb.write(out);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      
+	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
+		return targetStream;
+	}
+	
+	private static void dumpToFile(HSSFWorkbook wb) {
+		FileOutputStream fOut;
+		try {
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+			wb.write(fOut);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {

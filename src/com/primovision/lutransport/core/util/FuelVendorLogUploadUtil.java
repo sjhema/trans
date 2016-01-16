@@ -517,35 +517,6 @@ public class FuelVendorLogUploadUtil {
 		return fuelVendor.getName();
 	}
 
-	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
-		
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			wb.write(out);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	      
-	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
-		return targetStream;
-	}
-	
-	private static void dumpToFile(HSSFWorkbook wb) {
-		FileOutputStream fOut;
-		try {
-			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
-			wb.write(fOut);
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	private static void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { 
@@ -1081,6 +1052,35 @@ public class FuelVendorLogUploadUtil {
 		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
 		String expectedDateStr = expectedDateFormat.format(actualDate);
 		return expectedDateFormat.parse(expectedDateStr);
+	}
+	
+	private static InputStream createInputStream(HSSFWorkbook wb) {
+		//dumpToFile(wb);
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			wb.write(out);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      
+	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
+		return targetStream;
+	}
+	
+	private static void dumpToFile(HSSFWorkbook wb) {
+		FileOutputStream fOut;
+		try {
+			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
+			wb.write(fOut);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
