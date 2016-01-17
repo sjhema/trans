@@ -36,7 +36,9 @@ public class TollCompanyTagUploadUtil {
 	private static String TOLL_COMPANY_EZ_PASS_NY = "E-Z Pass NY";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
+	static String expectedTimeFormatStr = "HH:mm";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
+	static SimpleDateFormat expectedTimeFormat = new SimpleDateFormat(expectedTimeFormatStr);
 	
 	static HashMap<String, LinkedHashMap<String, String>> tollCompanyToTollTagMapping = new HashMap<String, LinkedHashMap<String, String>>();
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
@@ -46,17 +48,16 @@ public class TollCompanyTagUploadUtil {
 	static {
 		expectedColumnList.add("TOLL COMPANY"); // 0
 		expectedColumnList.add("COMPANY"); // 1
-		expectedColumnList.add("Invoice Date"); // 2
-		expectedColumnList.add("TERMINAL");// 3
-		expectedColumnList.add("TAG#"); // 4
-		expectedColumnList.add("PLATE#"); // 5
-		expectedColumnList.add("DRIVER LAST NAME"); // 6
-		expectedColumnList.add("DRIVER FIRST NAME"); // 7
-		expectedColumnList.add("Unit #"); // 8
-		expectedColumnList.add("TRANSACTION DATE"); // 9
-		expectedColumnList.add("TRANSACTION TIME"); // 10
-		expectedColumnList.add("AGENCY"); // 11
-		expectedColumnList.add("AMOUNT"); // 12
+		expectedColumnList.add("TERMINAL"); // 2
+		expectedColumnList.add("TAG#"); // 3
+		expectedColumnList.add("PLATE#"); // 4
+		expectedColumnList.add("DRIVER NAME"); // 5
+		expectedColumnList.add("TRANSACTION DATE"); // 6
+		expectedColumnList.add("TRANSACTION TIME"); // 7
+		expectedColumnList.add("AGENCY"); // 8
+		expectedColumnList.add("AMOUNT"); // 9
+		expectedColumnList.add("Invoice Date"); // 10
+		expectedColumnList.add("Unit #"); // 11
 
 		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_NY, "MM/dd/yy");
 		
@@ -78,17 +79,16 @@ public class TollCompanyTagUploadUtil {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
 		
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TAG NUMBER/");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TAG NUMBER/");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TRANS");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TIME ");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "AGENCY");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS_NY, actualColumnMap);
 	}
 	
@@ -151,7 +151,7 @@ public class TollCompanyTagUploadUtil {
 	private static void formatCellValueForTollCompany(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
 			throws Exception {
 		if (vendor.contains(TOLL_COMPANY_EZ_PASS_NY)) { 
-			formatCellValueForEZPass(wb, cell, oneCellValue, vendor);
+			formatCellValueForEZPass(wb, cell, oneCellValue, TOLL_COMPANY_EZ_PASS_NY);
 		} 
 	}
 
@@ -162,16 +162,16 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 9) { // Invoice date, transaction date
-			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 6 || columnIndex == 7) { // Driver
+		if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
-		} else if (columnIndex == 8) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 10) { // Transaction time 
+		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date, Invoice date
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7) { // Transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 12) { // Amount
+		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 11) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
@@ -212,6 +212,13 @@ public class TollCompanyTagUploadUtil {
 	}
 	
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+		} else {
+			cell.setCellValue(oneCellValue.toString());
+		}
+		
+		/*
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
 		
@@ -260,7 +267,7 @@ public class TollCompanyTagUploadUtil {
 					cell.setCellValue(StringUtils.EMPTY);
 				}
 			}
-		}
+		}*/
 	}
 
 	private static void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
@@ -291,21 +298,30 @@ public class TollCompanyTagUploadUtil {
 		String tollCompanyDateFormat = tollCompanyToDateFormatMapping.get(vendor);
 		System.out.println("Value = " + tollCompanyDateFormat);
 		
+		int columnIndex = cell.getColumnIndex();
+		
 		if (oneCellValue instanceof Date) {
 			System.out.println("Incoming date is a Date Object.");
 			tollCompanyDateFormat = "EEE MMM dd hh:mm:ss z yyyy";
 		}
 		
 		String dateStr = oneCellValue.toString();
+		SimpleDateFormat requiredDateFormat = null;
 		
 		if (StringUtils.isEmpty(dateStr)) {
 			cell.setCellValue(StringUtils.EMPTY);
 		} else {
-			cell.setCellValue(convertToExpectedDateFormat(dateStr, tollCompanyDateFormat));
+			if (columnIndex == 7) { // Transaction time
+				requiredDateFormat = expectedTimeFormat;
+				cell.setCellValue(convertToExpectedTimeFormat(dateStr, tollCompanyDateFormat));
+			} else {
+				requiredDateFormat = expectedDateFormat;
+				cell.setCellValue(convertToExpectedDateFormat(dateStr, tollCompanyDateFormat));
+			}
 		}
 		
 		CellStyle style = wb.createCellStyle();
-		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));
+		style.setDataFormat(wb.createDataFormat().getFormat(requiredDateFormat.toPattern()));
 		cell.setCellStyle(style);
 	}
 	
@@ -313,6 +329,12 @@ public class TollCompanyTagUploadUtil {
 		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
 		String expectedDateStr = expectedDateFormat.format(actualDate);
 		return expectedDateFormat.parse(expectedDateStr);
+	}
+	
+	private static Date convertToExpectedTimeFormat(String actualTimeStr, String actualTimeFormat) throws ParseException {
+		Date actualTime = new SimpleDateFormat(actualTimeFormat).parse(actualTimeStr);
+		String expectedTimeStr = expectedTimeFormat.format(actualTime);
+		return expectedTimeFormat.parse(expectedTimeStr);
 	}
 	
 	private static InputStream createInputStream(HSSFWorkbook wb) {
