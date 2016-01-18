@@ -3648,7 +3648,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			// assumption is made that dataFormat = 14,
 			// when cellType is HSSFCell.CELL_TYPE_NUMERIC
 			// is equal to a DATE format.
-			if (dataFormat == 164 || dataFormat == 165) {
+			if (dataFormat == 164) {
 				result = cell.getDateCellValue();
 			} else {
 				result = cell.getNumericCellValue();

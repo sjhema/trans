@@ -189,10 +189,8 @@ public class TollCompanyTagUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
-		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date, Invoice date
+		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 7) { // Transaction time 
-			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 11) {
@@ -211,10 +209,8 @@ public class TollCompanyTagUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
-		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date, Invoice date
+		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 7) { // Transaction time 
-			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 11) {
@@ -282,13 +278,6 @@ public class TollCompanyTagUploadUtil {
 		cell.setCellStyle(style);
 	}
 
-	private static void setCellValueTimeFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		String timeStr = oneCellValue.toString();
-		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) { 
-			cell.setCellValue(timeStr);
-		}
-	}
-
 	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
 		System.out.println("Incoming vendor = " + vendor);
 		String tollCompanyDateFormat = tollCompanyToDateFormatMapping.get(vendor);
@@ -302,22 +291,20 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		String dateStr = oneCellValue.toString();
-		SimpleDateFormat requiredDateFormat = null;
 		
 		if (StringUtils.isEmpty(dateStr)) {
 			cell.setCellValue(StringUtils.EMPTY);
 		} else {
 			if (columnIndex == 7) { // Transaction time
-				requiredDateFormat = expectedTimeFormat;
-				cell.setCellValue(convertToExpectedTimeFormat(dateStr, tollCompanyDateFormat));
+				cell.setCellValue(convertToExpectedTimeFormatStr(dateStr, tollCompanyDateFormat));
+				return;
 			} else {
-				requiredDateFormat = expectedDateFormat;
 				cell.setCellValue(convertToExpectedDateFormat(dateStr, tollCompanyDateFormat));
 			}
 		}
 		
 		CellStyle style = wb.createCellStyle();
-		style.setDataFormat(wb.createDataFormat().getFormat(requiredDateFormat.toPattern()));
+		style.setDataFormat(wb.createDataFormat().getFormat(expectedDateFormat.toPattern()));
 		cell.setCellStyle(style);
 	}
 	
@@ -327,10 +314,10 @@ public class TollCompanyTagUploadUtil {
 		return expectedDateFormat.parse(expectedDateStr);
 	}
 	
-	private static Date convertToExpectedTimeFormat(String actualTimeStr, String actualTimeFormat) throws ParseException {
+	private static String convertToExpectedTimeFormatStr(String actualTimeStr, String actualTimeFormat) throws ParseException {
 		Date actualTime = new SimpleDateFormat(actualTimeFormat).parse(actualTimeStr);
 		String expectedTimeStr = expectedTimeFormat.format(actualTime);
-		return expectedTimeFormat.parse(expectedTimeStr);
+		return expectedTimeStr;
 	}
 	
 	private static InputStream createInputStream(HSSFWorkbook wb) {
