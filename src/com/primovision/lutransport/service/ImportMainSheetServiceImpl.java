@@ -4091,8 +4091,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(tollCompany.getName());
+				
 				// TODO: For now, need to get logic 
 				String company = StringUtils.substringAfterLast(tollCompany.getName(), " ");
+				company = StringUtils.defaultIfEmpty(company, "LU");
 				rowObjects.add(company);
 
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
