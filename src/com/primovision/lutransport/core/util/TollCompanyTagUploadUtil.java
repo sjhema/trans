@@ -115,7 +115,7 @@ public class TollCompanyTagUploadUtil {
 	
 	public static InputStream convertToGenericTollTagFormat(InputStream is, Long tollCompanyId, GenericDAO genericDAO, ImportMainSheetService importMainSheetService) throws Exception {
 		String tollCompanyName = getTollCompanyName(genericDAO, tollCompanyId);
-		LinkedHashMap<String, String> actualColumnListMap = getTollCompanySpecificMapping(TOLL_COMPANY_EZ_PASS_NY);
+		LinkedHashMap<String, String> actualColumnListMap = getTollCompanySpecificMapping(tollCompanyName);
 		
 		List<LinkedList<Object>> tempData = importMainSheetService.importTollCompanySpecificTollTag(is, actualColumnListMap, tollCompanyId);
 		System.out.println("Number of rows = " + tempData.size());
@@ -175,7 +175,7 @@ public class TollCompanyTagUploadUtil {
 			throws Exception {
 		if (vendor.contains(TOLL_COMPANY_EZ_PASS_NY)) { 
 			formatCellValueForEZPassNY(wb, cell, oneCellValue, TOLL_COMPANY_EZ_PASS_NY);
-		} else if (vendor.contains(TOLL_COMPANY_EZ_PASS_NY)) { 
+		} else if (vendor.contains(TOLL_COMPANY_EZ_PASS_PA)) { 
 			formatCellValueForEZPassPA(wb, cell, oneCellValue, TOLL_COMPANY_EZ_PASS_PA);
 		}
 	}
@@ -321,7 +321,7 @@ public class TollCompanyTagUploadUtil {
 	}
 	
 	private static InputStream createInputStream(HSSFWorkbook wb) {
-		//dumpToFile(wb);
+		dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {

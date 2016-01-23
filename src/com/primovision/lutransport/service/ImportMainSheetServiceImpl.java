@@ -4078,22 +4078,22 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			criterias.put("id", tollCompanyId);
 			TollCompany tollCompany = genericDAO.findByCriteria(TollCompany.class, criterias, "name", false).get(0);
 			
-			boolean stopParsing = false;
-			for (int i = titleRow.getRowNum() + 1; !stopParsing && i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
+			//boolean stopParsing = false;
+			for (int i = titleRow.getRowNum() + 1; i <= sheet.getPhysicalNumberOfRows() - 1; i++) {
+				Row row = sheet.getRow(i);
+				
+				Object firstCellValueObj = getCellValue((HSSFCell) row.getCell(0), true);
+				if (firstCellValueObj != null && firstCellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
+					System.out.println("Received END_OF_DATA");
+					break;
+				}
+				
 				LinkedList<Object> rowObjects = new LinkedList<Object>();
 				
 				rowObjects.add(tollCompany.getName());
-				rowObjects.add("LU"); // TODO: For now, need to get logic 
-				
-				Row row = sheet.getRow(i);
-				Object firstCellValueObj = getCellValue((HSSFCell) row.getCell(0), true);
-				
-				if (firstCellValueObj != null && firstCellValueObj.toString().equalsIgnoreCase("END_OF_DATA")) {
-					System.out.println("Received END_OF_DATA");
-					stopParsing = true;
-					rowObjects.clear();
-					break;
-				}
+				// TODO: For now, need to get logic 
+				String company = StringUtils.substringAfterLast(tollCompany.getName(), " ");
+				rowObjects.add(company);
 
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
 				while (iterator.hasNext()) {
@@ -4106,7 +4106,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					}
 					
 					Object cellValueObj = getCellValue((HSSFCell) row.getCell(entry.getValue()), true);
-					
 					if (cellValueObj != null) {
 						System.out.println("Adding " + cellValueObj.toString());
 					} else {
@@ -4115,11 +4114,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					rowObjects.add(cellValueObj);
 				}
 
-				if (!stopParsing) {
-					data.add(rowObjects);
-				}
+				data.add(rowObjects);
 			}
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
