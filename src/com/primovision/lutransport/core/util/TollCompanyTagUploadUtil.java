@@ -151,7 +151,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Transaction Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Toll agency");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Amount Charged");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");

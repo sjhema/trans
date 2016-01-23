@@ -160,7 +160,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						// System.out.println("\n\n Error in Driver first
 						// name========>"+ex);
 						error = true;
-						lineError.append("Company,");
+						lineError.append("Invalid Company Name,");
 						log.warn(ex.getMessage());
 					}
 					// FOR TERMINAL
