@@ -88,6 +88,24 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
 		return dateFormat.parse(validCellValue);
 	}
+	
+	private void validateAndResetTollTagAndPlateNumber(HSSFRow row) {
+		String tollNum = getCellValue(row.getCell(3)).toString();
+		if (StringUtils.isEmpty(tollNum)) {
+			return;
+		} 
+		
+		String tollQuery = "select obj from VehicleTollTag obj where obj.tollTagNumber='" + tollNum + "'";
+		List<VehicleTollTag> vehicleTollTags = genericDAO.executeSimpleQuery(tollQuery);
+		if (vehicleTollTags != null && vehicleTollTags.size() > 0) {
+			String plateNum = getCellValue(row.getCell(4)).toString();
+			if (StringUtils.contains(tollNum, plateNum)) {
+				row.getCell(4).setCellValue(StringUtils.EMPTY);
+			}
+		} else {
+			row.getCell(3).setCellValue(StringUtils.EMPTY);
+		}
+	}
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -180,6 +198,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					 * log.warn(ex.getMessage()); }
 					 */
 
+					validateAndResetTollTagAndPlateNumber(row);
+					
 					String plateNum = null;
 
 					if (getCellValue(row.getCell(4)) == null) {
@@ -243,14 +263,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										eztoll.setTollTagNumber(vehicletolltags.get(0));
 										String drv_name = (String) getCellValue(row.getCell(5));
 										if (!(StringUtils.isEmpty(drv_name))) {
-											criterias.clear();
+											/*criterias.clear();
 											criterias.put("fullName", getCellValue(row.getCell(5)));
-											/*
-											 * List<Driver> driver
-											 * =genericDAO.findByCriteria(Driver
-											 * .class,criterias);
-											 */
-											Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
+											
+											Driver driver = genericDAO.getByCriteria(Driver.class, criterias);*/
+											
+											Driver driver = getDriverObjectFromName(drv_name, row);
 											if (driver == null) {
 												error = true;
 												lineError.append("Invalid Driver Name, ");
@@ -582,14 +600,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 										String drv_name = (String) getCellValue(row.getCell(5));
 										if (!(StringUtils.isEmpty(drv_name))) {
-											criterias.clear();
+											/*criterias.clear();
 											criterias.put("fullName", getCellValue(row.getCell(5)));
-											/*
-											 * List<Driver> driver
-											 * =genericDAO.findByCriteria(Driver
-											 * .class,criterias);
-											 */
-											Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
+											
+											Driver driver = genericDAO.getByCriteria(Driver.class, criterias);*/
+											
+											Driver driver = getDriverObjectFromName(drv_name, row);
 											if (driver == null) {
 												error = true;
 												lineError.append("Invalid Driver Name, ");
@@ -2805,6 +2821,25 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return unit;
 		}
 	}
+	
+	private Driver getDriverObjectFromName(String fullName, HSSFRow row) {
+		List<Driver> drivers = getDriversFromName(fullName);
+
+		if (drivers.size() == 0) { // no driver, continue to existing flow
+			System.out.println("<<Custom code for Driver>>: No driver matching fullName = " + fullName + " was found.");
+			return null;
+		}
+		
+		if (drivers.size() == 1) { // exactly 1 matching driver, continue to existing flow
+			System.out.println("<<Custom code for Driver>>: Exactly 1 matching driver was found with id = " + drivers.get(0).getId());
+			return drivers.get(0);
+		}
+		
+		// more than 1 driver found
+		//return retrieveActualDriver(drivers, row);
+		String transdate = getTransactionDateFromExcel(row, 6);
+		return retrieveActualDriver(drivers, transdate);
+	}
 
 	private Driver getDriverObjectFromName(Map criterias, String firstName, String lastName, HSSFRow row) {
 		
@@ -2830,11 +2865,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		// more than 1 driver found
-		return retrieveActualDriver(drivers, row);
+		//return retrieveActualDriver(drivers, row);
+		String transdate = getTransactionDateFromExcel(row, 4);
+		return retrieveActualDriver(drivers, transdate);
 	}
 
-	private Driver retrieveActualDriver(List<Driver> drivers, HSSFRow row) {
-		String transdate = getTransactionDateFromExcel(row);
+	//private Driver retrieveActualDriver(List<Driver> drivers, HSSFRow row) {
+	private Driver retrieveActualDriver(List<Driver> drivers, String transdate) {
+		//String transdate = getTransactionDateFromExcel(row);
 		String listOfDrivers = getCommaSeparatedListOfDriverID(drivers);
 		
 		Ticket ticket = getTicketForDriver(listOfDrivers, transdate);
@@ -2875,7 +2913,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	
 			// if unit number is NOT EMPTY
 			if(!StringUtils.isEmpty(unit)) {
-				String transdate = getTransactionDateFromExcel(row);
+				String transdate = getTransactionDateFromExcel(row, 4);
 				if (!setVehicleInFuelLogFromUnitNumber(row, transdate, fuellog)) {
 					isError = true;
 					lineError.append("no such Vehicle,");
@@ -2934,7 +2972,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			listOfDrivers = getCommaSeparatedListOfDriverID(driver);
 		}
 		
-		String transdate = getTransactionDateFromExcel(row);
+		String transdate = getTransactionDateFromExcel(row, 4);
 		
 		// pass the Stringbuffer lineError -> to capture the right error
 		
@@ -2964,6 +3002,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return isError;
 	}
 
+	private List<Driver> getDriversFromName(String fullName) {
+		Map criterias = new HashMap();
+		criterias.clear();
+		criterias.put("fullName", fullName);
+		List<Driver> driver = genericDAO.findByCriteria(Driver.class, criterias, "id", true);
+		return driver;
+	}
+	
 	private List<Driver> getDriversFromName(Map criterias, String lastName, String firstName) {
 		criterias.clear();
 		criterias.put("firstName", firstName);
@@ -3160,7 +3206,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return driverIdList.toString().replaceFirst(",", "");
 	}
 
-	private String getTransactionDateFromExcel(HSSFRow row) {
+	private String getTransactionDateFromExcel(HSSFRow row, int colIndex) {
 		String transdate = null;
 		if (validDate(getCellValue(row.getCell(4)))) {
 			transdate = dateFormat.format(((Date) getCellValue(row.getCell(4))).getTime());

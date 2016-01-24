@@ -240,7 +240,9 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (columnIndex == 5) { // Driver
+		if (columnIndex == 4) { // Plate num
+			setCellValuePlateNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
@@ -260,7 +262,9 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (columnIndex == 5) { // Driver
+		if (columnIndex == 4) { // Plate num
+			setCellValuePlateNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
@@ -344,6 +348,20 @@ public class TollCompanyTagUploadUtil {
 			cell.setCellValue(cellValueStr);
 		} else {
 			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
+		}
+	}
+	
+	private static void setCellValuePlateNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
+			cell.setCellValue(StringUtils.EMPTY);
+		} else {
+			String plateNum = oneCellValue.toString();
+			if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
+				plateNum = StringUtils.substring(oneCellValue.toString(), 2);
+			} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA)) {
+				plateNum = StringUtils.substring(oneCellValue.toString(), 3);
+			}
+			cell.setCellValue(plateNum);
 		}
 	}
 	
