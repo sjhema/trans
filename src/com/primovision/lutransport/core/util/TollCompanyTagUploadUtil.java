@@ -60,7 +60,7 @@ public class TollCompanyTagUploadUtil {
 		expectedColumnList.add("AGENCY"); // 8
 		expectedColumnList.add("AMOUNT"); // 9
 		expectedColumnList.add("Invoice Date"); // 10
-		expectedColumnList.add("Unit #"); // 11
+		//expectedColumnList.add("Unit #"); // 11
 
 		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_NY, "MM/dd/yy");
 		tollCompanyToDateFormatMapping.put(TOLL_COMPANY_EZ_PASS_PA, "MM/dd/yy H:mm");
@@ -103,7 +103,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "AGENCY");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
+		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS_NY, actualColumnMap);
 	}
 	
@@ -120,7 +120,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "EXIT PLAZA");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
+		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_EZ_PASS_PA, actualColumnMap);
 	}
 	
@@ -137,7 +137,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Toll agency");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Transaction amount");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
+		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_IPASS, actualColumnMap);
 	}
 	
@@ -154,7 +154,7 @@ public class TollCompanyTagUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Amount Charged");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
+		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_SUN_PASS, actualColumnMap);
 	}
 	
@@ -248,8 +248,8 @@ public class TollCompanyTagUploadUtil {
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 11) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		/*} else if (columnIndex == 11) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);*/
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
@@ -270,8 +270,8 @@ public class TollCompanyTagUploadUtil {
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 11) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		/*} else if (columnIndex == 11) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);*/
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
@@ -290,8 +290,8 @@ public class TollCompanyTagUploadUtil {
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 11) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		/*} else if (columnIndex == 11) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);*/
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
@@ -310,14 +310,14 @@ public class TollCompanyTagUploadUtil {
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 11) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		/*} else if (columnIndex == 11) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);*/
 		} else {
 			cell.setCellValue(oneCellValue.toString().toUpperCase());
 		}
 	}
 	
-	private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+	/*private static void setCellValueUnitNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -330,9 +330,9 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		setIntegerValue(cell, cellValueStr);
-	}
+	}*/
 
-	private static void setIntegerValue(Cell cell, Object oneCellValue) {
+	/*private static void setIntegerValue(Cell cell, Object oneCellValue) {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -349,7 +349,7 @@ public class TollCompanyTagUploadUtil {
 		} else {
 			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
 		}
-	}
+	}*/
 	
 	private static void setCellValuePlateNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
