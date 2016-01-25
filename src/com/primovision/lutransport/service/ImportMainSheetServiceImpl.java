@@ -510,7 +510,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								criterias.put("plate", (String) getCellValue(row.getCell(4)));
 								Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, criterias);
 								if (vehicle == null)
-									throw new Exception("no such Plate Number");
+									throw new Exception("no such Plate or toll tag Number");
 								else {
 
 									if (tollNum != null) {
@@ -837,6 +837,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										}
 
 										eztoll.setPlateNumber(vehicle);
+										eztoll.setUnit(vehicle);
 									}
 
 								}
@@ -856,7 +857,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										"select o from Vehicle o where o.unit=" + vehicletoll.getUnit()
 												+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
 								if (vehicleList.isEmpty() && vehicleList.size() == 0)
-									throw new Exception("Invalid Plate Number");
+									//throw new Exception("Invalid Plate Number");
+									throw new Exception("Invalid Toll Tag Number");
 								else
 									eztoll.setPlateNumber(vehicleList.get(0));
 
