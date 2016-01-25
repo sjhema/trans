@@ -42,6 +42,10 @@ public class TollCompany extends AbstractBaseModel{
 	@Column(name="fax")
 	private String fax;
 	
+	@ManyToOne
+	@JoinColumn(name="company_id")
+	private Location company;
+	
 	/*@ManyToOne
 	@JoinColumn(name="transfer_station")
 	private Location transferStation;
@@ -51,6 +55,14 @@ public class TollCompany extends AbstractBaseModel{
 	private Location landfill;	
 	*/
 
+	public Location getCompany() {
+		return company;
+	}
+
+	public void setCompany(Location company) {
+		this.company = company;
+	}
+	
 	public String getName() {
 		return name;
 	}

@@ -69,6 +69,7 @@
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false">
 		<primo:textcolumn headerText="Name" dataField="name" />
+		<primo:textcolumn headerText="Company" dataField="company.name" />
 		<primo:textcolumn headerText="Address Line1" dataField="address" />
 		<primo:textcolumn headerText="Address Line2" dataField="address2" />
 		<primo:textcolumn headerText="City" dataField="city" />

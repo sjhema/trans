@@ -59,6 +59,9 @@ public class EzToll extends AbstractBaseModel
 	@NotNull
 	@Column(name="amount")
 	protected Double amount;
+	
+	@Column(name="invoice_date")
+	protected Date invoiceDate;
 
 	@Transient
 	private String tollcompanies;
@@ -92,6 +95,13 @@ public class EzToll extends AbstractBaseModel
 	@Transient
 	private String drivername="";
 	
+	public Date getInvoiceDate() {
+		return invoiceDate;
+	}
+
+	public void setInvoiceDate(Date invoiceDate) {
+		this.invoiceDate = invoiceDate;
+	}
 	
 	public String getPlates() {
 		return plates;

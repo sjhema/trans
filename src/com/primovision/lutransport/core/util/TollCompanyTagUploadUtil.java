@@ -354,15 +354,16 @@ public class TollCompanyTagUploadUtil {
 	private static void setCellValuePlateNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
 			cell.setCellValue(StringUtils.EMPTY);
-		} else {
-			String plateNum = oneCellValue.toString();
-			if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
-				plateNum = StringUtils.substring(oneCellValue.toString(), 2);
-			} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA)) {
-				plateNum = StringUtils.substring(oneCellValue.toString(), 3);
-			}
-			cell.setCellValue(plateNum);
+			return;
+		} 
+		
+		String plateNum = oneCellValue.toString();
+		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
+			plateNum = StringUtils.substring(oneCellValue.toString(), 2);
+		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA)) {
+			plateNum = StringUtils.substring(oneCellValue.toString(), 3);
 		}
+		cell.setCellValue(plateNum);
 	}
 	
 	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {

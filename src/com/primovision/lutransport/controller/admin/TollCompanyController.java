@@ -56,6 +56,9 @@ public class TollCompanyController extends CRUDController<TollCompany> {
 		criterias.put("type", 2);
 		model.addAttribute("landfill",
 				genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
+		criterias.put("type", 3);
+		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
 	}
 	
 	
@@ -95,7 +98,9 @@ public class TollCompanyController extends CRUDController<TollCompany> {
 	public String save(HttpServletRequest request, @ModelAttribute("modelObject") TollCompany entity,
 			BindingResult bindingResult, ModelMap model) {
 
-		
+		if(entity.getCompany()==null){
+			bindingResult.rejectValue("company", "error.select.option", null, null);
+		}
 		if(entity.getState() == null)
 			bindingResult.rejectValue("state", "error.select.option", null, null);
 		if(entity.getCity() == null)

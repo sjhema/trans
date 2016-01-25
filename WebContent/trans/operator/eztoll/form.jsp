@@ -367,7 +367,14 @@ function findPlateNum(){
 			 
 		</tr>
 		
-		
+		<tr>
+			<td class="form-left"><primo:label code="Invoice Date" /><span
+				class="errorMessage">*</span>
+			</td>
+			<td align="${left}"><form:input path="invoiceDate" style="min-width:150px; max-width:150px"
+					cssClass="flat" id="datepicker" onblur="return formatDate();" /> <br>
+			<form:errors path="invoiceDate" cssClass="errorMessage" /></td>
+		</tr>
 		
 		<tr>
 		      

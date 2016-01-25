@@ -12,6 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -89,13 +93,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return dateFormat.parse(validCellValue);
 	}
 	
-	private void validateAndResetTollTagAndPlateNumber(HSSFRow row) {
+	private void validateAndResetTollTagAndPlateNumber(HSSFRow row, EzToll ezToll) {
 		String tollNum = getCellValue(row.getCell(3)).toString();
 		if (StringUtils.isEmpty(tollNum)) {
 			return;
 		} 
 		
 		String tollQuery = "select obj from VehicleTollTag obj where obj.tollTagNumber='" + tollNum + "'";
+		if (ezToll.getToolcompany() != null) {
+			tollQuery += " and obj.tollCompany='" + ezToll.getToolcompany().getId() + "'";
+		}
+		
 		List<VehicleTollTag> vehicleTollTags = genericDAO.executeSimpleQuery(tollQuery);
 		if (vehicleTollTags != null && vehicleTollTags.size() > 0) {
 			String plateNum = getCellValue(row.getCell(4)).toString();
@@ -197,8 +205,32 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					 * error = true; lineError.append("Terminal,");
 					 * log.warn(ex.getMessage()); }
 					 */
+					
+					if (override == false) {
+						Date date2 = row.getCell(10).getDateCellValue();
 
-					validateAndResetTollTagAndPlateNumber(row);
+						try {
+							if (validDate(date2)) {
+								eztoll.setInvoiceDate(dateFormat1.parse(dateFormat1.format(date2)));
+							} else {
+								error = true;
+								lineError.append("Invoice Date,");
+							}
+						} catch (Exception ex) {
+							error = true;
+							lineError.append("Invoice Date,");
+							log.warn(ex.getMessage());
+
+						}
+					} else {
+						if (validDate(getCellValue(row.getCell(10))))
+							eztoll.setInvoiceDate((Date) getCellValue(row.getCell(10)));
+						else {
+							eztoll.setInvoiceDate(null);
+						}
+					}
+
+					validateAndResetTollTagAndPlateNumber(row, eztoll);
 					
 					String plateNum = null;
 
@@ -510,7 +542,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								criterias.put("plate", (String) getCellValue(row.getCell(4)));
 								Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, criterias);
 								if (vehicle == null)
-									throw new Exception("no such Plate or toll tag Number");
+									throw new Exception("no such Plate or Toll tag Number");
 								else {
 
 									if (tollNum != null) {
@@ -843,7 +875,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								}
 							} catch (Exception ex) {
 								error = true;
-								lineError.append("Invalid Plate Number, ");
+								lineError.append("Invalid Plate or Toll tag Number, ");
 								log.warn(ex.getMessage());
 							}
 
@@ -958,17 +990,70 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						lineError.append("Amount,");
 						error = true;
 					}
+					
+					/**Added dup check**/
 					// END OF CELL
+					if (override == false) {
+						System.out.println("***** eneter here ok 0");
+						if (!error) {
+							System.out.println("***** eneter here ok 1");
+							Map prop = new HashMap();
+							prop.put("toolcompany", eztoll.getToolcompany().getId());
+							prop.put("company", eztoll.getCompany().getId());
+							prop.put("driver", eztoll.getDriver().getId());
+							prop.put("terminal", eztoll.getTerminal().getId());
+							prop.put("unit", eztoll.getUnit().getId());
+							prop.put("agency", eztoll.getAgency());
+							prop.put("invoiceDate", dateFormat1.format(eztoll.getInvoiceDate()));
+							prop.put("transactiondate", dateFormat1.format(eztoll.getTransactiondate()));
+							prop.put("transactiontime", eztoll.getTransactiontime());
+							if (eztoll.getTollTagNumber() != null) {
+								prop.put("tollTagNumber", eztoll.getTollTagNumber().getId());
+							} 
+							if (eztoll.getPlateNumber() != null) {
+								prop.put("plateNumber", eztoll.getPlateNumber().getId());
+							} 
+							prop.put("amount", eztoll.getAmount());
+							boolean rst = genericDAO.isUnique(EzToll.class, eztoll, prop);
+							System.out.println("***** eneter here ok 2" + rst);
+							if (!rst) {
+								System.out.println("***** eneter here ok 3");
+								lineError.append("Toll tag entry already exists(Duplicate),");
+								error = true;
+								errorcount++;
+							}
+
+							if (eztolls.contains(eztoll)) {
+								 lineError.append("Duplicate eztoll in excel,"); 
+								 error = true;
+							 } else { 
+								 eztolls.add(eztoll);
+							 }
+						} else {
+							errorcount++;
+						}
+					} else {
+						if (!error) {
+							eztolls.add(eztoll);
+						} else {
+							errorcount++;
+						}
+					}
+					/**End of adding dup check**/
+					
+					/*// END OF CELL
 					if (!error) {
-						/*
-						 * if (eztolls.contains(eztoll)) {
-						 * lineError.append("Duplicate eztoll,"); error = true;
-						 * } else { fuellogs.add(eztoll); }
-						 */
-						eztolls.add(eztoll);
+						 if (eztolls.contains(eztoll)) {
+							 lineError.append("Duplicate eztoll,"); 
+							 error = true;
+						 } else { 
+							 eztolls.add(eztoll);
+						 }
+						 
+						//eztolls.add(eztoll);
 					} else {
 						errorcount++;
-					}
+					}*/
 
 				} // TRY INSIDE SHILE(LOOP)
 				catch (Exception ex) {
@@ -984,7 +1069,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			} // CLOSE while (rows.hasNext())
 		} // FIRST TRY
 		catch (Exception e) {
-			log.warn("Error in import customer :" + e);
+			log.warn("Error in import eztoll :" + e);
 		}
 		if (errorcount == 0) {
 			for (EzToll etoll : eztolls) {
@@ -4140,10 +4225,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				
 				rowObjects.add(tollCompany.getName());
 				
-				// TODO: For now, need to get logic 
+				/*// TODO: For now, need to get logic 
 				String company = StringUtils.substringAfterLast(tollCompany.getName(), " ");
 				company = StringUtils.defaultIfEmpty(company, "LU");
-				rowObjects.add(company);
+				rowObjects.add(company);*/
+				
+				rowObjects.add(tollCompany.getCompany().getName());
 
 				Iterator<Entry<String, Integer>> iterator = keySet.iterator();
 				while (iterator.hasNext()) {

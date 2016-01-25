@@ -56,6 +56,14 @@ function formatFax(){
 				<form:input path="name"  cssClass="flat" style="min-width:200px; max-width:200px" maxlength="20" />
 			 	<br><form:errors path="name" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Company" /><span	class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:select cssClass="flat" path="company" style="min-width:204px; max-width:204px">
+					<form:option value="">-----------Please Select----------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br><form:errors path="company" cssClass="errorMessage" />
+			</td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Address Line1"/><span	class="errorMessage">*</span></td>

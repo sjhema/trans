@@ -156,15 +156,15 @@
 		pagingLink="search.do" multipleDelete="true" searcheable="false">
 			
 			
-			
+			<primo:textcolumn headerText="Transaction Date" dataField="transactiondate" dataFormat="MM-dd-yyyy" />
+			<primo:textcolumn headerText="Invoiced Date" dataField="invoiceDate" dataFormat="MM-dd-yyyy"  />
 			<primo:textcolumn headerText="Toll company" dataField="toolcompany.name"/>
-			<primo:textcolumn headerText="company" dataField="company.name"/>
+			<primo:textcolumn headerText="comp" dataField="company.name"/>
 			<primo:textcolumn headerText="Terminal" dataField="terminal.name"/>
-			<primo:textcolumn headerText="Unit Number" dataField="unit.unitNum" />
-			<primo:textcolumn headerText="Tag Number" dataField="tollTagNumber.tollTagNumber"/>
-			<primo:textcolumn headerText="Plate Number" dataField="plateNumber.plate"/>
+			<primo:textcolumn headerText="Unit No" dataField="unit.unitNum" />
+			<primo:textcolumn headerText="Tag No" dataField="tollTagNumber.tollTagNumber"/>
+			<primo:textcolumn headerText="Plate No" dataField="plateNumber.plate"/>
 			<primo:textcolumn headerText="Driver" dataField="driver.fullName"/>
-			<primo:textcolumn headerText="Transaction Date" dataField="transactiondate" dataFormat="MM-dd-yyyy"/>
 			<primo:textcolumn headerText="Agency" dataField="agency" />
 			
 			
