@@ -985,7 +985,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					String amount1 = row.getCell(9).toString();
 					Double amount2 = getValidGallon(amount1);
 					if (amount2 != null) {
-						eztoll.setAmount(Math.abs(amount2));
+						//eztoll.setAmount(Math.abs(amount2));
+						eztoll.setAmount(amount2);
 					} else {
 						lineError.append("Amount,");
 						error = true;

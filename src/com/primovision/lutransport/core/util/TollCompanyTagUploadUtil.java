@@ -375,19 +375,31 @@ public class TollCompanyTagUploadUtil {
 	}
 
 	private static void setCellValueFeeFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) {
-		String feeStr = oneCellValue.toString();
-		if (StringUtils.isEmpty(feeStr)) {
-			feeStr = "0.0";
-		}
-				
-		if (StringUtils.startsWith(feeStr, "$") || StringUtils.startsWith(feeStr, "-")) {
-			feeStr = StringUtils.substring(feeStr, 1);
-		}
-		
-		cell.setCellValue(Double.parseDouble(feeStr));
 		CellStyle style = wb.createCellStyle();
 		style.setDataFormat(wb.createDataFormat().getFormat("$#,#0.00"));
 		cell.setCellStyle(style);
+		
+		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
+			cell.setCellValue(Double.parseDouble("0.0"));
+			return;
+		}
+		
+		String feeStr = oneCellValue.toString();
+				
+		if (StringUtils.startsWith(feeStr, "$")) {
+			feeStr = StringUtils.substring(feeStr, 1);
+		}
+		
+		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA) || StringUtils.contains(vendor, TOLL_COMPANY_IPASS)
+				 || StringUtils.contains(vendor, TOLL_COMPANY_SUN_PASS)) {
+			if (StringUtils.startsWith(feeStr, "-")) {
+				feeStr = StringUtils.substring(feeStr, 1);
+			} else {
+				feeStr = "-" + feeStr;
+			}
+		}
+		
+		cell.setCellValue(Double.parseDouble(feeStr));
 	}
 
 	private static void setCellValueDateFormat(Workbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
