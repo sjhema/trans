@@ -114,6 +114,24 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			row.getCell(3).setCellValue(StringUtils.EMPTY);
 		}
 	}
+	
+	private Vehicle retrieveVehicle(String plateNum, HSSFRow row) {
+		String transactiondate = StringUtils.EMPTY;
+		if (validDate(getCellValue(row.getCell(6)))) {
+			transactiondate = dateFormat.format(((Date) getCellValue(row.getCell(6))).getTime());
+		}
+		
+		String vehicleQuery = "select obj from Vehicle obj where obj.plate='" + plateNum + "'" 
+				+ " and obj.validFrom <='" + transactiondate + "' and obj.validTo >= '" + transactiondate + "'";
+		System.out.println("******* vehicleQuery  ======>" + vehicleQuery);
+		
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery.toString());
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			return null;
+		} else {
+			return vehicleList.get(0);
+		}	
+	}
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -541,9 +559,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						// FOR PLATE#
 						if (plateNum != null) {
 							try {
-								criterias.clear();
+								/**Correction for plate no. verification - adding txn date***/
+								/*criterias.clear();
 								criterias.put("plate", (String) getCellValue(row.getCell(4)));
-								Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, criterias);
+								Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, criterias);*/
+								
+								Vehicle vehicle = retrieveVehicle((String) getCellValue(row.getCell(4)), row);
+								
 								if (vehicle == null)
 									throw new Exception("no such Plate or Toll tag Number");
 								else {
@@ -568,8 +590,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 										
 										System.out.println("******* query  ======>" + query);
 										try {
-											List<VehicleTollTag> vehicletolltags = genericDAO
-													.executeSimpleQuery(query.toString());
+											List<VehicleTollTag> vehicletolltags = genericDAO.executeSimpleQuery(query.toString());
 											if (vehicletolltags.isEmpty() && vehicletolltags.size() == 0)
 												throw new Exception("Invalid Plate Number");
 											else {
@@ -582,9 +603,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 																/***Correction for unit no. mapping to multiple vehicle ids***/
 																//"select o from Vehicle o where o.unit="
 																//+ vehicletolltags.get(0).getUnit()
+																//+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
 																"select o from Vehicle o where o.id="
 																+ vehicletolltags.get(0).getVehicle().getId()
-																+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
+																+ " and o.validFrom <='"+ transactiondate + "' and o.validTo >= '" 
+																+ transactiondate + "'");
 												if (vehicleList.isEmpty() && vehicleList.size() == 0)
 													throw new Exception("Invalid Plate Number");
 												else
@@ -876,15 +899,22 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 						} else {
 							if (eztoll.getTollTagNumber() != null) {
-								VehicleTollTag vehicletoll = genericDAO.getById(VehicleTollTag.class,
-										eztoll.getTollTagNumber().getId());
+								String transactiondate = null;
+								if (validDate(getCellValue(row.getCell(6)))) {
+									transactiondate = dateFormat.format(((Date) getCellValue(row.getCell(6))).getTime());
+								}
+								
+								VehicleTollTag vehicletoll = genericDAO.getById(VehicleTollTag.class, eztoll.getTollTagNumber().getId());
 
 								/* Code to get the active plate numbers */
 								List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(
 										/***Correction for unit no. mapping to multiple vehicle ids***/
 										//"select o from Vehicle o where o.unit=" + vehicletoll.getUnit()
+										//+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
 										"select o from Vehicle o where o.id=" + vehicletoll.getVehicle().getId()
-												+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
+										+ " and o.validFrom <='"+ transactiondate + "' and o.validTo >= '" 
+										+ transactiondate + "'");
+								
 								if (vehicleList.isEmpty() && vehicleList.size() == 0)
 									//throw new Exception("Invalid Plate Number");
 									throw new Exception("Invalid Toll Tag Number");
@@ -894,7 +924,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								// eztoll.setPlateNumber(vehicletoll.getVehicle());
 							}
 						}
-
 					}
 
 					// FOR TRANSACTION DATE

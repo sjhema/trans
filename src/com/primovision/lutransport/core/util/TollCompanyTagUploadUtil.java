@@ -9,7 +9,6 @@ import java.io.InputStream;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -411,7 +410,7 @@ public class TollCompanyTagUploadUtil {
 		
 		if (oneCellValue instanceof Date) {
 			System.out.println("Incoming date is a Date Object.");
-			tollCompanyDateFormat = "EEE MMM dd hh:mm:ss z yyyy";
+			tollCompanyDateFormat = "EEE MMM dd HH:mm:ss z yyyy";
 		}
 		
 		String dateStr = oneCellValue.toString();
