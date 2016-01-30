@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.CharUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -243,8 +244,11 @@ public class TollCompanyTagUploadUtil {
 			setCellValuePlateNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
-		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
+		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7) { // Transaction time
+			String timeStr = stripToTimeFormat(oneCellValue);
+			cell.setCellValue(timeStr);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		/*} else if (columnIndex == 11) {
@@ -378,15 +382,29 @@ public class TollCompanyTagUploadUtil {
 		style.setDataFormat(wb.createDataFormat().getFormat("$#,#0.00"));
 		cell.setCellStyle(style);
 		
-		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
+		if (oneCellValue == null) {
 			cell.setCellValue(Double.parseDouble("0.0"));
 			return;
 		}
 		
-		String feeStr = oneCellValue.toString();
-				
-		if (StringUtils.startsWith(feeStr, "$")) {
-			feeStr = StringUtils.substring(feeStr, 1);
+		String feeStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(feeStr)) {
+			cell.setCellValue(Double.parseDouble("0.0"));
+			return;
+		}
+		
+		StringBuilder newFeeString = new StringBuilder();
+		char[] feeStrChars = feeStr.toCharArray();
+		for (int index = 0; index < feeStrChars.length; index++) {
+			if (CharUtils.isAsciiNumeric(feeStrChars[index]) || feeStrChars[index] == '.') {
+				newFeeString.append(feeStrChars[index]);
+			}
+		}
+		
+		feeStr = newFeeString.toString();
+		if (StringUtils.isEmpty(feeStr)) {
+			cell.setCellValue(Double.parseDouble("0.0"));
+			return;
 		}
 		
 		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA) || StringUtils.contains(vendor, TOLL_COMPANY_IPASS)
@@ -413,7 +431,7 @@ public class TollCompanyTagUploadUtil {
 			tollCompanyDateFormat = "EEE MMM dd HH:mm:ss z yyyy";
 		}
 		
-		String dateStr = oneCellValue.toString();
+		String dateStr = StringUtils.trimToEmpty(oneCellValue.toString());
 		
 		if (StringUtils.isEmpty(dateStr)) {
 			cell.setCellValue(StringUtils.EMPTY);
@@ -441,6 +459,27 @@ public class TollCompanyTagUploadUtil {
 		Date actualTime = new SimpleDateFormat(actualTimeFormat).parse(actualTimeStr);
 		String expectedTimeStr = expectedTimeFormat.format(actualTime);
 		return expectedTimeStr;
+	}
+	
+	private static String stripToTimeFormat(Object oneCellValue) {
+		if (oneCellValue == null) {
+			return StringUtils.EMPTY;
+		}
+		
+		String actualTimeStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(actualTimeStr)) {
+			return StringUtils.EMPTY;
+		}
+		
+		StringBuilder newActualTimeStr = new StringBuilder();
+		char[] actualTimeStrChars = actualTimeStr.toCharArray();
+		for (int index = 0; index < actualTimeStrChars.length; index++) {
+			if (CharUtils.isAsciiNumeric(actualTimeStrChars[index]) || actualTimeStrChars[index] == ':') {
+				newActualTimeStr.append(actualTimeStrChars[index]);
+			}
+		}
+		
+		return newActualTimeStr.toString();
 	}
 	
 	private static InputStream createInputStream(HSSFWorkbook wb) {
