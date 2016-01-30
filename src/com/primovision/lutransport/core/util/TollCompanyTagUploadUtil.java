@@ -396,7 +396,7 @@ public class TollCompanyTagUploadUtil {
 		StringBuilder newFeeString = new StringBuilder();
 		char[] feeStrChars = feeStr.toCharArray();
 		for (int index = 0; index < feeStrChars.length; index++) {
-			if (CharUtils.isAsciiNumeric(feeStrChars[index]) || feeStrChars[index] == '.') {
+			if (CharUtils.isAsciiNumeric(feeStrChars[index]) || feeStrChars[index] == '.' || feeStrChars[index] == '-') {
 				newFeeString.append(feeStrChars[index]);
 			}
 		}
