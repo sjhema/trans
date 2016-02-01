@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.CharUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -364,7 +364,7 @@ public class TollCompanyTagUploadUtil {
 		} 
 		
 		String tagNum = StringUtils.trimToEmpty(oneCellValue.toString());
-		tagNum = tagNum.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
+		tagNum = tagNum.replaceAll("\u00a0", StringUtils.EMPTY);
 		tagNum = StringUtils.stripStart(tagNum, "0");
 		cell.setCellValue(tagNum);
 	}
@@ -376,7 +376,7 @@ public class TollCompanyTagUploadUtil {
 		} 
 		
 		String plateNum = StringUtils.trimToEmpty(oneCellValue.toString());
-		plateNum = plateNum.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
+		plateNum = plateNum.replaceAll("\u00a0", StringUtils.EMPTY);
 		if (StringUtils.isEmpty(plateNum)) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -409,9 +409,9 @@ public class TollCompanyTagUploadUtil {
 			return;
 		}
 		
-		String feeStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		String feeStr = StringUtils.replace(oneCellValue.toString(), "$", StringUtils.EMPTY);
+		feeStr = StringUtils.trimToEmpty(feeStr);
 		feeStr = feeStr.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
-		feeStr = feeStr.replace("$", StringUtils.EMPTY);
 		if (StringUtils.isEmpty(feeStr)) {
 			cell.setCellValue(Double.parseDouble("0.0"));
 			return;
