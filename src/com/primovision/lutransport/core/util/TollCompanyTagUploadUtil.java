@@ -240,7 +240,10 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (columnIndex == 4) { // Plate num
+		
+		if (columnIndex == 3) { // Tag num
+			setCellValueTagNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 4) { // Plate num
 			setCellValuePlateNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
@@ -354,15 +357,34 @@ public class TollCompanyTagUploadUtil {
 		}
 	}*/
 	
-	private static void setCellValuePlateNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
-		if (oneCellValue == null || StringUtils.isEmpty(oneCellValue.toString())) {
+	private static void setCellValueTagNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
 		} 
 		
-		String plateNum = oneCellValue.toString();
+		String tagNum = StringUtils.trimToEmpty(oneCellValue.toString());
+		tagNum = tagNum.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
+		tagNum = StringUtils.stripStart(tagNum, "0");
+		cell.setCellValue(tagNum);
+	}
+	
+	private static void setCellValuePlateNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String plateNum = StringUtils.trimToEmpty(oneCellValue.toString());
+		plateNum = plateNum.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
+		if (StringUtils.isEmpty(plateNum)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
 		if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_NY)) {
-			plateNum = StringUtils.substring(oneCellValue.toString(), 2);
+			plateNum = StringUtils.stripStart(plateNum, "0");
+			plateNum = StringUtils.substring(plateNum, 2);
 		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA)) {
 			plateNum = StringUtils.substring(oneCellValue.toString(), 3);
 		}
@@ -388,20 +410,8 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		String feeStr = StringUtils.trimToEmpty(oneCellValue.toString());
-		if (StringUtils.isEmpty(feeStr)) {
-			cell.setCellValue(Double.parseDouble("0.0"));
-			return;
-		}
-		
-		StringBuilder newFeeString = new StringBuilder();
-		char[] feeStrChars = feeStr.toCharArray();
-		for (int index = 0; index < feeStrChars.length; index++) {
-			if (CharUtils.isAsciiNumeric(feeStrChars[index]) || feeStrChars[index] == '.' || feeStrChars[index] == '-') {
-				newFeeString.append(feeStrChars[index]);
-			}
-		}
-		
-		feeStr = newFeeString.toString();
+		feeStr = feeStr.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
+		feeStr = feeStr.replace("$", StringUtils.EMPTY);
 		if (StringUtils.isEmpty(feeStr)) {
 			cell.setCellValue(Double.parseDouble("0.0"));
 			return;
@@ -467,19 +477,7 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		String actualTimeStr = StringUtils.trimToEmpty(oneCellValue.toString());
-		if (StringUtils.isEmpty(actualTimeStr)) {
-			return StringUtils.EMPTY;
-		}
-		
-		StringBuilder newActualTimeStr = new StringBuilder();
-		char[] actualTimeStrChars = actualTimeStr.toCharArray();
-		for (int index = 0; index < actualTimeStrChars.length; index++) {
-			if (CharUtils.isAsciiNumeric(actualTimeStrChars[index]) || actualTimeStrChars[index] == ':') {
-				newActualTimeStr.append(actualTimeStrChars[index]);
-			}
-		}
-		
-		return newActualTimeStr.toString();
+		return actualTimeStr.replaceAll("\\p{javaSpaceChar}", StringUtils.EMPTY);
 	}
 	
 	private static InputStream createInputStream(HSSFWorkbook wb) {
