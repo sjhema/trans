@@ -310,7 +310,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 									System.out.println("******************** the vehicle query is " + vehquery);
 									List<Vehicle> vehicle = genericDAO.executeSimpleQuery(vehquery.toString());
 									if (vehicle.isEmpty() && vehicle.size() == 0) {
-										throw new Exception("no such Toll tag Number");
+										throw new Exception("TOLL_ERROR_MSG: No matching vehicle found for given id and txn date");
 									} else {
 										eztoll.setUnit(vehicle.get(0));
 										eztoll.setTollTagNumber(vehicletolltags.get(0));
@@ -551,7 +551,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 							} catch (Exception ex) {
 								error = true;
-								lineError.append("Invalid Toll Tag Number, ");
+								//lineError.append("Invalid Toll Tag Number, ");
+								String errMsg = "Invalid Toll Tag Number";
+								String exceptionMsg = StringUtils.substringAfter(ex.getMessage(), "TOLL_ERROR_MSG: ");
+								if (!StringUtils.isEmpty(exceptionMsg)) {
+									errMsg = exceptionMsg;
+								}
+								lineError.append(errMsg + ", ");
 								log.warn(ex.getMessage());
 							}
 						}

@@ -252,6 +252,8 @@ public class TollCompanyTagUploadUtil {
 		} else if (columnIndex == 7) { // Transaction time
 			String timeStr = stripToTimeFormat(oneCellValue);
 			cell.setCellValue(timeStr);
+		} else if (columnIndex == 8) { // Agency
+			setCellValueAgencyFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Amount
 			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
 		/*} else if (columnIndex == 11) {
@@ -357,6 +359,17 @@ public class TollCompanyTagUploadUtil {
 		}
 	}*/
 	
+	private static void setCellValueAgencyFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String agency = StringUtils.trimToEmpty(oneCellValue.toString());
+		agency = agency.replaceAll("\u00a0", StringUtils.EMPTY);
+		cell.setCellValue(agency);
+	}
+	
 	private static void setCellValueTagNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
@@ -386,7 +399,7 @@ public class TollCompanyTagUploadUtil {
 			plateNum = StringUtils.stripStart(plateNum, "0");
 			plateNum = StringUtils.substring(plateNum, 2);
 		} else if (StringUtils.contains(vendor, TOLL_COMPANY_EZ_PASS_PA)) {
-			plateNum = StringUtils.substring(oneCellValue.toString(), 3);
+			plateNum = StringUtils.substring(plateNum, 3);
 		}
 		cell.setCellValue(plateNum);
 	}
