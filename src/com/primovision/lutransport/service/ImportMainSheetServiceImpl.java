@@ -132,6 +132,26 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return vehicleList.get(0);
 		}	
 	}
+	
+	private List<Vehicle> retrieveVehicle(VehicleTollTag vehicletolltag, String transactionDate) {
+		/***Correction for unit no. mapping to multiple vehicle ids***/
+		String vehicleQuery = "Select obj from Vehicle obj where obj.id="
+				+ vehicletolltag.getVehicle().getId() + " and obj.validFrom <='"
+				+ transactionDate + "' and obj.validTo >= '" + transactionDate + "'";
+		System.out.println("******************** First vehicle query is " + vehicleQuery);
+		
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			vehicleQuery = "Select obj from Vehicle obj where obj.unit="
+					+ vehicletolltag.getVehicle().getUnit() + " and obj.validFrom <='"
+					+ transactionDate + "' and obj.validTo >= '" + transactionDate + "' order by obj.id DESC";
+			System.out.println("******************** Second vehicle query is " + vehicleQuery);
+			
+			vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		}
+		
+		return vehicleList;
+	}
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -303,14 +323,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 									/***Correction for unit no. mapping to multiple vehicle ids***/
 									/*String vehquery = "Select obj from Vehicle obj where obj.unit="
 											+ vehicletolltags.get(0).getVehicle().getUnit() + " and obj.validFrom <='"
-											+ transactiondate + "' and obj.validTo >= '" + transactiondate + "'";*/
+											+ transactiondate + "' and obj.validTo >= '" + transactiondate + "'";
 									String vehquery = "Select obj from Vehicle obj where obj.id="
 											+ vehicletolltags.get(0).getVehicle().getId() + " and obj.validFrom <='"
 											+ transactiondate + "' and obj.validTo >= '" + transactiondate + "'";
 									System.out.println("******************** the vehicle query is " + vehquery);
-									List<Vehicle> vehicle = genericDAO.executeSimpleQuery(vehquery.toString());
+									List<Vehicle> vehicle = genericDAO.executeSimpleQuery(vehquery.toString());*/
+									
+									List<Vehicle> vehicle = retrieveVehicle(vehicletolltags.get(0), transactiondate);
 									if (vehicle.isEmpty() && vehicle.size() == 0) {
-										throw new Exception("TOLL_ERROR_MSG: No matching vehicle found for given id and txn date");
+										throw new Exception("TOLL_ERROR_MSG: Invalid Toll Tag Number - No matching vehicle found for given id and txn date");
 									} else {
 										eztoll.setUnit(vehicle.get(0));
 										eztoll.setTollTagNumber(vehicletolltags.get(0));
@@ -604,16 +626,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 												 * Code to get the active plate
 												 * numbers
 												 */
-												List<Vehicle> vehicleList = genericDAO
+												/*List<Vehicle> vehicleList = genericDAO
 														.executeSimpleQuery(
-																/***Correction for unit no. mapping to multiple vehicle ids***/
+																// Correction for unit no. mapping to multiple vehicle ids
 																//"select o from Vehicle o where o.unit="
 																//+ vehicletolltags.get(0).getUnit()
 																//+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
 																"select o from Vehicle o where o.id="
 																+ vehicletolltags.get(0).getVehicle().getId()
 																+ " and o.validFrom <='"+ transactiondate + "' and o.validTo >= '" 
-																+ transactiondate + "'");
+																+ transactiondate + "'");*/
+												List<Vehicle> vehicleList = retrieveVehicle(vehicletolltags.get(0), transactiondate);
 												if (vehicleList.isEmpty() && vehicleList.size() == 0)
 													throw new Exception("Invalid Plate Number");
 												else
@@ -913,17 +936,17 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								VehicleTollTag vehicletoll = genericDAO.getById(VehicleTollTag.class, eztoll.getTollTagNumber().getId());
 
 								/* Code to get the active plate numbers */
-								List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(
-										/***Correction for unit no. mapping to multiple vehicle ids***/
+								/*List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(
+										// Correction for unit no. mapping to multiple vehicle ids
 										//"select o from Vehicle o where o.unit=" + vehicletoll.getUnit()
 										//+ " and o.validFrom<=SYSDATE() and o.validTo>=SYSDATE() ");
 										"select o from Vehicle o where o.id=" + vehicletoll.getVehicle().getId()
 										+ " and o.validFrom <='"+ transactiondate + "' and o.validTo >= '" 
-										+ transactiondate + "'");
-								
+										+ transactiondate + "'");*/
+								List<Vehicle> vehicleList = retrieveVehicle(vehicletoll, transactiondate);
 								if (vehicleList.isEmpty() && vehicleList.size() == 0)
 									//throw new Exception("Invalid Plate Number");
-									throw new Exception("Invalid Toll Tag Number");
+									throw new Exception("Invalid Toll Tag Number - no matching vehicle found for given id and txn date");
 								else
 									eztoll.setPlateNumber(vehicleList.get(0));
 
