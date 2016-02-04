@@ -2,6 +2,7 @@ package com.primovision.lutransport.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,7 +19,9 @@ import javax.persistence.ManyToOne;
 
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -133,14 +136,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}	
 	}
 	
-	private List<Vehicle> retrieveVehicle(VehicleTollTag vehicletolltag, String transactionDate) {
+	private List<Vehicle> retrieveVehicle(VehicleTollTag vehicletolltag, String transactionDate) throws ParseException {
 		/***Correction for unit no. mapping to multiple vehicle ids***/
-		String vehicleQuery = "Select obj from Vehicle obj where obj.id="
+		/*String vehicleQuery = "Select obj from Vehicle obj where obj.id="
 				+ vehicletolltag.getVehicle().getId() + " and obj.validFrom <='"
 				+ transactionDate + "' and obj.validTo >= '" + transactionDate + "'";
 		System.out.println("******************** First vehicle query is " + vehicleQuery);
 		
 		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		
 		if (vehicleList == null || vehicleList.isEmpty()) {
 			vehicleQuery = "Select obj from Vehicle obj where obj.unit="
 					+ vehicletolltag.getVehicle().getUnit() + " and obj.validFrom <='"
@@ -148,7 +152,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			System.out.println("******************** Second vehicle query is " + vehicleQuery);
 			
 			vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		}*/
+		
+		String vehicleQuery = "Select obj from Vehicle obj where obj.unit="
+				+ vehicletolltag.getVehicle().getUnit() + " and obj.validFrom <='"
+				+ transactionDate + "' and obj.validTo >= '" + transactionDate + "' order by obj.id DESC";
+		System.out.println("******************** Vehicle query is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		if (vehicleList.size() <= 1) {
+			return vehicleList;
 		}
+		
+		List<Ticket> ticketList = getTicketsForVehicle(vehicleList, transactionDate);
+		vehicleList = new ArrayList<Vehicle>();
+		if (ticketList.isEmpty()) {
+			return vehicleList;
+		}
+		vehicleList.add(ticketList.get(0).getVehicle());
 		
 		return vehicleList;
 	}
@@ -301,8 +321,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							try {
 								String transactiondate = null;
 								if (validDate(getCellValue(row.getCell(6)))) {
-									transactiondate = dateFormat
-											.format(((Date) getCellValue(row.getCell(6))).getTime());
+									transactiondate = dateFormat.format(((Date) getCellValue(row.getCell(6))).getTime());
 								}
 								StringBuffer query = new StringBuffer(
 										"select obj from VehicleTollTag obj where obj.tollTagNumber='"
@@ -352,12 +371,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 												eztoll.setTerminal(driver.getTerminal());
 											}
 										} else {
-											String drivequery = "select obj from Ticket obj where obj.loadDate<='"
+											/*String drivequery = "select obj from Ticket obj where obj.loadDate<='"
 													+ transactiondate + "' and obj.unloadDate>='" + transactiondate
 													+ "' and obj.vehicle=" + vehicle.get(0).getId();
 
 											System.out.println(" my query is " + drivequery);
-											List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);
+											List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);*/
+											
+											List<Ticket> tickets = getTicketsForVehicle(vehicle, transactiondate);
 											if (!tickets.isEmpty()) {
 												boolean tic = true;
 												boolean first = true;
@@ -3320,6 +3341,45 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		fuelLog.setUnit(matchingTicket.getVehicle());
 		return true;
+	}
+	
+	private List<Ticket> getTicketsForVehicle(List<Vehicle> vehicleList, String transDateStr) throws ParseException {
+		String vehicleIds = getCommaSeparatedListOfVehicleId(vehicleList);
+		
+		String ticketQuery = "select obj from Ticket obj where "
+				+ "(obj.loadDate ='" + transDateStr
+				+ "' OR obj.unloadDate ='" + transDateStr 
+				+ "') and obj.vehicle IN ("
+				+ vehicleIds + ")";
+		System.out.println("<<Custom code for Vehicle>>: Select Ticket with list of vehicles query 1-> " + ticketQuery);
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
+		if (!tickets.isEmpty()) {
+			return tickets;
+		}
+		
+		Date transDate = dateFormat.parse(transDateStr);
+		Date transDateMin = DateUtils.addDays(transDate, -3);
+		Date transDateMax = DateUtils.addDays(transDate, 3);
+		String transDateMinStr = dateFormat.format(transDateMin);
+		String transDateMaxStr = dateFormat.format(transDateMax);
+		
+		ticketQuery = "select obj from Ticket obj where "
+				+ "(obj.loadDate between '" + transDateMinStr + "' and '" + transDateMaxStr + "'"
+				+ " AND obj.unloadDate between '" + transDateMinStr + "' and '" + transDateMaxStr + "'" 
+				+ ") and obj.vehicle IN ("
+				+ vehicleIds + ")";
+		System.out.println("<<Custom code for Vehicle>>: Select Ticket with list of vehicles query 2-> " + ticketQuery);
+		tickets = genericDAO.executeSimpleQuery(ticketQuery);
+		return tickets;
+	}
+
+	private String getCommaSeparatedListOfVehicleId(List<Vehicle> vehicleList) {
+		StringBuffer vehicleIdBuff = new StringBuffer();
+		for (Vehicle v : vehicleList) {
+			vehicleIdBuff.append("," + v.getId());
+		}
+		
+		return vehicleIdBuff.toString().replaceFirst(",", "");
 	}
 
 	private Ticket getTicketForDriver(String listOfDrivers, String transdate) {
