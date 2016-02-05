@@ -3371,7 +3371,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		Date transDate = dateFormat.parse(transDateStr);
-		Date transDateMin = DateUtils.addDays(transDate, -3);
+		//Date transDateMin = DateUtils.addDays(transDate, -3);
+		Date transDateMin = DateUtils.addDays(transDate, 0);
 		Date transDateMax = DateUtils.addDays(transDate, 3);
 		String transDateMinStr = dateFormat.format(transDateMin);
 		String transDateMaxStr = dateFormat.format(transDateMax);
@@ -3408,7 +3409,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		Date transDate = dateFormat.parse(transDateStr);
-		Date transDateMin = DateUtils.addDays(transDate, -3);
+		//Date transDateMin = DateUtils.addDays(transDate, -3);
+		Date transDateMin = DateUtils.addDays(transDate, 0);
 		Date transDateMax = DateUtils.addDays(transDate, 3);
 		String transDateMinStr = dateFormat.format(transDateMin);
 		String transDateMaxStr = dateFormat.format(transDateMax);
