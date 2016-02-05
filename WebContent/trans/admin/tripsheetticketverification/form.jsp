@@ -72,7 +72,7 @@ function getTime(field){
 
 
 
-function getTerminal()
+function getTerminal(reset)
 {
 	//var selecteddriver=document.getElementById("driverId").value;
 	var selectedcompany = document.getElementById('companyId');
@@ -93,7 +93,7 @@ function getTerminal()
 				var options = '<option value="">------Please Select------</option>';
 				for (var i = 0; i <listData.length; i++) {
 					var dlst=listData[i];
-					if(terminalId==dlst.id)
+					if(!reset && terminalId==dlst.id)
 					options += '<option value="'+dlst.id+'" selected="selected">'+dlst.name+'</option>';
 					else
 						options += '<option value="'+dlst.id+'">'+dlst.name+'</option>';
@@ -697,7 +697,7 @@ function formatDate1(){
 		
 		
 		<td class="form-left"><primo:label code="Employee Company" /><span class="errorMessage">*</span>
-			</td><td><form:select cssClass="flat" path="driverCompany" id="companyId" onchange="javascript:getTerminal();" style="min-width:154px; max-width:154px">
+			</td><td><form:select cssClass="flat" path="driverCompany" id="companyId" onchange="javascript:getTerminal(true);" style="min-width:154px; max-width:154px">
 							<form:option value="">-----Please Select----</form:option>
 							<form:options items="${terminals}" itemValue="id" itemLabel="name" />
 						</form:select> 
@@ -1014,7 +1014,7 @@ getTime('landfilltimeout');
 getTime('transfertimein');
 getTime('transfertimeout');
 getDriver();
-getTerminal();
+getTerminal(false);
 checkLandfillTicketNew();
 checkTransferTicketNew();
 </script>
