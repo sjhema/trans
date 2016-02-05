@@ -1874,12 +1874,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 									/*String drivequery = "select obj from Ticket obj where   obj.loadDate<='" + transdate
 											+ "' and obj.unloadDate>='" + transdate + "' and obj.driver="
 											+ driver.getId();*/
-									String drivequery = "select obj from Ticket obj where (obj.loadDate ='" + transdate
+									
+									/*String drivequery = "select obj from Ticket obj where (obj.loadDate ='" + transdate
 											+ "' OR obj.unloadDate ='" + transdate + "') and obj.driver="
 											+ driver.getId();
-									
 									System.out.println("******** query is " + drivequery);
-									List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);
+									List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);*/
+									
+									List<Ticket> tickets = getAllTicketsForDriver(String.valueOf(driver.getId()), transdate);
 									if (!tickets.isEmpty()) {
 										boolean tic = true;
 										boolean first = true;
@@ -2044,12 +2046,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 												+ transactiondate + "' and obj.unloadDate>='" + transactiondate
 												+ "' and obj.vehicle=" + vehicle.getId();*/
 										
-										String drivequery = "select obj from Ticket obj where (obj.loadDate ='"
+										/*String drivequery = "select obj from Ticket obj where (obj.loadDate ='"
 												+ transactiondate + "' OR obj.unloadDate ='" + transactiondate
 												+ "') and obj.vehicle=" + vehicle.getId();
-										
 										System.out.println("******** query is " + drivequery);
-										List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);
+										List<Ticket> tickets = genericDAO.executeSimpleQuery(drivequery);*/
+										
+										List<Vehicle> vehicleListForDriver = new ArrayList<Vehicle>();
+										vehicleListForDriver.add(vehicle);
+										List<Ticket> tickets = getTicketsForVehicle(vehicleListForDriver, transactiondate);
 										if (!tickets.isEmpty()) {
 											boolean tic = true;
 											boolean first = true;
@@ -3388,6 +3393,34 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		return vehicleIdBuff.toString().replaceFirst(",", "");
+	}
+	
+	private List<Ticket> getAllTicketsForDriver(String listOfDrivers, String transDateStr) throws ParseException {
+		String ticketQuery = "select obj from Ticket obj where "
+				+ "(obj.loadDate ='" + transDateStr
+				+ "' OR obj.unloadDate ='" + transDateStr 
+				+ "') and obj.driver IN ("
+				+ listOfDrivers + ")";
+		System.out.println("<<Custom code for Driver>>: Select Ticket with list of drivers query 1-> " + ticketQuery);
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
+		if (!tickets.isEmpty()) {
+			return tickets;
+		}
+		
+		Date transDate = dateFormat.parse(transDateStr);
+		Date transDateMin = DateUtils.addDays(transDate, -3);
+		Date transDateMax = DateUtils.addDays(transDate, 3);
+		String transDateMinStr = dateFormat.format(transDateMin);
+		String transDateMaxStr = dateFormat.format(transDateMax);
+		
+		ticketQuery = "select obj from Ticket obj where "
+				+ "( (obj.loadDate between '" + transDateMinStr + "' and '" + transDateMaxStr + "')"
+				+ "   OR (obj.unloadDate between '" + transDateMinStr + "' and '" + transDateMaxStr + "')" 
+				+ ") and obj.driver IN ("
+				+ listOfDrivers + ")";
+		System.out.println("<<Custom code for Driver>>: Select Ticket with list of drivers query 2-> " + ticketQuery);
+		tickets = genericDAO.executeSimpleQuery(ticketQuery);
+		return tickets;
 	}
 
 	private Ticket getTicketForDriver(String listOfDrivers, String transdate) {
