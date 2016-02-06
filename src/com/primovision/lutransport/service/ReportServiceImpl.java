@@ -54,6 +54,8 @@ import com.primovision.lutransport.model.report.BillingWrapper;
 import com.primovision.lutransport.model.report.Billing_New;
 import com.primovision.lutransport.model.report.EztollReportInput;
 import com.primovision.lutransport.model.report.EztollReportWrapper;
+import com.primovision.lutransport.model.report.FuelDistributionReportInput;
+import com.primovision.lutransport.model.report.FuelDistributionReportWrapper;
 import com.primovision.lutransport.model.report.FuelLogAverageReportWrapper;
 import com.primovision.lutransport.model.report.FuelLogReportInput;
 import com.primovision.lutransport.model.report.FuelLogReportWrapper;
@@ -3377,6 +3379,10 @@ throw new Exception("origin and destindation is empty");
 			
 	}
 	
+	@Override
+	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input) {
+		return null;
+	}
 	
 	@Override
 	public FuelLogReportWrapper generateFuellogData(

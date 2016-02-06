@@ -13,6 +13,8 @@ import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.report.BillingWrapper;
 import com.primovision.lutransport.model.report.EztollReportInput;
 import com.primovision.lutransport.model.report.EztollReportWrapper;
+import com.primovision.lutransport.model.report.FuelDistributionReportInput;
+import com.primovision.lutransport.model.report.FuelDistributionReportWrapper;
 import com.primovision.lutransport.model.report.FuelLogAverageReportWrapper;
 import com.primovision.lutransport.model.report.FuelLogReportInput;
 import com.primovision.lutransport.model.report.FuelLogReportWrapper;
@@ -49,4 +51,5 @@ public interface ReportService {
 	public List<NetReportWrapper> generateNetReportData(SearchCriteria searchCriteria, NetReportInput input,HttpServletRequest request);
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
 			BillingHistoryInput input);
+	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input);
 }
