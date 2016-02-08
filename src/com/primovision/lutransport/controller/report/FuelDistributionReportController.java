@@ -61,14 +61,12 @@ public class FuelDistributionReportController extends BaseController {
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/start.do")
 	public String populate(ModelMap model, HttpServletRequest request) {
-
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		if (criteria != null)
-		{
-			
+		if (criteria != null) {
 			if (criteria.getSearchMap() != null)
 				criteria.getSearchMap().clear();
 		}
+		
 		Map criterias = new HashMap();
 		model.addAttribute("fuelvendor",genericDAO.findByCriteria(FuelVendor.class, criterias, "name", false));
 		criterias.put("type", 1);
@@ -96,16 +94,11 @@ public class FuelDistributionReportController extends BaseController {
 		return "reportuser/report/fuelDistributionReport";
 	}
 	
-	
-	protected  Map<String,Object> generateData(SearchCriteria searchCriteria,HttpServletRequest request,FuelDistributionReportInput input) 
-	{
+	protected  Map<String,Object> generateData(SearchCriteria searchCriteria, HttpServletRequest request, FuelDistributionReportInput input) {
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		
 		FuelDistributionReportWrapper wrapper = generateFuelDistributionReport(searchCriteria,input);
-		 
-		
-		 
 		 
 		params.put("totalAmounts",wrapper.getTotalAmounts());
 		params.put("totaldiscounts", wrapper.getTotaldiscounts());
@@ -114,18 +107,16 @@ public class FuelDistributionReportController extends BaseController {
 		params.put("totalColumn",wrapper.getTotalColumn());
 		params.put("totalGrossCost",wrapper.getTotalGrossCost());
 		  
+		data.put("data", wrapper.getFuellog());
+		data.put("params",params);
 		  
-		    data.put("data", wrapper.getFuellog());
-			data.put("params",params);
-		  
-		  return data;
+		return data;
 	}
 	
 	
 	public FuelDistributionReportWrapper generateFuelDistributionReport(SearchCriteria searchCriteria, FuelDistributionReportInput input) {
-	return reportService.generateFuelDistributionData(searchCriteria,input);
+		return reportService.generateFuelDistributionData(searchCriteria,input);
 	}
-	
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
 	public String search(ModelMap model, HttpServletRequest request, HttpServletResponse response,
@@ -142,25 +133,22 @@ public class FuelDistributionReportController extends BaseController {
 		criteria.setPageSize(1000);
 		
 		
-		if(p==null)
+		if (p==null)
 			request.getSession().setAttribute("input", input);
 		
 		FuelDistributionReportInput input1=(FuelDistributionReportInput)request.getSession().getAttribute("input");
 		
-		
-		 
 		try {
-			Map<String, Object> datas; 
-			if(p==null)
-			{
+			Map<String, Object> datas;
+			
+			if (p==null) {
 				 datas = generateData(criteria,request,input);
-		    }else
-			{
+		   } else {
 				 datas = generateData(criteria,request,input1);	
 			}
 			
 			
-		    if (StringUtils.isEmpty(type))
+			if (StringUtils.isEmpty(type))
 				type = "html";
 			response.setContentType(MimeUtil.getContentType(type));
 			if (!type.equals("html"))
@@ -187,11 +175,10 @@ public class FuelDistributionReportController extends BaseController {
 				HttpServletResponse response,
 				@RequestParam(required = false, value = "type") String type,
 				@RequestParam(required = false, value = "jrxml") String jrxml) {
-			System.out.println("\nfuellogBillingController==export()==type===>"+type+"\n"); 
+			System.out.println("\nFuelDistributionReportController==export()==type===>"+type+"\n"); 
 			Map imagesMap = new HashMap();
 			request.getSession().setAttribute("IMAGES_MAP", imagesMap);
-			SearchCriteria criteria = (SearchCriteria) request.getSession()
-					.getAttribute("searchCriteria");
+			SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 			criteria.setPageSize(15000);
 			criteria.setPage(0);
 			FuelDistributionReportInput input = (FuelDistributionReportInput)request.getSession().getAttribute("input");
@@ -203,7 +190,7 @@ public class FuelDistributionReportController extends BaseController {
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
 					response.setHeader("Content-Disposition",
-							"attachment;filename= fuellogReport." + type);
+							"attachment;filename= fuelDistributionReport." + type);
 				}
 				response.setContentType(MimeUtil.getContentType(type));
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -237,8 +224,8 @@ public class FuelDistributionReportController extends BaseController {
 		}
 	
 	@ModelAttribute("modelObject")
-	public FuelLogReportInput setupModel(HttpServletRequest request) {
-		return new FuelLogReportInput();
+	public FuelDistributionReportInput setupModel(HttpServletRequest request) {
+		return new FuelDistributionReportInput();
 	}
 
 }

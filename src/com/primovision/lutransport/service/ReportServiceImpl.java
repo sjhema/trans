@@ -74,6 +74,8 @@ import com.primovision.lutransport.model.report.SubcontractorBillingNew;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
 import com.primovision.lutransport.model.report.SubcontractorReportInput;
 import com.primovision.lutransport.model.report.Summary;
+import com.primovision.lutransport.model.report.TollDistributionReportInput;
+import com.primovision.lutransport.model.report.TollDistributionReportWrapper;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.Customer;
 
@@ -3984,7 +3986,11 @@ throw new Exception("origin and destindation is empty");
 		return wrapper;
 	}
 	
-	
+	@Override
+	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria searchCriteria, 
+			TollDistributionReportInput input) {
+		return null;
+	}
 	
 	@Override
 	public EztollReportWrapper generateEztollData(

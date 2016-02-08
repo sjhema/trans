@@ -29,6 +29,8 @@ import com.primovision.lutransport.model.report.NetReportWrapper;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
 import com.primovision.lutransport.model.report.SubcontractorReportInput;
 import com.primovision.lutransport.model.report.Summary;
+import com.primovision.lutransport.model.report.TollDistributionReportInput;
+import com.primovision.lutransport.model.report.TollDistributionReportWrapper;
 
 public interface ReportService {
 	public  BillingWrapper  generateBillingData(SearchCriteria criteria);
@@ -52,4 +54,5 @@ public interface ReportService {
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
 			BillingHistoryInput input);
 	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input);
+	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria criteria, TollDistributionReportInput input);
 }
