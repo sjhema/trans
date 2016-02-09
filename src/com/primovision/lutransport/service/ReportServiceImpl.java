@@ -3383,12 +3383,33 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input) {
-		return null;
+		FuelLogReportInput fuelLogReportInput = new FuelLogReportInput();
+		map(input, fuelLogReportInput);
+		
+		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, true);
+		
+		FuelDistributionReportWrapper fuelDistributionReportWrapper = new FuelDistributionReportWrapper();
+		map(fuelDistributionReportWrapper, fuelLogReportWrapper);
+		
+		return fuelDistributionReportWrapper;
+	}
+	
+	private void map(FuelDistributionReportInput fuelDistributionReportInput, FuelLogReportInput fuelLogReportInput) {
+		fuelLogReportInput.setFuelVendor(fuelDistributionReportInput.getFuelVendor());
+		fuelLogReportInput.setCompany(fuelDistributionReportInput.getCompany());
+		fuelLogReportInput.setFromInvoiceDate(fuelDistributionReportInput.getFromInvoiceDate());
+		fuelLogReportInput.setInvoiceDateTo(fuelDistributionReportInput.getInvoiceDateTo());
+	}
+	
+	private void map(FuelDistributionReportWrapper fuelDistributionReportWrapper,FuelLogReportWrapper fuelLogReportWrapper ) {
+		fuelDistributionReportWrapper.setFuellog(fuelLogReportWrapper.getFuellog());
+		fuelDistributionReportWrapper.setTotalAmounts(fuelLogReportWrapper.getTotalAmounts());
+		fuelDistributionReportWrapper.setTotalColumn(fuelLogReportWrapper.getTotalColumn());
 	}
 	
 	@Override
 	public FuelLogReportWrapper generateFuellogData(
-			SearchCriteria searchCriteria, FuelLogReportInput input) {
+			SearchCriteria searchCriteria, FuelLogReportInput input, boolean sort) {
 		Map<String, String> params = new HashMap<String, String>();
 		// String fuelVendor = (String)
 		// searchCriteria.getSearchMap().get("fuelVendor");
@@ -3460,26 +3481,26 @@ throw new Exception("origin and destindation is empty");
 		if (!StringUtils.isEmpty(fuelVendor)) {
 			/* query.append("and  obj.fuelvendor = '" + fuelVendor + "'"); */
 
-			query.append("and  obj.fuelvendor in (" + fuelVendor + ")");
-			countQuery.append("and  obj.fuelvendor in (" + fuelVendor + ")");
+			query.append(" and  obj.fuelvendor in (" + fuelVendor + ")");
+			countQuery.append(" and  obj.fuelvendor in (" + fuelVendor + ")");
 		}
 
 		if (!StringUtils.isEmpty(company)) {
-			query.append("and  obj.company in (" + company + ")");
-			countQuery.append("and  obj.company in (" + company + ")");
+			query.append(" and  obj.company in (" + company + ")");
+			countQuery.append(" and  obj.company in (" + company + ")");
 		}
 		if (!StringUtils.isEmpty(terminal)) {
-			query.append("and  obj.terminal in (" + terminal + ")");
-			countQuery.append("and  obj.terminal in (" + terminal + ")");
+			query.append(" and  obj.terminal in (" + terminal + ")");
+			countQuery.append(" and  obj.terminal in (" + terminal + ")");
 		}
 
 		if (!StringUtils.isEmpty(fromInvoiceDate1)
 				&& !StringUtils.isEmpty(invoiceDateTo1)) {
 			if (!StringUtils.isEmpty(fromInvoiceDate)
 					&& !StringUtils.isEmpty(invoiceDateTo)) {
-				query.append("and  obj.invoiceDate between '" + fromInvoiceDate
+				query.append(" and  obj.invoiceDate between '" + fromInvoiceDate
 						+ "' and '" + invoiceDateTo + "'");
-				countQuery.append("and  obj.invoiceDate between '" + fromInvoiceDate
+				countQuery.append(" and  obj.invoiceDate between '" + fromInvoiceDate
 						+ "' and '" + invoiceDateTo + "'");
 				// query.append("and  obj.invoiceDate between '" +
 				// fromInvoiceDate + "' and '" + invoiceDateTo +
@@ -3495,10 +3516,10 @@ throw new Exception("origin and destindation is empty");
 				&& !StringUtils.isEmpty(transactionDateTo1)) {
 			if (!StringUtils.isEmpty(transactionDateFrom)
 					&& !StringUtils.isEmpty(transactionDateTo)) {
-				query.append("and  obj.transactiondate >= '"
+				query.append(" and  obj.transactiondate >= '"
 						+ transactionDateFrom + "' and obj.transactiondate <='" + transactionDateTo
 						+ "'");
-				countQuery.append("and  obj.transactiondate >= '"
+				countQuery.append(" and  obj.transactiondate >= '"
 						+ transactionDateFrom + "' and obj.transactiondate <='" + transactionDateTo
 						+ "'");
 			}
@@ -3511,9 +3532,9 @@ throw new Exception("origin and destindation is empty");
 
 		if (!StringUtils.isEmpty(cardno)) {
 			/* query.append("and  obj.fuelCardNumber = '" + cardno + "'"); */
-			query.append("and  obj.fuelcard.fuelcardNum like '%" + cardno
+			query.append(" and  obj.fuelcard.fuelcardNum like '%" + cardno
 					+ "%'");
-			countQuery.append("and  obj.fuelcard.fuelcardNum like '%" + cardno+ "%'");
+			countQuery.append(" and  obj.fuelcard.fuelcardNum like '%" + cardno+ "%'");
 		}
 
 		if (!StringUtils.isEmpty(driver)) {
@@ -3541,8 +3562,8 @@ throw new Exception("origin and destindation is empty");
 				}
 			}
 			
-			query.append("and  obj.driversid in (" + driverIds + ")");
-			countQuery.append("and  obj.driversid in (" + driverIds + ")");
+			query.append(" and  obj.driversid in (" + driverIds + ")");
+			countQuery.append(" and  obj.driversid in (" + driverIds + ")");
 		}
 		if (!StringUtils.isEmpty(truck)) {	
 			String truckIds="";			
@@ -3569,12 +3590,12 @@ throw new Exception("origin and destindation is empty");
 		
 			
 			
-			query.append("and  obj.unit in (" + truckIds + ")");
-			countQuery.append("and  obj.unit in (" + truckIds + ")");
+			query.append(" and  obj.unit in (" + truckIds + ")");
+			countQuery.append(" and  obj.unit in (" + truckIds + ")");
 		}
 		if (!StringUtils.isEmpty(state)) {
-			query.append("and  obj.state in (" + state + ")");
-			countQuery.append("and  obj.state in (" + state + ")");
+			query.append(" and  obj.state in (" + state + ")");
+			countQuery.append( "and  obj.state in (" + state + ")");
 		}
 
 		if (!StringUtils.isEmpty(gallansfrom)) {
@@ -3646,11 +3667,15 @@ throw new Exception("origin and destindation is empty");
 					fuelt.append("'" + str + "'");
 				}
 			}
-			query.append("and  obj.fueltype in (" + fuelt + ")");
-			countQuery.append("and  obj.fueltype in (" + fuelt + ")");
+			query.append(" and  obj.fueltype in (" + fuelt + ")");
+			countQuery.append(" and  obj.fueltype in (" + fuelt + ")");
 			// System.out.println("\nfuelt===>"+fuelt+"\n");
 		}
-
+		
+		if (sort) {
+			query.append(" order by obj.fuelvendor.name, obj.company.name, obj.terminal.name, obj.driversid.catagory.name, obj.fueltype");
+		}
+		
 		System.out.println("\nquery=fuelog=>" + query + "\n");
 		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();
 		searchCriteria.setRecordCount(recordCount.intValue());
@@ -3660,8 +3685,7 @@ throw new Exception("origin and destindation is empty");
 		.getEntityManager()
 		.createQuery(query.toString())
 		.setMaxResults(searchCriteria.getPageSize())
-		.setFirstResult(
-				searchCriteria.getPage() * searchCriteria.getPageSize())
+		.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
 		.getResultList();
 			
 		List<FuelLog> summarys = new ArrayList<FuelLog>();
@@ -3675,7 +3699,7 @@ throw new Exception("origin and destindation is empty");
 		double totalAmounts = 0.0;
 		double totalGrossCost=0.0;
 
-		Map<String, List<FuelLog>> fuellogMap = new HashMap<String, List<FuelLog>>();
+		//Map<String, List<FuelLog>> fuellogMap = new HashMap<String, List<FuelLog>>();
 
 		for (FuelLog fuelog : fs) {
 			totalColumn = totalColumn + 1;
@@ -3694,7 +3718,6 @@ throw new Exception("origin and destindation is empty");
 						.getInvoiceNo() : "");
 				output.setUnits((fuelog.getUnit() != null) ? fuelog.getUnit()
 						.getUnit().toString() : "");
-
 				
 				String fuelcardNum=null;
                 if(fuelog.getFuelcard()!=null){                                        
@@ -3725,6 +3748,8 @@ throw new Exception("origin and destindation is empty");
 				// output.setDrivers((fuelog.getDriverFname()!=null)?fuelog.getDriverFname().getFullName():"");
 				output.setDrivers((fuelog.getDriversid() != null) ? fuelog
 						.getDriversid().getFullName() : "");
+				output.setDriverCategory((fuelog.getDriversid() != null) && fuelog.getDriversid().getCatagory() != null ? fuelog
+						.getDriversid().getCatagory().getName() : "");
 				// billing.setDestination((ticket.getDestination()!=null)?ticket.getDestination().getName():"");
 				/*
 				 * output.setFuelCardNumbers(fuelog.getFuelCardNumber().toString(

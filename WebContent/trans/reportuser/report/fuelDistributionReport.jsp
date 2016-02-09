@@ -269,9 +269,13 @@ $(document).ready(function(){
 					<form:options items="${fuelvendor}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="fuelVendor" cssClass="errorMessage" />
 			</td>
-		    </td> 
-		    <td class="form-left"><primo:label code="Card#" /></td>
-		    <td align="${left}"><form:input path="cardno" /></td>		 
+		    <td class="form-left"><primo:label code="Terminals" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="terminal" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>		 
 		<tr>
 		
 		 <tr>
@@ -351,14 +355,6 @@ $(document).ready(function(){
 				From:<form:input size="10" path="fromInvoiceNo" cssClass="flat"/> 
 				To:<form:input size="10" path="invoiceNoTo" cssClass="flat"/>
 			 </td>
-			 <%-- <td class="form-left"><primo:label code="Fuel Type" /></td>
-		    <td align="${left}"><form:input path="fueltype" /></td>	 --%>
-		    <td class="form-left"><primo:label code="Fuel Type" />
-		    <td align="${left}"><form:select cssClass="flat" path="fueltype" multiple="true">
-					<form:option value="">-----Please Select----</form:option>
-					<form:options items="${fuelTypes}" itemValue="dataText"
-						itemLabel="dataText" />
-				</form:select> <br><form:errors path="fueltype" cssClass="errorMessage" /></td>
 		</tr>
 		
 		<tr>
@@ -369,91 +365,7 @@ $(document).ready(function(){
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
 			</td>
-		   
-		    <td class="form-left"><primo:label code="Terminals" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="terminal" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
-				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
-			</td>
 	   </tr>
-			
-	   <tr>
-	          <td class="form-left"><primo:label code="Driver" /><span class="errorMessage"></span></td>
-			  <td><form:select cssClass="flat" path="driver" id="driverId" multiple="true" onchange="javascript:getTerminal();">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${drivers}" itemValue="fullName" itemLabel="fullName"></form:options>
-				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
-			</td>
-			
-			 <td class="form-left"><primo:label code="Unit#" /><span
-				class="errorMessage"></span></td>
-			 <td><form:select cssClass="flat" path="unit" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${trucks}" itemValue="unit" itemLabel="unit" />
-				</form:select>
-			 </td>
-	   </tr>
-	   
-	   <tr>
-	       <td class="form-left"><primo:label code="States" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="state" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${states}" itemValue="id" itemLabel="name" />
-				</form:select> <br> <form:errors path="state" cssClass="errorMessage" />
-			</td>
-			<td class="form-left"></td>
-	   <tr>
-	   
-	   
-	   
-	   
-	   
-	   
-	   <tr>
-	      <td class="form-left"><primo:label code="Gallons" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="gallonsFrom" cssClass="flat"/> 
-				To:<form:input size="10" path="gallonsTo" cssClass="flat"/>
-			</td>
-			
-			<td class="form-left"><primo:label code="Unit Price" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="unitPriceFrom" cssClass="flat"/> 
-				To:<form:input size="10" path="unitPriceTo" cssClass="flat"/>
-			</td>
-	   <tr>
-	   
-	   <tr>
-	      <td class="form-left"><primo:label code="Fees" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="feesFrom" cssClass="flat"/> 
-				To:<form:input size="10" path="feesTo" cssClass="flat"/>
-			</td>
-			
-			<td class="form-left"><primo:label code="Discounts" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="discountFrom" cssClass="flat"/> 
-				To:<form:input size="10" path="discountTo" cssClass="flat"/>
-			</td>
-	   <tr>
-	   
-	  
-	      <td class="form-left"><primo:label code="Amount" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="amountFrom" cssClass="flat"/> 
-				To:<form:input size="10" path="amountTo" cssClass="flat"/>
-			</td>
-			
-			<td class="form-left"></td> 
-			
-	   </tr>
-		 
-		
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>

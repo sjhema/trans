@@ -95,17 +95,17 @@ public class FuelDistributionReportController extends BaseController {
 	}
 	
 	protected  Map<String,Object> generateData(SearchCriteria searchCriteria, HttpServletRequest request, FuelDistributionReportInput input) {
-		Map<String,Object> data = new HashMap<String,Object>();
-		Map<String,Object> params = new HashMap<String,Object>();
+		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		
-		FuelDistributionReportWrapper wrapper = generateFuelDistributionReport(searchCriteria,input);
+		FuelDistributionReportWrapper wrapper = generateFuelDistributionReport(searchCriteria, input);
 		 
-		params.put("totalAmounts",wrapper.getTotalAmounts());
+		params.put("totalAmounts", wrapper.getTotalAmounts());
 		params.put("totaldiscounts", wrapper.getTotaldiscounts());
 		params.put("totalFees", wrapper.getTotalFees());
-		params.put("totalGallons",wrapper.getTotalGallons());
-		params.put("totalColumn",wrapper.getTotalColumn());
-		params.put("totalGrossCost",wrapper.getTotalGrossCost());
+		params.put("totalGallons", wrapper.getTotalGallons());
+		params.put("totalColumn", wrapper.getTotalColumn());
+		params.put("totalGrossCost", wrapper.getTotalGrossCost());
 		  
 		data.put("data", wrapper.getFuellog());
 		data.put("params",params);
@@ -113,49 +113,44 @@ public class FuelDistributionReportController extends BaseController {
 		return data;
 	}
 	
-	
 	public FuelDistributionReportWrapper generateFuelDistributionReport(SearchCriteria searchCriteria, FuelDistributionReportInput input) {
-		return reportService.generateFuelDistributionData(searchCriteria,input);
+		return reportService.generateFuelDistributionData(searchCriteria, input);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
 	public String search(ModelMap model, HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("modelObject") FuelDistributionReportInput input, @RequestParam(required = false, value = "type") String type,
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
-        System.out.println("\nfuellogBillingController==Search()==type===>"+type+"\n"); 
+        System.out.println("\nFuelDistributionController==Search()==type===>"+type+"\n"); 
 		Map imagesMap = new HashMap();
-		String p=request.getParameter("p");
+		String p = request.getParameter("p");
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		//request.getSession().setAttribute("input", input);
 		populateSearchCriteria(request, request.getParameterMap());
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(1000);
 		
-		
-		if (p==null)
+		if (p == null)
 			request.getSession().setAttribute("input", input);
 		
-		FuelDistributionReportInput input1=(FuelDistributionReportInput)request.getSession().getAttribute("input");
+		FuelDistributionReportInput input1 = (FuelDistributionReportInput) request.getSession().getAttribute("input");
 		
 		try {
 			Map<String, Object> datas;
-			
-			if (p==null) {
-				 datas = generateData(criteria,request,input);
+			if (p == null) {
+				 datas = generateData(criteria, request, input);
 		   } else {
-				 datas = generateData(criteria,request,input1);	
+				 datas = generateData(criteria, request, input1);	
 			}
-			
 			
 			if (StringUtils.isEmpty(type))
 				type = "html";
 			response.setContentType(MimeUtil.getContentType(type));
 			if (!type.equals("html"))
 				response.setHeader("Content-Disposition",
-						"attachment;filename=billinghistory." + type);
+						"attachment;filename=fuelDistributionReport." + type);
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			Map params = (Map)datas.get("params");
+			Map params = (Map) datas.get("params");
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("fuelDistributionReport",
 					(List)datas.get("data"), params, request);
 			request.setAttribute("jasperPrint", jasperPrint);
@@ -166,62 +161,62 @@ public class FuelDistributionReportController extends BaseController {
 			request.getSession().setAttribute("errors", e.getMessage());
 			return "error";
 		}
-
 	}
-	
 	 
-		@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
-		public String display(ModelMap model, HttpServletRequest request,
-				HttpServletResponse response,
-				@RequestParam(required = false, value = "type") String type,
-				@RequestParam(required = false, value = "jrxml") String jrxml) {
-			System.out.println("\nFuelDistributionReportController==export()==type===>"+type+"\n"); 
-			Map imagesMap = new HashMap();
-			request.getSession().setAttribute("IMAGES_MAP", imagesMap);
-			SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-			criteria.setPageSize(15000);
-			criteria.setPage(0);
-			FuelDistributionReportInput input = (FuelDistributionReportInput)request.getSession().getAttribute("input");
-			try {
-				Map<String,Object> datas = generateData(criteria, request, input);
-				//List propertyList = (List<String>) request.getSession()
-				//		.getAttribute("propertyList");
-				if (StringUtils.isEmpty(type))
-					type = "xlsx";
-				if (!type.equals("html") && !(type.equals("print"))) {
-					response.setHeader("Content-Disposition",
-							"attachment;filename= fuelDistributionReport." + type);
-				}
-				response.setContentType(MimeUtil.getContentType(type));
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				Map<String, Object> params = (Map<String,Object>)datas.get("params");
-				/*if (!type.equals("print") &&!type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("fuelDistributionReport",
-							(List)datas.get("data"), params, type, request);
-				}*/
-				if (type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"pdf",
-							(List)datas.get("data"), params, type, request);
-				}
-				else if (type.equals("csv")) {
-					out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"csv",
-							(List)datas.get("data"), params, type, request);
-				}
-				else {
-					out = dynamicReportService.generateStaticReport("fuelDistributionReport",
-							(List)datas.get("data"), params, type, request);
-				}
-			
-				out.writeTo(response.getOutputStream());
-				out.close();
-				return null;
-			} catch (Exception e) {
-				e.printStackTrace();
-				log.warn("Unable to create file :" + e);
-				request.getSession().setAttribute("errors", e.getMessage());
-				return "report.error";
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
+	public String display(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+		System.out.println("\nFuelDistributionReportController==export()==type===>"+type+"\n"); 
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+		
+		FuelDistributionReportInput input = (FuelDistributionReportInput) request.getSession().getAttribute("input");
+		try {
+			Map<String, Object> datas = generateData(criteria, request, input);
+			//List propertyList = (List<String>) request.getSession()
+			//		.getAttribute("propertyList");
+			if (StringUtils.isEmpty(type))
+				type = "xlsx";
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename= fuelDistributionReport." + type);
 			}
+			
+			response.setContentType(MimeUtil.getContentType(type));
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String, Object>)datas.get("params");
+			/*if (!type.equals("print") &&!type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport",
+						(List)datas.get("data"), params, type, request);
+			}*/
+			if (type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"pdf",
+						(List)datas.get("data"), params, type, request);
+			}
+			else if (type.equals("csv")) {
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"csv",
+						(List)datas.get("data"), params, type, request);
+			}
+			else {
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport",
+						(List)datas.get("data"), params, type, request);
+			}
+		
+			out.writeTo(response.getOutputStream());
+			out.close();
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
 		}
+	}
 	
 	@ModelAttribute("modelObject")
 	public FuelDistributionReportInput setupModel(HttpServletRequest request) {

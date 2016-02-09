@@ -169,6 +169,9 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	private String drivers;
 	
 	@Transient
+	private String driverCategory;
+	
+	@Transient
 	private String fuelCardNumbers;
 	
 	@Transient
@@ -199,6 +202,16 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 
 	public void setFuelCardNumbers(String fuelCardNumbers) {
 		this.fuelCardNumbers = fuelCardNumbers;
+	}
+
+	@Transient
+	public String getDriverCategory() {
+		return driverCategory;
+	}
+	
+	@Transient
+	public void setDriverCategory(String driverCategory) {
+		this.driverCategory = driverCategory;
 	}
 
 	public String getDrivers() {

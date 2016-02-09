@@ -68,7 +68,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[FUEL  LOG  REPORT]]></text>
+				<text><![CDATA[FUEL  DISTRIBUTION  REPORT]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="72" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>

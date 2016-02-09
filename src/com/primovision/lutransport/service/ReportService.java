@@ -39,7 +39,7 @@ public interface ReportService {
 	public void saveBillingData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteBillingData(Invoice invoice) throws Exception;
 	public boolean checkDuplicate(Ticket ticket, String ticketType);
-	public FuelLogReportWrapper generateFuellogData(SearchCriteria criteria,FuelLogReportInput input);
+	public FuelLogReportWrapper generateFuellogData(SearchCriteria criteria,FuelLogReportInput input, boolean sort);
 	public List<FuelLogAverageReportWrapper> generateFuellogAverageData(SearchCriteria criteria,FuelLogReportInput input);
 	
 	public FuelLogVerificationReportWrapper generateFuelLogVerificationData(SearchCriteria searchCriteria, FuelLogVerificationReportInput input);

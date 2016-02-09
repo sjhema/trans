@@ -131,7 +131,7 @@ public class FuelLogBillingController extends BaseController{
 	
 	
 	public FuelLogReportWrapper generateFuellogReport(SearchCriteria searchCriteria,FuelLogReportInput input) {
-	return reportService.generateFuellogData(searchCriteria,input);
+		return reportService.generateFuellogData(searchCriteria,input, false);
 	}
 	
 	
