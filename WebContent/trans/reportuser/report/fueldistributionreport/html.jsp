@@ -10,11 +10,11 @@
 	JRHtmlExporter exporter = new JRHtmlExporter();
 	exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 	exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, out);
-	StringBuffer buffer = new StringBuffer("</td></tr></table><table width=\"100%\"><tr><td width=\"50%\">&nbsp;</td></tr>\n");
-	buffer.append("<input type=\"button\" value=\"Back\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/start.do'\">");
-	buffer.append("<input type=\"button\" value=\"Export As Pdf\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/export.do?type=pdf'\">");
-	buffer.append("<input type=\"button\" value=\"Export As CSV\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/export.do?type=csv'\">");
-	buffer.append("</table>\n");
+	StringBuffer buffer = new StringBuffer("<table width=\"100%\"><tr><td>\n");
+	buffer.append("<input type=\"button\" value=\"Back\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fueldistribution/start.do'\">");
+	buffer.append("<input type=\"button\" value=\"Export As Pdf\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fueldistribution/export.do?type=pdf'\">");
+	buffer.append("<input type=\"button\" value=\"Export As CSV\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fueldistribution/export.do?type=csv'\">");
+	buffer.append("</tr></td></table>\n");
 	exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, buffer.toString());
 	exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, (Map)request.getAttribute("IMAGES_MAP"));
 	exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI,request.getContextPath() + "/image?image=");

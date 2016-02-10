@@ -37,10 +37,10 @@ import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehicleTollTag;
-//import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.report.EztollReportInput;
 import com.primovision.lutransport.model.report.EztollReportWrapper;
+import com.primovision.lutransport.model.report.FuelDistributionReportInput;
 import com.primovision.lutransport.model.report.FuelLogReportInput;
 import com.primovision.lutransport.model.report.FuelLogReportWrapper;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
@@ -178,8 +178,7 @@ public class TollDistributionReportController extends BaseController {
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
 		Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(15000);
 		criteria.setPage(0);
 		TollDistributionReportInput input = (TollDistributionReportInput) request.getSession().getAttribute("input");
@@ -196,15 +195,24 @@ public class TollDistributionReportController extends BaseController {
 			response.setContentType(MimeUtil.getContentType(type));
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Map<String, Object> params = (Map<String,Object>)datas.get("params");
-			if (!type.equals("print")) {
+			
+			/*if (!type.equals("print") &&!type.equals("pdf")) {
+			out = dynamicReportService.generateStaticReport("tollDistributionReport",
+					(List)datas.get("data"), params, type, request);
+			}*/
+			if (type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport("tollDistributionReport",
+						(List)datas.get("data"), params, type, request);
+			}
+			else if (type.equals("csv")) {
 				out = dynamicReportService.generateStaticReport("tollDistributionReport",
 						(List)datas.get("data"), params, type, request);
 			}
 			else {
-				out = dynamicReportService.generateStaticReport("tollDistributionReport"+"print",
+				out = dynamicReportService.generateStaticReport("tollDistributionReport",
 						(List)datas.get("data"), params, type, request);
 			}
-		
+			
 			out.writeTo(response.getOutputStream());
 			out.close();
 			return null;

@@ -27,7 +27,6 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
-//import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.report.FuelDistributionReportInput;
@@ -195,11 +194,11 @@ public class FuelDistributionReportController extends BaseController {
 						(List)datas.get("data"), params, type, request);
 			}*/
 			if (type.equals("pdf")) {
-				out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"pdf",
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport",
 						(List)datas.get("data"), params, type, request);
 			}
 			else if (type.equals("csv")) {
-				out = dynamicReportService.generateStaticReport("fuelDistributionReport"+"csv",
+				out = dynamicReportService.generateStaticReport("fuelDistributionReport",
 						(List)datas.get("data"), params, type, request);
 			}
 			else {
