@@ -4203,6 +4203,10 @@ throw new Exception("origin and destindation is empty");
 			query.append(" and  obj.driver in ("+driver+")");
 			countQuery.append(" and  obj.driver in ("+driver+")");
 		}
+		
+		if (sort) {
+			query.append(" order by obj.toolcompany.name, obj.company.name, obj.terminal.name, obj.driver.catagory.name");
+		}
 
 		System.out.println("\nquery.toString()===>" + query.toString() + "\n");
 		
