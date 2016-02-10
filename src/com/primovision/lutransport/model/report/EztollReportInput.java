@@ -24,7 +24,37 @@ public class EztollReportInput /*implements ReportModel*/{
 	
 	private String driver;
 	
+	private String transactionDateFrom;
+	private String transactionDateTo;
 	
+	private String fromInvoiceDate;
+	private String invoiceDateTo;
+	
+	
+	public String getTransactionDateFrom() {
+		return transactionDateFrom;
+	}
+	public void setTransactionDateFrom(String transactionDateFrom) {
+		this.transactionDateFrom = transactionDateFrom;
+	}
+	public String getTransactionDateTo() {
+		return transactionDateTo;
+	}
+	public void setTransactionDateTo(String transactionDateTo) {
+		this.transactionDateTo = transactionDateTo;
+	}
+	public String getFromInvoiceDate() {
+		return fromInvoiceDate;
+	}
+	public void setFromInvoiceDate(String fromInvoiceDate) {
+		this.fromInvoiceDate = fromInvoiceDate;
+	}
+	public String getInvoiceDateTo() {
+		return invoiceDateTo;
+	}
+	public void setInvoiceDateTo(String invoiceDateTo) {
+		this.invoiceDateTo = invoiceDateTo;
+	}
 	public String getDriver() {
 		return driver;
 	}

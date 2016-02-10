@@ -4012,14 +4012,13 @@ throw new Exception("origin and destindation is empty");
 	}
 	
 	@Override
-	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria searchCriteria, 
-			TollDistributionReportInput input) {
+	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria searchCriteria, TollDistributionReportInput input) {
 		return null;
 	}
 	
 	@Override
 	public EztollReportWrapper generateEztollData(
-			SearchCriteria searchCriteria, EztollReportInput input) {
+			SearchCriteria searchCriteria, EztollReportInput input, boolean sort) {
 
 		Map<String, String> params = new HashMap<String, String>();
 
@@ -4052,6 +4051,26 @@ throw new Exception("origin and destindation is empty");
 		String amountto = input.getAmountsto();
          
 		String driver=input.getDriver();
+		
+		
+		String fromInvoiceDate1 = (String) searchCriteria.getSearchMap().get(
+				"fromInvoiceDate");
+		String invoiceDateTo1 = (String) searchCriteria.getSearchMap().get(
+				"invoiceDateTo");
+		String transactionDateFrom1 = (String) searchCriteria.getSearchMap()
+				.get("transactionDateFrom");
+		String transactionDateTo1 = (String) searchCriteria.getSearchMap().get(
+				"transactionDateTo");
+
+		String fromInvoiceDate = ReportDateUtil.getFromDate(input
+				.getFromInvoiceDate());
+		String invoiceDateTo = ReportDateUtil.getToDate(input
+				.getInvoiceDateTo());
+		String transactionDateFrom = ReportDateUtil.getFromDate(input
+				.getTransactionDateFrom());
+		String transactionDateTo = ReportDateUtil.getToDate(input
+				.getTransactionDateTo());
+		
 		 
 		StringBuffer query = new StringBuffer("");
 		StringBuffer countQuery = new StringBuffer("");
@@ -4113,6 +4132,41 @@ throw new Exception("origin and destindation is empty");
 			query.append("and  obj.plateNumber in (" + plate + ")");
 			countQuery.append("and  obj.plateNumber in (" + plate + ")");
 		}
+		
+		
+		if (!StringUtils.isEmpty(fromInvoiceDate1)
+				&& !StringUtils.isEmpty(invoiceDateTo1)) {
+			if (!StringUtils.isEmpty(fromInvoiceDate)
+					&& !StringUtils.isEmpty(invoiceDateTo)) {
+				query.append(" and  obj.invoiceDate between '" + fromInvoiceDate
+						+ "' and '" + invoiceDateTo + "'");
+				countQuery.append(" and  obj.invoiceDate between '" + fromInvoiceDate
+						+ "' and '" + invoiceDateTo + "'");
+				// query.append("and  obj.invoiceDate between '" +
+				// fromInvoiceDate + "' and '" + invoiceDateTo +
+				// "'or obj.invoiceDate IS null ");
+			}
+		}
+		/*
+		 * else{ query.append("and  obj.invoiceDate between '" + fromInvoiceDate
+		 * + "' and '" + invoiceDateTo + "'or obj.invoiceDate IS null "); }
+		 */
+
+		if (!StringUtils.isEmpty(transactionDateFrom1)
+				&& !StringUtils.isEmpty(transactionDateTo1)) {
+			if (!StringUtils.isEmpty(transactionDateFrom)
+					&& !StringUtils.isEmpty(transactionDateTo)) {
+				query.append(" and  obj.transactiondate >= '"
+						+ transactionDateFrom + "' and obj.transactiondate <='" + transactionDateTo
+						+ "'");
+				countQuery.append(" and  obj.transactiondate >= '"
+						+ transactionDateFrom + "' and obj.transactiondate <='" + transactionDateTo
+						+ "'");
+			}
+		}
+		
+		
+		
 
 		if (!StringUtils.isEmpty(transferDateFrom)
 				&& !StringUtils.isEmpty(transferDateTo)) {

@@ -285,60 +285,24 @@ $(document).ready(function(){
 					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
 			</td>
-			
-			<td class="form-left"><primo:label code="TollTag#" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="tollTagNumber" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${tollTagnumbers}" itemValue="id" itemLabel="tollTagNumber" />
-				</form:select> <br> <form:errors path="tollTagNumber" cssClass="errorMessage" />
-			</td>
-	   </tr>	<!-- plateNumber -->
+	   </tr>	
 		<tr>
-	         <td class="form-left"><primo:label code="Plate#" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="plateNumber" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${platenumbers}" itemValue="id" itemLabel="plate" />
-				</form:select> <br> <form:errors path="plateNumber" cssClass="errorMessage" />
-			</td>
-			
-			<td class="form-left"><primo:label code="Unit#" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="unit" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${units}" itemValue="unit" itemLabel="unit" />
-				</form:select> <br> <form:errors path="unit" cssClass="errorMessage" />
-			</td>
-			<!-- <td class="form-left"></td> -->
-			
-	   </tr>
-		<tr>
-		    <td class="form-left"><primo:label code="Driver" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="driver" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${drivers}" itemValue="id" itemLabel="fullName" />
-				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
-			</td>
-		</tr>
-		<tr>
-              <td class="form-left"><primo:label code="Transaction date" /><span class="errorMessage"></span></td>
+	        <td class="form-left"><primo:label code="Invoice Date" /><span class="errorMessage"></span></td>
 			<td  align="${left}">
-				From:<form:input size="10" path="transferDateFrom" cssClass="flat"  onblur="return formatDate1('transferDateFrom');"/> 
+				From:<form:input size="10" path="fromInvoiceDate" cssClass="flat"  onblur="return formatDate('fromInvoiceDate');"/> 
 				<script type="text/javascript">
 					$(function() {
-					$("#transferDateFrom").datepicker({
+					$("#fromInvoiceDate").datepicker({
 						dateFormat:'mm-dd-yy',
 		            	changeMonth: true,
 		    			changeYear: true
 		    		});
 					});
 				</script>
-				To:<form:input size="10" path="transferDateTo" cssClass="flat"  onblur="return formatDate1('transferDateTo');"/>
+				To:<form:input size="10" path="invoiceDateTo" cssClass="flat"  onblur="return formatDate('invoiceDateTo');"/>
 				<script type="text/javascript">
 					$(function() {
-					$("#transferDateTo").datepicker({
+					$("#invoiceDateTo").datepicker({
 						dateFormat:'mm-dd-yy',
 		            	changeMonth: true,
 		    			changeYear: true
@@ -346,29 +310,30 @@ $(document).ready(function(){
 					});
 				</script>
 			</td>
-			
-			<td class="form-left"><primo:label code="Transaction Time In" /><span
-				class="errorMessage"></span></td>
-			<td align="${left}">From:<form:input size="10" path="transferTimeFrom"
-					cssClass="flat"  onkeypress="return onlyNumbers(event,false)" onblur="return getTime('transferTimeFrom')"/>&nbsp;To:<form:input size="10" path="transferTimeTo"
-					cssClass="flat"  onkeypress="return onlyNumbers(event,false)" onblur="return getTime('transferTimeTo')"/> 
-			</td>
-		</tr>
-		
-		<tr>
-		     <td class="form-left"><primo:label code="Agency" /></td>
-		    <td align="${left}"><form:input name="agency" path="agency" />
-		    </td> 
-		    
-		    <td class="form-left"><primo:label code="Amount" /><span class="errorMessage"></span></td>
+			<td class="form-left"><primo:label code="Transaction date" /><span class="errorMessage"></span></td>
 			<td  align="${left}">
-				From:<form:input size="10" path="amountsfrom" cssClass="flat"/> 
-				To:<form:input size="10" path="amountsto" cssClass="flat"/>
+				From:<form:input size="10" path="transactionDateFrom" cssClass="flat"  onblur="return formatDate1('transactionDateFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#transactionDateFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="transactionDateTo" cssClass="flat"  onblur="return formatDate1('transactionDateTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#transactionDateTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
 			</td>
 		</tr>
-		
-		
-		 
 		
 		<tr><td colspan="2"></td></tr>
 		<tr>
@@ -376,7 +341,6 @@ $(document).ready(function(){
 			<td align="${left}" colspan="3"><input type="button"
 				onclick="javascript:searchReport()" value="Preview" /></td>
 		</tr>
-		
 		
 	</table>
 </form:form>

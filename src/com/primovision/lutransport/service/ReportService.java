@@ -45,7 +45,7 @@ public interface ReportService {
 	public FuelLogVerificationReportWrapper generateFuelLogVerificationData(SearchCriteria searchCriteria, FuelLogVerificationReportInput input);
 	public FuelViolationReportWrapper generateFuelViolationData(SearchCriteria criteria,FuelViolationInput input);
 	public FuelOverLimitReportWrapper generateFuelOverLimitData(SearchCriteria criteria,FuelOverLimitInput input);
-	public EztollReportWrapper generateEztollData(SearchCriteria criteria, EztollReportInput input);
+	public EztollReportWrapper generateEztollData(SearchCriteria criteria, EztollReportInput input, boolean sort);
 	public void saveSubcontractorBillingData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteSubcontractorBillingData(SubcontractorInvoice invoice) throws Exception;	
 	public List<Summary> generateSummary(SearchCriteria criteria, BillingHistoryInput input) ;

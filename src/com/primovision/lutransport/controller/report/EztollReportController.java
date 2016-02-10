@@ -136,7 +136,7 @@ public class EztollReportController extends BaseController{
 	
 	
 	public EztollReportWrapper generateEztollReport(SearchCriteria searchCriteria,EztollReportInput input) {
-	return reportService.generateEztollData(searchCriteria,input);
+	return reportService.generateEztollData(searchCriteria,input, false);
 	}
 	
 	
