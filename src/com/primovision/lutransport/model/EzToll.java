@@ -95,6 +95,19 @@ public class EzToll extends AbstractBaseModel
 	@Transient
 	private String drivername="";
 	
+	@Transient
+	private String driverCategory;
+	
+	@Transient
+	public String getDriverCategory() {
+		return driverCategory;
+	}
+
+	@Transient
+	public void setDriverCategory(String driverCategory) {
+		this.driverCategory = driverCategory;
+	}
+
 	public Date getInvoiceDate() {
 		return invoiceDate;
 	}

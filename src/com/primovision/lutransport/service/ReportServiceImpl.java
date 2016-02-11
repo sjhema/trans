@@ -3401,7 +3401,7 @@ throw new Exception("origin and destindation is empty");
 		fuelLogReportInput.setInvoiceDateTo(fuelDistributionReportInput.getInvoiceDateTo());
 	}
 	
-	private void map(FuelDistributionReportWrapper fuelDistributionReportWrapper,FuelLogReportWrapper fuelLogReportWrapper ) {
+	private void map(FuelDistributionReportWrapper fuelDistributionReportWrapper, FuelLogReportWrapper fuelLogReportWrapper ) {
 		fuelDistributionReportWrapper.setFuellog(fuelLogReportWrapper.getFuellog());
 		fuelDistributionReportWrapper.setTotalAmounts(fuelLogReportWrapper.getTotalAmounts());
 		fuelDistributionReportWrapper.setTotalColumn(fuelLogReportWrapper.getTotalColumn());
@@ -4013,7 +4013,30 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria searchCriteria, TollDistributionReportInput input) {
-		return null;
+		EztollReportInput ezTollReportInput = new EztollReportInput();
+		map(input, ezTollReportInput);
+		
+		EztollReportWrapper eztollReportWrapper = generateEztollData(searchCriteria, ezTollReportInput, true);
+		
+		TollDistributionReportWrapper tollDistributionReportWrapper = new TollDistributionReportWrapper();
+		map(tollDistributionReportWrapper, eztollReportWrapper);
+		
+		return tollDistributionReportWrapper;
+	}
+	
+	private void map(TollDistributionReportInput tollDistributionReportInput, EztollReportInput ezTollReportInput) {
+		ezTollReportInput.setToolcompany(tollDistributionReportInput.getToolcompany());
+		ezTollReportInput.setCompany(tollDistributionReportInput.getCompany());
+		ezTollReportInput.setFromInvoiceDate(tollDistributionReportInput.getFromInvoiceDate());
+		ezTollReportInput.setInvoiceDateTo(tollDistributionReportInput.getInvoiceDateTo());
+		ezTollReportInput.setTransactionDateFrom(tollDistributionReportInput.getTransactionDateFrom());
+		ezTollReportInput.setTransactionDateTo(tollDistributionReportInput.getTransactionDateTo());
+	}
+	
+	private void map(TollDistributionReportWrapper tollDistributionReportWrapper, EztollReportWrapper eztollReportWrapper ) {
+		tollDistributionReportWrapper.setEztolls(eztollReportWrapper.getEztolls());
+		tollDistributionReportWrapper.setTotalAmounts(eztollReportWrapper.getTotalAmounts());
+		tollDistributionReportWrapper.setTotalColumn(eztollReportWrapper.getTotalColumn());
 	}
 	
 	@Override
@@ -4267,7 +4290,8 @@ throw new Exception("origin and destindation is empty");
 				output.setAgency(eztol.getAgency());
 				output.setAmount(eztol.getAmount());
 				output.setDrivername(eztol.getDriver()!=null?eztol.getDriver().getFullName():"");
-				
+				output.setDriverCategory((eztol.getDriver() != null) && eztol.getDriver().getCatagory() != null ? eztol
+						.getDriver().getCatagory().getName() : "");
 
 				if (eztol.getAmount() != null)
 					totalAmounts += eztol.getAmount();

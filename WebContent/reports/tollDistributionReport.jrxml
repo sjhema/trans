@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="fueldistribution" pageWidth="1270" pageHeight="600" columnWidth="1230" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tolldistribution" pageWidth="1270" pageHeight="600" columnWidth="1230" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="totalColumn" class="java.lang.Long"/>
 	<parameter name="totalAmounts" class="java.lang.Double"/>
-	<field name="fuelvendor" class="java.lang.String"/>
-	<field name="fueltype" class="java.lang.String"/>
+	<field name="tollcompanies" class="java.lang.String"/>
 	<field name="amount" class="java.lang.Double"/>
 	<field name="companies" class="java.lang.String"/>
 	<field name="terminals" class="java.lang.String"/>
-	<field name="fuelVenders" class="java.lang.String"/>
 	<field name="driverCategory" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
@@ -21,11 +19,11 @@
 	<pageHeader>
 		<band height="46">
 			<staticText>
-				<reportElement mode="Opaque" x="195" y="24" width="177" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="168" y="24" width="177" height="20" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[FUEL DISTRIBUTION REPORT]]></text>
+				<text><![CDATA[TOLL DISTRIBUTION REPORT]]></text>
 			</staticText>
 		</band>
 	</pageHeader>
@@ -43,7 +41,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Vendor]]></text>
+				<text><![CDATA[Toll Company]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="94" y="25" width="112" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -74,21 +72,7 @@
 				<text><![CDATA[Terminal]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="366" y="25" width="82" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
-				<box>
-					<pen lineWidth="1.0" lineColor="#333333"/>
-					<topPen lineWidth="1.0" lineColor="#333333"/>
-					<leftPen lineWidth="1.0" lineColor="#333333"/>
-					<bottomPen lineWidth="1.0" lineColor="#333333"/>
-					<rightPen lineWidth="1.0" lineColor="#333333"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Fuel Type]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Opaque" x="448" y="25" width="120" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="366" y="25" width="120" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -134,21 +118,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{terminals}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="366" y="0" width="82" height="20"/>
-				<box>
-					<pen lineWidth="1.0"/>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{fueltype}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="448" y="0" width="120" height="20"/>
+				<reportElement x="366" y="0" width="120" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -185,7 +155,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{fuelVenders}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{tollcompanies}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="295" y="0" width="71" height="20"/>
@@ -227,7 +197,7 @@
 				<textFieldExpression class="java.lang.Long"><![CDATA[$P{totalColumn}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="448" y="0" width="120" height="24"/>
+				<reportElement x="366" y="0" width="120" height="24"/>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -239,7 +209,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($P{totalAmounts})))]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="366" y="0" width="82" height="21"/>
+				<reportElement x="295" y="0" width="71" height="21"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>

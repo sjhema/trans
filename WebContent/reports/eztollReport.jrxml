@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="865" pageHeight="500" orientation="Landscape" columnWidth="825" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="900" pageHeight="500" orientation="Landscape" columnWidth="860" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="259"/>
+	<property name="ireport.x" value="148"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="totalColumn" class="java.lang.Long"/>
 	<parameter name="totalAmounts" class="java.lang.Double"/>
@@ -16,6 +16,7 @@
 	<field name="transactiontime" class="java.lang.String"/>
 	<field name="agency" class="java.lang.String"/>
 	<field name="drivername" class="java.lang.String"/>
+	<field name="driverCategory" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -25,7 +26,7 @@
 	<pageHeader>
 		<band height="46">
 			<staticText>
-				<reportElement mode="Opaque" x="223" y="0" width="261" height="24" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="313" y="0" width="261" height="24" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -36,7 +37,7 @@
 	<columnHeader>
 		<band height="55" splitType="Stretch">
 			<staticText>
-				<reportElement mode="Opaque" x="81" y="25" width="82" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="81" y="25" width="69" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -50,7 +51,7 @@
 				<text><![CDATA[Company]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="163" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="150" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -78,7 +79,7 @@
 				<text><![CDATA[Toll Company]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="223" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="210" y="25" width="43" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -92,7 +93,7 @@
 				<text><![CDATA[Unit#]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="283" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="253" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -106,7 +107,7 @@
 				<text><![CDATA[Tag#]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="343" y="25" width="62" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="313" y="25" width="62" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -120,7 +121,7 @@
 				<text><![CDATA[Plate#]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="510" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="561" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -128,13 +129,13 @@
 					<bottomPen lineWidth="1.0" lineColor="#333333"/>
 					<rightPen lineWidth="1.0" lineColor="#333333"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Transaction Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="589" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="640" y="25" width="68" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -148,7 +149,7 @@
 				<text><![CDATA[Transaction  Time]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="668" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="708" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -162,7 +163,7 @@
 				<text><![CDATA[Agency]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="747" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="787" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -176,7 +177,7 @@
 				<text><![CDATA[Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="405" y="25" width="105" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="375" y="25" width="105" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -184,17 +185,31 @@
 					<bottomPen lineWidth="1.0" lineColor="#333333"/>
 					<rightPen lineWidth="1.0" lineColor="#333333"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Driver ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="480" y="25" width="81" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Category]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="163" y="0" width="60" height="20"/>
+				<reportElement x="150" y="0" width="60" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -208,7 +223,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{terminals}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="81" y="0" width="82" height="20"/>
+				<reportElement x="81" y="0" width="69" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -236,7 +251,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{tollcompanies}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="283" y="0" width="60" height="20"/>
+				<reportElement x="253" y="0" width="60" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -250,7 +265,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{tollTagNumbers}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="343" y="0" width="62" height="20"/>
+				<reportElement x="313" y="0" width="62" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -264,7 +279,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{plates}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="510" y="0" width="79" height="20"/>
+				<reportElement x="561" y="0" width="79" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -278,7 +293,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{transfersDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="589" y="0" width="79" height="20"/>
+				<reportElement x="640" y="0" width="68" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -292,7 +307,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{transactiontime}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="668" y="0" width="79" height="20"/>
+				<reportElement x="708" y="0" width="79" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -306,7 +321,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{agency}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="747" y="0" width="71" height="20"/>
+				<reportElement x="787" y="0" width="71" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -320,7 +335,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{amount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="223" y="0" width="60" height="20"/>
+				<reportElement x="210" y="0" width="43" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -334,7 +349,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{units}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="405" y="0" width="105" height="20"/>
+				<reportElement x="375" y="0" width="105" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -342,8 +357,20 @@
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{drivername}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="480" y="0" width="81" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{driverCategory}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -364,7 +391,7 @@
 				<text><![CDATA[Load Count:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="747" y="0" width="71" height="24"/>
+				<reportElement x="787" y="0" width="71" height="24"/>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -376,7 +403,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($P{totalAmounts})))]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="589" y="1" width="80" height="23"/>
+				<reportElement x="640" y="1" width="69" height="23"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -390,7 +417,7 @@
 				<text><![CDATA[Total ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="81" y="0" width="82" height="24"/>
+				<reportElement x="81" y="0" width="69" height="24"/>
 				<textElement verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>

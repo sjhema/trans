@@ -229,5 +229,4 @@ public class TollDistributionReportController extends BaseController {
 	public TollDistributionReportInput setupModel(HttpServletRequest request) {
 		return new TollDistributionReportInput();
 	}
-
 }
