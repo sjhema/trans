@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.apache.poi.util.StringUtil;
 import org.hibernate.bytecode.buildtime.ExecutionException;
@@ -3390,6 +3391,30 @@ throw new Exception("origin and destindation is empty");
 		
 		FuelDistributionReportWrapper fuelDistributionReportWrapper = new FuelDistributionReportWrapper();
 		map(fuelDistributionReportWrapper, fuelLogReportWrapper);
+		
+		String prevKey = StringUtils.EMPTY;
+		String currentKey = StringUtils.EMPTY;
+		double groupAmount = 0.0;
+		List<FuelLog> groupedFuelLogList = new ArrayList<FuelLog>();
+		List<FuelLog> fuelLogList = fuelDistributionReportWrapper.getFuellog();
+		for (FuelLog aFuelLog :  fuelLogList) {
+			currentKey = aFuelLog.getFuelVenders() + "|" + aFuelLog.getCompanies() + "|" + aFuelLog.getTerminals() 
+				+ aFuelLog.getDriverCategory() + "|" + aFuelLog.getFueltype();
+			
+			if (StringUtils.isEmpty(prevKey)) {
+				prevKey = currentKey;
+			}
+			
+			if (!currentKey.equals(prevKey)) {
+				prevKey = currentKey;
+				
+				aFuelLog.setAmount(groupAmount);
+				groupedFuelLogList.add(aFuelLog);
+			} else {
+				groupAmount += aFuelLog.getAmount();			
+			}
+		}
+		fuelDistributionReportWrapper.setFuellog(groupedFuelLogList);
 		
 		return fuelDistributionReportWrapper;
 	}
