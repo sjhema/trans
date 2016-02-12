@@ -10,18 +10,18 @@
 	JRHtmlExporter exporter = new JRHtmlExporter();
 	exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 	exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, out);
-	StringBuffer buffer = new StringBuffer("<table width=\"100%\"><tr><td>\n");
+	StringBuffer buffer = new StringBuffer("</td></tr></table><table width=\"100%\"><tr><td width=\"50%\">&nbsp;</td></tr>\n");
 	buffer.append("<input type=\"button\" value=\"Back\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/tolldistribution/start.do'\">");
 	buffer.append("<input type=\"button\" value=\"Export As Pdf\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/tolldistribution/export.do?type=pdf'\">");
 	buffer.append("<input type=\"button\" value=\"Export As CSV\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/tolldistribution/export.do?type=csv'\">");
-	buffer.append("</tr></td></table>\n");
+	buffer.append("</table>\n");
 	exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, buffer.toString());
 	exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, (Map)request.getAttribute("IMAGES_MAP"));
 	exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI,request.getContextPath() + "/image?image=");
 	try{
 		exporter.exportReport();
 	}catch(Exception e){
-			e.printStackTrace();
+		e.printStackTrace();
 	}
 	request.removeAttribute("jasperPrint");
 %>
