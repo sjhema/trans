@@ -3392,44 +3392,61 @@ throw new Exception("origin and destindation is empty");
 		FuelDistributionReportWrapper fuelDistributionReportWrapper = new FuelDistributionReportWrapper();
 		map(fuelDistributionReportWrapper, fuelLogReportWrapper);
 		
-		String prevKey = StringUtils.EMPTY;
-		String currentKey = StringUtils.EMPTY;
-		double groupAmount = 0.0;
-		List<FuelLog> groupedFuelLogList = new ArrayList<FuelLog>();
-		List<FuelLog> fuelLogList = fuelDistributionReportWrapper.getFuellog();
-		for (FuelLog aFuelLog :  fuelLogList) {
-			currentKey = aFuelLog.getFuelVenders() + "|" + aFuelLog.getCompanies() + "|" + aFuelLog.getTerminals() 
-				+ aFuelLog.getDriverCategory() + "|" + aFuelLog.getFueltype();
-			
-			if (StringUtils.isEmpty(prevKey)) {
-				prevKey = currentKey;
-			}
-			
-			if (!currentKey.equals(prevKey)) {
-				prevKey = currentKey;
-				
-				aFuelLog.setAmount(groupAmount);
-				groupedFuelLogList.add(aFuelLog);
-			} else {
-				groupAmount += aFuelLog.getAmount();			
-			}
-		}
+		List<FuelLog> groupedFuelLogList = groupFuelLogs(fuelDistributionReportWrapper.getFuellog());
 		fuelDistributionReportWrapper.setFuellog(groupedFuelLogList);
 		
 		return fuelDistributionReportWrapper;
 	}
 	
 	private void map(FuelDistributionReportInput fuelDistributionReportInput, FuelLogReportInput fuelLogReportInput) {
-		fuelLogReportInput.setFuelVendor(fuelDistributionReportInput.getFuelVendor());
 		fuelLogReportInput.setCompany(fuelDistributionReportInput.getCompany());
+		fuelLogReportInput.setTerminal(fuelDistributionReportInput.getTerminal());
+		fuelLogReportInput.setFuelVendor(fuelDistributionReportInput.getFuelVendor());
+		fuelLogReportInput.setFromInvoiceNo(fuelDistributionReportInput.getFromInvoiceNo());
+		fuelLogReportInput.setInvoiceNoTo(fuelDistributionReportInput.getInvoiceNoTo());
 		fuelLogReportInput.setFromInvoiceDate(fuelDistributionReportInput.getFromInvoiceDate());
 		fuelLogReportInput.setInvoiceDateTo(fuelDistributionReportInput.getInvoiceDateTo());
+		fuelLogReportInput.setTransactionDateFrom(fuelDistributionReportInput.getTransactionDateFrom());
+		fuelLogReportInput.setTransactionDateTo(fuelDistributionReportInput.getTransactionDateTo());
 	}
 	
 	private void map(FuelDistributionReportWrapper fuelDistributionReportWrapper, FuelLogReportWrapper fuelLogReportWrapper ) {
 		fuelDistributionReportWrapper.setFuellog(fuelLogReportWrapper.getFuellog());
 		fuelDistributionReportWrapper.setTotalAmounts(fuelLogReportWrapper.getTotalAmounts());
 		fuelDistributionReportWrapper.setTotalColumn(fuelLogReportWrapper.getTotalColumn());
+	}
+	
+	private List<FuelLog> groupFuelLogs(List<FuelLog> fuelLogList) {
+		String prevKey = StringUtils.EMPTY;
+		String currentKey = StringUtils.EMPTY;
+		double groupAmount = 0.0;
+		FuelLog previousFuelLog = null;
+		List<FuelLog> groupedFuelLogList = new ArrayList<FuelLog>();
+		for (FuelLog aFuelLog :  fuelLogList) {
+			currentKey = aFuelLog.getFuelVenders() + "|" + aFuelLog.getCompanies() + "|" + aFuelLog.getTerminals() 
+				+ "|" + aFuelLog.getDriverCategory() + "|" + aFuelLog.getFueltype();
+			
+			if (StringUtils.isEmpty(prevKey)) {
+				prevKey = currentKey;
+				previousFuelLog = aFuelLog;
+			}
+			
+			if (!currentKey.equals(prevKey)) {
+				previousFuelLog.setAmount(groupAmount);
+				groupedFuelLogList.add(previousFuelLog);
+				
+				prevKey = currentKey;
+				previousFuelLog = aFuelLog;
+				groupAmount = aFuelLog.getAmount();
+			} else {
+				groupAmount += aFuelLog.getAmount();			
+			}
+		}
+		
+		previousFuelLog.setAmount(groupAmount);
+		groupedFuelLogList.add(previousFuelLog);
+		
+		return groupedFuelLogList;
 	}
 	
 	@Override
@@ -4046,12 +4063,16 @@ throw new Exception("origin and destindation is empty");
 		TollDistributionReportWrapper tollDistributionReportWrapper = new TollDistributionReportWrapper();
 		map(tollDistributionReportWrapper, eztollReportWrapper);
 		
+		List<EzToll> groupedEzTollList = groupEzTolls(tollDistributionReportWrapper.getEztolls());
+		tollDistributionReportWrapper.setEztolls(groupedEzTollList);
+		
 		return tollDistributionReportWrapper;
 	}
 	
 	private void map(TollDistributionReportInput tollDistributionReportInput, EztollReportInput ezTollReportInput) {
-		ezTollReportInput.setToolcompany(tollDistributionReportInput.getToolcompany());
 		ezTollReportInput.setCompany(tollDistributionReportInput.getCompany());
+		ezTollReportInput.setTerminal(tollDistributionReportInput.getTerminal());
+		ezTollReportInput.setToolcompany(tollDistributionReportInput.getToolcompany());
 		ezTollReportInput.setFromInvoiceDate(tollDistributionReportInput.getFromInvoiceDate());
 		ezTollReportInput.setInvoiceDateTo(tollDistributionReportInput.getInvoiceDateTo());
 		ezTollReportInput.setTransactionDateFrom(tollDistributionReportInput.getTransactionDateFrom());
@@ -4062,6 +4083,39 @@ throw new Exception("origin and destindation is empty");
 		tollDistributionReportWrapper.setEztolls(eztollReportWrapper.getEztolls());
 		tollDistributionReportWrapper.setTotalAmounts(eztollReportWrapper.getTotalAmounts());
 		tollDistributionReportWrapper.setTotalColumn(eztollReportWrapper.getTotalColumn());
+	}
+	
+	private List<EzToll> groupEzTolls(List<EzToll> ezTollList) {
+		String prevKey = StringUtils.EMPTY;
+		String currentKey = StringUtils.EMPTY;
+		double groupAmount = 0.0;
+		EzToll previousEzToll= null;
+		List<EzToll> groupedEzTollList = new ArrayList<EzToll>();
+		for (EzToll aEzToll :  ezTollList) {
+			currentKey = aEzToll.getTollcompanies() + "|" + aEzToll.getCompanies() + "|" + aEzToll.getTerminals() 
+				+ "|" + aEzToll.getDriverCategory();
+			
+			if (StringUtils.isEmpty(prevKey)) {
+				prevKey = currentKey;
+				previousEzToll = aEzToll;
+			}
+			
+			if (!currentKey.equals(prevKey)) {
+				previousEzToll.setAmount(groupAmount);
+				groupedEzTollList.add(previousEzToll);
+				
+				prevKey = currentKey;
+				previousEzToll = aEzToll;
+				groupAmount = aEzToll.getAmount();
+			} else {
+				groupAmount += aEzToll.getAmount();			
+			}
+		}
+		
+		previousEzToll.setAmount(groupAmount);
+		groupedEzTollList.add(previousEzToll);
+		
+		return groupedEzTollList;
 	}
 	
 	@Override
