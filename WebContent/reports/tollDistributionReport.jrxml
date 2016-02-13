@@ -19,7 +19,7 @@
 	<pageHeader>
 		<band height="46">
 			<staticText>
-				<reportElement mode="Opaque" x="206" y="24" width="189" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="206" y="24" width="206" height="20" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
