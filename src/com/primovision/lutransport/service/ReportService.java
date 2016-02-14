@@ -39,13 +39,13 @@ public interface ReportService {
 	public void saveBillingData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteBillingData(Invoice invoice) throws Exception;
 	public boolean checkDuplicate(Ticket ticket, String ticketType);
-	public FuelLogReportWrapper generateFuellogData(SearchCriteria criteria,FuelLogReportInput input, boolean sort);
+	public FuelLogReportWrapper generateFuellogData(SearchCriteria criteria,FuelLogReportInput input, boolean distributionData);
 	public List<FuelLogAverageReportWrapper> generateFuellogAverageData(SearchCriteria criteria,FuelLogReportInput input);
 	
 	public FuelLogVerificationReportWrapper generateFuelLogVerificationData(SearchCriteria searchCriteria, FuelLogVerificationReportInput input);
 	public FuelViolationReportWrapper generateFuelViolationData(SearchCriteria criteria,FuelViolationInput input);
 	public FuelOverLimitReportWrapper generateFuelOverLimitData(SearchCriteria criteria,FuelOverLimitInput input);
-	public EztollReportWrapper generateEztollData(SearchCriteria criteria, EztollReportInput input, boolean sort);
+	public EztollReportWrapper generateEztollData(SearchCriteria criteria, EztollReportInput input, boolean distributionData);
 	public void saveSubcontractorBillingData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteSubcontractorBillingData(SubcontractorInvoice invoice) throws Exception;	
 	public List<Summary> generateSummary(SearchCriteria criteria, BillingHistoryInput input) ;

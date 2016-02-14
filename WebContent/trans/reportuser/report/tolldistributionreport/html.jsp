@@ -25,4 +25,3 @@
 	}
 	request.removeAttribute("jasperPrint");
 %>
-<tg:paging searchCriteria="${sessionScope.searchCriteria}" pagedLink="search.do"></tg:paging>

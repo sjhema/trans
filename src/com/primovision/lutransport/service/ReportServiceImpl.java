@@ -3392,8 +3392,10 @@ throw new Exception("origin and destindation is empty");
 		FuelDistributionReportWrapper fuelDistributionReportWrapper = new FuelDistributionReportWrapper();
 		map(fuelDistributionReportWrapper, fuelLogReportWrapper);
 		
-		List<FuelLog> groupedFuelLogList = groupFuelLogs(fuelDistributionReportWrapper.getFuellog());
-		fuelDistributionReportWrapper.setFuellog(groupedFuelLogList);
+		if (!fuelDistributionReportWrapper.getFuellog().isEmpty()) {
+			List<FuelLog> groupedFuelLogList = groupFuelLogs(fuelDistributionReportWrapper.getFuellog());
+			fuelDistributionReportWrapper.setFuellog(groupedFuelLogList);
+		}
 		
 		return fuelDistributionReportWrapper;
 	}
@@ -3451,7 +3453,7 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public FuelLogReportWrapper generateFuellogData(
-			SearchCriteria searchCriteria, FuelLogReportInput input, boolean sort) {
+			SearchCriteria searchCriteria, FuelLogReportInput input, boolean distributionData) {
 		Map<String, String> params = new HashMap<String, String>();
 		// String fuelVendor = (String)
 		// searchCriteria.getSearchMap().get("fuelVendor");
@@ -3714,7 +3716,7 @@ throw new Exception("origin and destindation is empty");
 			// System.out.println("\nfuelt===>"+fuelt+"\n");
 		}
 		
-		if (sort) {
+		if (distributionData) {
 			query.append(" order by obj.fuelvendor.name, obj.company.name, obj.terminal.name, obj.driversid.catagory.name, obj.fueltype");
 		}
 		
@@ -3723,12 +3725,20 @@ throw new Exception("origin and destindation is empty");
 		searchCriteria.setRecordCount(recordCount.intValue());
 		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
 
-		List<FuelLog> fs = (List<FuelLog>) genericDAO
-		.getEntityManager()
-		.createQuery(query.toString())
-		.setMaxResults(searchCriteria.getPageSize())
-		.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
-		.getResultList();
+		List<FuelLog> fs = null;
+		if (!distributionData) {
+			fs = (List<FuelLog>) genericDAO
+			.getEntityManager()
+			.createQuery(query.toString())
+			.setMaxResults(searchCriteria.getPageSize())
+			.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
+			.getResultList();
+		} else {
+			fs = (List<FuelLog>) genericDAO
+					.getEntityManager()
+					.createQuery(query.toString())
+					.getResultList();
+		}
 			
 		List<FuelLog> summarys = new ArrayList<FuelLog>();
 		FuelLogReportWrapper wrapper = new FuelLogReportWrapper();
@@ -4063,8 +4073,10 @@ throw new Exception("origin and destindation is empty");
 		TollDistributionReportWrapper tollDistributionReportWrapper = new TollDistributionReportWrapper();
 		map(tollDistributionReportWrapper, eztollReportWrapper);
 		
-		List<EzToll> groupedEzTollList = groupEzTolls(tollDistributionReportWrapper.getEztolls());
-		tollDistributionReportWrapper.setEztolls(groupedEzTollList);
+		if (!tollDistributionReportWrapper.getEztolls().isEmpty()) {
+			List<EzToll> groupedEzTollList = groupEzTolls(tollDistributionReportWrapper.getEztolls());
+			tollDistributionReportWrapper.setEztolls(groupedEzTollList);
+		}
 		
 		return tollDistributionReportWrapper;
 	}
@@ -4120,7 +4132,7 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public EztollReportWrapper generateEztollData(
-			SearchCriteria searchCriteria, EztollReportInput input, boolean sort) {
+			SearchCriteria searchCriteria, EztollReportInput input, boolean distributionData) {
 
 		Map<String, String> params = new HashMap<String, String>();
 
@@ -4306,7 +4318,7 @@ throw new Exception("origin and destindation is empty");
 			countQuery.append(" and  obj.driver in ("+driver+")");
 		}
 		
-		if (sort) {
+		if (distributionData) {
 			query.append(" order by obj.toolcompany.name, obj.company.name, obj.terminal.name, obj.driver.catagory.name");
 		}
 
@@ -4316,14 +4328,20 @@ throw new Exception("origin and destindation is empty");
 		searchCriteria.setRecordCount(recordCount.intValue());
 		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
 		
-		
-		List<EzToll> fs = (List<EzToll>) genericDAO
-		.getEntityManager()
-		.createQuery(query.toString())
-		.setMaxResults(searchCriteria.getPageSize())
-		.setFirstResult(
-				searchCriteria.getPage() * searchCriteria.getPageSize())
-		.getResultList();
+		List<EzToll> fs = null;
+		if (!distributionData) {
+			fs = (List<EzToll>) genericDAO
+					.getEntityManager()
+					.createQuery(query.toString())
+					.setMaxResults(searchCriteria.getPageSize())
+					.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
+					.getResultList();
+		} else {
+			fs = (List<EzToll>) genericDAO
+					.getEntityManager()
+					.createQuery(query.toString())
+					.getResultList();
+		}
 
 		List<EzToll> summarys = new ArrayList<EzToll>();
 		EztollReportWrapper wrapper = new EztollReportWrapper();
