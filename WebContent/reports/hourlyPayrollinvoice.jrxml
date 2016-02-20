@@ -160,7 +160,7 @@
 				<text><![CDATA[Terminal]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="94" y="25" width="77" height="30" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="111" y="25" width="60" height="30" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -174,7 +174,7 @@
 				<text><![CDATA[Emp#]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="15" y="25" width="79" height="30" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="15" y="25" width="96" height="30" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -514,7 +514,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{driver}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="94" y="0" width="77" height="20"/>
+				<reportElement x="111" y="0" width="60" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -528,7 +528,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{employeesNo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="15" y="0" width="79" height="20"/>
+				<reportElement x="15" y="0" width="96" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -826,7 +826,7 @@
 	<summary>
 		<band height="24" splitType="Stretch">
 			<staticText>
-				<reportElement x="15" y="0" width="79" height="23"/>
+				<reportElement x="15" y="0" width="96" height="23"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -840,7 +840,7 @@
 				<text><![CDATA[Count:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="94" y="0" width="92" height="23"/>
+				<reportElement x="111" y="0" width="75" height="23"/>
 				<textElement verticalAlignment="Middle">
 					<font size="11"/>
 				</textElement>
