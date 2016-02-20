@@ -115,6 +115,18 @@ public class HourlyPayrollInvoiceDetails extends AbstractBaseModel implements Re
 	@Column
 	private Double reimburseAmount;
 	
+	// Bereavement change
+	@Column
+	private Double bereavementAmount;
+	
+	public Double getBereavementAmount() {
+		return bereavementAmount;
+	}
+
+	public void setBereavementAmount(Double bereavementAmount) {
+		this.bereavementAmount = bereavementAmount;
+	}
+
 	public Double getVacationAmount() {
 		return vacationAmount;
 	}

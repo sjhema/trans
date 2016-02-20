@@ -4272,6 +4272,9 @@ public class HrReportServiceImpl implements HrReportService {
 			Double miscamt=0.0;
 			Double reimburseamt=0.0;
 			
+			// Bereavement change
+			Double bereavementAmount=0.0;
+			
 			Double sumOfTotVacSicBonus=0.0;
 			
 			
@@ -4390,7 +4393,11 @@ public class HrReportServiceImpl implements HrReportService {
 						vacationAmount=vacationAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
 						
 					}
-					
+					// Bereavement change
+					if(ptodap.getLeavetype().getId()==8){
+						bereavementAmount=bereavementAmount+ptodap.getSequenceAmt1();
+						
+					}
 				}
 				
 				StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+timeSheet.getDriver().getFullName()+"' and obj.miscNotes!='Reimbursement'");
@@ -4517,6 +4524,9 @@ public class HrReportServiceImpl implements HrReportService {
 				output.setSickParsanolAmount(sickParsanolAmount);
                 output.setBonusAmounts(bonusAmounts);
                 output.setHolidayAmount(holidayAmount);
+                
+            // Bereavement change    
+            output.setBereavementAmount(bereavementAmount);   
 				
 				sumOfTotVacSicBonus = totAmount + miscamt + sickParsanolAmount + bonusAmounts;
 				output.setSumOfTotVacSicBonus(sumOfTotVacSicBonus);
@@ -4572,6 +4582,10 @@ public class HrReportServiceImpl implements HrReportService {
 			Double miscamt=0.0;
 			Double reimburseamt=0.0;
 			
+			// Bereavement change
+			Double bereavementAmount=0.0;
+			
+			
 			Double sumOfTotVacSicBonus=0.0;
 			
 			
@@ -4617,6 +4631,11 @@ public class HrReportServiceImpl implements HrReportService {
 						output.setBatchdate(sdf.format(ptodap.getBatchdate()));
 						vacationAmount=vacationAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
 						
+					}
+					// Bereavement change
+					if(ptodap.getLeavetype().getId()==8){
+						output.setBatchdate(sdf.format(ptodap.getBatchdate()));
+						bereavementAmount=bereavementAmount+ptodap.getSequenceAmt1();
 					}
 					
 				}
@@ -4731,10 +4750,14 @@ public class HrReportServiceImpl implements HrReportService {
 				output.setSickParsanolAmount(sickParsanolAmount);
                 output.setBonusAmounts(bonusAmounts);
                 output.setHolidayAmount(holidayAmount);
-				
+            
+            // Bereavement change
+            output.setBereavementAmount(bereavementAmount);
+            
 				sumOfTotVacSicBonus = totAmount + miscamt + sickParsanolAmount + bonusAmounts;
 				output.setSumOfTotVacSicBonus(sumOfTotVacSicBonus);
-				if(miscamt==0.0 && sickParsanolAmount==0.0 && reimburseamt==0.0 && vacationAmount==0.0 && bonusAmounts==0.0){
+				// Bereavement change
+				if(miscamt==0.0 && sickParsanolAmount==0.0 && reimburseamt==0.0 && vacationAmount==0.0 && bonusAmounts==0.0 && bereavementAmount == 0.0){
 					// do nothing			
 				}
 				else{
@@ -8122,7 +8145,9 @@ public class HrReportServiceImpl implements HrReportService {
 		for(HourlyPayrollInvoiceDetails invoiceDetails:hourlyPayrollInvoiceDetails){			
 			criterias.clear();		
 			if(invoiceDetails.getDriver()!=null){
-				if(invoiceDetails.getVacationAmount()==0.0 || invoiceDetails.getVacationAmount()==null){
+				if((invoiceDetails.getVacationAmount()==0.0 || invoiceDetails.getVacationAmount()==null)
+						// Bereavement change
+						&& (invoiceDetails.getBereavementAmount() == null || invoiceDetails.getBereavementAmount() == 0.0)) {
 									
 					criterias.put("status",1);
 					criterias.put("fullName", invoiceDetails.getDriver());
@@ -8153,13 +8178,17 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setRate(invoiceDetails.getRegularrate());
 						detail.setOvRate(invoiceDetails.getOtrate());
 						detail.setTransportDriverAmount(0.0);
+						// Bereavement change
+						detail.setBereavementAmount(0.0);
 						summary.add(detail);
 					}else{
 						continue;
 					}
 					
 				}
-				else if(invoiceDetails.getVacationAmount()!=0.0 && invoiceDetails.getVacationAmount()!=null){									
+				else if((invoiceDetails.getVacationAmount()!=0.0 && invoiceDetails.getVacationAmount()!=null)
+						// Bereavement change
+						|| (invoiceDetails.getBereavementAmount() != null && invoiceDetails.getBereavementAmount() != 0.0)) {									
 					criterias.put("status",1);
 					criterias.put("fullName", invoiceDetails.getDriver());
 					criterias.put("company.name", invoiceDetails.getCompany());
@@ -8189,6 +8218,8 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setRate(invoiceDetails.getRegularrate());
 						detail.setOvRate(invoiceDetails.getOtrate());
 						detail.setTransportDriverAmount(0.0);
+						// Bereavement change
+						detail.setBereavementAmount(0.0);
 						summary.add(detail);
 						
 						//************** Newly Added
@@ -8209,7 +8240,9 @@ public class HrReportServiceImpl implements HrReportService {
 							if(ptodapplication.getLeavetype().getId()==1){
 								// do nothing
 							}
-							if(ptodapplication.getLeavetype().getId()==4){
+							if(ptodapplication.getLeavetype().getId()==4 ||
+									// Bereavement change
+									ptodapplication.getLeavetype().getId()==8){
 								List<Integer> sequenceNumber = new ArrayList<Integer>();
 								List<Double>  sequenceAmount = new ArrayList<Double>();
 								
@@ -8236,7 +8269,6 @@ public class HrReportServiceImpl implements HrReportService {
 										detail2.setEeNo(employee.getStaffId());
 										detail2.setLastName(employee.getLastName());
 										detail2.setFirstName(employee.getFirstName());
-										detail2.setVacationAmount(sequenceAmount.get(i));
 										detail2.setPersonalSickAmount(0.0);
 										detail2.setBonusAmount(0.0);
 										detail2.setHolidayAmount(0.0);
@@ -8248,11 +8280,24 @@ public class HrReportServiceImpl implements HrReportService {
 										detail2.setRate(0.0);
 										detail2.setOvRate(0.0);
 										detail2.setTransportDriverAmount(0.0);
+										// Bereavement change
+										if (sequenceNumber.get(i) == 7) {
+											detail2.setBereavementAmount(sequenceAmount.get(i));
+											detail2.setVacationAmount(0.0);
+										} else {
+											detail2.setVacationAmount(sequenceAmount.get(i));
+											detail2.setBereavementAmount(0.0);
+										}
 										summary.add(detail2);
 									}									
 								}
 								if(noSequenceNumber){
-									detail.setVacationAmount(detail.getVacationAmount()+(ptodapplication.getAmountpaid()+ptodapplication.getHourlyamountpaid()));
+									// Bereavement change
+									if(invoiceDetails.getBereavementAmount() != null && invoiceDetails.getBereavementAmount() != 0.0) {
+										detail.setBereavementAmount(invoiceDetails.getBereavementAmount());
+									} else {
+										detail.setVacationAmount(detail.getVacationAmount()+(ptodapplication.getAmountpaid()+ptodapplication.getHourlyamountpaid()));
+									}
 								}
 							}
 						}
@@ -8416,6 +8461,8 @@ public class HrReportServiceImpl implements HrReportService {
 			detail.setTotalAmount(invoiceDetails.getSumOfTotVacSicBonus());
 			detail.setMiscAmount(invoiceDetails.getMiscAmount());
 			detail.setReimburseAmount(invoiceDetails.getReimburseAmount());
+			// Bereavement change
+			detail.setBereavementAmount(invoiceDetails.getBereavementAmount());
 			Map driverCriteria = new HashMap();
 			driverCriteria.clear();
 			driverCriteria.put("fullName",invoiceDetails.getDriver());

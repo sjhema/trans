@@ -32,6 +32,9 @@ public class SalaryDetail {
 	
 	private Double probationDetection=0.0;
 	
+	// Bereavement change
+	private Double bereavementAmount=0.0;
+	
 	
 	public Double getProbationDetection() {
 		return probationDetection;
@@ -145,6 +148,13 @@ public class SalaryDetail {
 	public void setQuarterAmount(Double quarterAmount) {
 		this.quarterAmount = quarterAmount;
 	}
-	
+
+	public Double getBereavementAmount() {
+		return bereavementAmount;
+	}
+
+	public void setBereavementAmount(Double bereavementAmount) {
+		this.bereavementAmount = bereavementAmount;
+	}
 
 }
