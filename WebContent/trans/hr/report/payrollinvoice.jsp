@@ -1,4 +1,11 @@
 <%@ include file="/common/taglibs.jsp"%>
+
+<script language="javascript">
+window.onload = function WindowLoad(event) {
+	element=document.getElementById('saved');
+	element.style.display = 'none';
+}
+</script>
 <script type="text/javascript">
 
 function searchReport2() {
@@ -213,7 +220,14 @@ function searchRepo() {
 			<a href="${ctx}/hr/report/payrollinvoice/export.do?type=pdf" target="reportData"><img src="${ctx}/images/pdf.png" border="0" class="toolbarButton"/></a>
 			<a href="${ctx}/hr/report/payrollinvoice/export.do?type=xls" target="reportData"><img src="${ctx}/images/excel.png" border="0" class="toolbarButton"/></a>
 			<a href="${ctx}/hr/report/payrollinvoice/export.do?type=csv" target="reportData"><img src="${ctx}/images/csv.png" border="0" class="toolbarButton"/></a>
-			<a href="${ctx}/hr/report/payrollinvoice/save.do" target="reportData"><img src="${ctx}/images/save.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/hr/report/payrollinvoice/save.do" target="reportData" 
+			onclick = "
+				element=document.getElementById('save');
+				element.style.display = 'none';
+				element1=document.getElementById('saved');
+				element1.style.display = '';">
+			<img src="${ctx}/images/save.png" border="0" class="toolbarButton" id="save"/></a>
+			<img src="${ctx}/images/saved.png" border="0" class="toolbarButton" id="saved"/>
 			<%-- <a href="${ctx}/reportuser/report/billing/export.do?type=print" target="reportData"><img src="${ctx}/images/print.png" border="0" class="toolbarButton"/></a> --%>
 		</td>
 	</tr>
