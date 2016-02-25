@@ -8,8 +8,8 @@ VALUES (30103, '/reportuser/report/fueldistribution/start.do','Fuel Distribution
   NULL,NULL,NULL,NULL,1,13,0,301,'/1/301/30103',NULL);
 
   INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30103', '1'); -- 1 -  ADMIN
-  INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30103', '10'); -- 10 - SPECIAL_PRIVILEGE_1
-  INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30103', '8'); -- 8 - ADMIN_HR1
+  -- INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30103', '10'); -- 10 - SPECIAL_PRIVILEGE_1
+  -- INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30103', '8'); -- 8 - ADMIN_HR1
 
 -- Toll Distribution Report - 30104
 INSERT INTO `lutransport`.`business_object`
@@ -21,6 +21,6 @@ VALUES (30104, '/reportuser/report/tolldistribution/start.do','Toll Distribution
   NULL,NULL,NULL,NULL,1,14,0,301,'/1/301/30104',NULL);
 
   INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30104', '1'); -- 1 -  ADMIN
-  INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30104', '10'); -- 10 - SPECIAL_PRIVILEGE_1
-  INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30104', '8'); -- 8 - ADMIN_HR1
+  -- INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30104', '10'); -- 10 - SPECIAL_PRIVILEGE_1
+  -- INSERT INTO `lutransport`.`role_privilege` (`status`, `business_object_id`, `role_id`) VALUES ('1', '30104', '8'); -- 8 - ADMIN_HR1
 
