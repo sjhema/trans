@@ -7009,6 +7009,8 @@ public class HrReportServiceImpl implements HrReportService {
 				double holidayAmount=0.0;
 				Double miscamt=0.0;
 				Double reimburseamt=0.0;
+				// Bereavement change - salary
+				//double bereavementAmount=0.0;
 				String query1="select obj from WeeklySalary obj where obj.driver.fullName='"+employee2.getFullName()+"' and obj.catagory="+employee2.getCatagory().getId()+" and obj.company="+employee2.getCompany().getId()+" and obj.terminal="+employee2.getTerminal().getId()+"and '"+payrollDate+"' BETWEEN obj.validFrom and obj.validTo";
 				
 				List<WeeklySalary> salaries=genericDAO.executeSimpleQuery(query1);
@@ -7042,9 +7044,18 @@ public class HrReportServiceImpl implements HrReportService {
 						vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 						paidVacationAmount = paidVacationAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
 					}
+					
+					// Bereavement change - salary
+					/*if(ptodapplication.getLeavetype().getId() == 8){
+						bereavementAmount=bereavementAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+						//paidVacationAmount = paidVacationAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
+					}*/
 				}
 				detail.setVacationAmount(vacationAmount);
 				detail.setSickPersonalAmount(sickParsonalAmount);
+				
+				// Bereavement change - salary
+				//detail.setBereavementAmount(bereavementAmount);
 
 				detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount));
 
@@ -8311,6 +8322,14 @@ public class HrReportServiceImpl implements HrReportService {
 			}
 			
 		}
+		
+		// Bereavement change - fixing null
+		for (PayChexDetail aPayChexDetail : summary) {
+			if (aPayChexDetail.getBereavementAmount() == null) {
+				aPayChexDetail.setBereavementAmount(0.0);
+			}
+		}
+		
 		Comparator<PayChexDetail> comparator=new Comparator<PayChexDetail>() {
 			@Override
 			public int compare(PayChexDetail o1, PayChexDetail o2) {
