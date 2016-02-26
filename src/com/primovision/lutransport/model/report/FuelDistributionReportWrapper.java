@@ -2,6 +2,8 @@ package com.primovision.lutransport.model.report;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.FuelLog;
 
 public class FuelDistributionReportWrapper
@@ -15,9 +17,98 @@ public class FuelDistributionReportWrapper
 	double totalGrossCost=0.0;
 	
 
+	String invoiceDateFrom = StringUtils.EMPTY;
+	String invoiceDateTo = StringUtils.EMPTY;
 	
+	String transactionDateFrom = StringUtils.EMPTY;
+	String transactionDateTo = StringUtils.EMPTY;
+	
+	String invoiceNumberFrom = StringUtils.EMPTY;
+	String invoiceNumberTo = StringUtils.EMPTY;
 	
 	List<FuelLog> fuellog=null;
+	
+
+	public String getInvoiceNumberFrom() {
+		return invoiceNumberFrom;
+	}
+
+
+
+
+	public void setInvoiceNumberFrom(String invoiceNumberFrom) {
+		this.invoiceNumberFrom = invoiceNumberFrom;
+	}
+
+
+
+
+	public String getInvoiceNumberTo() {
+		return invoiceNumberTo;
+	}
+
+
+
+
+	public void setInvoiceNumberTo(String invoiceNumberTo) {
+		this.invoiceNumberTo = invoiceNumberTo;
+	}
+
+
+
+
+	public String getInvoiceDateFrom() {
+		return invoiceDateFrom;
+	}
+
+
+
+
+	public void setInvoiceDateFrom(String invoiceDateFrom) {
+		this.invoiceDateFrom = invoiceDateFrom;
+	}
+
+
+
+
+	public String getInvoiceDateTo() {
+		return invoiceDateTo;
+	}
+
+
+
+
+	public void setInvoiceDateTo(String invoiceDateTo) {
+		this.invoiceDateTo = invoiceDateTo;
+	}
+
+
+
+
+	public String getTransactionDateFrom() {
+		return transactionDateFrom;
+	}
+
+
+
+
+	public void setTransactionDateFrom(String transactionDateFrom) {
+		this.transactionDateFrom = transactionDateFrom;
+	}
+
+
+
+
+	public String getTransactionDateTo() {
+		return transactionDateTo;
+	}
+
+
+
+
+	public void setTransactionDateTo(String transactionDateTo) {
+		this.transactionDateTo = transactionDateTo;
+	}
 
 
 

@@ -3416,6 +3416,12 @@ throw new Exception("origin and destindation is empty");
 		fuelDistributionReportWrapper.setFuellog(fuelLogReportWrapper.getFuellog());
 		fuelDistributionReportWrapper.setTotalAmounts(fuelLogReportWrapper.getTotalAmounts());
 		fuelDistributionReportWrapper.setTotalColumn(fuelLogReportWrapper.getTotalColumn());
+		fuelDistributionReportWrapper.setInvoiceDateFrom(fuelLogReportWrapper.getInvoiceDateFrom());
+		fuelDistributionReportWrapper.setInvoiceDateTo(fuelLogReportWrapper.getInvoiceDateTo());
+		fuelDistributionReportWrapper.setTransactionDateFrom(fuelLogReportWrapper.getTransactionDateFrom());
+		fuelDistributionReportWrapper.setTransactionDateTo(fuelLogReportWrapper.getTransactionDateTo());
+		fuelDistributionReportWrapper.setInvoiceNumberFrom(fuelLogReportWrapper.getInvoiceNumberFrom());
+		fuelDistributionReportWrapper.setInvoiceNumberTo(fuelLogReportWrapper.getInvoiceNumberTo());
 	}
 	
 	private List<FuelLog> groupFuelLogs(List<FuelLog> fuelLogList) {
@@ -3871,7 +3877,27 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setTotalGrossCost(totalGrossCost);
 		//wrapper.setTotalColumn(totalColumn);
 		wrapper.setTotalColumn(fs.size());
-
+		
+		if (StringUtils.isNotEmpty(fromInvoiceDate)) {
+			wrapper.setInvoiceDateFrom(fromInvoiceDate);
+		}
+		if (StringUtils.isNotEmpty(invoiceDateTo)) {
+			wrapper.setInvoiceDateTo(invoiceDateTo);
+		}
+		if (StringUtils.isNotEmpty(transactionDateFrom)) {
+			wrapper.setTransactionDateFrom(transactionDateFrom);
+		}
+		if (StringUtils.isNotEmpty(transactionDateTo)) {
+			wrapper.setTransactionDateTo(transactionDateTo);
+		}
+		
+		if (StringUtils.isNotEmpty(fromInvoiceNo)) {
+			wrapper.setInvoiceNumberFrom(fromInvoiceNo);
+		}
+		if (StringUtils.isNotEmpty(InvoiceNoTo)) {
+			wrapper.setInvoiceNumberTo(InvoiceNoTo);
+		}
+		
 		return wrapper;
 	}
 
@@ -4095,6 +4121,10 @@ throw new Exception("origin and destindation is empty");
 		tollDistributionReportWrapper.setEztolls(eztollReportWrapper.getEztolls());
 		tollDistributionReportWrapper.setTotalAmounts(eztollReportWrapper.getTotalAmounts());
 		tollDistributionReportWrapper.setTotalColumn(eztollReportWrapper.getTotalColumn());
+		tollDistributionReportWrapper.setInvoiceDateFrom(eztollReportWrapper.getInvoiceDateFrom());
+		tollDistributionReportWrapper.setInvoiceDateTo(eztollReportWrapper.getInvoiceDateTo());
+		tollDistributionReportWrapper.setTransactionDateFrom(eztollReportWrapper.getTransactionDateFrom());
+		tollDistributionReportWrapper.setTransactionDateTo(eztollReportWrapper.getTransactionDateTo());
 	}
 	
 	private List<EzToll> groupEzTolls(List<EzToll> ezTollList) {
@@ -4403,6 +4433,20 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setTotalAmounts(totalAmounts);
 
 		wrapper.setTotalColumn(totalColumn);
+		
+		if (StringUtils.isNotEmpty(fromInvoiceDate)) {
+			wrapper.setInvoiceDateFrom(fromInvoiceDate);
+		}
+		if (StringUtils.isNotEmpty(invoiceDateTo)) {
+			wrapper.setInvoiceDateTo(invoiceDateTo);
+		}
+		if (StringUtils.isNotEmpty(transactionDateFrom)) {
+			wrapper.setTransactionDateFrom(transactionDateFrom);
+		}
+		if (StringUtils.isNotEmpty(transactionDateTo)) {
+			wrapper.setTransactionDateTo(transactionDateTo);
+		}
+
 
 		
 		System.out.println("******* nquery.toString()===>" + query.toString() + "\n");

@@ -3,8 +3,21 @@
 
 function searchReport()
 {
-	/* document.forms[0].target="reportData"; */
-    document.forms[0].submit();
+	var empty = true;
+	var fields = $('#tollDistributionReportSearchForm').serializeArray();
+	for (var i = 0; i < fields.length; i++) {
+    	var value = fields[i].value
+        if (value != '' && value != 1) {
+        	empty = false;
+        }
+    }
+	
+	if (empty) {
+		alert('Please select at least Toll Company and Transaction Dates');	
+	} else {
+		/* document.forms[0].target="reportData"; */
+	    document.forms[0].submit();
+	}
 }
 
 function getTime(timedata){
@@ -252,7 +265,7 @@ $(document).ready(function(){
 </script>
 <br/>
 <%-- <h3><primo:label code="Toll Distribution Report" /></h3> --%>
-<form:form action="search.do" name="searchForm" method="post" commandName="modelObject">
+<form:form action="search.do" name="tollDistributionReportSearchForm" id="tollDistributionReportSearchForm" method="post" commandName="modelObject">
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Toll Distribution Report" />
@@ -267,26 +280,33 @@ $(document).ready(function(){
 					<form:options items="${tollcompanies}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="toolcompany" cssClass="errorMessage" />
 			</td>
-			
-			<td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="company" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${companies}" itemValue="id" itemLabel="name" />
-				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
-			</td>
-		   
 	 </tr>
-	 <tr>	   
-		    <td class="form-left"><primo:label code="Terminals" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="terminal" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
-				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+	 <tr>
+	 	<td class="form-left"><primo:label code="Transaction date" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="transactionDateFrom" cssClass="flat"  onblur="return formatDate1('transactionDateFrom');"/> 
+				<script type="text/javascript">
+					$(function() {
+					$("#transactionDateFrom").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
+				To:<form:input size="10" path="transactionDateTo" cssClass="flat"  onblur="return formatDate1('transactionDateTo');"/>
+				<script type="text/javascript">
+					$(function() {
+					$("#transactionDateTo").datepicker({
+						dateFormat:'mm-dd-yy',
+		            	changeMonth: true,
+		    			changeYear: true
+		    		});
+					});
+				</script>
 			</td>
-	   </tr>	
-		<tr>
+	 </tr>
+	 <tr>
 	        <td class="form-left"><primo:label code="Invoice Date" /><span class="errorMessage"></span></td>
 			<td  align="${left}">
 				From:<form:input size="10" path="fromInvoiceDate" cssClass="flat"  onblur="return formatDate('fromInvoiceDate');"/> 
@@ -310,31 +330,24 @@ $(document).ready(function(){
 					});
 				</script>
 			</td>
-			<td class="form-left"><primo:label code="Transaction date" /><span class="errorMessage"></span></td>
-			<td  align="${left}">
-				From:<form:input size="10" path="transactionDateFrom" cssClass="flat"  onblur="return formatDate1('transactionDateFrom');"/> 
-				<script type="text/javascript">
-					$(function() {
-					$("#transactionDateFrom").datepicker({
-						dateFormat:'mm-dd-yy',
-		            	changeMonth: true,
-		    			changeYear: true
-		    		});
-					});
-				</script>
-				To:<form:input size="10" path="transactionDateTo" cssClass="flat"  onblur="return formatDate1('transactionDateTo');"/>
-				<script type="text/javascript">
-					$(function() {
-					$("#transactionDateTo").datepicker({
-						dateFormat:'mm-dd-yy',
-		            	changeMonth: true,
-		    			changeYear: true
-		    		});
-					});
-				</script>
-			</td>
+			
 		</tr>
-		
+	 <tr>	
+	 	<td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="company" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
+			</td>   
+		    <td class="form-left"><primo:label code="Terminals" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="terminal" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>
+	   </tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>

@@ -112,6 +112,10 @@ public class TollDistributionReportController extends BaseController {
 		 
 		params.put("totalAmounts",wrapper.getTotalAmounts());
 		params.put("totalColumn",wrapper.getTotalColumn());
+		params.put("invoiceDateFrom",wrapper.getInvoiceDateFrom());
+		params.put("invoiceDateTo",wrapper.getInvoiceDateTo());
+		params.put("transactionDateFrom",wrapper.getTransactionDateFrom());
+		params.put("transactionDateTo",wrapper.getTransactionDateTo());
 		
 		data.put("data", wrapper.getEztolls());
 		data.put("params",params);

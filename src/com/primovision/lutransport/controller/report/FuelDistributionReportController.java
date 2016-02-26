@@ -105,6 +105,12 @@ public class FuelDistributionReportController extends BaseController {
 		params.put("totalGallons", wrapper.getTotalGallons());
 		params.put("totalColumn", wrapper.getTotalColumn());
 		params.put("totalGrossCost", wrapper.getTotalGrossCost());
+		params.put("invoiceDateFrom", wrapper.getInvoiceDateFrom());
+		params.put("invoiceDateTo", wrapper.getInvoiceDateTo());
+		params.put("transactionDateFrom", wrapper.getTransactionDateFrom());
+		params.put("transactionDateTo", wrapper.getTransactionDateTo());
+		params.put("invoiceNumberFrom", wrapper.getInvoiceNumberFrom());
+		params.put("invoiceNumberTo", wrapper.getInvoiceNumberTo());
 		  
 		data.put("data", wrapper.getFuellog());
 		data.put("params",params);
