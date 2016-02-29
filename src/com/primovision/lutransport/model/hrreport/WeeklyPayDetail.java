@@ -65,6 +65,9 @@ public class WeeklyPayDetail extends AbstractBaseModel{
 	@Column(name="payroll_number")
 	private Date checkDate;
 	
+	// Bereavement change - salary
+	@Column(name="bereavementAmount")
+	private Double bereavementAmount=0.0;
 	
 	@Column
 	private Double miscAmount;
@@ -72,7 +75,15 @@ public class WeeklyPayDetail extends AbstractBaseModel{
 	@Column
 	private Double reimburseAmount;
 	
-	
+	public Double getBereavementAmount() {
+		return bereavementAmount;
+	}
+
+	public void setBereavementAmount(Double bereavementAmount) {
+		this.bereavementAmount = bereavementAmount;
+	}
+
+
 	public Double getMiscAmount() {
 		return miscAmount;
 	}
