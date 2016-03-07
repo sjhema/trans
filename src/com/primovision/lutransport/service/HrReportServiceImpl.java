@@ -1622,6 +1622,8 @@ public class HrReportServiceImpl implements HrReportService {
 				Double bonusAmount=0.0;
 				Double miscAmount=0.0;
 				Double holidayAmount=0.0;
+				// Bereavement change - driver
+				Double bereavementAmount=0.0;
 				DriverPay pay=new DriverPay();
 				pay.setDrivername(driverWithOutTicket.getFullName());
 				if(driverWithOutTicket.getCompany()!=null)
@@ -1719,6 +1721,11 @@ public class HrReportServiceImpl implements HrReportService {
 							vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 							
 						}
+						// Bereavement change - driver
+						if(ptodapplication.getLeavetype().getId() == 8) {
+							setDriver = true;
+							bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
+						}
 					}
 					
 					LocalDate dt= null;								
@@ -1805,6 +1812,8 @@ public class HrReportServiceImpl implements HrReportService {
 				pay.setSickPersonalAmount(sickParsonalAmount);
 				pay.setVacationAmount(vacationAmount);
 				pay.setHolidayAmount(holidayAmount);
+				// Bereavement change - driver
+				pay.setBereavementAmount(bereavementAmount);
 				Double totalAmount=(pay.getTransportationAmount()-pay.getProbationDeductionAmount())+pay.getMiscAmount()+pay.getSickPersonalAmount()+pay.getBonusAmount()+pay.getHolidayAmount();
 				totalAmount=MathUtil.roundUp(totalAmount, 2);
 				
@@ -7476,6 +7485,83 @@ public class HrReportServiceImpl implements HrReportService {
 			genericDAO.delete(pay);
 		}
 	}
+	
+	// Bereavement change - driver
+	private void addBereavementPayForDriver(DriverPay driverPay, List<PayChexDetail> summary)  {
+		Driver driver = retrieveDriver(driverPay);
+		if (driver == null) {
+			return;
+		}
+		
+		StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.payRollStatus=2 and obj.approvestatus=1 and obj.driver.fullName='"+ driver.getFullName()+"'");
+		ptodquery.append(" and obj.payRollBatch='"+mysqldf.format(driverPay.getPayRollBatch())+"'");
+		
+		List<Ptodapplication> ptodapplications = genericDAO.executeSimpleQuery(ptodquery.toString());
+		for(Ptodapplication ptodapplication:ptodapplications){
+			if(ptodapplication.getLeavetype().getId() != 8) {
+				continue;
+			}
+			
+			List<Integer> sequenceNumber = new ArrayList<Integer>();
+			List<Double>  sequenceAmount = new ArrayList<Double>();
+			
+			sequenceNumber.add(ptodapplication.getSequenceNum1());
+			sequenceNumber.add(ptodapplication.getSequenceNum2());
+			sequenceNumber.add(ptodapplication.getSequenceNum3());
+			sequenceNumber.add(ptodapplication.getSequenceNum4());
+			
+			sequenceAmount.add(ptodapplication.getSequenceAmt1());
+			sequenceAmount.add(ptodapplication.getSequenceAmt2());
+			sequenceAmount.add(ptodapplication.getSequenceAmt3());
+			sequenceAmount.add(ptodapplication.getSequenceAmt4());
+				
+			for(int i = 0; i < 4; i++) {
+				if(sequenceNumber.get(i) != 0 && sequenceAmount.get(i) != 0.0) {	
+					PayChexDetail detail2 = new PayChexDetail();
+					
+					Terminal terminal = retrieveTerminal(driver);
+					if(terminal != null && terminal.getHomeBranch() != null) {
+						detail2.setHomeBr(terminal.getHomeBranch().toString());
+					}
+			
+					detail2.setSeqNo(sequenceNumber.get(i));
+					detail2.setHomeDpt(driver.getCatagory().getCode());
+					detail2.setEeNo(driver.getStaffId());
+					detail2.setLastName(driver.getLastName());
+					detail2.setFirstName(driver.getFirstName());
+					detail2.setVacationAmount(0.0);
+					// Bereavement change - driver
+					detail2.setBereavementAmount(sequenceAmount.get(i));
+					detail2.setPersonalSickAmount(0.0);
+					detail2.setMiscAmount(0.0);
+					detail2.setReimburseAmount(0.0);
+					detail2.setTransportDriverAmount(0.0);
+					detail2.setBonusAmount(0.0);
+					detail2.setHolidayAmount(0.0);
+					
+					summary.add(detail2);
+				}
+			}
+		}	
+	}
+	
+	// Bereavement change - driver
+	private Driver retrieveDriver(DriverPay driverPay) {
+		Map criterias=new HashMap();
+		criterias.put("status",1);
+		criterias.put("fullName", driverPay.getDrivername());
+		criterias.put("company.id", driverPay.getCompany().getId());
+		return genericDAO.getByCriteria(Driver.class, criterias);
+	}
+	
+	// Bereavement change - driver
+	private Terminal retrieveTerminal(Driver driver) {
+		Map criterias=new HashMap();
+		criterias.clear();
+		criterias.put("terminal.id", driver.getTerminal().getId());
+		criterias.put("company.id", driver.getCompany().getId());
+		return genericDAO.getByCriteria(Terminal.class, criterias);
+	}
 
 	@Override
 	public List<PayChexDetail> generatePaychexData(SearchCriteria criteria) {
@@ -7696,6 +7782,9 @@ public class HrReportServiceImpl implements HrReportService {
 		 }
 	 }
 	 
+	 // Bereavement change - driver
+	 addBereavementPayForDriver(driverPay, summary);
+	 
 	 if(driverPay.getMiscAmount()!=0.0 && driverPay.getMiscAmount()!=null){	
 		 
 		 criterias.clear();
@@ -7733,6 +7822,8 @@ public class HrReportServiceImpl implements HrReportService {
 				       detail1.setSeqNo(Integer.parseInt(miscAmount.getSequenceNumber()));									
 				
 					detail1.setVacationAmount(0.0);
+					// Bereavement change - driver
+					detail1.setBereavementAmount(0.0);
 					detail1.setPersonalSickAmount(0.0);
 					detail1.setMiscAmount(miscAmount.getMisamount());
 					detail1.setReimburseAmount(0.0);
@@ -7777,6 +7868,8 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setLastName(employee.getLastName());
 				detail.setFirstName(employee.getFirstName());
 				detail.setVacationAmount(0.0);
+				// Bereavement change - driver
+				detail.setBereavementAmount(0.0);
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());				
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
@@ -7819,6 +7912,8 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setLastName(employee.getLastName());
 				detail.setFirstName(employee.getFirstName());
 				detail.setVacationAmount(0.0);
+				// Bereavement change - driver
+				detail.setBereavementAmount(0.0);
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
@@ -7864,6 +7959,8 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 					//
 					detail1.setVacationAmount(0.0);
+					// Bereavement change - driver
+					detail1.setBereavementAmount(0.0);
 					detail1.setPersonalSickAmount(0.0);
 					detail1.setMiscAmount(0.0);
 					detail1.setReimburseAmount(0.0);
@@ -7905,6 +8002,8 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setLastName(employee.getLastName());
 				detail.setFirstName(employee.getFirstName());
 				detail.setVacationAmount(0.0);
+				// Bereavement change - driver
+				detail.setBereavementAmount(0.0);
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
@@ -7979,6 +8078,8 @@ public class HrReportServiceImpl implements HrReportService {
 							detail2.setFirstName(employee.getFirstName());
 							//detail2.setVacationAmount(ptodapplication.getAmountpaid());
 							detail2.setVacationAmount(sequenceAmount.get(i));
+							// Bereavement change - driver
+							detail2.setBereavementAmount(0.0);
 							detail2.setPersonalSickAmount(0.0);
 							detail2.setMiscAmount(0.0);
 							detail2.setReimburseAmount(0.0);
@@ -8033,6 +8134,8 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setLastName(employee.getLastName());
 				detail.setFirstName(employee.getFirstName());
 				detail.setVacationAmount(0.0);
+				// Bereavement change - driver
+				detail.setBereavementAmount(0.0);
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
@@ -8107,6 +8210,8 @@ public class HrReportServiceImpl implements HrReportService {
 							detail2.setFirstName(employee.getFirstName());
 							//detail2.setVacationAmount(ptodapplication.getAmountpaid());
 							detail2.setVacationAmount(sequenceAmount.get(i));
+							// Bereavement change - driver
+							detail2.setBereavementAmount(0.0);
 							detail2.setPersonalSickAmount(0.0);
 							detail2.setMiscAmount(0.0);
 							detail2.setReimburseAmount(0.0);
@@ -8152,6 +8257,8 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 					//
 					detail1.setVacationAmount(0.0);
+					// Bereavement change - driver
+					detail1.setBereavementAmount(0.0);
 					detail1.setPersonalSickAmount(0.0);
 					detail1.setMiscAmount(0.0);
 					detail1.setReimburseAmount(0.0);
@@ -8431,6 +8538,8 @@ public class HrReportServiceImpl implements HrReportService {
 			detail.setCategory("Driver");
 			detail.setCompanyname(pay.getCompanyname());
 			detail.setAmount(pay.getTransportationAmount());
+			// Bereavement change - driver
+			detail.setBereavementAmount(pay.getBereavementAmount());
 			detail.setVacationAmount(pay.getVacationAmount());
 			detail.setSickPersonalAmount(pay.getSickPersonalAmount());
 			detail.setBonusAmount(pay.getBonusAmount());

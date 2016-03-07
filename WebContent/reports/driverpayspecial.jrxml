@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="driverpay" pageWidth="850" pageHeight="650" orientation="Landscape" columnWidth="830" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="19"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="totalRowCount" class="java.lang.Integer"/>
 	<parameter name="sumTotal" class="java.lang.Double"/>
@@ -74,6 +74,7 @@
 	<field name="quarterAmountSpc" class="java.lang.Double"/>
 	<field name="subTotalAmountSpc" class="java.lang.Double"/>
 	<field name="totalAmountSpc" class="java.lang.Double"/>
+	<field name="bereavementAmountSpc" class="java.lang.Double"/>
 	<variable name="toatlLoadcount" class="java.lang.Integer" resetType="Group" resetGroup="Driver" calculation="Sum">
 		<variableExpression><![CDATA[$F{noOfLoad}]]></variableExpression>
 	</variable>
@@ -631,6 +632,34 @@
 					</textElement>
 					<text><![CDATA[Batch Date To]]></text>
 				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="726" y="36" width="52" height="16" forecolor="#000000" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#000000"/>
+						<topPen lineWidth="1.0" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Bereavement amount]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="726" y="52" width="52" height="16"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{bereavementAmountSpc})]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 		<groupFooter>

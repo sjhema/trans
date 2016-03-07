@@ -244,6 +244,10 @@ public class DriverPayReportController extends BaseController{
 								setDriver = true;
 								
 							}
+							// Bereavement change - driver
+							if(ptodapplication.getLeavetype().getId() == 8) {
+								setDriver = true;
+							}
 						}					
 						
 						StringBuffer bonusquery=new StringBuffer("select obj from EmployeeBonus obj where obj.payRollStatus!=2 and obj.driver.fullName='"+driver3.getFullName()+"' and obj.category=2");
@@ -459,6 +463,8 @@ public class DriverPayReportController extends BaseController{
 		 			
 		 
 		           Map empmap=new HashMap();
+		           // Bereavement change - driver
+		           List<Double> bereavementAmountList = new ArrayList<Double>();
 		           List<Double> parameter1=new ArrayList<Double>();
 		           List<Double> parameter2=new ArrayList<Double>();
 		           List<Double> parameter3=new ArrayList<Double>();
@@ -524,6 +530,8 @@ public class DriverPayReportController extends BaseController{
 					Double bonusSum=0.0;					
 					Double miscamtSum=0.0;
 					Double holidaySum=0.0;
+					// Bereavement change - driver
+					Double bereavementSum = 0.0;
 					
 		           //for(String driverFullname:drivers){
 					Map criti = new HashMap();
@@ -569,6 +577,8 @@ public class DriverPayReportController extends BaseController{
 		 						driverPayFreezObj.setTransportationAmount(0.00);
 		 						driverPayFreezObj.setSubTotalAmount(0.00);
 		 						driverPayFreezObj.setVacationAmount(0.00);
+		 						// Bereavement change - driver
+		 						driverPayFreezObj.setBereavementAmount(0.00);
 		 						driverPayFreezObj.setTotalRowCount(wrapper.getTotalRowCount());
 		 						driverPayFreezObj.setSumAmount(MathUtil.roundUp(wrapper.getSumAmount(),2));
 		 						driverPayFreezObj.setPayRollBatchString(wrapper.getPayRollBatch());
@@ -628,6 +638,8 @@ public class DriverPayReportController extends BaseController{
 		        	
 		        	    Double sickParsonalAmount=0.00;
 						Double vacationAmount=0.00;
+						// Bereavement change - driver
+						Double bereavementAmount = 0.00;
 						Integer numberOfSickDays = 0;
 						Integer numberOfVactionDays = 0;
 						
@@ -705,6 +717,11 @@ public class DriverPayReportController extends BaseController{
 									vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 									vacationSum+=vacationAmount;
 									numberOfVactionDays=numberOfVactionDays+(ptodapplication.getDayspaid()+ptodapplication.getPaidoutdays());
+								}
+								// Bereavement change - driver
+								if(ptodapplication.getLeavetype().getId() == 8){
+									bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
+									bereavementSum += bereavementAmount;
 								}
 							}
 							
@@ -1006,6 +1023,8 @@ public class DriverPayReportController extends BaseController{
 						numberofsickdays.add(String.valueOf(numberOfSickDays));
 						numberofvactiondays.add(String.valueOf(numberOfVactionDays));
 						
+						// Bereavement change - driver
+						bereavementAmountList.add(MathUtil.roundUp(bereavementAmount,2));
 						parameter1.add(MathUtil.roundUp(sickParsonalAmount,2));
 						parameter2.add(MathUtil.roundUp(vacationAmount,2));
 						deductionAmounts.add(MathUtil.roundUp(deductionAmount,2));
@@ -1029,6 +1048,8 @@ public class DriverPayReportController extends BaseController{
 							driverPay.setHolidayAmountSpc(MathUtil.roundUp(holidayAmount,2));
 							driverPay.setTotalAmountSpc(MathUtil.roundUp(((driverPay.getTransAmountSpc()+driverPay.getPtodAmountSpc()+driverPay.getBonusAmountSpc()+driverPay.getHolidayAmountSpc()+driverPay.getMiscAmountSpc())-driverPay.getProbdeductionAmountSpc()),2));
 							driverPay.setVacationAmountSpc(MathUtil.roundUp(vacationAmount,2));
+							// Bereavement change - driver
+							driverPay.setBereavementAmountSpc(MathUtil.roundUp(bereavementAmount,2));
 							driverPay.setReimAmountSpc(reimburseAmt);
 							driverPay.setQuarterAmountSpc(qutarAmt);							
 							driverPayNew.add(driverPay);							
@@ -1100,6 +1121,8 @@ public class DriverPayReportController extends BaseController{
 						driverPayFreezObj.setTransportationAmount(MathUtil.roundUp(transportationamount,2));						
 						driverPayFreezObj.setSubTotalAmount(MathUtil.roundUp((driverPayFreezObj.getTransportationAmount()-driverPayFreezObj.getProbationDeductionAmount()),2));
 						driverPayFreezObj.setVacationAmount(MathUtil.roundUp(vacationAmount,2));
+						// Bereavement change - driver
+						driverPayFreezObj.setBereavementAmount(MathUtil.roundUp(bereavementAmount,2));
 						driverPayFreezObj.setTotalRowCount(wrapper.getTotalRowCount());
 						driverPayFreezObj.setSumAmount(MathUtil.roundUp(wrapper.getSumAmount(),2));						
 						driverPayFreezObj.setTotalAmount(MathUtil.roundUp((driverPayFreezObj.getTransportationAmount()-driverPayFreezObj.getProbationDeductionAmount())+driverPayFreezObj.getMiscAmount()+driverPayFreezObj.getSickParsonalAmount()+driverPayFreezObj.getHolidayAmount()+driverPayFreezObj.getBonusAmount(),2));
@@ -1199,6 +1222,8 @@ public class DriverPayReportController extends BaseController{
 		           params.put("quatarAmount",quatarAmount);
 		           params.put("quatarNote", quatarNote);
 		           
+		           // Bereavement change - driver
+		           params.put("bereavementAmountList", bereavementAmountList);
 		           params.put("parameter1", parameter1);
 		           params.put("parameter2", parameter2);
 		           params.put("parameter3", parameter3);

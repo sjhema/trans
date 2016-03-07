@@ -73,6 +73,10 @@ public class DriverPay extends AbstractBaseModel{
 	@Column(name="vacation_amount")
 	Double vacationAmount=0.0;
 	
+	// Bereavement change - driver
+	@Column(name="bereavementAmount")
+	Double bereavementAmount=0.0;
+	
 	@Column(name="bonus_amount")
 	Double bonusAmount=0.0;
 	
@@ -135,11 +139,24 @@ public class DriverPay extends AbstractBaseModel{
 	Double vacationAmountSpc = 0.0;
 	
 	@Transient
+	Double bereavementAmountSpc = 0.0;
+	
+	@Transient
 	Double reimAmountSpc = 0.0;
 	
 	@Transient
 	Double quarterAmountSpc = 0.0;
 	
+	@Transient
+	public Double getBereavementAmountSpc() {
+		return bereavementAmountSpc;
+	}
+
+	@Transient
+	public void setBereavementAmountSpc(Double bereavementAmountSpc) {
+		this.bereavementAmountSpc = bereavementAmountSpc;
+	}
+
 	public Double getTransportationAmount() {
 		return transportationAmount;
 	}
@@ -149,7 +166,16 @@ public class DriverPay extends AbstractBaseModel{
 	}
 	
 	
-	
+	// Bereavement change - driver
+	public Double getBereavementAmount() {
+		return bereavementAmount;
+	}
+
+	// Bereavement change - driver
+	public void setBereavementAmount(Double bereavementAmount) {
+		this.bereavementAmount = bereavementAmount;
+	}
+
 	public Date getBillBatchDateFrom() {
 		return billBatchDateFrom;
 	}

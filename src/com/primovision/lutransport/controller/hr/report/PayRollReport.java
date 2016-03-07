@@ -681,6 +681,8 @@ public class PayRollReport extends BaseController{
 		        	//System.out.println("************ the driver name is "+driver3.getFullName());
 		        	    Double sickParsonalAmount=0.00;
 						Double vacationAmount=0.00;
+						// Bereavement change - driver
+						Double bereavementAmount=0.00;
 						Integer numberOfSickDays = 0;
 						Integer numberOfVactionDays = 0;
 						
@@ -743,6 +745,8 @@ public class PayRollReport extends BaseController{
 							numberOfSickDays=driverPay.getNumberOfSickDays();
 							
 							vacationAmount=driverPay.getVacationAmount();
+							// Bereavement change - driver
+							bereavementAmount=driverPay.getBereavementAmount();
 									
 							numberOfVactionDays=driverPay.getNumberOfVactionDays();
 							
@@ -868,6 +872,8 @@ public class PayRollReport extends BaseController{
 							driverPay.setHolidayAmountSpc(MathUtil.roundUp(holidayAmount,2));
 							driverPay.setTotalAmountSpc(MathUtil.roundUp(((driverPay.getTransAmountSpc()+driverPay.getPtodAmountSpc()+driverPay.getBonusAmountSpc()+driverPay.getHolidayAmountSpc()+driverPay.getMiscAmountSpc())-driverPay.getProbdeductionAmountSpc()),2));
 							driverPay.setVacationAmountSpc(MathUtil.roundUp(vacationAmount,2));
+							// Bereavement change - driver
+							driverPay.setBereavementAmountSpc(MathUtil.roundUp(bereavementAmount,2));
 							driverPay.setReimAmountSpc(reimburseAmt);
 							driverPay.setQuarterAmountSpc(qutarAmt);							
 							driverPayNew.add(driverPay);							
