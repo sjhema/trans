@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,15 +24,20 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.tags.IColumnTag;
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Customer;
 import com.primovision.lutransport.model.DemurrageCharges;
 import com.primovision.lutransport.model.FuelSurchargePadd;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.TonnagePremium;
 
@@ -290,7 +298,7 @@ public class BillingRateController extends CRUDController<BillingRate>{
 					}
 				}
 				/*
-				 * for “Manual” enter either surcharge per ton or Surcharge amount
+				 * for Manual enter either surcharge per ton or Surcharge amount
 				 */
 				if("M".equalsIgnoreCase(entity.getFuelSurchargeType())){
 					if(entity.getSurchargePerTon() == null && entity.getSurchargeAmount() == null){
@@ -302,7 +310,7 @@ public class BillingRateController extends CRUDController<BillingRate>{
 				}
 			}
 			/*
-			 * Subcontractor - If Subcontractor is set to “Yes”, 
+			 * Subcontractor - If Subcontractor is set to Yes, 
 			 * then Subcontractor Rate Type and Subcontractor Rate must be entered.
 			 
 			if(entity.getSubcontractor() == 1){
@@ -380,6 +388,53 @@ public class BillingRateController extends CRUDController<BillingRate>{
 			//here
 		/*return super.save(request, entity, bindingResult, model);*/
 	}
+	
+	// Billing rate fix - 10thMar2016
+	public List<BillingRate> searchForExport(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+		List<BillingRate> billingRateList = genericDAO.search(getEntityClass(), criteria);
+		return billingRateList;
+	}
+	
+	@Override
+	// Billing rate fix - 10thMar2016
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		List columnPropertyList = (List) request.getSession().getAttribute(
+				"columnPropertyList");
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html"))
+			response.setHeader("Content-Disposition", "attachment;filename="
+					+ urlContext + "Report." + type);
+		try {
+			criteria.setPageSize(100000);
+			String label = getCriteriaAsString(criteria);
+			/*ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(),
+					columnPropertyList, criteria, request);*/
+			
+			List<BillingRate> billingRateList = searchForExport(model, request);
+			ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(), billingRateList,
+					columnPropertyList, request);
+			out.writeTo(response.getOutputStream());
+			if (type.equals("html"))
+				response.getOutputStream()
+						.println(
+								"<script language=\"javascript\">window.print()</script>");
+			criteria.setPageSize(25);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		}
+	}
+
 	
 	private String common(HttpServletRequest request,ModelMap model,BillingRate entity,String rateQuery)
 	{

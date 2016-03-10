@@ -35,6 +35,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.j2ee.servlets.ImageServlet;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -389,7 +390,8 @@ public class DynamicReportServiceImpl implements
 					}
 				}
 			}
-			JasperPrint jp = getJasperPrintFromBean(reportName, list.toArray(),
+			// Billing rate fix - 10thMar2016
+			JasperPrint jp = getJasperPrintFromBean(reportName, type, list.toArray(),
 					columnPropertyList, displayableFieldMap, request);
 			out = getStreamByType(type, jp, request);
 		} catch (Exception ex) {
@@ -484,7 +486,8 @@ public class DynamicReportServiceImpl implements
 		return jp;
 	}
 
-	private JasperPrint getJasperPrintFromBean(String reportName, Object[] obj,
+	// Billing rate fix - 10thMar2016
+	private JasperPrint getJasperPrintFromBean(String reportName, String type, Object[] obj,
 			List<IColumnTag> columnPropertyList,
 			Map<String, Field> displayableFieldMap, HttpServletRequest request) {
 		Style headerStyle = getHeaderStyle();
@@ -492,7 +495,8 @@ public class DynamicReportServiceImpl implements
 		detailStyle.setBorder(Border.THIN);
 		JasperPrint jp = null;
 		try {
-			DynamicReportBuilder jasperReport = getReportFromMap(reportName,
+			// Billing rate fix - 10thMar2016
+			DynamicReportBuilder jasperReport = getReportFromMap(reportName, type,
 					headerStyle, detailStyle, columnPropertyList,
 					displayableFieldMap, request);
 			DynamicReport dynaRep = jasperReport.build();
@@ -620,7 +624,8 @@ public class DynamicReportServiceImpl implements
 		return report;
 	}
 
-	private DynamicReportBuilder getReportFromMap(String reportName,
+	// Billing rate fix - 10thMar2016
+	private DynamicReportBuilder getReportFromMap(String reportName, String type,
 			Style headerStyle, Style detailStyle,
 			List<IColumnTag> columnPropertyList,
 			Map<String, Field> displayableFieldMap, HttpServletRequest request)
@@ -659,6 +664,14 @@ public class DynamicReportServiceImpl implements
 		autoText.setStyle(atStyle);
 		report.setFooterVariablesHeight(20);
 		report.addAutoText(autoText);
+		
+		// Billing rate fix - 10thMar2016
+		if (StringUtils.equals(type, "pdf")) {
+			report.setIgnorePagination(false);
+		} else {
+			report.setIgnorePagination(true);
+		}
+		
 		return report;
 	}
 
