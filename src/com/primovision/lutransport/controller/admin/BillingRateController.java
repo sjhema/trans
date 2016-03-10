@@ -390,7 +390,7 @@ public class BillingRateController extends CRUDController<BillingRate>{
 	}
 	
 	// Billing rate fix - 10thMar2016
-	public List<BillingRate> searchForExport(ModelMap model, HttpServletRequest request) {
+	private List<BillingRate> searchForExport(ModelMap model, HttpServletRequest request) {
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
 		int origPage = criteria.getPage();
