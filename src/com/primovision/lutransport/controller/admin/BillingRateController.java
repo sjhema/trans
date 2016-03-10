@@ -393,7 +393,16 @@ public class BillingRateController extends CRUDController<BillingRate>{
 	public List<BillingRate> searchForExport(ModelMap model, HttpServletRequest request) {
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
+		int origPage = criteria.getPage();
+		
+		criteria.setPage(0);
+		criteria.setPageSize(100000);
+		
 		List<BillingRate> billingRateList = genericDAO.search(getEntityClass(), criteria);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(25);
+		
 		return billingRateList;
 	}
 	
@@ -404,16 +413,12 @@ public class BillingRateController extends CRUDController<BillingRate>{
 			Object objectDAO, Class clazz) {
 		List columnPropertyList = (List) request.getSession().getAttribute(
 				"columnPropertyList");
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
-
+		
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html"))
 			response.setHeader("Content-Disposition", "attachment;filename="
 					+ urlContext + "Report." + type);
 		try {
-			criteria.setPageSize(100000);
-			String label = getCriteriaAsString(criteria);
 			/*ByteArrayOutputStream out = dynamicReportService.exportReport(
 					urlContext + "Report", type, getEntityClass(),
 					columnPropertyList, criteria, request);*/
@@ -427,7 +432,6 @@ public class BillingRateController extends CRUDController<BillingRate>{
 				response.getOutputStream()
 						.println(
 								"<script language=\"javascript\">window.print()</script>");
-			criteria.setPageSize(25);
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
