@@ -1383,6 +1383,8 @@ public class HrReportServiceImpl implements HrReportService {
         		Double deductionAmount = 0.0;
 				Double sickParsonalAmount=0.0;
 				Double vacationAmount=0.0;
+				// Bereavement change - driver
+				Double bereavementAmount=0.0;
 				Double bonusAmount=0.0;
 				Double miscAmount=0.0;
 				Double holidayAmount=0.0;
@@ -1476,6 +1478,10 @@ public class HrReportServiceImpl implements HrReportService {
 							vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 							
 						}
+						// Bereavement change - driver
+						if(ptodapplication.getLeavetype().getId() == 8) {
+							bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
+						}
 					}
 					
 					LocalDate dt= null;								
@@ -1566,6 +1572,8 @@ public class HrReportServiceImpl implements HrReportService {
 				pay.setBonusAmount(bonusAmount);
 				pay.setSickPersonalAmount(sickParsonalAmount);
 				pay.setVacationAmount(vacationAmount);
+				// Bereavement change - driver
+				pay.setBereavementAmount(bereavementAmount);
 				pay.setHolidayAmount(holidayAmount);
 				Double totalAmount=(pay.getTransportationAmount()-pay.getProbationDeductionAmount())+pay.getMiscAmount()+pay.getSickPersonalAmount()+pay.getBonusAmount()+pay.getHolidayAmount();
 				totalAmount=MathUtil.roundUp(totalAmount, 2);
