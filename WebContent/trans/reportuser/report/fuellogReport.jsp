@@ -399,6 +399,14 @@ $(document).ready(function(){
 	   </tr>
 	   
 	   <tr>
+	   	 <td class="form-left"><primo:label code="Subcontractor" /><span class="errorMessage"></span></td>
+			  <td><form:select cssClass="flat" path="subContractor" id="subContractor" multiple="true" >
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${subcontractors}" itemValue="id" itemLabel="name"></form:options>
+				</form:select> <br> <form:errors path="subContractor" cssClass="errorMessage" />
+			</td>
+	   
 	       <td class="form-left"><primo:label code="States" /><span class="errorMessage"></span></td>
 			<td><form:select cssClass="flat" path="state" multiple="true">
 					<form:option value="-1">------<primo:label
@@ -406,7 +414,7 @@ $(document).ready(function(){
 					<form:options items="${states}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="state" cssClass="errorMessage" />
 			</td>
-			<td class="form-left"></td>
+			
 	   <tr>
 	   
 	   

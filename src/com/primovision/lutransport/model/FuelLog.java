@@ -183,14 +183,24 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	private String driverCategory;
 	
 	@Transient
+	private String subContractorName;
+	
+	@Transient
 	private String fuelCardNumbers;
 	
 	@Transient
 	private String transactionsDate;
 	
-	
-	
-	
+	@Transient
+	public String getSubContractorName() {
+		return subContractorName;
+	}
+
+	@Transient
+	public void setSubContractorName(String subContractorName) {
+		this.subContractorName = subContractorName;
+	}
+
 	public String getStates() {
 		return states;
 	}

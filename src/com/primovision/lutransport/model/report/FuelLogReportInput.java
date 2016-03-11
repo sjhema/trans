@@ -34,6 +34,8 @@ public class FuelLogReportInput /*implements ReportModel*/{
 	private String fromInvoiceNo;
 	private String invoiceNoTo;
 	private String fueltype;
+	// Fuel log - subcontractor
+	private String subContractor;
 	
 	
 	List<FuelLog> fuellogs=null;
@@ -48,6 +50,13 @@ public class FuelLogReportInput /*implements ReportModel*/{
 	
 	
 	
+	
+	public String getSubContractor() {
+		return subContractor;
+	}
+	public void setSubContractor(String subContractor) {
+		this.subContractor = subContractor;
+	}
 	public String getFueltype() {
 		return fueltype;
 	}

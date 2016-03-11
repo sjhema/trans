@@ -3464,6 +3464,8 @@ throw new Exception("origin and destindation is empty");
 		// String fuelVendor = (String)
 		// searchCriteria.getSearchMap().get("fuelVendor");
 		String fuelVendor = input.getFuelVendor();
+		// Fuel log - subcontractor
+		String subContractor = input.getSubContractor();
 		String fromInvoiceDate1 = (String) searchCriteria.getSearchMap().get(
 				"fromInvoiceDate");
 		String invoiceDateTo1 = (String) searchCriteria.getSearchMap().get(
@@ -3533,6 +3535,12 @@ throw new Exception("origin and destindation is empty");
 
 			query.append(" and  obj.fuelvendor in (" + fuelVendor + ")");
 			countQuery.append(" and  obj.fuelvendor in (" + fuelVendor + ")");
+		}
+		
+		// Fuel log - subcontractor
+		if (!StringUtils.isEmpty(subContractor)) {
+			query.append(" and  obj.subContractor in (" + subContractor + ")");
+			countQuery.append(" and  obj.subContractor in (" + subContractor + ")");
 		}
 
 		if (!StringUtils.isEmpty(company)) {
@@ -3803,6 +3811,9 @@ throw new Exception("origin and destindation is empty");
                         }  
                 }				
 				
+            // Fuel log - subcontractor
+            output.setSubContractorName((fuelog.getSubContractor() != null) ? fuelog
+    						.getSubContractor().getName() : "");    
 				// output.setDrivers((fuelog.getDriverFname()!=null)?fuelog.getDriverFname().getFullName():"");
 				output.setDrivers((fuelog.getDriversid() != null) ? fuelog
 						.getDriversid().getFullName() : "");

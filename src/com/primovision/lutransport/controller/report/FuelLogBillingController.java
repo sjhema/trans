@@ -99,6 +99,9 @@ public class FuelLogBillingController extends BaseController{
 		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
 		criterias.clear();
 		model.addAttribute("fuelTypes", listStaticData("FUEL_TYPE"));
+		
+		model.addAttribute("subcontractors", genericDAO.executeSimpleQuery("Select obj from SubContractor obj order by obj.name "));
+		
 		return "reportuser/report/fuellogReport";
 	}
 	
