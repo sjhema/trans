@@ -31,6 +31,11 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	@JoinColumn(name="driver_id")
 	protected Driver driversid;
 	
+	// Fuel log - subcontractor
+	@ManyToOne
+	@JoinColumn(name="subcontractor_id")
+	protected SubContractor subContractor;
+	
 	@Column(name = "unitNum")
 	protected String unitNum;
 	
@@ -146,9 +151,15 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	public String getFuelViolation() {
 		return fuelViolation;
 	}
-	
-	
-	
+
+	public SubContractor getSubContractor() {
+		return subContractor;
+	}
+
+	public void setSubContractor(SubContractor subContractor) {
+		this.subContractor = subContractor;
+	}
+
 	public FuelCard getFuelcard() {
 		return fuelcard;
 	}

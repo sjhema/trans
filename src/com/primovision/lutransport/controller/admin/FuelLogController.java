@@ -31,6 +31,7 @@ import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.State;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
@@ -70,6 +71,8 @@ public class FuelLogController extends CRUDController<FuelLog> {
 		binder.registerCustomEditor(FuelVendor.class, new AbstractModelEditor(FuelVendor.class));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
 		binder.registerCustomEditor(FuelCard.class, new AbstractModelEditor(FuelCard.class));
+		// Fuel log - subcontractor
+		binder.registerCustomEditor(SubContractor.class, new AbstractModelEditor(SubContractor.class));
 	}
 
 	 private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -109,6 +112,7 @@ public class FuelLogController extends CRUDController<FuelLog> {
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 		criterias.clear();
 		model.addAttribute("fuelTypes", listStaticData("FUEL_TYPE"));
+		model.addAttribute("subcontractors", genericDAO.executeSimpleQuery("Select obj from SubContractor obj order by obj.name "));
 	}
 
 	/*

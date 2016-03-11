@@ -26,8 +26,8 @@
 					<option value="${vendors.id}" ${selected}>${vendors.name}</option>
 				</c:forEach>
 			</select></td>
-			
-			
+		</tr>
+		<tr>
 			<td align="${left}" class="first">
 			<primo:label code="Driver"/>
 			</td>
@@ -44,18 +44,17 @@
 			</select>
 			</td>
 			
-			
-			<%-- <td align="${left}" class="first"><primo:label code="Driver"/></td>
-			<td align="${left}"><select id="driversid" name="driversid.id" style="min-width:154px; max-width:154px">
+			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
+			<td align="${left}"><select id="subContractor" name="subContractor.id" style="min-width:154px; max-width:154px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
-				<c:forEach items="${drivernames}" var="drivers">
+				<c:forEach items="${subcontractors}" var="aSubcontractor">
 				<c:set var="selected" value=""/>
-				<c:if test="${sessionScope.searchCriteria.searchMap['drivers.id'] == drivers.id}">
+				<c:if test="${sessionScope.searchCriteria.searchMap['subContractor.id'] == aSubcontractor.id}">
 					<c:set var="selected" value="selected"/>
 				</c:if>
-					<option value="${drivers.id}" ${selected}>${drivers.fullName}</option>
+					<option value="${aSubcontractor.id}" ${selected}>${aSubcontractor.name}</option>
 				</c:forEach>
-			</select></td> --%>
+			</select></td>
 		</tr>
 		<tr>
 			<td align="${left}"></td>
@@ -80,6 +79,7 @@
 			<primo:textcolumn headerText="Vendor" dataField="fuelvendor.name"/>
 			<%-- <primo:textcolumn headerText="Driver First Name" dataField="driverFname.firstName"/>
 			<primo:textcolumn headerText="Driver last Name" dataField="driverLname.lastName"/> --%>
+			<primo:textcolumn headerText="Subcontractor" dataField="subContractor.name"/>
 			<primo:textcolumn headerText="Driver Name" dataField="driversid.fullName"/>
 			<primo:textcolumn headerText="company" dataField="company.name"/>
 			<primo:textcolumn headerText="Unit#" dataField="unit.unit" type="int"/>

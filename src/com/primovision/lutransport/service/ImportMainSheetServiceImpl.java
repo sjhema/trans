@@ -1592,7 +1592,30 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	 * genericDAO.saveOrUpdate(etoll); } } return list; }
 	 */
 
-	//
+	// Fuel log - subcontractor
+	private void processSubContractor(HSSFRow row, FuelLog fuelLog) {
+		String driverLastName = ((String) getCellValue(row.getCell(7)));
+		String driverFirstName = ((String) getCellValue(row.getCell(8)));
+		if (StringUtils.isEmpty(driverLastName) && StringUtils.isEmpty(driverFirstName) ) {
+			return;
+		}
+		
+		Map criterias = new HashMap();
+		List<Driver> driversList = getDriversFromName(criterias, driverLastName, driverFirstName);
+		if (!driversList.isEmpty()) {
+			return; 
+		}
+		
+		SubContractor subContractor = getSubcontractorObjectFromName(driverLastName, driverFirstName);
+		if (subContractor == null) {
+			return; 
+		}
+		
+		fuelLog.setSubContractor(subContractor);
+		row.getCell(7).setCellValue("Subcontractor"); // Last name
+		row.getCell(8).setCellValue("Subcontractor"); // First name
+		row.getCell(6).setCellValue("0"); // Unit #
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -1638,8 +1661,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				}
 				lineError = new StringBuffer("");
 				try {
-
 					fuellog = new FuelLog();
+					
+					// Fuel log - subcontractor
+					processSubContractor(row, fuellog);
+					
 					String Fname = (String) getCellValue(row.getCell(0));
 					if (override == false) {
 						try {
@@ -3018,6 +3044,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return retrieveActualDriver(drivers, transdate);
 	}
 
+	// Fuel log - subcontractor
+	private SubContractor getSubcontractorObjectFromName(String lastName, String firstName) {
+		String name = lastName + " " + firstName;
+		
+		String subcontractorQuery = "select obj from SubContractor obj where "
+				+ "obj.name LIKE '" + name + "%'"; 
+		System.out.println("******* The subcontractor query for fuel upload is " + subcontractorQuery);
+		List<SubContractor> subContractorList = genericDAO.executeSimpleQuery(subcontractorQuery);
+		if (subContractorList.isEmpty()) {
+			return null;
+		} else {
+			return subContractorList.get(0);
+		}
+	}
+	
 	private Driver getDriverObjectFromName(Map criterias, String firstName, String lastName, HSSFRow row) {
 		
 		/*// Existing Buggy code

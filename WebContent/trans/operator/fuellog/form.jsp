@@ -342,6 +342,16 @@
 				</td> --%>
 
 		</tr>
+		
+		<tr>
+			<td class="form-left"><primo:label code="Subcontractor" /></td>
+			<td><form:select cssClass="flat" path="subContractor" id="subContractor" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${subcontractors}" itemValue="id"
+						itemLabel="name" />
+				</form:select> <br>
+			<form:errors path="subContractor" cssClass="errorMessage" /></td>
+		</tr>
 
 		<tr>
 			<td class="form-left"><primo:label code="Company" /><span
