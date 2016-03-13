@@ -5083,7 +5083,10 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 			}			
 			
 			String query="select obj.t_origin,obj.t_destination ,count(obj), sum(totAmt), obj.company from Billing_New obj where obj.ticket in ("
-				+ticketIds.toString()+") group by t_origin,t_destination order by obj.t_origin asc,obj.t_destination asc";
+				+ticketIds.toString()+") group by t_origin,t_destination " + 
+				// Billing History Summary - Order fix	
+				//" order by obj.t_origin asc,obj.t_destination asc";
+				" order by obj.company asc, obj.t_origin asc, obj.t_destination asc";
 			List<Summary> summarys=genericDAO.executeSimpleQuery(query);						
 		
 	
