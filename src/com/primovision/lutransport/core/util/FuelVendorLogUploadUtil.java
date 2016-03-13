@@ -29,7 +29,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.model.FuelCard;
 import com.primovision.lutransport.model.FuelVendor;
+import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
 public class FuelVendorLogUploadUtil {
@@ -110,8 +112,10 @@ public class FuelVendorLogUploadUtil {
 				|| fuelVendorId == 17l || fuelVendorId == 1l || fuelVendorId == 5l
 				// KW Rastall
 				|| fuelVendorId == 19l
-				// AC & T
-				|| fuelVendorId == 2l
+				// AC & T WB
+				|| fuelVendorId == 2l 
+				// AC & T DREW
+				|| fuelVendorId == 21l
 				// Atlantic Coast
 				|| fuelVendorId == 18l
 				// Quick Fuel
@@ -396,7 +400,7 @@ public class FuelVendorLogUploadUtil {
 				Cell cell = createExcelCell(sheet, row, columnIndex);
 				oneCellValue = consolidateDataForVendors(wb, cell, oneRow, oneCellValue, vendorName, additionalVendorData);
 				System.out.println("Creating Column @ " + columnIndex + " with value (manipulated) = " + oneCellValue);
-				formatCellValueForVendor(wb, cell, oneCellValue, vendorName);
+				formatCellValueForVendor(genericDAO, wb, cell, oneCellValue, vendorName, vendor);
 				columnIndex++;
 			}
 		}
@@ -517,59 +521,30 @@ public class FuelVendorLogUploadUtil {
 		return fuelVendor.getName();
 	}
 
-	private static void formatCellValueForVendor(HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor)
+	private static void formatCellValueForVendor(GenericDAO genericDAO, HSSFWorkbook wb,  Cell cell, Object oneCellValue, String vendor, Long vendorId)
 			throws Exception {
 		if (vendor.equalsIgnoreCase(VENDOR_TCH)) { 
-			formatCellValueForTCH(wb, cell, oneCellValue, vendor);
+			formatCellValueForTCH(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || vendor.equalsIgnoreCase(VENDOR_DCFUELLU)) { 
-			formatCellValueForDCFuelWB(wb, cell, oneCellValue, VENDOR_DCFUELWB);
+			formatCellValueForDCFuelWB(genericDAO, wb, cell, oneCellValue, VENDOR_DCFUELWB, vendorId);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
-			formatCellValueForQuarles(wb, cell, oneCellValue, VENDOR_QUARLES);
+			formatCellValueForQuarles(genericDAO, wb, cell, oneCellValue, VENDOR_QUARLES, vendorId);
 		} else if (StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_DREW) || StringUtils.equalsIgnoreCase(vendor, VENDOR_COMDATA_LU) ) { 
-			formatCellValueForComData(wb, cell, oneCellValue, VENDOR_COMDATA_DREW);
+			formatCellValueForComData(genericDAO, wb, cell, oneCellValue, VENDOR_COMDATA_DREW, vendorId);
 		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO)) { 
-			formatCellValueForSunoco(wb, cell, oneCellValue, VENDOR_SUNOCO);
+			formatCellValueForSunoco(genericDAO, wb, cell, oneCellValue, VENDOR_SUNOCO, vendorId);
 		} else if (StringUtils.contains(vendor, VENDOR_KW_RASTALL)) { 
-			formatCellValueForKWRastall(wb, cell, oneCellValue, VENDOR_KW_RASTALL);
+			formatCellValueForKWRastall(genericDAO, wb, cell, oneCellValue, VENDOR_KW_RASTALL, vendorId);
 		} else if (StringUtils.contains(vendor, VENDOR_AC_T)) { 
-			formatCellValueForACAndT(wb, cell, oneCellValue, VENDOR_AC_T);
+			formatCellValueForACAndT(genericDAO, wb, cell, oneCellValue, VENDOR_AC_T, vendorId);
 		} else if (StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST)) { 
-			formatCellValueForAtlanticCoast(wb, cell, oneCellValue, VENDOR_ATLANTIC_COAST);
+			formatCellValueForAtlanticCoast(genericDAO, wb, cell, oneCellValue, VENDOR_ATLANTIC_COAST, vendorId);
 		} else if (StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) { 
-			formatCellValueForQuickFuel(wb, cell, oneCellValue, VENDOR_QUICK_FUEL);
+			formatCellValueForQuickFuel(genericDAO, wb, cell, oneCellValue, VENDOR_QUICK_FUEL, vendorId);
 		}
 	}
 
-	private static void formatCellValueForComData(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
-		if (oneCellValue == null) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		} 
-		
-		int columnIndex = cell.getColumnIndex();
-		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
-			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 3) {
-			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 6) {
-			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 5) { // transaction time 
-			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
-		} else if (columnIndex == 10) {
-			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 13) { // gallons
-			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
-			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
-		} else {
-			cell.setCellValue(oneCellValue.toString().toUpperCase());
-		}
-		
-	}
-	
-	private static void formatCellValueForKWRastall(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForComData(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -587,7 +562,38 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+		
+	}
+	
+	private static void formatCellValueForKWRastall(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // transaction time 
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
+		} else if (columnIndex == 9) { // cardnumber 
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
@@ -601,7 +607,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void formatCellValueForAtlanticCoast(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForAtlanticCoast(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -619,7 +625,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
@@ -633,7 +639,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void formatCellValueForQuickFuel(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForQuickFuel(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -651,7 +657,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 11) {
@@ -667,7 +673,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void formatCellValueForACAndT(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForACAndT(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -683,7 +689,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 10) {
@@ -699,7 +705,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private static void formatCellValueForDCFuelWB(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForDCFuelWB(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -717,7 +723,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 13) {  // else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -727,7 +733,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void formatCellValueForQuarles(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForQuarles(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -745,7 +751,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
@@ -757,7 +763,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void formatCellValueForSunoco(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws ParseException {
+	private static void formatCellValueForSunoco(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
 		if (oneCellValue == null) {
 			cell.setCellValue(StringUtils.EMPTY);
 			return;
@@ -776,7 +782,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // cardnumber 
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
@@ -788,7 +794,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 
-	private static void formatCellValueForTCH(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) throws Exception {
+	private static void formatCellValueForTCH(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws Exception {
 		if (oneCellValue == null) {
 			oneCellValue = StringUtils.EMPTY;
 			return;
@@ -806,7 +812,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) {
-			setCellValueFuelCardFormat(wb, cell, oneCellValue, vendor);
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
@@ -818,7 +824,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void setCellValueFuelCardFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
+	private static void setCellValueFuelCardFormat(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) {
 		String cardNumber = oneCellValue.toString();
 		if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL) 
 				|| StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.containsIgnoreCase(vendor, VENDOR_QUICK_FUEL)) {
@@ -834,6 +840,9 @@ public class FuelVendorLogUploadUtil {
 			cell.setCellValue(cardNumber);
 		} else if (StringUtils.contains(vendor, VENDOR_QUARLES)) { 
 			setIntegerValue(cell, oneCellValue);
+		} else if (vendor.equalsIgnoreCase(VENDOR_COMDATA_LU) || vendor.equalsIgnoreCase(VENDOR_COMDATA_DREW)) {
+			String processedCardNum = processFuelCardNum(genericDAO, cardNumber, vendorId);
+			cell.setCellValue(processedCardNum);
 		} else if (StringUtils.contains(vendor, VENDOR_SUNOCO) || StringUtils.contains(vendor, VENDOR_AC_T)) { 
 			cell.setCellValue(cardNumber);
 		}
@@ -973,25 +982,6 @@ public class FuelVendorLogUploadUtil {
 		setIntegerValue(cell, cellValueStr);
 	}
 
-	private static void setIntegerValue(Cell cell, Object oneCellValue) {
-		if (oneCellValue == null) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		} 
-		
-		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
-		if (StringUtils.isEmpty(cellValueStr)) {
-			cell.setCellValue(StringUtils.EMPTY);
-			return;
-		}
-		
-		if (!StringUtils.contains(cellValueStr, ".")) {
-			cell.setCellValue(cellValueStr);
-		} else {
-			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
-		}
-	}
-
 	private static void setCellValueInvoiceNumberFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue,
 			String vendor) {
 		setIntegerValue(cell, oneCellValue);
@@ -1048,13 +1038,58 @@ public class FuelVendorLogUploadUtil {
 		cell.setCellStyle(style);
 	}
 	
-	private static Date convertToExpectedDateFormat(String actualDateStr, String actualDateFormat) throws ParseException {
-		Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
-		String expectedDateStr = expectedDateFormat.format(actualDate);
-		return expectedDateFormat.parse(expectedDateStr);
+	private static String processFuelCardNum(GenericDAO genericDAO, String cardNumber, Long vendorId) {
+		if (StringUtils.isEmpty(cardNumber)) {
+			return StringUtils.EMPTY;
+		}
+		
+		if (cardNumber.length() < 4) {
+			return cardNumber;
+		}
+		
+		String fuelCardQuery = "select obj from FuelCard obj where obj.fuelcardNum ='" + cardNumber
+				+ "' and obj.fuelvendor = " + vendorId;
+		List<FuelCard> fuelCardList = genericDAO.executeSimpleQuery(fuelCardQuery);
+		if (!fuelCardList.isEmpty()) {
+			return cardNumber;
+		}
+		
+		fuelCardQuery = "select obj from FuelCard obj where obj.fuelcardNum like '%" + StringUtils.right(cardNumber, 4)
+				+ "' and obj.fuelvendor = " + vendorId;
+		fuelCardList = genericDAO.executeSimpleQuery(fuelCardQuery);
+		if (fuelCardList.isEmpty()) {
+			return cardNumber;
+		}
+		
+		return fuelCardList.get(0).getFuelcardNum();
 	}
+	 
+	private static void setIntegerValue(Cell cell, Object oneCellValue) {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		String cellValueStr = StringUtils.trimToEmpty(oneCellValue.toString());
+		if (StringUtils.isEmpty(cellValueStr)) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		}
+		
+		if (!StringUtils.contains(cellValueStr, ".")) {
+			cell.setCellValue(cellValueStr);
+		} else {
+			cell.setCellValue(Double.valueOf(cellValueStr).intValue());
+		}
+	 }
 	
-	private static InputStream createInputStream(HSSFWorkbook wb) {
+	 private static Date convertToExpectedDateFormat(String actualDateStr, String actualDateFormat) throws ParseException {
+		 Date actualDate = new SimpleDateFormat(actualDateFormat).parse(actualDateStr);
+		 String expectedDateStr = expectedDateFormat.format(actualDate);
+		 return expectedDateFormat.parse(expectedDateStr);
+	 }
+	
+	 private static InputStream createInputStream(HSSFWorkbook wb) {
 		//dumpToFile(wb);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -1067,9 +1102,9 @@ public class FuelVendorLogUploadUtil {
 	      
 	   InputStream targetStream = new ByteArrayInputStream(out.toByteArray());
 		return targetStream;
-	}
+	 }
 	
-	private static void dumpToFile(HSSFWorkbook wb) {
+	 private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
 			fOut = new FileOutputStream("/Users/raghav/Desktop/Test.xls");
@@ -1081,15 +1116,15 @@ public class FuelVendorLogUploadUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	 }
 	
-	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+	 private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
 		Cell cell = row.createCell(columnIndex);
 		sheet.setColumnWidth(columnIndex, 256*20);
 		return cell;
-	}
+	 }
 	
-	private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
+	 private static void createColumnHeaders(LinkedList<String> expectedColumnList, Sheet sheet, CellStyle style) {
 		Row headerRow = sheet.createRow(0);
 		int columnHeaderIndex = 0;
 		for (String columnHeader : expectedColumnList) { // TODO redundant, use actualColumnListMap.keys instead
