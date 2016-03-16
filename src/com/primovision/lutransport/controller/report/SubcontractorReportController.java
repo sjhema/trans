@@ -166,12 +166,10 @@ public class SubcontractorReportController extends BaseController {
 				}
 				
 				Map<String,Object> params= new HashMap<String,Object>();
-				if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
-					params.put("batchDateFrom",input.getBatchDateFrom());
-				}
-				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
-					params.put("batchDateTo",input.getBatchDateTo());
-				}
+				String batchDateFrom = StringUtils.isEmpty(input.getBatchDateFrom()) ? StringUtils.EMPTY : input.getBatchDateFrom();
+				String batchDateTo = StringUtils.isEmpty(input.getBatchDateTo()) ? StringUtils.EMPTY : input.getBatchDateTo();
+				params.put("batchDateFrom", batchDateFrom);
+				params.put("batchDateTo", batchDateTo);
 				
 				if (StringUtils.isEmpty(type)) {
 					type = "html";
@@ -254,12 +252,10 @@ public class SubcontractorReportController extends BaseController {
 				List<SubcontractorSummary> subcontractorSummaryList = generateSubcontractorSummaryReport(criteria, input);           
 				
 				Map<String,Object> params= new HashMap<String,Object>();
-				if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
-					params.put("batchDateFrom",input.getBatchDateFrom());
-				}
-				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
-					params.put("batchDateTo",input.getBatchDateTo());
-				}
+				String batchDateFrom = StringUtils.isEmpty(input.getBatchDateFrom()) ? StringUtils.EMPTY : input.getBatchDateFrom();
+				String batchDateTo = StringUtils.isEmpty(input.getBatchDateTo()) ? StringUtils.EMPTY : input.getBatchDateTo();
+				params.put("batchDateFrom", batchDateFrom);
+				params.put("batchDateTo", batchDateTo);
 				
 				if (StringUtils.isEmpty(type))
 					type = "xlsx";
