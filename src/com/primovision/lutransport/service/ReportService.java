@@ -28,6 +28,7 @@ import com.primovision.lutransport.model.report.NetReportInput;
 import com.primovision.lutransport.model.report.NetReportWrapper;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
 import com.primovision.lutransport.model.report.SubcontractorReportInput;
+import com.primovision.lutransport.model.report.SubcontractorSummary;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.model.report.TollDistributionReportInput;
 import com.primovision.lutransport.model.report.TollDistributionReportWrapper;
@@ -49,7 +50,11 @@ public interface ReportService {
 	public void saveSubcontractorBillingData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteSubcontractorBillingData(SubcontractorInvoice invoice) throws Exception;	
 	public List<Summary> generateSummary(SearchCriteria criteria, BillingHistoryInput input) ;
-	public SubcontractorBillingWrapper generateSubcontractorReportData(SearchCriteria searchCriteria,SubcontractorReportInput input);
+	// Subcontractor summary report - 16thMar2016
+	public SubcontractorBillingWrapper generateSubcontractorReportData(SearchCriteria searchCriteria,SubcontractorReportInput input, boolean isSummary);
+	// Subcontractor summary report - 16thMar2016
+	public List<SubcontractorSummary> generateSubcontractorSummaryReport(SearchCriteria criteria, 
+			SubcontractorReportInput input);
 	public List<NetReportWrapper> generateNetReportData(SearchCriteria searchCriteria, NetReportInput input,HttpServletRequest request);
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
 			BillingHistoryInput input);

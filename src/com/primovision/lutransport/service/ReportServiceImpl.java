@@ -74,6 +74,7 @@ import com.primovision.lutransport.model.report.SubcontractorBilling;
 import com.primovision.lutransport.model.report.SubcontractorBillingNew;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
 import com.primovision.lutransport.model.report.SubcontractorReportInput;
+import com.primovision.lutransport.model.report.SubcontractorSummary;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.model.report.TollDistributionReportInput;
 import com.primovision.lutransport.model.report.TollDistributionReportWrapper;
@@ -875,14 +876,14 @@ public class ReportServiceImpl implements ReportService {
 				.getResultList();
 		// ticketIds1=null;
 		ticketIds = null;
-		return processTicketsNew(tickets, params);
+		// Subcontractor summary report - 16thMar2016
+		return processTicketsNew(tickets, params, false);
 
 		
 	}
 	
-	
-	
-	private BillingWrapper processTicketsNew(List<Ticket> tickets,Map<String, String> params) {
+	// Subcontractor summary report - 16thMar2016
+	private BillingWrapper processTicketsNew(List<Ticket> tickets,Map<String, String> params, boolean isSummary) {
 		
 		List<Billing_New> summarys = new ArrayList<Billing_New>();
 		BillingWrapper wrapper = new BillingWrapper();
@@ -910,7 +911,13 @@ public class ReportServiceImpl implements ReportService {
 			
 			String query="select obj from Billing_New obj where obj.ticket in ("
 				+ticketIds.toString()+")";
-			 summarys=genericDAO.executeSimpleQuery(query);			
+			 summarys=genericDAO.executeSimpleQuery(query);	
+			 
+			// Subcontractor summary report - 16thMar2016
+		   wrapper.setBillings(summarys);
+		   if (isSummary) {
+		   	return wrapper;
+		   }
 			
 			 String sum_query="select sum(obj.effectiveNetWt),sum(obj.effectiveTonsWt),sum(obj.originTonsWt),sum(obj.destinationTonsWt),sum(obj.amount),sum(obj.fuelSurcharge),sum(obj.tonnagePremium),sum(obj.demurrageCharge) from Billing_New obj where obj.ticket in ("
 				+ticketIds.toString()+")";
@@ -941,8 +948,8 @@ public class ReportServiceImpl implements ReportService {
 			 }
 			 }		
 		
-		
-	    wrapper.setBillings(summarys);	     
+		// Subcontractor summary report - 16thMar2016
+	   // wrapper.setBillings(summarys);	     
 		sumBillableTon = MathUtil.roundUp(sumBillableTon, 2);
 		sumOriginTon = MathUtil.roundUp(sumOriginTon, 2);
 		sumDestinationTon = MathUtil.roundUp(sumDestinationTon, 2);
@@ -966,12 +973,79 @@ public class ReportServiceImpl implements ReportService {
 		wrapper.setTotalRowCount(tickets.size());
 		return wrapper;
 	}
-		
-		
-		
 	
-	
-	
+	// Subcontractor summary report - 16thMar2016
+	public List<SubcontractorSummary> generateSubcontractorSummaryReport(SearchCriteria criteria, 
+			SubcontractorReportInput input) {
+		List<SubcontractorSummary> subcontractorSummaryList = new ArrayList<SubcontractorSummary>();
+		
+		// First get the subcontractor billing data
+		SubcontractorBillingWrapper subcontractorBillingWrapper = generateSubcontractorReportData(criteria, input, true);
+		List<SubcontractorBillingNew> subcontractorBillingNewList = subcontractorBillingWrapper.getSubcontractorBillingsNew();
+		if (subcontractorBillingNewList == null || subcontractorBillingNewList.isEmpty()) {
+			return subcontractorSummaryList;
+		}
+		
+		// Group by subcontractor name and calculate total amount paid
+		Map<String, SubcontractorSummary> subcontractorSummaryMap = new HashMap<String, SubcontractorSummary>();
+		for(SubcontractorBillingNew aSubcontractorBillingNew : subcontractorBillingNewList) {
+			String subContractorName = aSubcontractorBillingNew.getSubcontractor();
+			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryMap.get(subContractorName);
+			if (aSubcontractorSummary == null) {
+				aSubcontractorSummary = new SubcontractorSummary();
+				aSubcontractorSummary.setSubcontractorName(subContractorName);
+				subcontractorSummaryMap.put(subContractorName, aSubcontractorSummary);
+				
+				subcontractorSummaryList.add(aSubcontractorSummary);
+			}
+			
+			Double amountPaid = aSubcontractorSummary.getAmountPaid() + aSubcontractorBillingNew.getTotAmt();
+			aSubcontractorSummary.setAmountPaid(amountPaid);
+		}
+		
+		// Then get customer billing data for the same tickets retrieved above
+		BillingWrapper billingWrapper = processTicketsNew(subcontractorBillingWrapper.getTickets(), null, true);
+		List<Billing_New> billingNewList = billingWrapper.getBillings();
+		if (billingNewList == null || billingNewList.isEmpty()) {
+			System.out.println("Subcontractor summary report: No billing history found for specified subcontractor tickets");
+			return subcontractorSummaryList;
+		}
+		
+		// Group by subcontractor name in customer billing data and calculate total revenue
+		Map<String, SubcontractorSummary> subcontractorSummaryBillingMap = new HashMap<String, SubcontractorSummary>();
+		for(Billing_New aBillingNew : billingNewList) {
+			String subContractorName = aBillingNew.getSubcontractor();
+			if (StringUtils.isEmpty(subContractorName)) {
+				System.out.println("Subcontractor summary report: Empty subcontractor in customer billing history");
+				continue;
+			}
+			
+			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryBillingMap.get(subContractorName);
+			if (aSubcontractorSummary == null) {
+				aSubcontractorSummary = new SubcontractorSummary();
+				aSubcontractorSummary.setSubcontractorName(subContractorName);
+				subcontractorSummaryBillingMap.put(subContractorName, aSubcontractorSummary);
+			}
+			
+			Double revenue = aSubcontractorSummary.getRevenue() + aBillingNew.getTotAmt();
+			aSubcontractorSummary.setRevenue(revenue);
+		}
+		
+		// Merge subcontractor paid data and customer billed data and calculate net amount
+		for(SubcontractorSummary aSubcontractorSummary : subcontractorSummaryList) {
+			String subContractorName = aSubcontractorSummary.getSubcontractorName();
+			SubcontractorSummary aSubcontractorBillingSummary = subcontractorSummaryBillingMap.get(subContractorName);
+			if (aSubcontractorBillingSummary == null) {
+				System.out.println("Subcontractor summary report: Subcontractor not found in customer billing history: " + subContractorName);
+			} else {
+				aSubcontractorSummary.setRevenue(aSubcontractorBillingSummary.getRevenue());
+				Double netAmount = aSubcontractorSummary.getRevenue() - aSubcontractorSummary.getAmountPaid();
+				aSubcontractorSummary.setNetAmount(netAmount);
+			}
+		}
+		
+		return subcontractorSummaryList;
+	}
 
 	private BillingWrapper processTickets(List<Ticket> tickets,
 			Map<String, String> params) {
@@ -1622,9 +1696,6 @@ public class ReportServiceImpl implements ReportService {
 		wrapper.setTotalRowCount(tickets.size());
 		return wrapper;
 	}
-
-	
-	
 	
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void saveBillingData(HttpServletRequest request,
@@ -5564,8 +5635,9 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 	}
 
 	@Override
+	// Subcontractor summary report - 16thMar2016
 	public SubcontractorBillingWrapper generateSubcontractorReportData(
-			SearchCriteria searchCriteria, SubcontractorReportInput input) {
+			SearchCriteria searchCriteria, SubcontractorReportInput input, boolean isSummary) {
 
 		String amountFrom = input.getAmountFrom();
 		String amountTo = input.getAmountTo();
@@ -5946,13 +6018,23 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 		System.out.println("******");
 		System.out.println("****** Second and main query is "+query.toString());
 		System.out.println("******");
-		List<Ticket> tickets = (List<Ticket>) genericDAO
-				.getEntityManager()
-				.createQuery(query.toString())
-				.setMaxResults(searchCriteria.getPageSize())
-				.setFirstResult(
-						searchCriteria.getPage() * searchCriteria.getPageSize())
-				.getResultList();
+		
+		// Subcontractor summary report - 16thMar2016
+		List<Ticket> tickets = null;
+		if (isSummary) {
+			tickets = (List<Ticket>) genericDAO
+					.getEntityManager()
+					.createQuery(query.toString())
+					.getResultList();
+		} else {
+			tickets = (List<Ticket>) genericDAO
+					.getEntityManager()
+					.createQuery(query.toString())
+					.setMaxResults(searchCriteria.getPageSize())
+					.setFirstResult(
+							searchCriteria.getPage() * searchCriteria.getPageSize())
+					.getResultList();
+		}
 
 		List<SubcontractorBillingNew> summarys = new ArrayList<SubcontractorBillingNew>();
 		SubcontractorBillingWrapper wrapper = new SubcontractorBillingWrapper();
@@ -5993,10 +6075,21 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 				
 		}
 		
+		// Subcontractor summary report - 16thMar2016
+		if (isSummary) {
+			subinvquery += " order by obj.subcontractor";
+		}
+		
 		summarys=genericDAO.executeSimpleQuery(subinvquery);			
 		
 		wrapper.setSubcontractorBillingsNew(summarys);
-		 
+		
+		// Subcontractor summary report - 16thMar2016
+		if (isSummary) {
+			wrapper.setTickets(tickets);
+			return wrapper;
+		}
+		
 		String sum_query="select sum(obj.effectiveNetWt),sum(obj.effectiveTonsWt),sum(obj.originTonsWt),sum(obj.destinationTonsWt),sum(obj.amount),sum(obj.fuelSurcharge),sum(obj.otherCharges),sum(obj.totAmt) from SubcontractorBillingNew obj where obj.ticket in ("
 			+subticketIds.toString()+")";
 		

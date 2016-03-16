@@ -11,6 +11,7 @@ import javax.persistence.Transient;
 
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SubContractor;
+import com.primovision.lutransport.model.Ticket;
 
 public class SubcontractorBillingWrapper {
 	double sumNet=0.0;
@@ -27,6 +28,9 @@ public class SubcontractorBillingWrapper {
 	int totalRowCount=0;
 	
 	List<String> list = new ArrayList<String>();
+	
+	// Subcontractor summary report - 16thMar2016
+	List<Ticket> tickets = null;
 	
 	List<SubcontractorBilling> subcontractorBillings=null;
 	List<SubcontractorBillingNew> subcontractorBillingsNew=null;
@@ -46,8 +50,17 @@ public class SubcontractorBillingWrapper {
 	private Location companyLocationId;
 	/*String company;*/
 	
+	
 	public Location getCompanyLocationId() {
 		return companyLocationId;
+	}
+
+	public List<Ticket> getTickets() {
+		return tickets;
+	}
+
+	public void setTickets(List<Ticket> tickets) {
+		this.tickets = tickets;
 	}
 
 	public void setCompanyLocationId(Location companyLocationId) {

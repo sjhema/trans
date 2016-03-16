@@ -5,6 +5,11 @@ function searchReport() {
 	document.forms[0].submit();
 }
 
+function searchReport1() {
+	document.getElementById('sum').value='true' ;
+	document.forms[0].submit(); 
+}
+
 function formatDate(){
 	var date=document.getElementById("datepicker").value;
 	if(date!=""){
@@ -419,6 +424,7 @@ $(document).ready(function(){
 				class="errorMessage"></span> </td>
 				<td  align="${left}">
 				<form:input size="10" path="miscelleneousCharges" cssClass="flat"/>
+				<input type="hidden" name="summary" id="sum">
 				</td>
 				
 		</tr>
@@ -429,6 +435,9 @@ $(document).ready(function(){
 				onclick="javascript:searchReport()" value="Search" />&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				
+				<input type="button"
+			onclick="javascript:searchReport1()" value="Summary" />
 				</td>
 			
 		</tr>

@@ -1,7 +1,9 @@
 package com.primovision.lutransport.controller.report;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,12 @@ import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.SubcontractorInvoice;
 import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.report.BillingWrapper;
+import com.primovision.lutransport.model.report.Billing_New;
+import com.primovision.lutransport.model.report.SubcontractorBillingNew;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
 import com.primovision.lutransport.model.report.SubcontractorReportInput;
+import com.primovision.lutransport.model.report.SubcontractorSummary;
+import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.ReportService;
 
@@ -95,7 +101,9 @@ public class SubcontractorReportController extends BaseController {
 			HttpServletRequest request, SubcontractorReportInput input) {
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
-		SubcontractorBillingWrapper wrapper=generateSubcontractorReport(criteria, input);
+		
+		// Subcontractor summary report - 16thMar2016
+		SubcontractorBillingWrapper wrapper=generateSubcontractorReport(criteria, input, false);
 		/*double mesceCharge=0.00;
 		double mCharge=0.00;
 		DecimalFormat df2 = new DecimalFormat("###.##");
@@ -129,8 +137,10 @@ public class SubcontractorReportController extends BaseController {
 		return data;
 		//return null;
 	}
-	public SubcontractorBillingWrapper generateSubcontractorReport(SearchCriteria searchCriteria, SubcontractorReportInput input) {
-		    return reportService.generateSubcontractorReportData(searchCriteria, input);
+	
+	// Subcontractor summary report - 16thMar2016
+	public SubcontractorBillingWrapper generateSubcontractorReport(SearchCriteria searchCriteria, SubcontractorReportInput input, boolean isSummary) {
+		    return reportService.generateSubcontractorReportData(searchCriteria, input, isSummary);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
@@ -139,58 +149,150 @@ public class SubcontractorReportController extends BaseController {
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
 		Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
 		populateSearchCriteria(request, request.getParameterMap());
+		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		String p=request.getParameter("p");
-		if(p==null)
-			request.getSession().setAttribute("input", input);
-			SubcontractorReportInput input1=(SubcontractorReportInput)request.getSession().getAttribute("input");
-			criteria.setPageSize(1000);
+		
+		// Subcontractor summary report - 16thMar2016
+		String sum = request.getParameter("summary");
+		if (StringUtils.contains(sum, "true")) {
 			try {
-				Map<String, Object> datas;
-				//if(criteria.getPage()==0)
-				if(p==null)
-				{
-					 datas = generateData(criteria,request,input);
-			    }else
-				{
-					 datas = generateData(criteria,request,input1);	
+				request.getSession().setAttribute("input", input);
+				
+				List<SubcontractorSummary> subcontractorSummaryList = generateSubcontractorSummaryReport(criteria, input); 
+				if (subcontractorSummaryList.isEmpty()) {
+					return "reportuser/report/subcontractorreport/nodata";
 				}
-				//Map<String, Object> datas = generateData(criteria, request,input);
-				if (StringUtils.isEmpty(type))
+				
+				Map<String,Object> params= new HashMap<String,Object>();
+				if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+					params.put("batchDateFrom",input.getBatchDateFrom());
+				}
+				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
+					params.put("batchDateTo",input.getBatchDateTo());
+				}
+				
+				if (StringUtils.isEmpty(type)) {
 					type = "html";
-				response.setContentType(MimeUtil.getContentType(type));
-				if (!type.equals("html"))
-					response.setHeader("Content-Disposition",
-							"attachment;filename=subcontractorreport." + type);
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				Map params = (Map)datas.get("params");
-				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("subcontractorreport",
-						(List)datas.get("data"), params, request);
-				request.setAttribute("jasperPrint", jasperPrint);
-				/*return "reportuser/report/"+type;*/
-				if(criteria.getRecordCount()>0)
-				    return "reportuser/report/subcontractorreport/"+type;
-			     return "reportuser/report/subcontractorreport/nodata";
+				}
+				response.setContentType(MimeUtil.getContentType(type));			
+			   
+				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("subContractorSummaryReport",
+						(List)subcontractorSummaryList, params, request);
+				request.setAttribute("jasperPrint", jasperPrint);	
+				return  "reportuser/report/subcontractorreport/summayHtml";
 			} catch (Exception e) {
 				e.printStackTrace();
 				request.getSession().setAttribute("errors", e.getMessage());
 				return "error";
-			}
+			} 
+		}
 		
+		String p=request.getParameter("p");
+		if(p==null)
+			request.getSession().setAttribute("input", input);
+		
+		SubcontractorReportInput input1=(SubcontractorReportInput)request.getSession().getAttribute("input");
+		criteria.setPageSize(1000);
+		try {
+			Map<String, Object> datas;
+			//if(criteria.getPage()==0)
+			if(p==null)
+			{
+				 datas = generateData(criteria,request,input);
+		    }else
+			{
+				 datas = generateData(criteria,request,input1);	
+			}
+			//Map<String, Object> datas = generateData(criteria, request,input);
+			if (StringUtils.isEmpty(type))
+				type = "html";
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html"))
+				response.setHeader("Content-Disposition",
+						"attachment;filename=subcontractorreport." + type);
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map params = (Map)datas.get("params");
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("subcontractorreport",
+					(List)datas.get("data"), params, request);
+			request.setAttribute("jasperPrint", jasperPrint);
+			/*return "reportuser/report/"+type;*/
+			if(criteria.getRecordCount()>0)
+			    return "reportuser/report/subcontractorreport/"+type;
+		     return "reportuser/report/subcontractorreport/nodata";
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "error";
+		}
 	}
+	
+	// Subcontractor summary report - 16thMar2016
+	private List<SubcontractorSummary> generateSubcontractorSummaryReport(SearchCriteria criteria, 
+			SubcontractorReportInput input) {
+		List<SubcontractorSummary> subcontractorSummaryList = reportService.generateSubcontractorSummaryReport(criteria, input);
+		return subcontractorSummaryList;
+	}
+	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
 	public String display(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response,
 			@RequestParam(required = false, value = "type") String type,
-			@RequestParam(required = false, value = "jrxml") String jrxml) {
+			@RequestParam(required = false, value = "jrxml") String jrxml)  throws IOException {
 		Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		SubcontractorReportInput input = (SubcontractorReportInput)request.getSession().getAttribute("input");
+		
+		// Subcontractor summary report - 16thMar2016
+		String sum=request.getParameter("typ");
+		if (StringUtils.equalsIgnoreCase(sum, "summary")) {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			try {
+				List<SubcontractorSummary> subcontractorSummaryList = generateSubcontractorSummaryReport(criteria, input);           
+				
+				Map<String,Object> params= new HashMap<String,Object>();
+				if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+					params.put("batchDateFrom",input.getBatchDateFrom());
+				}
+				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
+					params.put("batchDateTo",input.getBatchDateTo());
+				}
+				
+				if (StringUtils.isEmpty(type))
+					type = "xlsx";
+				if (!type.equals("html") && !(type.equals("print"))) {
+					response.setHeader("Content-Disposition",
+							"attachment;filename=subContractorSummaryReport." + type);
+				}
+				response.setContentType(MimeUtil.getContentType(type));
+				
+				if (!type.equals("print")&&!type.equals("pdf")) {
+					out = dynamicReportService.generateStaticReport("subContractorSummaryReport",
+							(List)subcontractorSummaryList, params, type, request);
+				}
+				else if(type.equals("pdf")) {
+					out = dynamicReportService.generateStaticReport("subContractorSummaryReport",
+							(List)subcontractorSummaryList, params, type, request);
+				} 			
+				out.writeTo(response.getOutputStream());
+				out.flush();
+				out.close();
+				return null;
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.warn("Unable to create file :" + e);
+				request.getSession().setAttribute("errors", e.getMessage());
+				out.flush();
+				out.close();
+				return "error";
+			}			
+		}
+		
 		criteria.setPageSize(25000);
 		criteria.setPage(0);
-		SubcontractorReportInput input = (SubcontractorReportInput)request.getSession().getAttribute("input");
 		try {
 			Map<String,Object> datas = generateData(criteria, request, input);
 			//List propertyList = (List<String>) request.getSession()
