@@ -1680,8 +1680,10 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 				if(!category.equals("2")){						
 					Driver driver = genericDAO.getById(Driver.class,Long.parseLong(employeeId));
 					
-					if(driver.getPayTerm().equals("3")){							
-						String query="select obj from WeeklySalary obj where obj.driver.fullName='"+driver.getFullName()+"'";							
+					if(driver.getPayTerm().equals("3")){	
+						String query="select obj from WeeklySalary obj where obj.driver.fullName='"+driver.getFullName()+"'"
+										  // PTOD payrate fix - weekly salary - 25thMar2016
+										  + " and '" + batchDate + "' BETWEEN obj.validFrom and obj.validTo";
 						List<WeeklySalary> weeklySalaryRates=genericDAO.executeSimpleQuery(query);
 						if(!weeklySalaryRates.isEmpty()){								
 							WeeklySalary weeklySalaryRate=weeklySalaryRates.get(0);								
@@ -1790,7 +1792,7 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 				}
 */
 
-			}
+			}	
 			hourlyamountPaid=(hpaid+hourpaidout)*ptodhourlyRate;
 			//System.out.println("\nhourlyamountPaid\n");
 			//System.out.println("\nemployeeId--->"+employeeId+"\n");
@@ -1894,8 +1896,10 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 			if(!category.equals("2")){						
 				Driver driver = genericDAO.getById(Driver.class,Long.parseLong(employeeId));
 				
-				if(driver.getPayTerm().equals("3")){						
-					String query="select obj from WeeklySalary obj where obj.driver.fullName='"+driver.getFullName()+"'";
+				if(driver.getPayTerm().equals("3")){
+					String query="select obj from WeeklySalary obj where obj.driver.fullName='"+driver.getFullName()+"'"
+									  // PTOD payrate fix - weekly salary - 25thMar2016
+									  + " and '" + batchDate + "' BETWEEN obj.validFrom and obj.validTo";
 					
 					List<WeeklySalary> weeklySalaryRates=genericDAO.executeSimpleQuery(query);
 					if(!weeklySalaryRates.isEmpty()){							
