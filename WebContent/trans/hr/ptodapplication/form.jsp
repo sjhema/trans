@@ -967,6 +967,16 @@ function formatDate6(){
    }
 	
 }
+
+function processform() {
+	var submitBtn = document.getElementById("create");
+	submitBtn.disabled = true;
+	
+	var form = document.getElementById("ptodApplnForm");
+	form.submit();
+	
+	return false;
+}
 </script>
 
 
@@ -976,7 +986,7 @@ function formatDate6(){
 </h3>
 
 
-<form:form action="save.do" name="typeForm" commandName="modelObject"
+<form:form action="save.do" name="typeForm" id="ptodApplnForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />	
 	<input id="usertypeid" type="hidden" value="${sessionScope.userInfo.role.name}"/>	
@@ -1758,7 +1768,7 @@ function formatDate6(){
 		<tr>
 			<td>&nbsp;</td>
 			<td align="${left}" colspan="2"><input type="submit"
-				name="create" id="create" onclick=""
+				name="create" id="create" onclick="javascript:processform();"
 				value="<primo:label code="Save"/>" class="flat" /> <input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"
