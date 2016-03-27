@@ -968,7 +968,7 @@ function formatDate6(){
 	
 }
 
-function processform() {
+function processForm() {
 	var submitBtn = document.getElementById("create");
 	submitBtn.disabled = true;
 	
@@ -1768,7 +1768,7 @@ function processform() {
 		<tr>
 			<td>&nbsp;</td>
 			<td align="${left}" colspan="2"><input type="submit"
-				name="create" id="create" onclick="javascript:processform();"
+				name="create" id="create" onclick="javascript:processForm();"
 				value="<primo:label code="Save"/>" class="flat" /> <input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"
