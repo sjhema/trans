@@ -174,7 +174,7 @@ public class CommonNetSubcontractorReportController extends BaseController {
 		//return null;
 	}
 	public SubcontractorBillingWrapper generateSubcontractorReport(SearchCriteria searchCriteria, SubcontractorReportInput input) {
-		    return reportService.generateSubcontractorReportData(searchCriteria, input);
+		    return reportService.generateSubcontractorReportData(searchCriteria, input, false);
 	}
 	
 }
