@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="1640" pageHeight="1500" orientation="Landscape" columnWidth="1636" leftMargin="2" rightMargin="2" topMargin="2" bottomMargin="2">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="1640" pageHeight="855" orientation="Landscape" columnWidth="1636" leftMargin="2" rightMargin="2" topMargin="2" bottomMargin="2">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="863"/>
-	<property name="ireport.y" value="148"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
 	<parameter name="origin" class="java.lang.String"/>
 	<parameter name="destination" class="java.lang.String"/>
 	<parameter name="date" class="java.lang.String"/>
@@ -293,6 +293,7 @@
 	</pageHeader>
 	<columnHeader>
 		<band height="54" splitType="Stretch">
+			<printWhenExpression><![CDATA[$V{PAGE_NUMBER} > 0]]></printWhenExpression>
 			<staticText>
 				<reportElement mode="Opaque" x="933" y="24" width="49" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
