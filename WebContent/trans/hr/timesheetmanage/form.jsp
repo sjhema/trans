@@ -1835,7 +1835,7 @@ function formatDate6(){
 		var submitBtn = document.getElementById("create");
 		submitBtn.disabled = true;
 		
-		var form = document.getElementById("ptodApplnForm");
+		var form = document.getElementById("timesheetManageForm");
 		form.submit();
 		
 		return false;
@@ -1844,7 +1844,7 @@ function formatDate6(){
 </script>
 
 <h3><primo:label code="Add/Update Time Sheet" /></h3>
-<form:form action="save.do" name="typeForm" commandName="modelObject" method="post">
+<form:form action="save.do" name="typeForm" id="timesheetManageForm" commandName="modelObject" method="post">
 	<form:hidden path="id" id="id" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
