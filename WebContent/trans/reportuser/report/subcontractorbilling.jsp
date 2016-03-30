@@ -2,22 +2,10 @@
 <script type="text/javascript">
 
 	var submitting = false;
-	
-	function processSubmit() {
-	  if(submitting) {
-		    alert('Please wait a moment...');
-		    this.disabled = true;
-		    return false;
-	   } else {
-			submitting = true;
-		    return true;
-	   }	
-	}
 
 </script>
 <script language="javascript">
 	function searchReport() {
-		submitting = false;
 		
 		var subcon= document.getElementById('subcontractorID').value;
 		
@@ -365,8 +353,18 @@
 			<a href="${ctx}/reportuser/report/subcontractorbilling/export.do?type=pdf" target="reportData"><img src="${ctx}/images/pdf.png" border="0" class="toolbarButton"/></a>
 			<a href="${ctx}/reportuser/report/subcontractorbilling/export.do?type=xls" target="reportData"><img src="${ctx}/images/excel.png" border="0" class="toolbarButton"/></a>
 			<a href="${ctx}/reportuser/report/subcontractorbilling/export.do?type=csv" target="reportData"><img src="${ctx}/images/csv.png" border="0" class="toolbarButton"/></a>
-			<a href="${ctx}/reportuser/report/subcontractorbilling/save.do" target="reportData"  name="myButton" 
-			onclick="return processSubmit();"><img src="${ctx}/images/save.png" border="0" class="toolbarButton"/></a>
+			<a href="${ctx}/reportuser/report/subcontractorbilling/save.do" target="reportData"  name="myButton" onclick="
+  if(submitting) {
+    alert('please wait a moment...');
+    this.disabled = true;
+    return false;
+  }
+
+  else {
+	  submitting = true;
+    return true;
+  }
+"><img src="${ctx}/images/save.png" border="0" class="toolbarButton"/></a>
 <a href="${ctx}/reportuser/report/subcontractorbilling/export.do?type=print" target="reportData"><img src="${ctx}/images/print.png" border="0" class="toolbarButton"/></a>
 		</td>
 	</tr>
