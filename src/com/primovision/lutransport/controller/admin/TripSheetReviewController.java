@@ -967,7 +967,9 @@ if(!StringUtils.isEmpty(verificationStatus)){
 	}
 }
 
-query.append(" order by obj.loadDate desc,obj.origin asc,obj.originTicket asc");
+// Trip sheet export order fix - 31st Mar 2016
+query.append(" order by obj.loadDate asc,obj.origin asc,obj.originTicket asc");
+//query.append(" order by obj.loadDate desc,obj.origin asc,obj.originTicket asc");
 
 
 
