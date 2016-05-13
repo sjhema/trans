@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,6 +35,10 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.StringUtil;
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -386,6 +391,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											List<Vehicle> vehicleList = retrieveVehicleForUnit(vehicletolltags.get(0).getVehicle().getUnit(),
 													transactiondate);
 											List<Ticket> tickets = getTicketsForVehicle(vehicleList, transactiondate);
+											
+											// More than one driver fix - 13th May 2016
+											String txnTime = getCellValue(row.getCell(7)).toString();
+											Date txnDate = (Date) getCellValue(row.getCell(6));
+											tickets = determineCorrectTicket(tickets, txnDate, txnTime);
+											
 											if (!tickets.isEmpty()) {
 												boolean tic = true;
 												boolean first = true;
@@ -735,6 +746,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											List<Vehicle> vehicleListForDriver = new ArrayList<Vehicle>();
 											vehicleListForDriver.add(vehicle);
 											List<Ticket> tickets = getTicketsForVehicle(vehicleListForDriver, transactiondate);
+											
+											// More than one driver fix - 13th May 2016
+											String txnTime = getCellValue(row.getCell(7)).toString();
+											Date txnDate = (Date) getCellValue(row.getCell(6));
+											tickets = determineCorrectTicket(tickets, txnDate, txnTime);
+											
 											if (!tickets.isEmpty()) {
 												boolean tic = true;
 												boolean first = true;
@@ -3046,16 +3063,24 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 	// Fuel log - subcontractor
 	private SubContractor getSubcontractorObjectFromName(String lastName, String firstName) {
-		String name = lastName + " " + firstName;
+		String baseSubcontractorQuery = "select obj from SubContractor obj where "
+				+ "obj.name LIKE '"; 
 		
-		String subcontractorQuery = "select obj from SubContractor obj where "
-				+ "obj.name LIKE '" + name + "%'"; 
-		System.out.println("******* The subcontractor query for fuel upload is " + subcontractorQuery);
+		String name = lastName + " " + firstName + "%";
+		String subcontractorQuery = baseSubcontractorQuery + name + "'";
+		System.out.println("******* The subcontractor query for fuel upload - first attempt is " + subcontractorQuery);
 		List<SubContractor> subContractorList = genericDAO.executeSimpleQuery(subcontractorQuery);
 		if (subContractorList.isEmpty()) {
-			return null;
-		} else {
+			name = firstName + " " + lastName + "%";
+			subcontractorQuery = baseSubcontractorQuery + name + "'";
+			System.out.println("******* The subcontractor query for fuel upload - second attempt is " + subcontractorQuery);
+			subContractorList = genericDAO.executeSimpleQuery(subcontractorQuery);
+		} 
+		
+		if (!subContractorList.isEmpty()) {
 			return subContractorList.get(0);
+		} else {
+			return null;
 		}
 	}
 	
@@ -3395,6 +3420,66 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		fuelLog.setUnit(matchingTicket.getVehicle());
 		return true;
+	}
+	
+	// More than one driver fix - 13th May 2016
+	private int calculateDuration(String startTime, String endTime) {
+		if (StringUtils.isEmpty(startTime) || StringUtils.isEmpty(endTime)) {
+			return 0;
+		}
+		
+		DateTimeFormatter durationFormat = DateTimeFormat.forPattern("HH:mm");
+		
+		DateTime dtStart = durationFormat.parseDateTime(startTime);
+	   DateTime dtStop = durationFormat.parseDateTime(endTime);
+	   if (dtStop.isBefore(dtStart)) {
+	   	DateTime temp = dtStart;
+	   	dtStart = dtStop;
+	   	dtStop = temp;
+	   }
+	
+	   /*System.out.print(Days.daysBetween(dtStart, dtStop).getDays() + " days, ");
+	   System.out.print(Hours.hoursBetween(dtStart, dtStop).getHours() % 24 + " hours, ");
+	   System.out.print(org.joda.time.Minutes.minutesBetween(dtStart, dtStop).getMinutes() % 60 + " minutes, ");
+	   System.out.println(Seconds.secondsBetween(dtStart, dtStop).getSeconds() % 60 + " seconds.");*/
+	   
+	   int hours = Hours.hoursBetween(dtStart, dtStop).getHours() % 24;
+	   int mins = org.joda.time.Minutes.minutesBetween(dtStart, dtStop).getMinutes() % 60;
+	   return mins + (hours * 60);
+	}
+	
+	// More than one driver fix - 13th May 2016
+	private List<Ticket> determineCorrectTicket(List<Ticket> ticketsList, Date txnDate, String txnTime) {
+		List<Ticket> correctTicketsList = new ArrayList<Ticket>();
+		if (ticketsList.isEmpty()) {
+			return correctTicketsList;
+		}
+		
+		Map<Integer, Ticket> ticketDurationMap = new HashMap<Integer, Ticket>();
+		for (Ticket aTicket : ticketsList) {
+			List<Integer> durationsList = new ArrayList<Integer>();
+			
+			if (DateUtils.isSameDay(txnDate, aTicket.getLoadDate()) ) {
+				durationsList.add(calculateDuration(aTicket.getTransferTimeIn(), txnTime));
+				durationsList.add(calculateDuration(aTicket.getTransferTimeOut(), txnTime));
+				
+			}
+			
+			if (DateUtils.isSameDay(txnDate, aTicket.getUnloadDate()) ) {
+				durationsList.add(calculateDuration(aTicket.getLandfillTimeIn(), txnTime));
+				durationsList.add(calculateDuration(aTicket.getLandfillTimeOut(), txnTime));
+			}
+			
+			Object[] sortedDurations = durationsList.toArray();
+			Arrays.sort(sortedDurations);
+			ticketDurationMap.put((Integer)sortedDurations[0], aTicket);
+		}
+		
+		Integer[] finalDurations = ticketDurationMap.keySet().toArray(new Integer[0]);
+		Arrays.sort(finalDurations);
+		
+		correctTicketsList.add(ticketDurationMap.get(finalDurations[0]));
+		return correctTicketsList;
 	}
 	
 	private List<Ticket> getTicketsForVehicle(List<Vehicle> vehicleList, String transDateStr) throws ParseException {
