@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
@@ -63,6 +64,7 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	 private static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	 public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
 	
 	
 	@Override
@@ -609,6 +611,14 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 		beforeSave(request, entity, model);			
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
+		
+		String mobileEntryTableUpdateQuery = "update DriverMobileEntry d set "
+				+ "d.tripsheet_flag='Y' "
+				+ ", d.enteredBy='" + getUser(request).getFullName() + "'"
+				+ " where "
+				+ "d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getLoadDate())+"'";
+		genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());
+		
 		
 		
 

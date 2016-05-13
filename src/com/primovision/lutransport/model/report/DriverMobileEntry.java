@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.ReportModel;
@@ -48,6 +49,17 @@ public class DriverMobileEntry extends AbstractBaseModel implements ReportModel 
 	
 	@Column(name="odometer_flag")
 	protected String odometer_flag;
+	
+	@Column(name="entered_by")
+	protected String enteredBy;
+
+	public String getEnteredBy() {
+		return enteredBy;
+	}
+
+	public void setEnteredBy(String enteredBy) {
+		this.enteredBy = enteredBy;
+	}
 
 	public Long getEmployeeCompanyId() {
 		return employeeCompanyId;

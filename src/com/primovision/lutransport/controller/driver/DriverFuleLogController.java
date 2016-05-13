@@ -255,7 +255,10 @@ public class DriverFuleLogController extends CRUDController<DriverFuelLog>{
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		String mobileEntryTableUpdateQuery = "update DriverMobileEntry d set d.fuellog_flag='Y' where d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getTransactionDate())+"'";
+		String mobileEntryTableUpdateQuery = "update DriverMobileEntry d "
+				+ "set d.fuellog_flag='Y' "
+				+ ", d.enteredBy='" + getUser(request).getFullName() + "'"
+				+ " where d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getTransactionDate())+"'";
 		genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());
 		
 		

@@ -108,8 +108,9 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
         	countquery.append(" and obj.employeeName in ('"+driver+"')");
 		}      
         
-        
+        boolean entryDateSearch = false;
         if(!StringUtils.isEmpty(entryDateFrom)){
+      	  entryDateSearch = true;
         	try {
 				query.append(" and obj.entryDate  >='"+dateFormat.format(sdf.parse(entryDateFrom))+"'");
 				countquery.append(" and obj.entryDate  >='"+dateFormat.format(sdf.parse(entryDateFrom))+"'");
@@ -121,6 +122,7 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
 		}
         
         if(!StringUtils.isEmpty(entryDateTo)){
+      	  entryDateSearch = true;
         	try {
 				query.append(" and obj.entryDate  <='"+dateFormat.format(sdf.parse(entryDateTo))+"'");
 				countquery.append(" and obj.entryDate <='"+dateFormat.format(sdf.parse(entryDateTo))+"'");
@@ -143,8 +145,10 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
         	}
 		}
        
-        query.append(" order by obj.entryDate desc,obj.employeeName asc");
-        countquery.append(" order by obj.entryDate desc,obj.employeeName asc");
+        // Driver mobile entry order fix
+        String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
+        query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        countquery.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
        
         
 		
@@ -198,8 +202,9 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
         	query.append(" and obj.employeeName in ('"+driver+"')");        	
 		}      
         
-        
+        boolean entryDateSearch = false;
         if(!StringUtils.isEmpty(entryDateFrom)){
+      	  entryDateSearch = true;
         	try {
 				query.append(" and obj.entryDate  >='"+dateFormat.format(sdf.parse(entryDateFrom))+"'");				
 			} catch (ParseException e) {
@@ -210,6 +215,7 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
 		}
         
         if(!StringUtils.isEmpty(entryDateTo)){
+      	  entryDateSearch = true;
         	try {
 				query.append(" and obj.entryDate  <='"+dateFormat.format(sdf.parse(entryDateTo))+"'");				
 			} catch (ParseException e) {
@@ -227,9 +233,10 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
         	}
 		}
        
-        query.append(" order by obj.entryDate desc,obj.employeeName asc");        
-       
-		
+        // Driver mobile entry order fix
+        String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
+        query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        
        
 
 List<DriverMobileEntry>	driverMobileEntry = genericDAO.executeSimpleQuery(query.toString());
@@ -244,6 +251,7 @@ for(DriverMobileEntry obj:driverMobileEntry){
 	output.setTripsheet_flag(obj.getTripsheet_flag());
 	output.setFuellog_flag(obj.getFuellog_flag());
 	output.setOdometer_flag(obj.getOdometer_flag());
+	output.setEnteredBy(obj.getEnteredBy());
 	driverMobileEntryList.add(output);
 }
 

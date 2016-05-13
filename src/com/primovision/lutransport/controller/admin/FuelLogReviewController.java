@@ -63,6 +63,7 @@ public class FuelLogReviewController extends CRUDController<DriverFuelLog>{
 	
 	 private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	 private static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	 public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
 	
 	@Override
 	@InitBinder
@@ -348,6 +349,13 @@ public class FuelLogReviewController extends CRUDController<DriverFuelLog>{
 			beforeSave(request, entity, model);			
 			genericDAO.saveOrUpdate(entity);
 			cleanUp(request);
+			
+			String mobileEntryTableUpdateQuery = "update DriverMobileEntry d "
+					+ "set d.fuellog_flag='Y' "
+					+ ", d.enteredBy='" + getUser(request).getFullName() + "'"
+					+ " where "
+					+ "d.employeeName in ('"+drviver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getTransactionDate())+"'";
+			genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());
 			
 			
 			/*if(!StringUtils.isEmpty(request.getParameter("id")) && request.getParameter("id")!=null){

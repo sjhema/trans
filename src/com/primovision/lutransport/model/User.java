@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -86,6 +87,19 @@ public class User extends AbstractBaseModel implements Comparable, Auditable{
 	@ManyToOne
 	@JoinColumn(name="role_id")
 	private Role role;
+	
+	@Transient
+	public String getFullName() {
+		String fullName = StringUtils.EMPTY;
+		if (!StringUtils.isEmpty(getFirstName())) {
+			fullName = getFirstName();
+		}
+		if (!StringUtils.isEmpty(getLastName())) {
+			fullName += " " + getLastName();
+		}
+			
+		return fullName;	
+	}
 	
 	public String getName() {
 		return name;

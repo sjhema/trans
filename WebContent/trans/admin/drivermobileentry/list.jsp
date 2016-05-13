@@ -294,10 +294,11 @@ function formatDate1(){
 		<primo:textcolumn headerText="Company" dataField="employeeCompanyName" />
 		<primo:textcolumn headerText="Terminal" dataField="employeeTerminalName" />
 		<primo:textcolumn headerText="Driver" dataField="employeeName" />
-		<primo:textcolumn headerText="Entry Date" dataField="entryDate" dataFormat="MM-dd-yyyy" />	
+		<primo:textcolumn headerText="Date" dataField="entryDate" dataFormat="MM-dd-yyyy" />	
 		<primo:textcolumn HAlign="center" headerText="Trip Sheet" dataField="tripsheet_flag"/>	
 		<primo:textcolumn HAlign="center" headerText="Fuel Log" dataField="fuellog_flag"/>		
 		<primo:textcolumn HAlign="center" headerText="Odometer" dataField="odometer_flag"/>	
+		<primo:textcolumn headerText="Entered By" dataField="enteredBy" />
 	</primo:datatable>
 	<% session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList")); %>
 </form:form>

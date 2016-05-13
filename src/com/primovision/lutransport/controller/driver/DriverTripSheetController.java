@@ -541,7 +541,10 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		String mobileEntryTableUpdateQuery = "update DriverMobileEntry d set d.tripsheet_flag='Y' where d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getLoadDate())+"'";
+		String mobileEntryTableUpdateQuery = "update DriverMobileEntry d "
+				+ "set d.tripsheet_flag='Y' "
+				+ ", d.enteredBy='" + getUser(request).getFullName() + "'"
+				+ " where d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getLoadDate())+"'";
 		genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());
 		
 
