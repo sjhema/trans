@@ -1177,7 +1177,7 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 				String workedDuration = calculateWorkedDuration(startTime1, stopTime1,
 						startTime2, stopTime2, lunchDuration);
 				
-				list.add(workedDuration);
+				list.add(StringUtils.replace(workedDuration, ":", "."));
 				Gson gson = new Gson();
 				return gson.toJson(list);
 				
