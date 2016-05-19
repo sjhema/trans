@@ -3450,9 +3450,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	
 	// More than one driver fix - 13th May 2016
 	private List<Ticket> determineCorrectTicket(List<Ticket> ticketsList, Date txnDate, String txnTime) {
-		List<Ticket> correctTicketsList = new ArrayList<Ticket>();
 		if (ticketsList.isEmpty()) {
-			return correctTicketsList;
+			return ticketsList;
+		}
+		
+		if (ticketsList.size() == 1) {
+			return ticketsList;
+		}
+		
+		List<Long> driverIdList = new ArrayList<Long>();
+		for (Ticket aTicket : ticketsList) {
+			if (!driverIdList.contains(aTicket.getDriver().getId())) {
+				driverIdList.add(aTicket.getDriver().getId());
+			}
+		}
+		
+		if (driverIdList.size() == 1) {
+			return ticketsList;
 		}
 		
 		Map<Integer, Ticket> ticketDurationMap = new HashMap<Integer, Ticket>();
@@ -3470,15 +3484,20 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				durationsList.add(calculateDuration(aTicket.getLandfillTimeOut(), txnTime));
 			}
 			
-			Object[] sortedDurations = durationsList.toArray();
-			Arrays.sort(sortedDurations);
-			ticketDurationMap.put((Integer)sortedDurations[0], aTicket);
+			if (!durationsList.isEmpty()) {
+				Object[] sortedDurations = durationsList.toArray();
+				Arrays.sort(sortedDurations);
+				ticketDurationMap.put((Integer)sortedDurations[0], aTicket);
+			}
 		}
 		
-		Integer[] finalDurations = ticketDurationMap.keySet().toArray(new Integer[0]);
-		Arrays.sort(finalDurations);
+		List<Ticket> correctTicketsList = new ArrayList<Ticket>();
+		if (!ticketDurationMap.isEmpty()) {
+			Integer[] finalDurations = ticketDurationMap.keySet().toArray(new Integer[0]);
+			Arrays.sort(finalDurations);
+			correctTicketsList.add(ticketDurationMap.get(finalDurations[0]));
+		}
 		
-		correctTicketsList.add(ticketDurationMap.get(finalDurations[0]));
 		return correctTicketsList;
 	}
 	
