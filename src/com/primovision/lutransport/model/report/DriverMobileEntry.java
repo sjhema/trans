@@ -52,6 +52,28 @@ public class DriverMobileEntry extends AbstractBaseModel implements ReportModel 
 	
 	@Column(name="entered_by")
 	protected String enteredBy;
+	
+	@Column(name="entered_by_id")
+	protected Long enteredById;
+	
+	@Column(name="entered_by_type")
+	protected String enteredByType;
+
+	public Long getEnteredById() {
+		return enteredById;
+	}
+
+	public void setEnteredById(Long enteredById) {
+		this.enteredById = enteredById;
+	}
+
+	public String getEnteredByType() {
+		return enteredByType;
+	}
+
+	public void setEnteredByType(String enteredByType) {
+		this.enteredByType = enteredByType;
+	}
 
 	public String getEnteredBy() {
 		return enteredBy;

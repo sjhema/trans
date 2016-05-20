@@ -344,6 +344,8 @@ public class OdometerReadingReviewController extends CRUDController<Odometer>{
 			String mobileEntryTableUpdateQuery = "update DriverMobileEntry d "
 					+ "set d.odometer_flag='Y' "
 					+ ", d.enteredBy='" + getUser(request).getFullName() + "'"
+					+ ", d.enteredById=" + getUser(request).getId()
+					+ ", d.enteredByType='OPS'"
 					+ " where "
 					+ "d.employeeName in ('"+drviver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getRecordDate())+"'";
 			genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());

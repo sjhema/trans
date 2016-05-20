@@ -91,11 +91,11 @@ public class User extends AbstractBaseModel implements Comparable, Auditable{
 	@Transient
 	public String getFullName() {
 		String fullName = StringUtils.EMPTY;
-		if (!StringUtils.isEmpty(getFirstName())) {
-			fullName = getFirstName();
-		}
 		if (!StringUtils.isEmpty(getLastName())) {
-			fullName += " " + getLastName();
+			fullName = getLastName();
+		}
+		if (!StringUtils.isEmpty(getFirstName())) {
+			fullName += " " + getFirstName();
 		}
 			
 		return fullName;	
