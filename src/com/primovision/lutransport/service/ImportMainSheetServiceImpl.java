@@ -115,7 +115,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		List<VehicleTollTag> vehicleTollTags = genericDAO.executeSimpleQuery(tollQuery);
 		if (vehicleTollTags != null && vehicleTollTags.size() > 0) {
 			String plateNum = getCellValue(row.getCell(4)).toString();
-			if (StringUtils.contains(tollNum, plateNum)) {
+			if (StringUtils.contains(tollNum, plateNum) || StringUtils.contains(plateNum, tollNum)) {
 				row.getCell(4).setCellValue(StringUtils.EMPTY);
 			}
 		} else {

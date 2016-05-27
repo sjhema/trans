@@ -312,7 +312,9 @@ public class TollCompanyTagUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (columnIndex == 5) { // Driver
+		if (columnIndex == 3) { // Tag num
+			setCellValueTagNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // Driver
 			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (oneCellValue instanceof Date || columnIndex == 6 || columnIndex == 10) { // Transaction date and time, Invoice date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
@@ -379,6 +381,13 @@ public class TollCompanyTagUploadUtil {
 		String tagNum = StringUtils.trimToEmpty(oneCellValue.toString());
 		tagNum = tagNum.replaceAll("\u00a0", StringUtils.EMPTY);
 		tagNum = StringUtils.stripStart(tagNum, "0");
+		
+		if (StringUtils.contains(vendor, TOLL_COMPANY_SUN_PASS)) {
+			if (StringUtils.startsWith(tagNum, "155")) {
+				tagNum = StringUtils.stripEnd(tagNum, "0");
+			}
+		}
+		
 		cell.setCellValue(tagNum);
 	}
 	
