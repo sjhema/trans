@@ -55,6 +55,7 @@ import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.Ptod;
 import com.primovision.lutransport.model.hr.PtodRate;
 import com.primovision.lutransport.model.hr.Ptodapplication;
+import com.primovision.lutransport.model.hr.SalaryOverride;
 import com.primovision.lutransport.model.hr.TimeSheet;
 import com.primovision.lutransport.model.hr.WeeklySalary;
 import com.primovision.lutransport.model.hrreport.DriverPay;
@@ -7039,6 +7040,14 @@ public class HrReportServiceImpl implements HrReportService {
 						weeklysalary=salary.getWeeklySalary();
 					}
 				}
+				
+				// Salary override req - 29th May 2016
+				Double salaryOverrideAmount = retrieveSalaryOverride(employee2.getFullName(), employee2.getCompany().getId(), 
+						employee2.getTerminal().getId(), payrollDate);
+				if (salaryOverrideAmount != null) {
+					weeklysalary = salaryOverrideAmount;
+				}
+				
 				WeeklyPayDetail detail=new WeeklyPayDetail();
 				detail.setCheckDate(checkDate);
 				detail.setDriver(employee2.getFullName());
@@ -7154,9 +7163,18 @@ public class HrReportServiceImpl implements HrReportService {
 		return wrapper;
 	}
 	
-	
-	
-	
+	// Salary override req - 29th May 2016
+	private Double retrieveSalaryOverride(String employeeFullName, Long companyId, Long terminalId, String payrollDate) {
+		String query = "select obj from SalaryOverride obj where obj.driver.fullName='"+employeeFullName
+				+"' and obj.company="+companyId+" and obj.terminal="+terminalId+" and obj.payrollBatch='"+payrollDate+"'";
+		
+		List<SalaryOverride> salaryOverrideList = genericDAO.executeSimpleQuery(query);
+		if (!salaryOverrideList.isEmpty()) {
+			return salaryOverrideList.get(0).getAmount();
+		}
+		
+		return null;
+	}
 
 	//@Override
 	//public WeeklypayWrapper generateWeeklyPayrollData(SearchCriteria criteria) {
