@@ -109,7 +109,7 @@ function formatDate(){
 <div style="width:100%; margin:0px auto;">
 	<form:form name="salaryOverrideEditForm" id="salaryOverrideEditForm">
 		<primo:datatable urlContext="hr/salaryoverride" deletable="false" editable="true" insertable="true" 
-			exportPdf="true" exportXls="true" exportCsv="true"
+			exportPdf="false" exportXls="false" exportCsv="false"
 			baseObjects="${list}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false" >
