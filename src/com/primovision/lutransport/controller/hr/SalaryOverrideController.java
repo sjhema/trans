@@ -92,8 +92,6 @@ public class SalaryOverrideController extends CRUDController<SalaryOverride> {
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(25);
 		
-		criteria.getSearchMap().clear();
-		
 		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria, "payrollBatch", true));
 		return urlContext + "/list";
 	}
