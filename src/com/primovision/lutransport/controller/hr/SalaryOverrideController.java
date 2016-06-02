@@ -33,7 +33,9 @@ import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.SalaryOverride;
+import com.primovision.lutransport.model.hrreport.WeeklyPay;
 
 @Controller
 @RequestMapping("/hr/salaryoverride")
@@ -128,6 +130,12 @@ public class SalaryOverrideController extends CRUDController<SalaryOverride> {
 			setupCreate(model, request);
 			return urlContext + "/form";
 		}
+		
+		if (isDuplicate(entity)) {
+			setupCreate(model, request);
+			request.getSession().setAttribute("error", "Salary override already exists for the batch.");
+			return urlContext + "/form";
+		}
 			
 		beforeSave(request, entity, model);
 		
@@ -141,6 +149,28 @@ public class SalaryOverrideController extends CRUDController<SalaryOverride> {
 			return "redirect:list.do";
 		} else {
 			return "redirect:create.do";
+		}
+	}
+
+	private boolean isDuplicate(SalaryOverride entity) {
+		if(entity.getId() != null){
+			return false;
+		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String payrollBatch = dateFormat.format(entity.getPayrollBatch());
+		
+		String checkForDuplicateQuery = "SELECT obj FROM SalaryOverride obj WHERE"
+				+ " obj.driver=" + entity.getDriver().getId()
+				+ " AND obj.payrollBatch='" + payrollBatch + "'";
+		
+		System.out.println(checkForDuplicateQuery);
+		List<SalaryOverride> salaryOverrideList = genericDAO.executeSimpleQuery(checkForDuplicateQuery);
+		
+		if (salaryOverrideList != null && !salaryOverrideList.isEmpty()) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

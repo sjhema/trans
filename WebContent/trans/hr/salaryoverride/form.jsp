@@ -82,7 +82,7 @@ function formatDate() {
 			<td colspan="6"><b><primo:label code="Add/Update Salary Override" /></b></td>
 		</tr>	
 		<tr>
-			<td class="form-left"><primo:label code="Driver" /><span class="errorMessage">*</span></td>		
+			<td class="form-left"><primo:label code="Employee" /><span class="errorMessage">*</span></td>		
 			<td>
 				<form:select cssClass="flat" path="driver" id="driverId" style="min-width:184px; max-width:184px">
 					<form:option value="">------<primo:label code="Please Select" />------</form:option>

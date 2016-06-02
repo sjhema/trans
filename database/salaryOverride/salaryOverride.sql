@@ -1,5 +1,5 @@
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
-VALUES ('9034', '/hr/salaryoverride/list.do?rst=1', 'Salary Override', '3', 'Salary Override', '/hr/salaryoverride/list.do,/hr/salaryoverride/create.do,/hr/salaryoverride/save.do,/hr/salaryoverride/edit.do,/hr/salaryoverride/search.do,/hr/salaryoverride/export.do,/hr/salaryoverride/ajax.do', '1', '4', '0', '903', '/1/903/9034/');
+VALUES ('9034', '/hr/salaryoverride/list.do?rst=1', 'Salary Override', '3', 'Salary Override', '/hr/salaryoverride/list.do,/hr/salaryoverride/create.do,/hr/salaryoverride/save.do,/hr/salaryoverride/edit.do,/hr/salaryoverride/delete.do,/hr/salaryoverride/search.do,/hr/salaryoverride/export.do,/hr/salaryoverride/ajax.do', '1', '4', '0', '903', '/1/903/9034/');
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '9034', '1'); -- ADMIN
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '9034', '7'); -- HR
