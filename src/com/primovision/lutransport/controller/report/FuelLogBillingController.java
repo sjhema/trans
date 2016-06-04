@@ -247,6 +247,12 @@ public class FuelLogBillingController extends BaseController{
 				Map<String,Object> datas = generateData(criteria, request, input);
 				//List propertyList = (List<String>) request.getSession()
 				//		.getAttribute("propertyList");
+				
+				String reportType = "fuellogReport";
+				if (FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK.equals(input.getReportType())) {
+					reportType = "fuelTruckReport";
+				}
+				
 				if (StringUtils.isEmpty(type))
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
@@ -261,15 +267,15 @@ public class FuelLogBillingController extends BaseController{
 							(List)datas.get("data"), params, type, request);
 				}*/
 				if (type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("fuellogReport"+"pdf",
+					out = dynamicReportService.generateStaticReport(reportType+"pdf",
 							(List)datas.get("data"), params, type, request);
 				}
 				else if (type.equals("csv")) {
-					out = dynamicReportService.generateStaticReport("fuellogReport"+"csv",
+					out = dynamicReportService.generateStaticReport(reportType+"csv",
 							(List)datas.get("data"), params, type, request);
 				}
 				else {
-					out = dynamicReportService.generateStaticReport("fuellogReport",
+					out = dynamicReportService.generateStaticReport(reportType,
 							(List)datas.get("data"), params, type, request);
 				}
 			
