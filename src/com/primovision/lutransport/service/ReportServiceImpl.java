@@ -3615,9 +3615,21 @@ throw new Exception("origin and destindation is empty");
 		}
 
 		if (!StringUtils.isEmpty(company)) {
-			query.append(" and  obj.company in (" + company + ")");
-			countQuery.append(" and  obj.company in (" + company + ")");
+			// Fuel log - truck report - 3rd Jun 2016
+			if (FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK.equals(input.getReportType())) {
+				if (StringUtils.isEmpty(truck)) {	
+					String truckIds = retrieveTruckIds(company);
+					if (StringUtils.isNotEmpty(truckIds)) {
+						query.append(" and  obj.unit in (" + truckIds + ")");
+						countQuery.append(" and  obj.unit in (" + truckIds + ")");
+					}
+				}
+			} else {
+				query.append(" and  obj.company in (" + company + ")");
+				countQuery.append(" and  obj.company in (" + company + ")");
+			}
 		}
+		
 		if (!StringUtils.isEmpty(terminal)) {
 			query.append(" and  obj.terminal in (" + terminal + ")");
 			countQuery.append(" and  obj.terminal in (" + terminal + ")");
@@ -3966,11 +3978,13 @@ throw new Exception("origin and destindation is empty");
 		if (StringUtils.isNotEmpty(invoiceDateTo)) {
 			wrapper.setInvoiceDateTo(invoiceDateTo);
 		}
+		
+		// Fuel log - truck report 3rd Jun 2016
 		if (StringUtils.isNotEmpty(transactionDateFrom)) {
-			wrapper.setTransactionDateFrom(transactionDateFrom);
+			wrapper.setTransactionDateFrom(input.getTransactionDateFrom());
 		}
 		if (StringUtils.isNotEmpty(transactionDateTo)) {
-			wrapper.setTransactionDateTo(transactionDateTo);
+			wrapper.setTransactionDateTo(input.getTransactionDateTo());
 		}
 		
 		if (StringUtils.isNotEmpty(fromInvoiceNo)) {
@@ -3980,11 +3994,36 @@ throw new Exception("origin and destindation is empty");
 			wrapper.setInvoiceNumberTo(InvoiceNoTo);
 		}
 		
+		// Fuel log - truck report 3rd Jun 2016
+		if (StringUtils.isNotEmpty(company)) {
+			wrapper.setCompany(company);
+		}
+		
 		return wrapper;
 	}
+	
+	// Fuel log - truck report - 3rd Jun 2016
+	private String retrieveTruckIds(String company) {
+		String vehicleQuery = "select obj from Vehicle obj where obj.type=1" 
+	   		+" and obj.owner in ("
+	   		+company
+	   		+")";
+		System.out.println("******** the vehicleQuery in retrieveTruckIds is "+ vehicleQuery);
+		
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		
+		String truckIds = StringUtils.EMPTY;
+		if(vehicleList == null || vehicleList.isEmpty()) {
+			return truckIds;
+		}
+		
+		for (Vehicle vehicleObj : vehicleList) {	
+			truckIds = truckIds + "," + String.valueOf(vehicleObj.getId());
+		}
+		
+		return truckIds.substring(1);
+	}
 
-	
-	
 	@Override
 	public FuelLogVerificationReportWrapper generateFuelLogVerificationData(
 			SearchCriteria searchCriteria, FuelLogVerificationReportInput input) {

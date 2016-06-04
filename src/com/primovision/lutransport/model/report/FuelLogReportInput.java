@@ -6,6 +6,8 @@ import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.ReportModel;
 
 public class FuelLogReportInput /*implements ReportModel*/{
+	public static String REPORT_TYPE_FUEL_PURCHASE = "FUEL_PURCHASE";
+	public static String REPORT_TYPE_FUEL_TRUCK = "FUEL_TRUCK";
 	
 	private String fuelVendor;
 	private String company;
@@ -37,6 +39,9 @@ public class FuelLogReportInput /*implements ReportModel*/{
 	// Fuel log - subcontractor
 	private String subContractor;
 	
+	// Fuel log - truck report - 3rd Jun 2016
+	private String reportType;
+	
 	
 	List<FuelLog> fuellogs=null;
 	
@@ -51,6 +56,12 @@ public class FuelLogReportInput /*implements ReportModel*/{
 	
 	
 	
+	public String getReportType() {
+		return reportType;
+	}
+	public void setReportType(String reportType) {
+		this.reportType = reportType;
+	}
 	public String getSubContractor() {
 		return subContractor;
 	}

@@ -25,7 +25,19 @@ public class FuelLogReportWrapper
 	String invoiceNumberFrom = StringUtils.EMPTY;
 	String invoiceNumberTo = StringUtils.EMPTY;
 	
+	// Fuel log - truck report 3rd Jun 2016
+	String company = StringUtils.EMPTY;
+	
 	List<FuelLog> fuellog=null;
+
+
+	public String getCompany() {
+		return company;
+	}
+	
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
 
 

@@ -1,8 +1,16 @@
 <%@include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
 
-function searchReport()
-{
+function searchFuelPurchaseReport() {
+	document.forms[0].elements["reportType"].value = 'FUEL_PURCHASE';
+	
+	/* document.forms[0].target="reportData"; */
+    document.forms[0].submit();
+}
+
+function searchFuelTruckReport() {
+	document.forms[0].elements["reportType"].value = 'FUEL_TRUCK';
+	
 	/* document.forms[0].target="reportData"; */
     document.forms[0].submit();
 }
@@ -253,6 +261,7 @@ $(document).ready(function(){
 <br/>
 <%-- <h3><primo:label code="FuelLog Report" /></h3> --%>
 <form:form action="search.do" name="searchForm" method="post" commandName="modelObject">
+	<form:hidden path="reportType" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Fuel Log Report" />
@@ -466,7 +475,11 @@ $(document).ready(function(){
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}" colspan="3"><input type="button"
-				onclick="javascript:searchReport()" value="Preview" /></td>
+				onclick="javascript:searchFuelPurchaseReport()" value="Fuel - Purchase report" />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+			onclick="javascript:searchFuelTruckReport()" value="Fuel - Truck report" />
+			</td>
 		</tr>
 		
 		

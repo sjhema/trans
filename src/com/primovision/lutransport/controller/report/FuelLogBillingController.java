@@ -112,11 +112,6 @@ public class FuelLogBillingController extends BaseController{
 		Map<String,Object> params = new HashMap<String,Object>();
 		
 		FuelLogReportWrapper wrapper = generateFuellogReport(searchCriteria,input);
-		
-		
-		 
-		
-		 
 		 
 		params.put("totalAmounts",wrapper.getTotalAmounts());
 		params.put("totaldiscounts", wrapper.getTotaldiscounts());
@@ -124,14 +119,49 @@ public class FuelLogBillingController extends BaseController{
 		params.put("totalGallons",wrapper.getTotalGallons());
 		params.put("totalColumn",wrapper.getTotalColumn());
 		params.put("totalGrossCost",wrapper.getTotalGrossCost());
+		
+		// Fuel log - truck report 3rd Jun 2016
+		String company = "-";
+		if (!StringUtils.isEmpty(wrapper.getCompany())) {
+			company = retrieveCompanyNames(wrapper.getCompany());
+		}
+		params.put("company", company);
+		
+		// Fuel log - truck report 3rd Jun 2016
+		String transactionDateRange = "-";
+		if (!StringUtils.isEmpty(wrapper.getTransactionDateFrom()) && !StringUtils.isEmpty(wrapper.getTransactionDateTo())) {
+			transactionDateRange = wrapper.getTransactionDateFrom() + " - " + wrapper.getTransactionDateTo();
+		}
+		params.put("transactionDateRange", transactionDateRange);
 		  
+		data.put("data", wrapper.getFuellog());
+		data.put("params",params);
 		  
-		    data.put("data", wrapper.getFuellog());
-			data.put("params",params);
-		  
-		  return data;
+		return data;
 	}
 	
+	// Fuel log - truck report - 3rd Jun 2016
+	private String retrieveCompanyNames(String companyIds) {
+		if (StringUtils.isEmpty(companyIds)) {
+			return StringUtils.EMPTY;
+		}
+		
+		String companyQuery = "select obj from Location obj where obj.id in (" 
+	   		+ companyIds
+	   		+")";
+		
+		List<Location> locationList = genericDAO.executeSimpleQuery(companyQuery);
+		if (locationList == null || locationList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String comanyNames = StringUtils.EMPTY;
+		for (Location aLocation : locationList) {
+			comanyNames = comanyNames + ", " + aLocation.getName();
+		}
+		
+		return comanyNames.substring(2);
+	}
 	
 	public FuelLogReportWrapper generateFuellogReport(SearchCriteria searchCriteria,FuelLogReportInput input) {
 		return reportService.generateFuellogData(searchCriteria,input, false);
@@ -179,7 +209,14 @@ public class FuelLogBillingController extends BaseController{
 						"attachment;filename=billinghistory." + type);
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Map params = (Map)datas.get("params");
-			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("fuellogReport",
+			
+			String reportType = "fuellogReport";
+			// Fuel log - truck report - 3rd Jun 2016
+			if (FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK.equals(input.getReportType())) {
+				reportType = "fuelTruckReport";
+			}
+			
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
 					(List)datas.get("data"), params, request);
 			request.setAttribute("jasperPrint", jasperPrint);
 			
