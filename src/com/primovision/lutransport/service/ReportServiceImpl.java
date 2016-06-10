@@ -1,5 +1,6 @@
 package com.primovision.lutransport.service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,7 +12,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -41,6 +44,7 @@ import com.primovision.lutransport.model.FuelSurchargePadd;
 import com.primovision.lutransport.model.FuelSurchargeWeeklyRate;
 import com.primovision.lutransport.model.Invoice;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.SubcontractorInvoice;
@@ -67,6 +71,8 @@ import com.primovision.lutransport.model.report.FuelOverLimitInput;
 import com.primovision.lutransport.model.report.FuelOverLimitReportWrapper;
 import com.primovision.lutransport.model.report.FuelViolationInput;
 import com.primovision.lutransport.model.report.FuelViolationReportWrapper;
+import com.primovision.lutransport.model.report.MileageLogReportInput;
+import com.primovision.lutransport.model.report.MileageLogReportWrapper;
 import com.primovision.lutransport.model.report.NetReportInput;
 import com.primovision.lutransport.model.report.NetReportMain;
 import com.primovision.lutransport.model.report.NetReportWrapper;
@@ -83,12 +89,14 @@ import com.primovision.lutransport.model.Customer;
 
 @Transactional(readOnly = false)
 public class ReportServiceImpl implements ReportService {
-
 	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 	public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd");
 	public static SimpleDateFormat drvdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
 	public static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd 00:00:00.0");	
 	public static SimpleDateFormat tdff = new SimpleDateFormat("yyyy-MM-dd");	
+	
+	public static SimpleDateFormat mileageSearchDateFormat = new SimpleDateFormat("MMMMM yyyy");
+	public static SimpleDateFormat mileageReportDateFormat = new SimpleDateFormat("MM-yyyy"); 
 
 	@Autowired
 	private GenericDAO genericDAO;
@@ -3526,6 +3534,131 @@ throw new Exception("origin and destindation is empty");
 		groupedFuelLogList.add(previousFuelLog);
 		
 		return groupedFuelLogList;
+	}
+	
+	@Override
+	public MileageLogReportWrapper generateMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
+		String company = input.getCompany();
+		String state = input.getState();
+		String truck = input.getUnit();
+		String periodFrom = input.getPeriodFrom();
+		String periodTo = input.getPeriodTo();
+		
+		StringBuffer query = new StringBuffer("select obj from MileageLog obj  where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from MileageLog obj where 1=1");
+		
+		if (!StringUtils.isEmpty(company)){
+			query.append(" and  obj.company in (" + company + ")");
+			countQuery.append(" and  obj.company in (" + company + ")");
+		}
+		
+		if (!StringUtils.isEmpty(state)){
+			query.append(" and  obj.state in (" + state + ")");
+			countQuery.append(" and  obj.state in (" + state + ")");
+		}
+		
+		if (!StringUtils.isEmpty(truck)){
+			query.append(" and  obj.unit in (" + truck + ")");
+			countQuery.append(" and  obj.unit in (" + truck + ")");
+		}
+        
+      if (!StringUtils.isEmpty(periodFrom)) {
+        	try {
+				query.append(" and obj.period >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+				countQuery.append(" and obj.period >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+        
+      if (!StringUtils.isEmpty(periodTo)){
+        	try {
+				query.append(" and obj.period <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
+				countQuery.append(" and obj.period <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+      }
+
+      query.append(" order by obj.company.name asc, obj.state.name asc, obj.unitNum asc, obj.period desc");
+      countQuery.append(" order by obj.period desc");
+     
+		System.out.println("\nquery=mileageLog=>" + query + "\n");
+		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();
+		searchCriteria.setRecordCount(recordCount.intValue());
+		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
+
+		List<MileageLog> retrievedMileageLogList = (List<MileageLog>) genericDAO
+			.getEntityManager()
+			.createQuery(query.toString())
+			.setMaxResults(searchCriteria.getPageSize())
+			.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
+			.getResultList();
+		
+		MileageLogReportWrapper wrapper = new MileageLogReportWrapper();
+		wrapper.setTotalRows(recordCount.intValue());
+		wrapper.setCompanies(company);
+		wrapper.setStates(state);
+		wrapper.setPeriodFrom(periodFrom);
+		wrapper.setPeriodTo(periodTo);
+		
+		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
+		double totalMiles = 0.0;
+		for (MileageLog aSrcMileageLog : retrievedMileageLogList) {
+			totalMiles += aSrcMileageLog.getMiles();
+			
+			MileageLog aDestMileageLog = new MileageLog();
+			copy(aSrcMileageLog, aDestMileageLog);
+			returnMileageLogList.add(aDestMileageLog);
+		}
+		wrapper.setTotalMiles(totalMiles);
+		
+		if("TOTALS".equals(input.getReportType())) {
+			returnMileageLogList = aggregateMileageLog(returnMileageLogList);
+		}
+		
+		wrapper.setMileageLogList(returnMileageLogList);
+		return wrapper;
+	}
+	
+	private void copy(MileageLog srcMileageLog, MileageLog destMileageLog) {
+		destMileageLog.setCompany(srcMileageLog.getCompany());
+		destMileageLog.setState(srcMileageLog.getState());
+		destMileageLog.setMiles(srcMileageLog.getMiles());
+		destMileageLog.setPeriod(srcMileageLog.getPeriod());
+		destMileageLog.setUnit(srcMileageLog.getUnit());
+		destMileageLog.setUnitNum(srcMileageLog.getUnitNum());
+		destMileageLog.setVin(srcMileageLog.getVin());
+		
+		String periodStr = mileageReportDateFormat.format(srcMileageLog.getPeriod());
+		destMileageLog.setPeriodStr(periodStr);
+	}
+	
+	private List<MileageLog> aggregateMileageLog(List<MileageLog> srcMileageLogList) {
+		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
+		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
+			return aggreateMileageLogList;
+		}
+		
+		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
+		for (MileageLog aSrcMileageLog : srcMileageLogList) {
+			String key = aSrcMileageLog.getCompany().getName() + "|" + aSrcMileageLog.getState().getName();
+			
+			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
+			if (aggregateMileageLog == null) {
+				aggreateMileageLogMap.put(key, aSrcMileageLog);
+			} else {
+				Double aggregateMiles = aggregateMileageLog.getMiles() + aSrcMileageLog.getMiles();
+				aggregateMileageLog.setMiles(aggregateMiles);
+			}
+		}
+		
+		SortedSet<String> sortedKeys = new TreeSet<String>(aggreateMileageLogMap.keySet());
+		for (String aKey : sortedKeys) {
+			aggreateMileageLogList.add(aggreateMileageLogMap.get(aKey));
+		}
+		
+		return aggreateMileageLogList;
 	}
 	
 	@Override

@@ -64,7 +64,6 @@ public class UploadDataController extends BaseController {
 		return "admin/fuelSurcharge";
 	}
 	
-	
 	@RequestMapping("/fuellog.do")
 	public String fuellog(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 		Map criterias = new HashMap();
@@ -79,14 +78,16 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/eztoll";
 	}
 	
+	@RequestMapping("/mileagelog.do")
+	public String mileage(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/mileage";
+	}
 	
 	@RequestMapping("/vehiclepermit.do")
 	public String vehiclepermit(HttpServletRequest request,
 			HttpServletResponse response) {
 		return "admin/uploaddata/vehiclepermit";
 	}
-
-
 
 	@RequestMapping("/vehiclepermit/upload.do")
 	public String vehiclePermitSaveData(HttpServletRequest request,
@@ -198,9 +199,49 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/eztollOverride";
 	}
 	
-	
-	
-	
+	@RequestMapping("/mileagelog/upload.do")
+	public String saveMileageData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("period") String periodStr,
+			@RequestParam("resetMiles") Double resetMiles,
+			@RequestParam("dataFile") MultipartFile file) {
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/mileage";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/mileage";
+			}
+			
+			SimpleDateFormat mileageSearchDateFormat = new SimpleDateFormat("MMMMM yyy");
+			Date period = mileageSearchDateFormat.parse(periodStr);
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importMileageLogMainSheet(is)\n");
+			List<String> str = importMainSheetService.importMileageLogMainSheet(is, period, resetMiles, createdBy);
+			if (str.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all mileage records");
+			} else {
+				model.addAttribute("errorList", str);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/mileage";
+		}
+		
+		return "admin/uploaddata/mileage";
+	}
 	
 	@RequestMapping("/fuellog/override.do")
 	public String fuellogSaveDataOverride(HttpServletRequest request,

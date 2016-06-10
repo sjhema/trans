@@ -24,6 +24,8 @@ import com.primovision.lutransport.model.report.FuelOverLimitInput;
 import com.primovision.lutransport.model.report.FuelOverLimitReportWrapper;
 import com.primovision.lutransport.model.report.FuelViolationInput;
 import com.primovision.lutransport.model.report.FuelViolationReportWrapper;
+import com.primovision.lutransport.model.report.MileageLogReportInput;
+import com.primovision.lutransport.model.report.MileageLogReportWrapper;
 import com.primovision.lutransport.model.report.NetReportInput;
 import com.primovision.lutransport.model.report.NetReportWrapper;
 import com.primovision.lutransport.model.report.SubcontractorBillingWrapper;
@@ -60,4 +62,5 @@ public interface ReportService {
 			BillingHistoryInput input);
 	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input);
 	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria criteria, TollDistributionReportInput input);
+	public MileageLogReportWrapper generateMileageLogData(SearchCriteria criteria, MileageLogReportInput input);
 }

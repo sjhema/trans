@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,6 +56,7 @@ import com.primovision.lutransport.model.FuelDiscount;
 import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
@@ -181,6 +183,219 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		System.out.println("******************** Vehicle query is " + vehicleQuery);
 		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
 		return vehicleList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception {
+		List<MileageLog> mileageLogList = new ArrayList<MileageLog>();
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount == 1) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				MileageLog mileageLog = null;
+				try {
+					String unit = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", unit)) {
+						break;
+					}
+					
+					String stateStr = ((String) getCellValue(row.getCell(2)));
+					if (StringUtils.equals("Total", stateStr)) {
+						continue;
+					}
+					
+					mileageLog = new MileageLog();
+					
+					String lastInStateStr = ((String) getCellValue(row.getCell(5)));
+					Date lastInState = processLastInState(lastInStateStr);
+					if (lastInState == null) {
+						recordError = true;
+						recordErrorMsg.append("Last in State,");
+					} 
+					
+					Vehicle vehicle = retrieveVehicle(unit, lastInState);
+					if (vehicle == null) {
+						recordError = true;
+						recordErrorMsg.append("Unit,");
+					} else {
+						mileageLog.setUnitNum(unit);
+						mileageLog.setUnit(vehicle);
+						mileageLog.setCompany(vehicle.getOwner());
+					}
+					
+					State state = retrieveState(stateStr);
+					if (state == null) {
+						recordError = true;
+						recordErrorMsg.append("State,");
+					} else {
+						mileageLog.setState(state);
+					}
+					
+					String miles = ((String) getCellValue(row.getCell(3)));
+					Double milesDbl = processMiles(miles, resetMiles);
+					if (milesDbl == null) {
+						recordError = true;
+						recordErrorMsg.append("Miles,");
+					} else {
+						mileageLog.setMiles(milesDbl);
+					}
+					
+					String vin = ((String) getCellValue(row.getCell(7)));
+					if (!validateVin(vin)) {
+						recordError = true;
+						recordErrorMsg.append("VIN,");
+					} else {
+						mileageLog.setVin(vin);
+					}
+					
+					mileageLog.setPeriod(period);
+					
+					if (!recordError) {
+						if (checkDuplicate(mileageLog)) {
+							recordError = true;
+							recordErrorMsg.append("Duplicate record,");
+						}
+					}
+				} catch (Exception ex) {
+					recordError = true;
+					recordErrorMsg.append("Error while processing record,");
+				}
+				
+				if (recordError) {
+					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					errorCount++;
+				} else {
+					mileageLogList.add(mileageLog);
+				}
+			}
+		} catch (Exception ex) {
+			errorCount++;
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Mileage log: " + ex);
+		}
+		
+		System.out.println("Done processing..Error count: " + errorCount);
+		if (errorCount == 0 && !mileageLogList.isEmpty()) {
+			for (MileageLog aMileageLog : mileageLogList) {
+				aMileageLog.setCreatedBy(createdBy);
+				aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
+				genericDAO.saveOrUpdate(aMileageLog);
+			}
+		}
+					
+		return errorList;
+	}
+	
+	private boolean checkDuplicate(MileageLog aMileageLog) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String period = dateFormat.format(aMileageLog.getPeriod());
+		String query = "select obj from MileageLog obj where obj.period='" + period + "'"
+				+ " and obj.state=" + aMileageLog.getState().getId()
+				+ " and obj.unitNum='" + aMileageLog.getUnitNum() + "'";
+		
+		List<MileageLog> mileageLogList = genericDAO.executeSimpleQuery(query);
+		return !mileageLogList.isEmpty();
+	}
+	
+	private boolean validateVin(String vin) {
+		if (StringUtils.isEmpty(vin)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private Double processMiles(String miles, Double resetMiles) {
+		if (StringUtils.isEmpty(miles)) {
+			return null;
+		}
+		
+		Double maxMiles = 100000.0;
+		Double milesDbl = null;
+		try {
+			miles = StringUtils.replace(miles, "*", StringUtils.EMPTY);
+			miles = StringUtils.replace(miles, ",", StringUtils.EMPTY);
+			milesDbl = new Double(miles);
+			if (milesDbl > maxMiles) {
+				milesDbl = resetMiles;
+			}
+		} catch (Exception ex) {
+			log.warn("Exception while processing miles", ex);
+		}
+		
+		return milesDbl;
+	}
+	
+	private Date processLastInState(String lastInStateStr) {
+		if (StringUtils.isEmpty(lastInStateStr)) {
+			return null;
+		}
+		
+		//1/30/16 11:35 AM EDT
+		SimpleDateFormat sdf = new SimpleDateFormat("M/dd/yy h:mm a z");
+		Date lastInState = null;
+		try {
+			lastInState = sdf.parse(lastInStateStr);
+		} catch (Exception ex) {
+			log.warn("Exception while processing lastInState: " + lastInStateStr, ex);
+		}
+		
+		return lastInState;
+	}
+	
+	private Vehicle retrieveVehicle(String unit, Date lastInState) {
+		if (StringUtils.isEmpty(unit) || lastInState == null) {
+			return null;
+		}
+		
+		List<Vehicle> vehicleList = null;
+		String lastInStateStr = dateFormat.format(lastInState);
+		try {
+			vehicleList = retrieveVehicleForUnit(new Integer(unit), lastInStateStr);
+		} catch (Exception ex) {
+			log.warn("Exception while retrieving vehicle: " + unit, ex);
+		}
+		
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			return null;
+		} else {
+			return vehicleList.get(0);
+		}
+	}
+	
+	private State retrieveState(String stateLongName) {
+		if (StringUtils.isEmpty(stateLongName)) {
+			return null;
+		}
+		
+		State state = null;
+		try {
+			Map criterias = new HashMap();
+			criterias.put("longName", stateLongName);
+			state = genericDAO.getByCriteria(State.class, criterias);
+		} catch (Exception ex) {
+			log.warn("Exception while retrieving state: " + stateLongName, ex);
+		}
+		
+		return state;
 	}
 
 	@Override
