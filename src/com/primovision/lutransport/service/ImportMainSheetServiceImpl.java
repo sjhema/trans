@@ -176,10 +176,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return vehicleList;
 	}
 	
-	private List<Vehicle> retrieveVehicleForUnit(Integer unit, String transactionDate) throws ParseException {
+	private List<Vehicle> retrieveVehicleForUnit(Integer unit, String transactionDate) {
 		String vehicleQuery = "Select obj from Vehicle obj where obj.unit="
 				+ unit + " and obj.validFrom <='"
-				+ transactionDate + "' and obj.validTo >= '" + transactionDate + "'";
+				+ transactionDate + "' and obj.validTo >= '" + transactionDate + "'"
+				+ " order by obj.id DESC";
 		System.out.println("******************** Vehicle query is " + vehicleQuery);
 		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
 		return vehicleList;
