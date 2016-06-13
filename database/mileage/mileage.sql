@@ -61,3 +61,13 @@ UPDATE `lutransport`.`state` SET `long_name`='Virginia' WHERE `id`='53' and `cod
 UPDATE `lutransport`.`state` SET `long_name`='Illinois' WHERE `id`='20' and code='IL';
 UPDATE `lutransport`.`state` SET `long_name`='Maryland' WHERE `id`='27' and `code`='MD' ;
 
+UPDATE `lutransport`.`state` SET `long_name`='Delaware' WHERE `id`='14' and `code`='DE' ;
+UPDATE `lutransport`.`state` SET `long_name`='District of Columbia' WHERE `id`='15' and `code`='DC' ;
+UPDATE `lutransport`.`state` SET `long_name`='Georgia' WHERE `id`='17' and `code`='GA';
+UPDATE `lutransport`.`state` SET `long_name`='Indiana' WHERE `id`='21' and `code`='IN';
+UPDATE `lutransport`.`state` SET `long_name`='Kentucky' WHERE `id`='24' and `code`='KY';
+UPDATE `lutransport`.`state` SET `long_name`='Ohio' WHERE `id`='42' and `code`='OH';
+UPDATE `lutransport`.`state` SET `long_name`='Tennessee' WHERE `id`='49' and `code`='TN';
+UPDATE `lutransport`.`state` SET `long_name`='West Virginia' WHERE `id`='55' and `code`='WV';
+
+
