@@ -24,7 +24,7 @@ VALUES ('30105', '/reportuser/report/mileagelog/start.do', 'Mileage Report', '3'
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '1'); -- ADMIN
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '6'); -- BILLING
 
----
+----
 CREATE TABLE `lutransport`.`mileage_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL,

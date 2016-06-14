@@ -101,7 +101,7 @@ $(document).ready(function(){
 			<td>
 				<form:select cssClass="flat" path="unit" multiple="true">
 					<form:option value="-1">------<primo:label code="Please Select" />------</form:option>
-					<form:options items="${trucks}" itemValue="unit" itemLabel="unit" />
+					<form:options items="${trucks}" itemValue="id" itemLabel="unit" />
 				</form:select>
 			</td>
 		</tr>
