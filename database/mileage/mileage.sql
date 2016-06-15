@@ -70,4 +70,9 @@ UPDATE `lutransport`.`state` SET `long_name`='Ohio' WHERE `id`='42' and `code`='
 UPDATE `lutransport`.`state` SET `long_name`='Tennessee' WHERE `id`='49' and `code`='TN';
 UPDATE `lutransport`.`state` SET `long_name`='West Virginia' WHERE `id`='55' and `code`='WV';
 
+UPDATE `lutransport`.`state` SET `long_name`='Alabama' WHERE `id`='7' and `code`='AL';
+UPDATE `lutransport`.`state` SET `long_name`='Connecticut' WHERE `id`='13' and `code`='CT';
+UPDATE `lutransport`.`state` SET `long_name`='North Carolina' WHERE `id`='40' and `code`='NC';
+UPDATE `lutransport`.`state` SET `long_name`='South Carolina' WHERE `id`='47' and `code`='SC';
+
 
