@@ -182,7 +182,9 @@ public class DriverOdometerController extends CRUDController<Odometer>{
 						null, null);
 			}
 			else{
-				String query = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"' and obj.endReading >"+entity.getStartReading();
+				// Driver odometer start reading invalid fix - 17th Jun 2016
+				//String query = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"' and obj.endReading >"+entity.getStartReading();
+				String query = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"' and obj.startReading<="+entity.getStartReading()+" and obj.endReading >"+entity.getStartReading();
 				if(entity.getId()!=null){
 					query = query + " and id!="+entity.getId();
 				}
