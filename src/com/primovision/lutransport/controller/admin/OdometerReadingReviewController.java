@@ -48,7 +48,6 @@ import com.primovision.lutransport.service.DateUpdateService;
 @Controller
 @RequestMapping("/admin/odometerreview")
 public class OdometerReadingReviewController extends CRUDController<Odometer>{
-	
 	public OdometerReadingReviewController() {
 		setUrlContext("admin/odometerreview");
 	}
