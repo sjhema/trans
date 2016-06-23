@@ -95,7 +95,9 @@ public class DriverOdometerController extends CRUDController<Odometer>{
 	 @Override
 		public String create(ModelMap model, HttpServletRequest request) {
 			setupCreate(model, request);
-			User userObj = (User) request.getSession().getAttribute("userInfo");			
+			
+			// Driver mobile entry validation fix - 23rd Jun 2016
+			/*User userObj = (User) request.getSession().getAttribute("userInfo");			
 			Map criterias = new HashMap();		
 			criterias.clear();
 			criterias.put("status",1);
@@ -114,7 +116,9 @@ public class DriverOdometerController extends CRUDController<Odometer>{
 			}
 			else{
 				return urlContext + "/form";
-			}
+			}*/
+			
+			return urlContext + "/form";
 		}
 	 
 	 
