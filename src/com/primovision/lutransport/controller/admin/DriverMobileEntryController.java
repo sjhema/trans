@@ -72,7 +72,11 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
 		setupList(model, request);
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
-		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"entryDate desc,employeeName",false));
+		
+		// Driver mobile entry sort order fix - 29th Jun 2016
+		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"employeeName asc, entryDate asc",false));
+		//model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"entryDate desc,employeeName",false));
+		
 		return urlContext + "/list";
 	}
 	
@@ -146,9 +150,10 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
 		}
        
         // Driver mobile entry order fix
-        String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
-        query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
-        countquery.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        //String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
+        //query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        // Driver mobile entry sort order fix - 29th Jun 2016
+        query.append(" order by obj.employeeName asc, obj.entryDate asc");
        
         
 		
@@ -234,8 +239,10 @@ public class DriverMobileEntryController extends CRUDController<DriverMobileEntr
 		}
        
         // Driver mobile entry order fix
-        String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
-        query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        //String entryDateOrderDir =  entryDateSearch ? "asc" : "desc";
+        //query.append(" order by obj.entryDate " + entryDateOrderDir + " ,obj.employeeName asc");
+        // Driver mobile entry sort order fix - 29th Jun 2016
+        query.append(" order by obj.employeeName asc, obj.entryDate asc");
         
        
 
