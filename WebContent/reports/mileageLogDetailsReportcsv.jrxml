@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="mileageLogDetailsReportcsv" pageWidth="1250" pageHeight="600" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="10"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="companies" class="java.lang.String"/>
 	<parameter name="totalRows" class="java.lang.Long"/>
@@ -14,6 +14,7 @@
 	<field name="state.name" class="java.lang.String"/>
 	<field name="company.name" class="java.lang.String"/>
 	<field name="periodStr" class="java.lang.String"/>
+	<field name="vehiclePermitNumber" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -37,7 +38,7 @@
 				<text><![CDATA[COMPANIES]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="0" y="0" width="614" height="24" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="0" y="0" width="631" height="24" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -56,7 +57,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{companies}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="306" y="38" width="308" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="306" y="38" width="325" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -70,7 +71,7 @@
 				<text><![CDATA[PERIOD]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="306" y="64" width="308" height="20"/>
+				<reportElement x="306" y="64" width="325" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -154,7 +155,7 @@
 				<text><![CDATA[Unit#]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="494" y="24" width="120" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="631" y="24" width="120" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -181,6 +182,20 @@
 				</textElement>
 				<text><![CDATA[Period]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="494" y="24" width="137" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Permit]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -200,7 +215,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{unitNum}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="494" y="0" width="120" height="20"/>
+				<reportElement x="631" y="0" width="120" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -255,6 +270,20 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{periodStr}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="494" y="0" width="137" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{vehiclePermitNumber}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<summary>
@@ -281,7 +310,7 @@
 				<textFieldExpression class="java.lang.Long"><![CDATA[$P{totalRows}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="389" y="0" width="105" height="21"/>
+				<reportElement x="526" y="0" width="105" height="21"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -295,7 +324,7 @@
 				<text><![CDATA[Total   ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="494" y="0" width="120" height="24"/>
+				<reportElement x="631" y="0" width="120" height="24"/>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>

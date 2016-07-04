@@ -133,7 +133,11 @@ $(function() {
 				<primo:textcolumn headerText="State" dataField="state.name" />
 				<primo:textcolumn headerText="Unit#" dataField="unitNum"/>
 				<primo:textcolumn headerText="VIN" dataField="vin"/>
+				<primo:textcolumn headerText="Permit" dataField="vehiclePermitNumber"/>
 				<primo:textcolumn headerText="Miles" dataField="miles"/>
+				<primo:textcolumn headerText="First In State" dataField="firstInState" dataFormat="MM-dd-yyyy"/>
+				<primo:textcolumn headerText="Last In State" dataField="lastInState" dataFormat="MM-dd-yyyy"/>
+				<primo:textcolumn headerText="Groups" dataField="groups"/>
 		</primo:datatable>
 		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 	</form:form>

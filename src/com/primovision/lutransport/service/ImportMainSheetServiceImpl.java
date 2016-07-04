@@ -210,6 +210,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				}
 				
 				boolean recordError = false;
+				boolean fatalRecordError = false;
 				StringBuffer recordErrorMsg = new StringBuffer();
 				MileageLog mileageLog = null;
 				try {
@@ -225,16 +226,30 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					mileageLog = new MileageLog();
 					
+					String firstInStateStr = ((String) getCellValue(row.getCell(4)));
+					Date firstInState = processFirstInState(firstInStateStr);
+					if (firstInState == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("First in State,");
+					} else {
+						mileageLog.setFirstInState(firstInState);
+					}
+					
 					String lastInStateStr = ((String) getCellValue(row.getCell(5)));
 					Date lastInState = processLastInState(lastInStateStr);
 					if (lastInState == null) {
 						recordError = true;
+						fatalRecordError = true;
 						recordErrorMsg.append("Last in State,");
-					} 
+					} else {
+						mileageLog.setLastInState(lastInState);
+					}
 					
 					Vehicle vehicle = retrieveVehicle(unit, lastInState);
 					if (vehicle == null) {
 						recordError = true;
+						fatalRecordError = true;
 						recordErrorMsg.append("Unit,");
 					} else {
 						mileageLog.setUnitNum(unit);
@@ -245,6 +260,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					State state = retrieveState(stateStr);
 					if (state == null) {
 						recordError = true;
+						fatalRecordError = true;
 						recordErrorMsg.append("State,");
 					} else {
 						mileageLog.setState(state);
@@ -254,6 +270,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Double milesDbl = processMiles(miles, resetMiles);
 					if (milesDbl == null) {
 						recordError = true;
+						fatalRecordError = true;
 						recordErrorMsg.append("Miles,");
 					} else {
 						mileageLog.setMiles(milesDbl);
@@ -262,50 +279,102 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					String vin = ((String) getCellValue(row.getCell(7)));
 					if (!validateVin(vin)) {
 						recordError = true;
+						fatalRecordError = true;
 						recordErrorMsg.append("VIN,");
 					} else {
 						mileageLog.setVin(vin);
 					}
 					
+					String groups = ((String) getCellValue(row.getCell(6)));
+					groups = StringUtils.isEmpty(groups) ? StringUtils.EMPTY : groups;
+					mileageLog.setGroups(groups);
+					
 					mileageLog.setPeriod(period);
 					
-					if (!recordError) {
-						if (checkDuplicate(mileageLog)) {
+					VehiclePermit vehiclePermit = retrieveVehiclePermit(mileageLog);
+					if (vehiclePermit != null && StringUtils.isNotEmpty(vehiclePermit.getPermitNumber())) {
+						mileageLog.setVehiclePermit(vehiclePermit);
+						mileageLog.setVehiclePermitNumber(vehiclePermit.getPermitNumber());
+					} else {
+						mileageLog.setVehiclePermit(null);
+						mileageLog.setVehiclePermitNumber(StringUtils.EMPTY);
+						
+						if (mileageLog.getState() != null 
+								&& StringUtils.equals("NY", mileageLog.getState().getCode())) {
 							recordError = true;
-							recordErrorMsg.append("Duplicate record,");
+							recordErrorMsg.append("Could not determine vehicle permit,");
 						}
+					}
+					
+					if (checkDuplicate(mileageLog)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Duplicate record,");
 					}
 				} catch (Exception ex) {
 					recordError = true;
+					fatalRecordError = true;
 					recordErrorMsg.append("Error while processing record,");
 				}
 				
 				if (recordError) {
-					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+					errorList.add(msgPreffix 
+							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
 					errorCount++;
-				} else {
+				} 
+				
+				if (!fatalRecordError) {
 					mileageLogList.add(mileageLog);
 				}
 			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + mileageLogList.size());
+			if (!mileageLogList.isEmpty()) {
+				for (MileageLog aMileageLog : mileageLogList) {
+					aMileageLog.setCreatedBy(createdBy);
+					aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(aMileageLog);
+				}
+			}
 		} catch (Exception ex) {
-			errorCount++;
 			errorList.add("Not able to upload XL!!! Please try again.");
 			log.warn("Error while importing Mileage log: " + ex);
 		}
 		
-		System.out.println("Done processing..Error count: " + errorCount);
-		if (errorCount == 0 && !mileageLogList.isEmpty()) {
-			for (MileageLog aMileageLog : mileageLogList) {
-				aMileageLog.setCreatedBy(createdBy);
-				aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
-				genericDAO.saveOrUpdate(aMileageLog);
-			}
-		}
-					
 		return errorList;
 	}
 	
+	private VehiclePermit retrieveVehiclePermit(MileageLog mileageLog) {
+		if (mileageLog.getUnit() == null || mileageLog.getCompany() == null 
+				|| mileageLog.getLastInState() == null) {
+			return null;
+		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String lastInStateStr = dateFormat.format(mileageLog.getLastInState());
+		
+		String query = "select obj from VehiclePermit obj where obj.status=1"
+				+ " and obj.issueDate <= '" + lastInStateStr + "'"
+				+ " and obj.expirationDate > '" + lastInStateStr + "'"
+				+ " and obj.vehicle.unitNum = " + mileageLog.getUnit().getUnitNum();
+				//+ " and obj.companyLocation = " + mileageLog.getCompany().getId();
+		List<VehiclePermit> permits = genericDAO.executeSimpleQuery(query);
+		if (permits != null && !permits.isEmpty()) {
+			return permits.get(0);
+		} else {
+			return null;
+		}
+	}
+	
 	private boolean checkDuplicate(MileageLog aMileageLog) {
+		if (aMileageLog.getPeriod() == null || aMileageLog.getState() == null
+				|| StringUtils.isEmpty(aMileageLog.getUnitNum())) {
+			return false;
+		}
+		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String period = dateFormat.format(aMileageLog.getPeriod());
 		String query = "select obj from MileageLog obj where obj.period='" + period + "'"
@@ -360,6 +429,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		return lastInState;
+	}
+	
+	private Date processFirstInState(String firstInStateStr) {
+		if (StringUtils.isEmpty(firstInStateStr)) {
+			return null;
+		}
+		
+		//5/17/16 10:29 PM EDT
+		SimpleDateFormat sdf = new SimpleDateFormat("M/dd/yy h:mm a z");
+		Date firstInState = null;
+		try {
+			firstInState = sdf.parse(firstInStateStr);
+		} catch (Exception ex) {
+			log.warn("Exception while processing firstInState: " + firstInStateStr, ex);
+		}
+		
+		return firstInState;
 	}
 	
 	private Vehicle retrieveVehicle(String unit, Date lastInState) {

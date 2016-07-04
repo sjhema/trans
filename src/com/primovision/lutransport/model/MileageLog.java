@@ -49,8 +49,66 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 	@Column(name="vin")
 	private String vin;
 	
+	@NotNull
+   @Column(name="first_in_state")
+   private Date firstInState;
+	
+	@NotNull
+   @Column(name="last_in_state")
+   private Date lastInState;
+	
+	@Column(name="groups")
+   private String groups;
+	
+	@ManyToOne
+	@JoinColumn(name="vehicle_permit")
+	private VehiclePermit vehiclePermit;
+	
+	@Column(name="vehicle_permit_number")
+	private String vehiclePermitNumber;
+	
 	@Transient
 	private String periodStr;
+	
+	public Date getFirstInState() {
+		return firstInState;
+	}
+
+	public void setFirstInState(Date firstInState) {
+		this.firstInState = firstInState;
+	}
+
+	public String getVehiclePermitNumber() {
+		return vehiclePermitNumber;
+	}
+
+	public void setVehiclePermitNumber(String vehiclePermitNumber) {
+		this.vehiclePermitNumber = vehiclePermitNumber;
+	}
+
+	public Date getLastInState() {
+		return lastInState;
+	}
+
+	public void setLastInState(Date lastInState) {
+		this.lastInState = lastInState;
+	}
+
+	public String getGroups() {
+		return groups;
+	}
+
+	public void setGroups(String groups) {
+		this.groups = groups;
+	}
+	
+	public VehiclePermit getVehiclePermit() {
+		return vehiclePermit;
+	}
+
+	public void setVehiclePermit(VehiclePermit vehiclePermit) {
+		this.vehiclePermit = vehiclePermit;
+	}
 
 	public Date getPeriod() {
 		return period;

@@ -24,7 +24,7 @@ VALUES ('30105', '/reportuser/report/mileagelog/start.do', 'Mileage Report', '3'
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '1'); -- ADMIN
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '6'); -- BILLING
 
-----
+-----
 CREATE TABLE `lutransport`.`mileage_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL,
@@ -36,20 +36,27 @@ CREATE TABLE `lutransport`.`mileage_log` (
   `state` bigint(20) NOT NULL,
   `miles` double NOT NULL,
   `unit` bigint(20) NOT NULL,
-  `unit_num` varchar(255) NOT NULL,
+  `unit_num` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `company` bigint(20) NOT NULL,
-  `vin` varchar(255) NOT NULL,
+  `vin` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `groups` varchar(500) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `first_in_state` datetime NOT NULL,
+  `last_in_state` datetime NOT NULL,
+  `vehicle_permit` bigint(20) DEFAULT NULL,
+  `vehicle_permit_number` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_MILEAGE_LOG_STATE_ID` (`state`),
-  KEY `FK_MILEAGE_LOG_UNIT_VEHICLE_ID` (`unit`),
-  KEY `FK_MILEAGE_LOG_COMPANY_LOCATION_ID` (`company`),
+  KEY `idx_FK_MILEAGE_LOG_STATE_ID` (`state`),
+  KEY `idx_FK_MILEAGE_LOG_UNIT_VEHICLE_ID` (`unit`),
+  KEY `idx_FK_MILEAGE_LOG_COMPANY_LOCATION_ID` (`company`),
+  KEY `idx_FK_MILEAGE_LOG_PERMIT_VEHICLE_PERMIT_ID` (`vehicle_permit`),
   KEY `idx_period` (`period`),
-  CONSTRAINT `FK_MILEAGE_LOG_UNIT_VEHICLE_ID` FOREIGN KEY (`unit`) REFERENCES `vehicle` (`id`),
   CONSTRAINT `FK_MILEAGE_LOG_COMPANY_LOCATION_ID` FOREIGN KEY (`company`) REFERENCES `location` (`id`),
-  CONSTRAINT `FK_MILEAGE_LOG_STATE_ID` FOREIGN KEY (`state`) REFERENCES `state` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  CONSTRAINT `FK_MILEAGE_LOG_PERMIT_VEHICLE_PERMIT_ID` FOREIGN KEY (`vehicle_permit`) REFERENCES `vehicle_permit` (`id`),
+  CONSTRAINT `FK_MILEAGE_LOG_STATE_ID` FOREIGN KEY (`state`) REFERENCES `state` (`id`),
+  CONSTRAINT `FK_MILEAGE_LOG_UNIT_VEHICLE_ID` FOREIGN KEY (`unit`) REFERENCES `vehicle` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-----
+--  
 ALTER TABLE `lutransport`.`state` 
 ADD COLUMN `long_name` VARCHAR(100) NULL DEFAULT NULL COMMENT '' AFTER `country`;
 

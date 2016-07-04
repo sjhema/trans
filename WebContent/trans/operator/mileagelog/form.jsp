@@ -85,6 +85,13 @@ $(function() {
 			</td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Permit" /><span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="vehiclePermitNumber" style="min-width:150px; max-width:150px" cssClass="flat"/> 
+				<br><form:errors path="vehiclePermitNumber" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Miles" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
 				<form:input path="miles" style="min-width:150px; max-width:150px" cssClass="flat"/>

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.VehiclePermit;
 
 @Controller
 @RequestMapping("/operator/mileagelog")
@@ -106,18 +108,17 @@ public class MileageLogController extends CRUDController<MileageLog> {
         
       if (!StringUtils.isEmpty(periodFrom)) {
         	try {
-				query.append(" and obj.period  >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
-				countquery.append(" and obj.period  >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+				query.append(" and obj.period >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+				countquery.append(" and obj.period >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
         
       if (!StringUtils.isEmpty(periodTo)) {
         	try {
-				query.append(" and obj.period  <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
-				countquery.append(" and obj.period  <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
+				query.append(" and obj.period <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
+				countquery.append(" and obj.period <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -128,13 +129,13 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		
      Long recordCount = (Long) genericDAO.getEntityManager().createQuery(
         		countquery.toString()).getSingleResult();        
-		criteria.setRecordCount(recordCount.intValue());
+     criteria.setRecordCount(recordCount.intValue());
 		
-		model.addAttribute("list", genericDAO.getEntityManager().createQuery(query.toString())
+     model.addAttribute("list", genericDAO.getEntityManager().createQuery(query.toString())
 				.setMaxResults(criteria.getPageSize())
 				.setFirstResult(criteria.getPage() * criteria.getPageSize())
 				.getResultList());
-		return urlContext + "/list";
+     return urlContext + "/list";
 	}
 	
 	@Override
@@ -177,14 +178,26 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		   Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, crieiria);
 		   if (vehicle != null) {
 		   	entity.setUnitNum(vehicle.getUnitNum());
-		   }
+		   } 
+		}
+		
+		if (StringUtils.isEmpty(entity.getVehiclePermitNumber())) {
+			entity.setVehiclePermitNumber(StringUtils.EMPTY);
+			entity.setVehiclePermit(null);
+		} else {
+			VehiclePermit vehiclePermit = retrieveVehiclePermit(entity.getVehiclePermitNumber(), entity.getUnitNum());
+			if (vehiclePermit != null) {
+				entity.setVehiclePermit(vehiclePermit);
+			} else {
+				bindingResult.rejectValue("vehiclePermitNumber", "error.textbox.vehiclePermitNumber", null, null);
+			}
 		}
 		
 		try {
 			getValidator().validate(entity, bindingResult);
 		} catch (ValidationException e) {
 			e.printStackTrace();
-			log.warn("Error in validation :" + e);
+			log.warn("Error in validation:" + e);
 		}
 		
 		if (bindingResult.hasErrors()) {
@@ -196,13 +209,28 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		if(!StringUtils.isEmpty(request.getParameter("id"))){
+		if (!StringUtils.isEmpty(request.getParameter("id"))){
 			request.getSession().setAttribute("msg", "Mileage updated successfully");
 			return "redirect:list.do";
 		}
-		else{			
+		else {			
 			request.getSession().setAttribute("msg", "Mileage added successfully");
 			return "redirect:create.do";
+		}
+	}
+	
+	private VehiclePermit retrieveVehiclePermit(String vehiclePermitNumber, String unitNum) {
+		if (StringUtils.isEmpty(vehiclePermitNumber) || StringUtils.isEmpty(unitNum)) {
+			return null;
+		}
+		
+		String query = "select obj from VehiclePermit obj where obj.permitNumber=" + vehiclePermitNumber
+						+ " and obj.vehicle.unitNum = " + unitNum;
+		List<VehiclePermit> permits = genericDAO.executeSimpleQuery(query);
+		if (permits != null && !permits.isEmpty()) {
+			return permits.get(0);
+		} else {
+			return null;
 		}
 	}
 	
