@@ -3597,7 +3597,7 @@ throw new Exception("origin and destindation is empty");
 			.getResultList();
 		
 		MileageLogReportWrapper wrapper = new MileageLogReportWrapper();
-		wrapper.setTotalRows(recordCount.intValue());
+		wrapper.setTotalRows(retrievedMileageLogList.size());
 		wrapper.setCompanies(company);
 		wrapper.setStates(state);
 		wrapper.setPeriodFrom(periodFrom);

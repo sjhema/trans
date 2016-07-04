@@ -178,9 +178,9 @@ public class MileageLogReportController extends BaseController {
 		try {
 			Map<String, Object> datas; 
 			if (p == null) {
-				 datas = generateData(criteria,request,input);
+				 datas = generateData(criteria, request, input);
 		   } else {
-				 datas = generateData(criteria,request,input1);	
+				 datas = generateData(criteria, request, input1);	
 			}
 			
 		   if (StringUtils.isEmpty(type)) {
