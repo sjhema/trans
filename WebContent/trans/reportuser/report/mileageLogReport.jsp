@@ -113,7 +113,7 @@ $(document).ready(function(){
 					onclick="javascript:processMileageLogTotalsReport()" value="Totals" />
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
-					onclick="javascript:processMileageLogDetailsReport()" value="Details" />
+					onclick="javascript:processMileageLogDetailsReport()" value="HUT" />
 			</td>
 		</tr>
 	</table>
