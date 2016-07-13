@@ -78,7 +78,7 @@ public class VehiclePermitController extends CRUDController<VehiclePermit> {
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
 		Map criterias = new HashMap();
-		model.addAttribute("vehicle", genericDAO.findByCriteria(Vehicle.class, criterias));
+		model.addAttribute("vehicle", genericDAO.findByCriteria(Vehicle.class, criterias, "unit", false));
 		Map<String,Object> map=new HashMap<String,Object>();
 		criterias.put("dataType", "PERMIT_TYPE");
 		model.addAttribute("permitType", genericDAO.findByCriteria(SetupData.class, criterias, "dataLabel", false));		
