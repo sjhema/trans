@@ -24,6 +24,8 @@ import com.primovision.lutransport.model.report.FuelOverLimitInput;
 import com.primovision.lutransport.model.report.FuelOverLimitReportWrapper;
 import com.primovision.lutransport.model.report.FuelViolationInput;
 import com.primovision.lutransport.model.report.FuelViolationReportWrapper;
+import com.primovision.lutransport.model.report.IFTAReportInput;
+import com.primovision.lutransport.model.report.IFTAReportWrapper;
 import com.primovision.lutransport.model.report.MileageLogReportInput;
 import com.primovision.lutransport.model.report.MileageLogReportWrapper;
 import com.primovision.lutransport.model.report.NetReportInput;
@@ -63,4 +65,6 @@ public interface ReportService {
 	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input);
 	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria criteria, TollDistributionReportInput input);
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria criteria, MileageLogReportInput input);
+
+	public IFTAReportWrapper generateIFTAData(SearchCriteria searchCriteria, IFTAReportInput iftaReportInput);
 }

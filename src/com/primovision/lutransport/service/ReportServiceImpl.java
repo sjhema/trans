@@ -72,6 +72,9 @@ import com.primovision.lutransport.model.report.FuelOverLimitInput;
 import com.primovision.lutransport.model.report.FuelOverLimitReportWrapper;
 import com.primovision.lutransport.model.report.FuelViolationInput;
 import com.primovision.lutransport.model.report.FuelViolationReportWrapper;
+import com.primovision.lutransport.model.report.IFTAReport;
+import com.primovision.lutransport.model.report.IFTAReportInput;
+import com.primovision.lutransport.model.report.IFTAReportWrapper;
 import com.primovision.lutransport.model.report.MileageLogReportInput;
 import com.primovision.lutransport.model.report.MileageLogReportWrapper;
 import com.primovision.lutransport.model.report.NetReportInput;
@@ -3538,6 +3541,114 @@ throw new Exception("origin and destindation is empty");
 	}
 	
 	@Override
+	public IFTAReportWrapper generateIFTAData(SearchCriteria searchCriteria, IFTAReportInput iftaReportInput) {
+		MileageLogReportInput mileageLogReportInput = new MileageLogReportInput();
+		map(mileageLogReportInput, iftaReportInput);
+		mileageLogReportInput.setReportType(MileageLogReportInput.REPORT_TYPE_TOTALS);
+		
+		MileageLogReportWrapper mileageLogReportWrapper = generateMileageLogData(searchCriteria, mileageLogReportInput);
+		
+		FuelLogReportInput fuelLogReportInput = new FuelLogReportInput();
+		map(fuelLogReportInput, searchCriteria, iftaReportInput);
+		
+		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, false);
+		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLog(fuelLogReportWrapper.getFuellog());
+		
+		List<IFTAReport> iftaReportList = new ArrayList<IFTAReport>();
+		for (MileageLog aMileageLog : mileageLogReportWrapper.getMileageLogList()) {
+			IFTAReport anIFTAReport = new IFTAReport();
+			anIFTAReport.setCompany(aMileageLog.getCompany());
+			anIFTAReport.setState(aMileageLog.getState());
+			anIFTAReport.setMiles(aMileageLog.getMiles());
+			
+			String key = aMileageLog.getCompany().getName() + "|" + aMileageLog.getState().getName();
+			FuelLog aFuelLog = aggreateFuelLogMap.get(key);
+			if (aFuelLog != null) {
+				anIFTAReport.setGallons(aFuelLog.getGallons());
+			}
+			
+			iftaReportList.add(anIFTAReport);
+		}
+		
+		IFTAReportWrapper anIFTAReportWrapper = new IFTAReportWrapper();
+		anIFTAReportWrapper.setCompanies(mileageLogReportWrapper.getCompanies());
+		anIFTAReportWrapper.setPeriodFrom(mileageLogReportWrapper.getPeriodFrom());
+		anIFTAReportWrapper.setPeriodTo(mileageLogReportWrapper.getPeriodTo());
+		anIFTAReportWrapper.setStates(mileageLogReportWrapper.getStates());
+		anIFTAReportWrapper.setTotalMiles(mileageLogReportWrapper.getTotalMiles());
+		anIFTAReportWrapper.setTotalRows(mileageLogReportWrapper.getTotalRows());
+		anIFTAReportWrapper.setTotalGallons(fuelLogReportWrapper.getTotalGallons());
+		anIFTAReportWrapper.setIftaReportList(iftaReportList);
+		
+		cleanMileageLogReportSearchCriteria(searchCriteria);
+		
+		return anIFTAReportWrapper;
+	}
+	
+	private void cleanMileageLogReportSearchCriteria(SearchCriteria searchCriteria) {
+		searchCriteria.getSearchMap().remove("transactionDateFrom");
+		searchCriteria.getSearchMap().remove("transactionDateTo");
+	}
+	
+	private void map(FuelLogReportInput fuelLogReportInput, SearchCriteria searchCriteria, IFTAReportInput iftaReportInput) {
+		fuelLogReportInput.setCompany(iftaReportInput.getCompany());
+		fuelLogReportInput.setState(iftaReportInput.getState());
+		fuelLogReportInput.setUnit(iftaReportInput.getUnit());
+		
+		try {
+			String periodFromStr = ReportDateUtil.dateFormatter.format(mileageSearchDateFormat.parse(iftaReportInput.getPeriodFrom()));
+			
+			Date periodTo = mileageSearchDateFormat.parse(iftaReportInput.getPeriodTo());
+			Calendar c = Calendar.getInstance();
+			c.setTime(periodTo);
+			c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+			periodTo = c.getTime();
+			String periodToStr = ReportDateUtil.dateFormatter.format(periodTo);
+			
+			fuelLogReportInput.setTransactionDateFrom(periodFromStr);
+			fuelLogReportInput.setTransactionDateTo(periodToStr);
+			searchCriteria.getSearchMap().put("transactionDateFrom", periodFromStr);
+			searchCriteria.getSearchMap().put("transactionDateTo", periodFromStr);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void map(MileageLogReportInput mileageLogReportInput, IFTAReportInput iftaReportInput) {
+		mileageLogReportInput.setCompany(iftaReportInput.getCompany());
+		mileageLogReportInput.setState(iftaReportInput.getState());
+		mileageLogReportInput.setUnit(iftaReportInput.getUnit());
+		
+		mileageLogReportInput.setPeriodFrom(iftaReportInput.getPeriodFrom());
+		mileageLogReportInput.setPeriodTo(iftaReportInput.getPeriodTo());
+	}
+
+	private Map<String, FuelLog> aggregateFuelLog(List<FuelLog> srcFuelLogList) {
+		Map<String, FuelLog> aggreateFuelLogMap = new HashMap<String, FuelLog>();
+		if (srcFuelLogList == null || srcFuelLogList.isEmpty()) {
+			return aggreateFuelLogMap;
+		}
+		
+		for (FuelLog aSrcFuelLog : srcFuelLogList) {
+			if (StringUtils.isEmpty(aSrcFuelLog.getCompanies()) || StringUtils.isEmpty(aSrcFuelLog.getStates())) {
+				continue;
+			}
+			String key = aSrcFuelLog.getCompanies() + "|" + aSrcFuelLog.getStates();
+			
+			FuelLog aggregateFuelLog = aggreateFuelLogMap.get(key);
+			if (aggregateFuelLog == null) {
+				aggreateFuelLogMap.put(key, aSrcFuelLog);
+			} else {
+				Double aggregateGallons = aggregateFuelLog.getGallons() + aSrcFuelLog.getGallons();
+				aggregateFuelLog.setGallons(aggregateGallons);
+			}
+		}
+		
+		return aggreateFuelLogMap;
+	}
+	
+	@Override
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
 		String company = input.getCompany();
 		String state = input.getState();
@@ -6033,13 +6144,14 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 					.append(subcontractor).append(")");
 			;
 		}
-		/*if (!StringUtils.isEmpty(input.getCompany())) {
+		// Uncommented as part of subcontrator summary revenue fix - 8th July 2016
+		if (!StringUtils.isEmpty(input.getCompany())) {
 
 			query.append(" and obj.companyLocation.id in (").append(company)
 					.append(")");
 			countQuery.append(" and obj.companyLocation.id in (")
 					.append(company).append(")");
-		}*/
+		}
 		if (!StringUtils.isEmpty(origin)) {
 			query.append(" and  obj.origin.id in (").append(origin).append(")");
 			countQuery.append(" and  obj.origin.id in (").append(origin)

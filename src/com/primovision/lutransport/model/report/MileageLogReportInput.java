@@ -1,8 +1,8 @@
 package com.primovision.lutransport.model.report;
 
 public class MileageLogReportInput {
-	public static String REPORT_TYPE_TOTALS = "TOTALS";
-	public static String REPORT_TYPE_DETAILS = "DETAILS";
+	public static final String REPORT_TYPE_TOTALS = "TOTALS";
+	public static final String REPORT_TYPE_DETAILS = "DETAILS";
 	
 	private String periodFrom;
 	private String periodTo;

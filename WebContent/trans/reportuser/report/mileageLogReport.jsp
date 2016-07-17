@@ -17,6 +17,12 @@ function processMileageLogDetailsReport() {
 	document.forms[0].submit();
 }
 
+function processIFTAReport() {
+	document.forms[0].elements["reportType"].value = 'IFTA';
+	document.forms[0].action='iftaSearch.do'
+	document.forms[0].submit();
+}
+
 $(function() {
 	$("#periodFrom").datepicker( {
         changeMonth: true,
@@ -114,6 +120,9 @@ $(document).ready(function(){
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processMileageLogDetailsReport()" value="HUT" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processIFTAReport()" value="IFTA" />
 			</td>
 		</tr>
 	</table>
