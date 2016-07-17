@@ -23,6 +23,12 @@ function processIFTAReport() {
 	document.forms[0].submit();
 }
 
+function processMPGReport() {
+	document.forms[0].elements["reportType"].value = 'MPG';
+	document.forms[0].action='mpgSearch.do'
+	document.forms[0].submit();
+}
+
 $(function() {
 	$("#periodFrom").datepicker( {
         changeMonth: true,
@@ -123,6 +129,9 @@ $(document).ready(function(){
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processIFTAReport()" value="IFTA" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processMPGReport()" value="MPG" />
 			</td>
 		</tr>
 	</table>

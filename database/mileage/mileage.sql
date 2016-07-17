@@ -21,7 +21,7 @@ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_ob
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('30105', '/reportuser/report/mileagelog/start.do', 'Mileage Report', '3', 'Mileage Report', '/reportuser/report/mileagelog/start.do,/reportuser/report/mileagelog/save.do,/reportuser/report/mileagelog/search.do,/reportuser/report/mileagelog/export.do,/reportuser/report/mileagelog/ajax.do', '1', '15', '0', '301', '/1/301/30105');
 
-UPDATE `lutransport`.`business_object` SET `URL`='/reportuser/report/mileagelog/start.do,/reportuser/report/mileagelog/save.do,/reportuser/report/mileagelog/search.do,/reportuser/report/mileagelog/iftaSearch.do,/reportuser/report/mileagelog/export.do,/reportuser/report/mileagelog/iftaExport.do,/reportuser/report/mileagelog/ajax.do' WHERE `ID`='30105';
+UPDATE `lutransport`.`business_object` SET `URL`='/reportuser/report/mileagelog/start.do,/reportuser/report/mileagelog/save.do,/reportuser/report/mileagelog/search.do,/reportuser/report/mileagelog/iftaSearch.do,/reportuser/report/mileagelog/mpgSearch.do,/reportuser/report/mileagelog/export.do,/reportuser/report/mileagelog/iftaExport.do,/reportuser/report/mileagelog/ajax.do' WHERE `ID`='30105';
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '1'); -- ADMIN
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30105', '6'); -- BILLING

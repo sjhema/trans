@@ -3565,6 +3565,11 @@ throw new Exception("origin and destindation is empty");
 			FuelLog aFuelLog = aggreateFuelLogMap.get(key);
 			if (aFuelLog != null) {
 				anIFTAReport.setGallons(aFuelLog.getGallons());
+				
+				if (anIFTAReport.getMiles() != null && anIFTAReport.getGallons() != null) {
+					Double mpg = anIFTAReport.getMiles()/anIFTAReport.getGallons();
+					anIFTAReport.setMpg(mpg);
+				}
 			}
 			
 			iftaReportList.add(anIFTAReport);

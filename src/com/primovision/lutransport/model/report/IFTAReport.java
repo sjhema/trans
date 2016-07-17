@@ -6,8 +6,10 @@ import com.primovision.lutransport.model.State;
 public class IFTAReport {
 	private Location company;
 	private State state;
-	private Double miles;
+	
+	private Double miles = 0.0;
 	private Double gallons = 0.0;
+	private Double mpg = 0.0;
 	
 	public Location getCompany() {
 		return company;
@@ -32,5 +34,11 @@ public class IFTAReport {
 	}
 	public void setGallons(Double gallons) {
 		this.gallons = gallons;
+	}
+	public Double getMpg() {
+		return mpg;
+	}
+	public void setMpg(Double mpg) {
+		this.mpg = mpg;
 	}
 }

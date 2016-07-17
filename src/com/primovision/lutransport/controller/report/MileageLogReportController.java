@@ -310,6 +310,65 @@ public class MileageLogReportController extends BaseController {
 			return "error";
 		}
 	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/mpgSearch.do")
+	public String mpgSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
+			@ModelAttribute("modelObject") MileageLogReportInput input, @RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+		System.out.println("\nMileageLogReportController==MPGSearch()==type===>"+type+"\n"); 
+		
+      populateSearchCriteria(request, request.getParameterMap());
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(1000);
+      
+      Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		String p = request.getParameter("p");
+		if (p == null) {
+			request.getSession().setAttribute("input", input);
+		}
+		
+		MileageLogReportInput input1 = (MileageLogReportInput) request.getSession().getAttribute("input");
+		
+		try {
+			IFTAReportInput iftaReportInput = new IFTAReportInput();
+			if (p == null) {
+				map(iftaReportInput, input);
+		   } else {
+				map(iftaReportInput, input1);
+			}
+			
+			Map<String, Object> datas = generateIFTAData(criteria, request, iftaReportInput);
+			
+		   if (StringUtils.isEmpty(type)) {
+				type = "html";
+		   }
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			String reportType = "iftaReport";
+			if (IFTAReportInput.REPORT_TYPE_MPG.equals(input.getReportType())) {
+				reportType = "mpgReport";
+			}
+			
+			if (!type.equals("html")) {
+				response.setHeader("Content-Disposition", "attachment;filename="+reportType+"." + type);
+			}
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map params = (Map)datas.get("params");
+			
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
+					(List)datas.get("data"), params, request);
+			request.setAttribute("jasperPrint", jasperPrint);
+			
+			return "reportuser/report/mileagelogreport/"+type+reportType;
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "error";
+		}
+	}
 	 
 	private void map(IFTAReportInput iftaReportInput, MileageLogReportInput mileageLogReportInput) {
 		iftaReportInput.setCompany(mileageLogReportInput.getCompany());
