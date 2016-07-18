@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="iftaReportpdf" pageWidth="1250" pageHeight="600" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="mpgReportpdf" pageWidth="1250" pageHeight="600" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -13,6 +13,7 @@
 	<field name="state.name" class="java.lang.String"/>
 	<field name="company.name" class="java.lang.String"/>
 	<field name="gallons" class="java.lang.Double"/>
+	<field name="mpg" class="java.lang.Double"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -40,7 +41,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[IFTA REPORT]]></text>
+				<text><![CDATA[MPG REPORT]]></text>
 			</staticText>
 			<textField pattern="">
 				<reportElement x="1" y="65" width="173" height="20"/>
@@ -166,6 +167,20 @@
 				</textElement>
 				<text><![CDATA[Gallons]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="644" y="25" width="182" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[MPG]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -223,6 +238,20 @@
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.000").format($F{gallons})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="644" y="0" width="182" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.0").format($F{mpg})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

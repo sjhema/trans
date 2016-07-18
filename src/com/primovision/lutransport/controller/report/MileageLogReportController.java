@@ -256,11 +256,12 @@ public class MileageLogReportController extends BaseController {
 	public String iftaSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("modelObject") MileageLogReportInput input, @RequestParam(required = false, value = "type") String type,
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
-		System.out.println("\nMileageLogReportController==IFTASearch()==type===>"+type+"\n"); 
+		System.out.println("\nMileageLogReportController==iftaSearch()==type===>"+type+"\n"); 
 		
       populateSearchCriteria(request, request.getParameterMap());
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(1000);
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
       
       Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
@@ -288,9 +289,6 @@ public class MileageLogReportController extends BaseController {
 			response.setContentType(MimeUtil.getContentType(type));
 			
 			String reportType = "iftaReport";
-			if (IFTAReportInput.REPORT_TYPE_MPG.equals(input.getReportType())) {
-				reportType = "mpgReport";
-			}
 			
 			if (!type.equals("html")) {
 				response.setHeader("Content-Disposition", "attachment;filename="+reportType+"." + type);
@@ -315,11 +313,12 @@ public class MileageLogReportController extends BaseController {
 	public String mpgSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("modelObject") MileageLogReportInput input, @RequestParam(required = false, value = "type") String type,
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
-		System.out.println("\nMileageLogReportController==MPGSearch()==type===>"+type+"\n"); 
+		System.out.println("\nMileageLogReportController==mpgSearch()==type===>"+type+"\n"); 
 		
       populateSearchCriteria(request, request.getParameterMap());
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(1000);
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
       
       Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
@@ -346,10 +345,7 @@ public class MileageLogReportController extends BaseController {
 		   }
 			response.setContentType(MimeUtil.getContentType(type));
 			
-			String reportType = "iftaReport";
-			if (IFTAReportInput.REPORT_TYPE_MPG.equals(input.getReportType())) {
-				reportType = "mpgReport";
-			}
+			String reportType = "mpgReport";
 			
 			if (!type.equals("html")) {
 				response.setHeader("Content-Disposition", "attachment;filename="+reportType+"." + type);
@@ -459,9 +455,62 @@ public class MileageLogReportController extends BaseController {
 			Map<String, Object> datas = generateIFTAData(criteria, request, iftaReportInput);
 			
 			String reportType = "iftaReport";
-			if (IFTAReportInput.REPORT_TYPE_MPG.equals(input.getReportType())) {
-				reportType = "mpgReport";
+			
+			if (StringUtils.isEmpty(type)) {
+				type = "xlsx";
 			}
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename="+reportType+"." + type);
+			}
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String, Object>)datas.get("params");
+			
+			if (type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport(reportType+"pdf",
+						(List)datas.get("data"), params, type, request);
+			} else if (type.equals("csv")) {
+				out = dynamicReportService.generateStaticReport(reportType+"csv",
+						(List)datas.get("data"), params, type, request);
+			} else {
+				out = dynamicReportService.generateStaticReport(reportType,
+						(List)datas.get("data"), params, type, request);
+			}
+		
+			out.writeTo(response.getOutputStream());
+			out.close();
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
+		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/mpgExport.do")
+	public String mpgExport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+		System.out.println("\nmileageLogBillingController==mpgExport()==type===>"+type+"\n");
+		
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+		
+		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
+		IFTAReportInput iftaReportInput = new IFTAReportInput();
+		map(iftaReportInput, input);
+		try {
+			Map<String, Object> datas = generateIFTAData(criteria, request, iftaReportInput);
+			
+			String reportType = "mpgReport";
 			
 			if (StringUtils.isEmpty(type)) {
 				type = "xlsx";

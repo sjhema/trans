@@ -132,6 +132,9 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	private String states;
 	
 	@Transient
+	private String vehicleCompany;
+	
+	@Transient
 	private String fuelVenders;
 	
 	@Transient
@@ -143,7 +146,16 @@ public class FuelLog extends AbstractBaseModel implements ReportModel{
 	@Transient
 	private String terminals;
 	
+	@Transient
+	public String getVehicleCompany() {
+		return vehicleCompany;
+	}
 	
+	@Transient
+	public void setVehicleCompany(String vehicleCompany) {
+		this.vehicleCompany = vehicleCompany;
+	}
+
 	public void setFuelViolation(String fuelViolation) {
 		this.fuelViolation = fuelViolation;
 	}

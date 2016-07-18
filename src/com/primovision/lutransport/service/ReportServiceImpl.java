@@ -3636,10 +3636,10 @@ throw new Exception("origin and destindation is empty");
 		}
 		
 		for (FuelLog aSrcFuelLog : srcFuelLogList) {
-			if (StringUtils.isEmpty(aSrcFuelLog.getCompanies()) || StringUtils.isEmpty(aSrcFuelLog.getStates())) {
+			if (StringUtils.isEmpty(aSrcFuelLog.getVehicleCompany()) || StringUtils.isEmpty(aSrcFuelLog.getStates())) {
 				continue;
 			}
-			String key = aSrcFuelLog.getCompanies() + "|" + aSrcFuelLog.getStates();
+			String key = aSrcFuelLog.getVehicleCompany() + "|" + aSrcFuelLog.getStates();
 			
 			FuelLog aggregateFuelLog = aggreateFuelLogMap.get(key);
 			if (aggregateFuelLog == null) {
@@ -4122,6 +4122,9 @@ throw new Exception("origin and destindation is empty");
 						.getInvoiceNo() : "");
 				output.setUnits((fuelog.getUnit() != null) ? fuelog.getUnit()
 						.getUnit().toString() : "");
+				
+				output.setVehicleCompany((fuelog.getUnit() != null && fuelog.getUnit().getOwner() != null) 
+						? fuelog.getUnit().getOwner().getName() : StringUtils.EMPTY);
 				
 				String fuelcardNum=null;
                 if(fuelog.getFuelcard()!=null){                                        
