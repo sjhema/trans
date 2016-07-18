@@ -3550,6 +3550,7 @@ throw new Exception("origin and destindation is empty");
 		
 		FuelLogReportInput fuelLogReportInput = new FuelLogReportInput();
 		map(fuelLogReportInput, searchCriteria, iftaReportInput);
+		fuelLogReportInput.setReportType(FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK);
 		
 		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, false);
 		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLog(fuelLogReportWrapper.getFuellog());
