@@ -3553,7 +3553,7 @@ throw new Exception("origin and destindation is empty");
 		fuelLogReportInput.setReportType(FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK);
 		
 		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, false);
-		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLog(fuelLogReportWrapper.getFuellog());
+		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLogByCompanyState(fuelLogReportWrapper.getFuellog());
 		
 		List<IFTAReport> iftaReportList = new ArrayList<IFTAReport>();
 		for (MileageLog aMileageLog : mileageLogReportWrapper.getMileageLogList()) {
@@ -3575,6 +3575,82 @@ throw new Exception("origin and destindation is empty");
 			
 			iftaReportList.add(anIFTAReport);
 		}
+		
+		IFTAReportWrapper anIFTAReportWrapper = new IFTAReportWrapper();
+		anIFTAReportWrapper.setCompanies(mileageLogReportWrapper.getCompanies());
+		anIFTAReportWrapper.setPeriodFrom(mileageLogReportWrapper.getPeriodFrom());
+		anIFTAReportWrapper.setPeriodTo(mileageLogReportWrapper.getPeriodTo());
+		anIFTAReportWrapper.setStates(mileageLogReportWrapper.getStates());
+		anIFTAReportWrapper.setTotalMiles(mileageLogReportWrapper.getTotalMiles());
+		anIFTAReportWrapper.setTotalRows(mileageLogReportWrapper.getTotalRows());
+		anIFTAReportWrapper.setTotalGallons(fuelLogReportWrapper.getTotalGallons());
+		anIFTAReportWrapper.setIftaReportList(iftaReportList);
+		
+		cleanMileageLogReportSearchCriteria(searchCriteria);
+		
+		return anIFTAReportWrapper;
+	}
+	
+	@Override
+	public IFTAReportWrapper generateMPGData(SearchCriteria searchCriteria, IFTAReportInput iftaReportInput) {
+		MileageLogReportInput mileageLogReportInput = new MileageLogReportInput();
+		map(mileageLogReportInput, iftaReportInput);
+		mileageLogReportInput.setReportType(MileageLogReportInput.REPORT_TYPE_DETAILS);
+		
+		MileageLogReportWrapper mileageLogReportWrapper = generateMileageLogData(searchCriteria, mileageLogReportInput);
+		List<MileageLog> aggregateMileageLogList = aggregateMileageLogByUnit(mileageLogReportWrapper.getMileageLogList());
+		
+		FuelLogReportInput fuelLogReportInput = new FuelLogReportInput();
+		map(fuelLogReportInput, searchCriteria, iftaReportInput);
+		fuelLogReportInput.setReportType(FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK);
+		
+		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, false);
+		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLogByUnit(fuelLogReportWrapper.getFuellog());
+		
+		List<IFTAReport> iftaReportList = new ArrayList<IFTAReport>();
+		for (MileageLog aMileageLog : aggregateMileageLogList) {
+			IFTAReport anIFTAReport = new IFTAReport();
+			anIFTAReport.setCompanyName(aMileageLog.getCompany().getName());
+			anIFTAReport.setUnitNum(aMileageLog.getUnitNum());
+			anIFTAReport.setMiles(aMileageLog.getMiles());
+			
+			String key = aMileageLog.getUnitNum();
+			FuelLog aFuelLog = aggreateFuelLogMap.get(key);
+			if (aFuelLog != null) {
+				anIFTAReport.setGallons(aFuelLog.getGallons());
+				
+				if (anIFTAReport.getMiles() != null && anIFTAReport.getGallons() != null) {
+					Double mpg = anIFTAReport.getMiles()/anIFTAReport.getGallons();
+					anIFTAReport.setMpg(mpg);
+				}
+				
+				aggreateFuelLogMap.remove(key);
+			}
+			
+			iftaReportList.add(anIFTAReport);
+		}
+		
+		Iterator<Map.Entry<String, FuelLog>> itr = aggreateFuelLogMap.entrySet().iterator();
+		while (itr.hasNext()) {
+			Map.Entry<String, FuelLog> pair = itr.next();
+			FuelLog aFuelLog = pair.getValue();
+			
+			IFTAReport anIFTAReport = new IFTAReport();
+			anIFTAReport.setCompanyName(aFuelLog.getVehicleCompany());
+			anIFTAReport.setUnitNum(aFuelLog.getUnits());
+			anIFTAReport.setGallons(aFuelLog.getGallons());
+			
+			iftaReportList.add(anIFTAReport);
+		}
+		
+		Collections.sort(iftaReportList, new Comparator<IFTAReport>() {
+			@Override
+         public int compare(IFTAReport lhs, IFTAReport rhs) {
+         	Integer lhsUnitNumInt = new Integer(lhs.getUnitNum());
+         	Integer rhsUnitNumInt = new Integer(rhs.getUnitNum());
+				return (lhsUnitNumInt > rhsUnitNumInt) ? 1 : (lhsUnitNumInt < rhsUnitNumInt ) ? -1 : 0;
+         }
+     });
 		
 		IFTAReportWrapper anIFTAReportWrapper = new IFTAReportWrapper();
 		anIFTAReportWrapper.setCompanies(mileageLogReportWrapper.getCompanies());
@@ -3630,7 +3706,7 @@ throw new Exception("origin and destindation is empty");
 		mileageLogReportInput.setPeriodTo(iftaReportInput.getPeriodTo());
 	}
 
-	private Map<String, FuelLog> aggregateFuelLog(List<FuelLog> srcFuelLogList) {
+	private Map<String, FuelLog> aggregateFuelLogByCompanyState(List<FuelLog> srcFuelLogList) {
 		Map<String, FuelLog> aggreateFuelLogMap = new HashMap<String, FuelLog>();
 		if (srcFuelLogList == null || srcFuelLogList.isEmpty()) {
 			return aggreateFuelLogMap;
@@ -3641,6 +3717,30 @@ throw new Exception("origin and destindation is empty");
 				continue;
 			}
 			String key = aSrcFuelLog.getVehicleCompany() + "|" + aSrcFuelLog.getStates();
+			
+			FuelLog aggregateFuelLog = aggreateFuelLogMap.get(key);
+			if (aggregateFuelLog == null) {
+				aggreateFuelLogMap.put(key, aSrcFuelLog);
+			} else {
+				Double aggregateGallons = aggregateFuelLog.getGallons() + aSrcFuelLog.getGallons();
+				aggregateFuelLog.setGallons(aggregateGallons);
+			}
+		}
+		
+		return aggreateFuelLogMap;
+	}
+	
+	private Map<String, FuelLog> aggregateFuelLogByUnit(List<FuelLog> srcFuelLogList) {
+		Map<String, FuelLog> aggreateFuelLogMap = new HashMap<String, FuelLog>();
+		if (srcFuelLogList == null || srcFuelLogList.isEmpty()) {
+			return aggreateFuelLogMap;
+		}
+		
+		for (FuelLog aSrcFuelLog : srcFuelLogList) {
+			if (StringUtils.isEmpty(aSrcFuelLog.getUnits())) {
+				continue;
+			}
+			String key = aSrcFuelLog.getUnits();
 			
 			FuelLog aggregateFuelLog = aggreateFuelLogMap.get(key);
 			if (aggregateFuelLog == null) {
@@ -3731,8 +3831,8 @@ throw new Exception("origin and destindation is empty");
 		}
 		wrapper.setTotalMiles(totalMiles);
 		
-		if("TOTALS".equals(input.getReportType())) {
-			returnMileageLogList = aggregateMileageLog(returnMileageLogList);
+		if (MileageLogReportInput.REPORT_TYPE_TOTALS.equals(input.getReportType())) {
+			returnMileageLogList = aggregateMileageLogByCompanyState(returnMileageLogList);
 		}
 		
 		wrapper.setMileageLogList(returnMileageLogList);
@@ -3757,7 +3857,7 @@ throw new Exception("origin and destindation is empty");
 		destMileageLog.setPeriodStr(periodStr);
 	}
 	
-	private List<MileageLog> aggregateMileageLog(List<MileageLog> srcMileageLogList) {
+	private List<MileageLog> aggregateMileageLogByCompanyState(List<MileageLog> srcMileageLogList) {
 		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
 		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
 			return aggreateMileageLogList;
@@ -3766,6 +3866,33 @@ throw new Exception("origin and destindation is empty");
 		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
 		for (MileageLog aSrcMileageLog : srcMileageLogList) {
 			String key = aSrcMileageLog.getCompany().getName() + "|" + aSrcMileageLog.getState().getName();
+			
+			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
+			if (aggregateMileageLog == null) {
+				aggreateMileageLogMap.put(key, aSrcMileageLog);
+			} else {
+				Double aggregateMiles = aggregateMileageLog.getMiles() + aSrcMileageLog.getMiles();
+				aggregateMileageLog.setMiles(aggregateMiles);
+			}
+		}
+		
+		SortedSet<String> sortedKeys = new TreeSet<String>(aggreateMileageLogMap.keySet());
+		for (String aKey : sortedKeys) {
+			aggreateMileageLogList.add(aggreateMileageLogMap.get(aKey));
+		}
+		
+		return aggreateMileageLogList;
+	}
+	
+	private List<MileageLog> aggregateMileageLogByUnit(List<MileageLog> srcMileageLogList) {
+		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
+		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
+			return aggreateMileageLogList;
+		}
+		
+		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
+		for (MileageLog aSrcMileageLog : srcMileageLogList) {
+			String key = aSrcMileageLog.getUnitNum();
 			
 			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
 			if (aggregateMileageLog == null) {

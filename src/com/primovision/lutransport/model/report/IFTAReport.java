@@ -7,10 +7,25 @@ public class IFTAReport {
 	private Location company;
 	private State state;
 	
+	private String companyName;
+	private String unitNum;
+	
 	private Double miles = 0.0;
 	private Double gallons = 0.0;
 	private Double mpg = 0.0;
 	
+	public String getCompanyName() {
+		return companyName;
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+	public String getUnitNum() {
+		return unitNum;
+	}
+	public void setUnitNum(String unitNum) {
+		this.unitNum = unitNum;
+	}
 	public Location getCompany() {
 		return company;
 	}

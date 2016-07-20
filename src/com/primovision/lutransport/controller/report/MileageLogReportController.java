@@ -143,6 +143,40 @@ public class MileageLogReportController extends BaseController {
 		return data;
 	}
 	
+	private Map<String,Object> generateMPGData(SearchCriteria searchCriteria, HttpServletRequest request, IFTAReportInput input) {
+		IFTAReportWrapper wrapper = generateMPGReport(searchCriteria, input);
+		
+		Map<String,Object> data = new HashMap<String,Object>();
+		Map<String,Object> params = new HashMap<String,Object>();
+		 
+		params.put("totalRows", wrapper.getTotalRows());
+		params.put("totalMiles", wrapper.getTotalMiles());
+		params.put("totalGallons", wrapper.getTotalGallons());
+		
+		String companies = "-";
+		if (!StringUtils.isEmpty(wrapper.getCompanies())) {
+			companies = retrieveCompanyNames(wrapper.getCompanies());
+		}
+		params.put("companies", companies);
+		
+		String states = "-";
+		if (!StringUtils.isEmpty(wrapper.getStates())) {
+			states = retrieveStateNames(wrapper.getStates());
+		}
+		params.put("states", states);
+		
+		String period = "-";
+		if (!StringUtils.isEmpty(wrapper.getPeriodFrom()) && !StringUtils.isEmpty(wrapper.getPeriodTo())) {
+			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
+		}
+		params.put("period", period);
+		  
+		data.put("data", wrapper.getIftaReportList());
+		data.put("params", params);
+		  
+		return data;
+	}
+	
 	private String retrieveCompanyNames(String companyIds) {
 		if (StringUtils.isEmpty(companyIds)) {
 			return StringUtils.EMPTY;
@@ -193,6 +227,10 @@ public class MileageLogReportController extends BaseController {
 	
 	public IFTAReportWrapper generateIFTAReport(SearchCriteria searchCriteria, IFTAReportInput input) {
 		return reportService.generateIFTAData(searchCriteria, input);
+	}
+	
+	public IFTAReportWrapper generateMPGReport(SearchCriteria searchCriteria, IFTAReportInput input) {
+		return reportService.generateMPGData(searchCriteria, input);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
@@ -338,7 +376,7 @@ public class MileageLogReportController extends BaseController {
 				map(iftaReportInput, input1);
 			}
 			
-			Map<String, Object> datas = generateIFTAData(criteria, request, iftaReportInput);
+			Map<String, Object> datas = generateMPGData(criteria, request, iftaReportInput);
 			
 		   if (StringUtils.isEmpty(type)) {
 				type = "html";
@@ -508,7 +546,7 @@ public class MileageLogReportController extends BaseController {
 		IFTAReportInput iftaReportInput = new IFTAReportInput();
 		map(iftaReportInput, input);
 		try {
-			Map<String, Object> datas = generateIFTAData(criteria, request, iftaReportInput);
+			Map<String, Object> datas = generateMPGData(criteria, request, iftaReportInput);
 			
 			String reportType = "mpgReport";
 			

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="mpgReportpdf" pageWidth="1250" pageHeight="600" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="mpgReportpdf" pageWidth="1250" pageHeight="750" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -10,8 +10,8 @@
 	<parameter name="states" class="java.lang.String"/>
 	<parameter name="totalGallons" class="java.lang.Double"/>
 	<field name="miles" class="java.lang.Double"/>
-	<field name="state.name" class="java.lang.String"/>
-	<field name="company.name" class="java.lang.String"/>
+	<field name="unitNum" class="java.lang.String"/>
+	<field name="companyName" class="java.lang.String"/>
 	<field name="gallons" class="java.lang.Double"/>
 	<field name="mpg" class="java.lang.Double"/>
 	<background>
@@ -137,7 +137,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[State]]></text>
+				<text><![CDATA[Unit#]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="280" y="25" width="182" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -211,7 +211,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{state.name}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{unitNum}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1" y="0" width="173" height="20"/>
@@ -223,7 +223,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{company.name}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{companyName}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="462" y="0" width="182" height="20"/>
