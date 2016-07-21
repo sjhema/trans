@@ -3677,6 +3677,9 @@ throw new Exception("origin and destindation is empty");
 		fuelLogReportInput.setState(iftaReportInput.getState());
 		fuelLogReportInput.setUnit(iftaReportInput.getUnit());
 		
+		if (StringUtils.isEmpty(iftaReportInput.getPeriodFrom()) || StringUtils.isEmpty(iftaReportInput.getPeriodTo())) {
+			return;
+		}
 		try {
 			String periodFromStr = ReportDateUtil.dateFormatter.format(mileageSearchDateFormat.parse(iftaReportInput.getPeriodFrom()));
 			
@@ -3690,7 +3693,7 @@ throw new Exception("origin and destindation is empty");
 			fuelLogReportInput.setTransactionDateFrom(periodFromStr);
 			fuelLogReportInput.setTransactionDateTo(periodToStr);
 			searchCriteria.getSearchMap().put("transactionDateFrom", periodFromStr);
-			searchCriteria.getSearchMap().put("transactionDateTo", periodFromStr);
+			searchCriteria.getSearchMap().put("transactionDateTo", periodToStr);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3776,8 +3779,8 @@ throw new Exception("origin and destindation is empty");
 		}
 		
 		if (!StringUtils.isEmpty(truck)){
-			query.append(" and  obj.unit in (" + truck + ")");
-			countQuery.append(" and  obj.unit in (" + truck + ")");
+			query.append(" and  obj.unitNum in (" + truck + ")");
+			countQuery.append(" and  obj.unitNum in (" + truck + ")");
 		}
         
       if (!StringUtils.isEmpty(periodFrom)) {
