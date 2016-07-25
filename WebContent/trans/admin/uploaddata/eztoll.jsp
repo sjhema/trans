@@ -89,12 +89,13 @@
 <div id="div_id" style="font-size:1.2em;font-weight: bold; color:red"></div>
 
 <c:if test="${not empty errorList}">
-	<b>Following Tolls are in Error :</b><br/>
+	<b style="font-size:1.2em;font-weight: bold; color:green">ALL tolls uploaded successfully EXCEPT following Tolls which are in Error :</b><br/>
 	<c:forEach var="item" items="${errorList}">
 		<%-- ${item} --%>
 		<FONT color=#F2290F><STRONG>${item}</strong></FONT>
 	</c:forEach>
-	
+
+<!-- 	
 <form:form action="${ctx}/uploadData/eztoll/override.do" name="overrideForm"  enctype="multipart/form-data" modelAttribute="modelObject">
 <table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 	<tr class="table-heading">
@@ -109,4 +110,5 @@
 	</tr>
 </table>
 </form:form>
+ -->
 </c:if>

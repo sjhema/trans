@@ -1426,13 +1426,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								error = true;
 								errorcount++;
 							}
-
+							
 							if (eztolls.contains(eztoll)) {
 								 lineError.append("Duplicate eztoll in excel,"); 
 								 error = true;
-							 } else { 
-								 eztolls.add(eztoll);
 							 }
+							 // Toll upload improvement - 23rd Jul 2016
+							 /*else { 
+								 eztolls.add(eztoll);
+							 }*/
 						} else {
 							errorcount++;
 						}
@@ -1462,20 +1464,30 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				} // TRY INSIDE SHILE(LOOP)
 				catch (Exception ex) {
 					error = true;
+					lineError.append("Exception while processing toll upload records,"); 
 					log.warn(ex);
 				}
 				if (lineError.length() > 0) {
 					System.out.println("Error :" + lineError.toString());
 					list.add("Line " + count + ":" + lineError.toString() + "<br/>");
 				}
+				// Toll upload improvement - 23rd Jul 2016
+				else { 
+					eztolls.add(eztoll);
+				}
+				
 				System.out.println("Record No :" + count);
 				count++;
 			} // CLOSE while (rows.hasNext())
 		} // FIRST TRY
 		catch (Exception e) {
 			log.warn("Error in import eztoll :" + e);
+			// Toll upload improvement - 23rd Jul 2016
+			throw e;
 		}
-		if (errorcount == 0) {
+		
+		// Toll upload improvement - 23rd Jul 2016
+		//if (errorcount == 0) {
 			for (EzToll etoll : eztolls) {
 				Map criti = new HashMap();
 				criti.clear();
@@ -1491,7 +1503,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					etoll.setUnitNum(vehObj.getUnitNum());
 				genericDAO.saveOrUpdate(etoll);
 			}
-		}
+		// Toll upload improvement - 23rd Jul 2016
+		//}
 		return list;
 	}
 
