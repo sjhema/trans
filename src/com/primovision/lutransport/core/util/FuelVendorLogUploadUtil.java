@@ -233,7 +233,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Description : Truck #");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
