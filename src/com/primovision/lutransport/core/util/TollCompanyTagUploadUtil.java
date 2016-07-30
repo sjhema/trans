@@ -12,23 +12,30 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.model.ErrorData;
+import com.primovision.lutransport.model.EzToll;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.service.ImportMainSheetService;
 
@@ -517,6 +524,20 @@ public class TollCompanyTagUploadUtil {
 		return targetStream;
 	}
 	
+	private static ByteArrayOutputStream createOutputStream(HSSFWorkbook wb) {
+		//dumpToFile(wb);
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			wb.write(out);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      
+	   return out;
+	}
+	
 	private static void dumpToFile(HSSFWorkbook wb) {
 		FileOutputStream fOut;
 		try {
@@ -546,8 +567,92 @@ public class TollCompanyTagUploadUtil {
 	}
 
 	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex) {
+		return createExcelCell(sheet, row, columnIndex, 256*20);
+	}
+	
+	private static Cell createExcelCell(Sheet sheet, Row row, int columnIndex, int width) {
 		Cell cell = row.createCell(columnIndex);
-		sheet.setColumnWidth(columnIndex, 256*20);
+		sheet.setColumnWidth(columnIndex, width);
 		return cell;
+	}
+	
+	public static ByteArrayOutputStream createTollUploadResponse(InputStream is, List<String> errors) throws IOException {
+		if (errors == null || errors.isEmpty()) {
+			return createTollUploadSuccessResponse();
+		} else {
+			return createTollUploadErrorResponse(is, errors);
+		}
+	}
+	
+	public static ByteArrayOutputStream createTollUploadErrorResponse(InputStream is, List<String> errors) throws IOException {
+		POIFSFileSystem fs = new POIFSFileSystem(is);
+		HSSFWorkbook wb = new HSSFWorkbook(fs);
+		
+		HSSFFont font = wb.createFont();
+		font.setColor(Font.COLOR_RED);
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setFont(font);
+		
+		HSSFSheet sheet = wb.getSheetAt(0);
+		
+		Row row = sheet.getRow(0);
+		int lastCell = row.getLastCellNum();
+		Cell cell = createExcelCell(sheet, row, lastCell, 256*100);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue("ERRORS");
+		
+		for (String anError : errors) {
+			String lineNoStr = StringUtils.substringBefore(anError, ":");
+			lineNoStr = StringUtils.substringAfter(lineNoStr, "Line ");
+			Integer lineNo = new Integer(lineNoStr) - 1;
+			
+			row = sheet.getRow(lineNo);
+			cell = createExcelCell(sheet, row, lastCell, 256*100);
+			cell.setCellStyle(cellStyle);
+			cell.setCellValue(anError);
+		}
+		
+		return createOutputStream(wb);
+	}
+	
+	public static ByteArrayOutputStream createTollUploadSuccessResponse() {
+		HSSFWorkbook wb = new HSSFWorkbook();
+		
+		HSSFFont font = wb.createFont();
+		font.setColor(IndexedColors.GREEN.getIndex());
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setFont(font);
+		
+		Sheet sheet = wb.createSheet();
+		
+		Row row = sheet.createRow(0);
+		Cell cell = createExcelCell(sheet, row, 0, 256*100);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue("ALL tolls uploaded successfully");
+		
+		return createOutputStream(wb);
+	}
+	
+	public static ByteArrayOutputStream createTollUploadExceptionResponse(Exception e) {
+		HSSFWorkbook wb = new HSSFWorkbook();
+		
+		HSSFFont font = wb.createFont();
+		font.setColor(Font.COLOR_RED);
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setFont(font);
+		
+		Sheet sheet = wb.createSheet();
+		
+		Row row = sheet.createRow(0);
+		Cell cell = createExcelCell(sheet, row, 0, 256*100);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue("An error occurred while uploading!!!");
+
+		return createOutputStream(wb);
 	}
 }

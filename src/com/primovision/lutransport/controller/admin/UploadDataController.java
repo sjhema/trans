@@ -1,6 +1,9 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,11 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.FuelVendorLogUploadUtil;
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.TollCompanyTagUploadUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelSurcharge;
@@ -107,66 +112,119 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/vehiclepermit";
 	}
 	
-	
 	@RequestMapping("/eztoll/upload.do")
-	public String eztollSaveData(HttpServletRequest request,
+	public void eztollSaveData(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("dataFile") MultipartFile file,
 			@RequestParam("tollcompany") Long tollCompanyId) {
-		Map criterias = new HashMap();
-		model.addAttribute("tollcompanies", genericDAO.findByCriteria(TollCompany.class, criterias, "name", false));
-		
-		List<String> str = new ArrayList<String>();
-		boolean flag=false;
-		try 
-		{
-			if (StringUtils.isEmpty(file.getOriginalFilename())) 
-			{
+		// Toll upload improvement - 23rd Jul 2016
+		//Map criterias = new HashMap();
+		//model.addAttribute("tollcompanies", genericDAO.findByCriteria(TollCompany.class, criterias, "name", false));
+	
+		ByteArrayOutputStream out = null;
+		InputStream dataFileInputStream1 = null;
+		InputStream dataFileInputStream2 = null;
+		InputStream convertedDataFileInputStream = null;
+		try {
+			// Toll upload improvement - 23rd Jul 2016
+			/*
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
 			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
 			    return "admin/uploaddata/eztoll";
-		    }
-			if (!StringUtils.isEmpty(file.getOriginalFilename())) 
-			{
+		   }
+			if (!StringUtils.isEmpty(file.getOriginalFilename()))  {
 				String ext=	file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-				if(!(ext.equalsIgnoreCase(".xls")))
-                {
-                	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
-                	return "admin/uploaddata/eztoll";
+				if(!(ext.equalsIgnoreCase(".xls"))) {
+                request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+                return "admin/uploaddata/eztoll";
 				}
-			}
+			}*/
 			
-			InputStream is = file.getInputStream();
-			
+			dataFileInputStream1 = file.getInputStream();
 			if (TollCompanyTagUploadUtil.isConversionRequired(tollCompanyId)) {
-				is = TollCompanyTagUploadUtil.convertToGenericTollTagFormat(is, tollCompanyId, this.genericDAO, this.importMainSheetService);
+				convertedDataFileInputStream = TollCompanyTagUploadUtil.convertToGenericTollTagFormat(dataFileInputStream1, tollCompanyId, this.genericDAO, this.importMainSheetService);
 			}
+			closeInputStream(dataFileInputStream1);
 			
-			System.out.println("\nimportMainSheetService.importMainSheet(is)\n");
-			str = importMainSheetService.importeztollMainSheet(is,flag);
-			if(str.isEmpty())
-			{
+			System.out.println("\nimportMainSheetService.importeztollMainSheet(is)\n");
+			List<String> errorList = importMainSheetService.importeztollMainSheet(convertedDataFileInputStream, false);
+			closeInputStream(convertedDataFileInputStream);
+			
+			// Toll upload improvement - 23rd Jul 2016
+			/*
+			if(str.isEmpty()) {
 				model.addAttribute("msg", "Successfully uploaded all tolls");
-			}
-			else
-			{
+			} else {
 				model.addAttribute("errorList", str);
-			}
-		} 
-		catch (Exception ex) 
-		{
+			}*/
+			
+			// Toll upload improvement - 23rd Jul 2016
+			dataFileInputStream2 = file.getInputStream();
+			out = TollCompanyTagUploadUtil.createTollUploadResponse(dataFileInputStream2, errorList);
+			closeInputStream(dataFileInputStream2);
+		} catch (Exception ex) {
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
 			ex.printStackTrace();
 			
 			//str.add("Exception while uploading");
 			//model.addAttribute("errorList", str);
 			
-			model.addAttribute("error", "An error occurred while uploading!!");
+			// Toll upload improvement - 23rd Jul 2016
+			/*
+			model.addAttribute("error", "An error occurred while uploading!!!");
 			return "admin/uploaddata/eztoll";
+			*/
+			
+			// Toll upload improvement - 23rd Jul 2016
+			out = TollCompanyTagUploadUtil.createTollUploadExceptionResponse(ex);
+		} finally {
+			closeInputStream(dataFileInputStream1);
+			closeInputStream(dataFileInputStream2);
+			closeInputStream(convertedDataFileInputStream);
 		}
 		
-		return "admin/uploaddata/eztoll";
+		// Toll upload improvement - 23rd Jul 2016
+		//return "admin/uploaddata/eztoll";
+		
+		String responseFileName = "TollUploadResults_" + StringUtils.replace(file.getOriginalFilename(), " ", "_");
+		String type = file.getContentType();
+		response.setHeader("Content-Disposition", "attachment;filename="+ responseFileName);
+		response.setContentType(type);
+	
+		try {
+			out.writeTo(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			closeOutputStream(out);
+		}
 	}
 	
+	private void closeInputStream(InputStream is) {
+		if (is == null) {
+			return;
+		}
+		
+		try {
+			is.close();
+			is = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void closeOutputStream(OutputStream os) {
+		if (os == null) {
+			return;
+		}
+		
+		try {
+			os.close();
+			os = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	@RequestMapping("/eztoll/override.do")
 	public String eztollSaveDataOverride(HttpServletRequest request,
