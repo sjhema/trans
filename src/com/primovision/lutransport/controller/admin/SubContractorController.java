@@ -3,6 +3,7 @@ package com.primovision.lutransport.controller.admin;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
+import com.primovision.lutransport.model.Ticket;
 
 @Controller
 @RequestMapping("/admin/subcontractor")
@@ -125,6 +127,40 @@ public class SubContractorController extends CRUDController<SubContractor> {
 			if(entity.getFax().length() < 12)
 				bindingResult.rejectValue("fax", "typeMismatch.java.lang.String", null, null);
 		}
+		
+		// Duplicate subcontractor name - 9th Sep 2016
+		if(StringUtils.isEmpty(entity.getCity())) {
+			bindingResult.rejectValue("name", "typeMismatch.java.lang.String", null, null);
+		}
+		
+		// Duplicate subcontractor name - 9th Sep 2016
+		if (isDuplicate(entity)) {
+			bindingResult.rejectValue("name", "error.duplicate.entry",	null, null);		
+		}
+		
 		return super.save(request, entity, bindingResult, model);
+	}
+	
+	// Duplicate subcontractor name - 9th Sep 2016
+	private boolean isDuplicate(SubContractor entity) {
+		String subcontractorQuery = "select obj from SubContractor obj where obj.name='"+entity.getName()+"'";
+		List<SubContractor> subContractorList = genericDAO.executeSimpleQuery(subcontractorQuery);
+		
+		if (subContractorList == null || subContractorList.isEmpty()) {
+			return false;
+		}
+		
+		// For adds
+		if (entity.getId() == null) {
+			return true;
+		}
+		
+		// For edits
+		SubContractor existingSubContractor = subContractorList.get(0);
+		if (existingSubContractor.getId() == entity.getId()) {
+			return false;
+		}
+		
+		return true;
 	}
 }
