@@ -218,7 +218,12 @@ public class TicketController extends CRUDController<Ticket> {
 		map1.put("dataValue", "0,1");
 		model.addAttribute("ticketStatus", genericDAO.findByCriteria(StaticData.class, map1,"dataText",false));
 		
-		
+		// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+		String showDuplicateTicketOverrideMsg = "false";
+		if (getUser(request).getId() == 20) {
+			showDuplicateTicketOverrideMsg = "true";
+		}
+		model.addAttribute("showDuplicateTicketOverrideMsg", showDuplicateTicketOverrideMsg);
 		
 		//criterias.put("role.id", 2l);
 		
@@ -338,16 +343,22 @@ public class TicketController extends CRUDController<Ticket> {
 				/*String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.destination.id="+entity.getDestination().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;*/
 				String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
-				if (tickets!=null && tickets.size()>0){		
-					bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);		
+				if (tickets!=null && tickets.size()>0){	
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (getUser(request).getId() != 20) {
+						bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);
+					}
 				}
 				/*String destination = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.destination.id="+entity.getDestination().getId()+" and obj.destinationTicket="+entity.getDestinationTicket()+" and obj.id != "+ticketId;*/
 				String destination = "select obj from Ticket obj where obj.destination.id="+entity.getDestination().getId()+" and obj.destinationTicket="+entity.getDestinationTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
-				if (tickets1!=null && tickets1.size()>0){		
-					bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);		
+				if (tickets1!=null && tickets1.size()>0){	
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (getUser(request).getId() != 20) {
+						bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);	
+					}
 				}
-				}
+			}
 			
 			
 			
@@ -913,15 +924,22 @@ public class TicketController extends CRUDController<Ticket> {
 			if(entity.getOrigin() != null && entity.getDestination() != null && entity.getOriginTicket() !=null && entity.getDestinationTicket() !=null){
 				String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
-				if (tickets!=null && tickets.size()>0){		
-					bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);		
+				
+				if (tickets!=null && tickets.size()>0){	
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (getUser(request).getId() != 20) {
+						bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);
+					}
 				}
 				String destination = "select obj from Ticket obj where obj.destination.id="+entity.getDestination().getId()+" and obj.destinationTicket="+entity.getDestinationTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
-				if (tickets1!=null && tickets1.size()>0){		
-					bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);		
+				if (tickets1!=null && tickets1.size()>0){	
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (getUser(request).getId() != 20) {
+						bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);	
+					}
 				}
-				}
+			}
 			
 			try {
 				getValidator().validate(entity, bindingResult);
@@ -1999,8 +2017,8 @@ public class TicketController extends CRUDController<Ticket> {
 		    
 		    String origin = "select obj from Ticket obj where obj.origin.id="+landfill+" and obj.originTicket="+landticket+" and obj.id != "+tickId;
 			List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
-			if (tickets!=null && tickets.size()>0){		
-				mssg="Duplicate Origin Ticket";	
+			if (tickets!=null && tickets.size()>0){
+				mssg="Duplicate Origin Ticket";
 			}
 		    
 			 return mssg;
@@ -2025,8 +2043,8 @@ public class TicketController extends CRUDController<Ticket> {
 		    
 		    String destination = "select obj from Ticket obj where obj.destination.id="+transfersttn+" and obj.destinationTicket="+transferticket+" and obj.id != "+tickId;
 			List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
-			if (tickets1!=null && tickets1.size()>0){		
-				mssg="Duplicate Destination Ticket";			
+			if (tickets1!=null && tickets1.size()>0){	
+				mssg="Duplicate Destination Ticket";
 			}
 			 return mssg;
 		}

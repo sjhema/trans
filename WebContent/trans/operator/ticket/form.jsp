@@ -12,8 +12,21 @@ function submitform(type){
     }
     else{
          submitting = true;
-		document.forms["ticketForm"].submit();
-        }
+         
+      	 // Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+         if ((document.getElementById("spanId1").innerHTML != "" ||
+        		 document.getElementById("spanId2").innerHTML != "") &&
+        		 document.getElementById("showDuplicateTicketOverrideMsg").value == "true") {
+        	 if (confirm('Duplicate Origin/Destination tickets entered, do you want to continue saving?')) {
+        		 document.forms["ticketForm"].submit();
+        	  } else {
+        		 submitting = false;
+        		 return;
+        	  }
+         } else {
+        	 document.forms["ticketForm"].submit();
+         }
+     }
 }
 
 
@@ -359,7 +372,11 @@ function checkLandfillTicket() {
 			success: function( data ) {
 				if(data!=''){
 					document.getElementById("spanId1").innerHTML="Duplicate Origin Ticket";
-					$("#originticket").focus();
+					
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (document.getElementById("showDuplicateTicketOverrideMsg").value == "false") {
+						$("#originticket").focus();
+					} 
 				}
 				else{
 					document.getElementById("spanId1").innerHTML="";
@@ -382,7 +399,11 @@ function checkTransferTicket() {
 			success: function( data ) {
 				if(data!=''){
 					document.getElementById("spanId2").innerHTML="Duplicate Destination Ticket";
-					$("#destinationticket").focus();
+					
+					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+					if (document.getElementById("showDuplicateTicketOverrideMsg").value == "false") {
+						$("#destinationticket").focus();
+					} 
 				}
 				else{
 					document.getElementById("spanId2").innerHTML="";
@@ -580,6 +601,8 @@ function formatDate1(){
 <form:form action="save.do" name="ticketForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
+	<!--// Allow duplicate tickets for Maria Navarro - 17th Oct 2016-->
+	<input type="hidden" name="showDuplicateTicketOverrideMsg" id="showDuplicateTicketOverrideMsg" value="${showDuplicateTicketOverrideMsg}" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Common Information" />
