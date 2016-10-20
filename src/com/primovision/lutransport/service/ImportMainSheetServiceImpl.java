@@ -60,6 +60,7 @@ import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
+import com.primovision.lutransport.model.SubcontractorRate;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.User;
@@ -184,6 +185,170 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		System.out.println("******************** Vehicle query is " + vehicleQuery);
 		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
 		return vehicleList;
+	}
+	
+	private List<StaticData> retrieveStaticData(String staticDataType, String dataText) {
+		Map criterias = new HashMap();
+		criterias.put("dataType", staticDataType);
+		criterias.put("dataText", dataText);
+		return genericDAO.findByCriteria(StaticData.class, criterias);
+	}
+	
+	private List<Location> retrieveLocationData(int locationType, String locationName) {
+		Map criterias = new HashMap();
+		criterias.put("status", 1);
+		criterias.put("type", locationType);
+		criterias.put("name", locationName);
+		return genericDAO.findByCriteria(Location.class, criterias, "name", false);
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importSubcontractorRateMainSheet(InputStream is, Date validFrom, Date validTo, Long createdBy) throws Exception {
+		List<SubcontractorRate> subcontractorRateList = new ArrayList<SubcontractorRate>();
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount == 1) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				boolean fatalRecordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				SubcontractorRate subcontractorRate = null;
+				try {
+					String subcontractorName = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", subcontractorName)) {
+						break;
+					}
+					
+					String companyName = ((String) getCellValue(row.getCell(1)));
+					String transferStationName = ((String) getCellValue(row.getCell(2)));
+					String landfillName = ((String) getCellValue(row.getCell(3)));
+					String billUsing = ((String) getCellValue(row.getCell(4)));
+					String sortBy = ((String) getCellValue(row.getCell(5)));
+					String rateType = ((String) getCellValue(row.getCell(6)));
+					
+					// Load date - 1, Unload date - 2
+					String rateUsing = "Load date";
+					
+					Double rate = row.getCell(7).getNumericCellValue();
+					Double fuelSurchargeAmount = row.getCell(8).getNumericCellValue();
+					Double otherCharges = row.getCell(9).getNumericCellValue();
+					
+					subcontractorRate = new SubcontractorRate();
+					
+					String query = "select obj from SubContractor obj where "
+							+ " obj.status=1"
+							+ " and obj.name='" + subcontractorName + "'";
+					List<SubContractor> subcontractorList = genericDAO.executeSimpleQuery(query);
+					
+					if (subcontractorList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Subcontractor,");
+					} else {
+						subcontractorRate.setSubcontractor(subcontractorList.get(0));
+					}
+					
+					List<Location> companyList = retrieveLocationData(3, companyName);
+					if (companyList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Company,");
+					} else {
+						subcontractorRate.setCompanyLocation(companyList.get(0));
+					}
+					
+					List<Location> transferStationList = retrieveLocationData(1, transferStationName);
+					if (transferStationList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Transfer Station,");
+					} else {
+						subcontractorRate.setTransferStation(transferStationList.get(0));
+					}
+					
+					List<Location> landfillList = retrieveLocationData(2, landfillName);
+					if (landfillList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Landfill,");
+					} else {
+						subcontractorRate.setLandfill(landfillList.get(0));
+					}
+				
+					List<StaticData> rateTypesList = retrieveStaticData("RATE_TYPE", rateType);
+					List<StaticData> billUsingList = retrieveStaticData("BILL_USING", billUsing);
+					List<StaticData> sortByList = retrieveStaticData("BILL_USING", sortBy);
+					List<StaticData> rateUsingList = retrieveStaticData("RATE_USING", rateUsing);
+					
+					subcontractorRate.setRateType(new Integer(rateTypesList.get(0).getDataValue()));
+					subcontractorRate.setBillUsing(new Integer(billUsingList.get(0).getDataValue()));
+					subcontractorRate.setSortBy(new Integer(sortByList.get(0).getDataValue()));
+					subcontractorRate.setRateUsing(new Integer(rateUsingList.get(0).getDataValue()));
+					
+					subcontractorRate.setFuelSurchargeAmount(fuelSurchargeAmount);
+					subcontractorRate.setOtherCharges(otherCharges);
+					subcontractorRate.setValue(rate);
+					
+					subcontractorRate.setValidFrom(validFrom);
+					subcontractorRate.setValidTo(validTo);
+					
+					if (checkDuplicate(subcontractorRate)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Duplicate record,");
+					}
+				} catch (Exception ex) {
+					recordError = true;
+					fatalRecordError = true;
+					recordErrorMsg.append("Error while processing record,");
+				}
+				
+				if (recordError) {
+					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+					errorList.add(msgPreffix 
+							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					errorCount++;
+				} 
+				
+				if (!fatalRecordError) {
+					subcontractorRateList.add(subcontractorRate);
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + subcontractorRateList.size());
+			if (!subcontractorRateList.isEmpty()) {
+				for (SubcontractorRate aSubcontractorRate : subcontractorRateList) {
+					aSubcontractorRate.setStatus(1);
+					aSubcontractorRate.setCreatedBy(createdBy);
+					aSubcontractorRate.setCreatedAt(Calendar.getInstance().getTime());
+					
+					genericDAO.saveOrUpdate(aSubcontractorRate);
+				}
+			}
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Mileage log: " + ex);
+		}
+		
+		return errorList;
 	}
 	
 	@Override
@@ -383,6 +548,29 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		List<MileageLog> mileageLogList = genericDAO.executeSimpleQuery(query);
 		return !mileageLogList.isEmpty();
+	}
+	
+	private boolean checkDuplicate(SubcontractorRate aSubcontractorRate) {
+		if (aSubcontractorRate.getValidFrom() == null || aSubcontractorRate.getValidTo() == null
+				 || aSubcontractorRate.getSubcontractor() == null || aSubcontractorRate.getCompanyLocation() == null
+				 || aSubcontractorRate.getTransferStation() == null  || aSubcontractorRate.getLandfill() == null) {
+			return false;
+		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String validFrom = dateFormat.format(aSubcontractorRate.getValidFrom());
+		String validTo = dateFormat.format(aSubcontractorRate.getValidTo());
+		
+		String query = "select obj from SubcontractorRate obj where "
+				+ " obj.validFrom='" + validFrom + "'"
+				+ " and obj.validTo='" + validTo + "'"
+				+ " and obj.subcontractor=" + aSubcontractorRate.getSubcontractor().getId()
+				+ " and obj.companyLocation=" + aSubcontractorRate.getCompanyLocation().getId()
+				+ " and obj.transferStation=" + aSubcontractorRate.getTransferStation().getId()
+				+ " and obj.landfill=" + aSubcontractorRate.getLandfill().getId();
+		
+		List<SubcontractorRate> subcontractorRateList = genericDAO.executeSimpleQuery(query);
+		return !subcontractorRateList.isEmpty();
 	}
 	
 	private boolean validateVin(String vin) {

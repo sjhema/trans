@@ -18,5 +18,6 @@ public interface ImportMainSheetService {
 			LinkedHashMap<String, String> tollCompanySpecificColumns, Long tollCompanyId) throws Exception;
 	
 	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception;
+	public List<String> importSubcontractorRateMainSheet(InputStream is, Date validFrom, Date validTo, Long createdBy) throws Exception;
 }
 

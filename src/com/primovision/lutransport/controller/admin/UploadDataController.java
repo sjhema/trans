@@ -88,6 +88,11 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/mileage";
 	}
 	
+	@RequestMapping("/subcontractorrate.do")
+	public String subcontractorrate(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/subcontractorrate";
+	}
+	
 	@RequestMapping("/vehiclepermit.do")
 	public String vehiclepermit(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -299,6 +304,51 @@ public class UploadDataController extends BaseController {
 		}
 		
 		return "admin/uploaddata/mileage";
+	}
+	
+	@RequestMapping("/subcontractorrate/upload.do")
+	public String saveSubcontractorRateData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("validFrom") String validFromStr,
+			@RequestParam("validTo") String validToStr,
+			@RequestParam("dataFile") MultipartFile file) {
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/subcontractorrate";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/subcontractorrate";
+			}
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+			Date validFrom = dateFormat.parse(validFromStr);
+			Date validTo = dateFormat.parse(validToStr);
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importMileageLogMainSheet(is)\n");
+			List<String> str = importMainSheetService.importSubcontractorRateMainSheet(is, validFrom, validTo, createdBy);
+			if (str.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all subcontractor rate records");
+			} else {
+				model.addAttribute("errorList", str);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/subcontractorrate";
+		}
+		
+		return "admin/uploaddata/subcontractorrate";
 	}
 	
 	@RequestMapping("/fuellog/override.do")
