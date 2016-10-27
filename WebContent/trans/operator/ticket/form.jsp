@@ -14,8 +14,8 @@ function submitform(type){
          submitting = true;
          
       	 // Allow duplicate tickets for Maria Navarro - 17th Oct 2016
-         if ((document.getElementById("spanId1").innerHTML != "" ||
-        		 document.getElementById("spanId2").innerHTML != "") &&
+         if ((document.getElementById("spanId1").innerHTML.trim() != "" ||
+        		 document.getElementById("spanId2").innerHTML.trim() != "") &&
         		 document.getElementById("showDuplicateTicketOverrideMsg").value == "true") {
         	 if (confirm('Duplicate Origin/Destination tickets entered, do you want to continue saving?')) {
         		 document.forms["ticketForm"].submit();

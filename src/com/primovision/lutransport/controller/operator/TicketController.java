@@ -1751,6 +1751,9 @@ public class TicketController extends CRUDController<Ticket> {
 		if(criteria.getSearchMap().get("contnd")!=null){
 			criteria.getSearchMap().remove("contnd");
 		}
+		
+		// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+		criteria.getSearchMap().remove("showDuplicateTicketOverrideMsg");
 		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria));
 		
 		if(!StringUtils.isEmpty(request.getParameter("contnd"))){
