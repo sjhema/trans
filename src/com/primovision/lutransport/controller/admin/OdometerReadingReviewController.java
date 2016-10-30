@@ -42,6 +42,7 @@ import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.driver.DriverFuelLog;
 import com.primovision.lutransport.model.driver.Odometer;
+import com.primovision.lutransport.model.driver.OdometerReset;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.service.DateUpdateService;
 
@@ -268,11 +269,45 @@ public class OdometerReadingReviewController extends CRUDController<Odometer>{
 						null, null);
 			}
 			else{
-				String query = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"' and obj.startReading<="+entity.getStartReading()+" and obj.endReading >"+entity.getStartReading();
+				// Odometer reset - 27th Oct 2016
+				String odometerResetQuery = "select obj from OdometerReset obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"'"
+				+ " and obj.resetDate<='" + dateFormat.format(entity.getRecordDate()) + "'"
+				+ " order by obj.resetDate desc";
+				List<OdometerReset> odometerResetList = genericDAO.executeSimpleQuery(odometerResetQuery);
+				OdometerReset anOdometerReset = null;
+				if (odometerResetList != null && !odometerResetList.isEmpty()) {
+					anOdometerReset = odometerResetList.get(0);
+				}
+				
+				String query = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()
+					+"' and obj.startReading<="+entity.getStartReading()
+					+" and obj.endReading >"+entity.getStartReading();
 				if(entity.getId()!=null){
 					query = query + " and id!="+entity.getId();
 				}
+				
+				// Odometer reset - 27th Oct 2016
+				if (anOdometerReset != null) {
+					query += " and obj.recordDate >= '" + dateFormat.format(anOdometerReset.getResetDate()) + "'";
+				}
+				
 				List<Odometer> odolist = genericDAO.executeSimpleQuery(query);
+				
+				// Odometer reset - 27th Oct 2016
+				// Validate first record after reset
+				if (odolist == null || odolist.isEmpty()) {
+					if (anOdometerReset != null) {
+						// Retrieve any records after reset date and then throw error
+						String odometerQuery2 = "select obj from Odometer obj where 1=1 and obj.tempTruck='"+entity.getTempTruck()+"'"
+								+ " and obj.recordDate >= '" + dateFormat.format(anOdometerReset.getResetDate()) + "'";
+						List<Odometer> odolist2 = genericDAO.executeSimpleQuery(odometerQuery2);
+						if (odolist2 == null || odolist2.isEmpty()) {
+							if (entity.getStartReading() > anOdometerReset.getResetReading()) {
+								bindingResult.rejectValue("startReading", "error.invalid.startReadingAfterReset", null, null);
+							}
+						}
+					}
+				}
 				
 				if(odolist!=null && odolist.size()>0){
 					bindingResult.rejectValue("startReading", "error.invalid.startReading",
