@@ -3418,7 +3418,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String employees=input.getEmployees();
 		StringBuffer query=new StringBuffer("");
 		query.append("select obj from LeaveCurrentBalance obj where 1=1");
-		query.append(" and (obj.hourremain!='0.0' and obj.hourremain is not null) OR (obj.daysremain!='0.0' and obj.daysremain is not null)");
+		query.append(" and ((obj.hourremain!='0.0' and obj.hourremain is not null) OR (obj.daysremain!='0.0' and obj.daysremain is not null)) ");
 		if (!StringUtils.isEmpty(employees)) {
 			query.append("and  obj.empname in ("+employees+")");
 		}
