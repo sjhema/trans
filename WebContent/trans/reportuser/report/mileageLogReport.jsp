@@ -1,9 +1,9 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <style>
- .ui-datepicker-calendar {
-     display: none;
-  }
+.hide-calendar .ui-datepicker-calendar {
+    display: none;
+}
 </style>
 
 <script type="text/javascript">
@@ -41,6 +41,7 @@ $(function() {
             $(this).datepicker('setDate', new Date(iYear, iMonth, 1));
         },
         beforeShow : function(input, inst) {
+        	$('#ui-datepicker-div').addClass('hide-calendar');
         	if ((selDate = $(this).val()).length > 0) {
                iYear = selDate.substring(selDate.length - 4, selDate.length);
                iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5), $(this).datepicker('option', 'monthNames'));
@@ -63,6 +64,7 @@ $(function() {
             $(this).datepicker('setDate', new Date(iYear, iMonth, 1));
         },
         beforeShow : function(input, inst) {
+        	$('#ui-datepicker-div').addClass('hide-calendar');
         	if ((selDate = $(this).val()).length > 0) {
                iYear = selDate.substring(selDate.length - 4, selDate.length);
                iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5), $(this).datepicker('option', 'monthNames'));
@@ -73,8 +75,80 @@ $(function() {
     });
 });
 
-$(document).ready(function(){
-	   $("select").multiselect();
+function formatDate(datepickerId){
+	var date=document.getElementById(datepickerId).value;
+	if(date!=""){
+	if(date.length<8){
+		alert("Invalidte date format");
+		document.getElementById(datepickerId).value="";
+		return true;
+	}
+	else{
+		var str=new String(date);
+		if(!str.match("-")){
+			var mm=str.substring(0,2);
+			var dd=str.substring(2,4);
+			var yy=str.substring(4,8);
+			var enddigit=str.substring(6,8);
+			if(!enddigit==00 && enddigit%4==0 ){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("Invalid date format");
+						document.getElementById(datepickerId).value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("Invalid date format");
+					document.getElementById(datepickerId).value="";
+					return true;
+				}
+				else if(dd>31){
+					alert("Invalid date format");
+					document.getElementById(datepickerId).value="";
+					return true;
+				}
+			}if(enddigit==00 && yy%400==0){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("Invalid date format");
+						document.getElementById(datepickerId).value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("Invalid date format");
+					document.getElementById("datepicker1").value="";
+					return true;
+				}else if(dd>31){
+					alert("Invalid date format");
+					document.getElementById(datepickerId).value="";
+					return true;
+				}					
+			}else{
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("Invalid date format");
+						document.getElementById(datepickerId).value="";
+						return true;
+					}
+				}if(mm==02 && dd>28){
+					alert("Invalid date format");
+					document.getElementById(datepickerId).value="";
+					return true;
+				}else if(dd>31){
+					alert("Invalid date format");
+					document.getElementById(datepickerId).value="";
+					return true;
+				}
+			}
+			var date=mm+"-"+dd+"-"+yy;
+			document.getElementById(datepickerId).value=date;
+		}
+	 }
+   }
+}
+
+$(document).ready(function() {
+	$("select").multiselect();
 });
 </script>
 <br/>
@@ -92,6 +166,37 @@ $(document).ready(function(){
 				To:<form:input size="15" path="periodTo" cssClass="flat" />
 			</td>
 		</tr>
+		<tr>
+	 	<td class="form-left"><primo:label code="Date" /><span class="errorMessage"></span></td>
+			<td  align="${left}">
+				From:<form:input size="10" path="firstInStateFrom" cssClass="flat" onblur="return formatDate('firstInStateFrom');"/>
+				<script type="text/javascript">
+					$(function() {
+						$("#firstInStateFrom").datepicker({
+							dateFormat:'mm-dd-yy',
+			            	changeMonth: true,
+			    			changeYear: true,
+			    	        beforeShow : function(input, inst) {
+			    	        	$('#ui-datepicker-div').removeClass('hide-calendar');
+			    	        }
+			    		});
+					});
+				</script>
+				To:<form:input size="10" path="firstInStateTo" cssClass="flat" onblur="return formatDate('firstInStateTo');"/>
+				<script type="text/javascript">
+					$(function() {
+						$("#firstInStateTo").datepicker({
+							dateFormat:'mm-dd-yy',
+			            	changeMonth: true,
+			    			changeYear: true,
+			    	        beforeShow : function(input, inst) {
+			    	        	$('#ui-datepicker-div').removeClass('hide-calendar');
+			    	        }
+			    		});
+					});
+				</script>
+			</td>
+	 	</tr>
 		<tr>
 			<td class="form-left"><primo:label code="States" /><span class="errorMessage"></span></td>
 			<td>

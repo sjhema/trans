@@ -100,6 +100,8 @@ public class MileageLogReportController extends BaseController {
 		String period = "-";
 		if (!StringUtils.isEmpty(wrapper.getPeriodFrom()) && !StringUtils.isEmpty(wrapper.getPeriodTo())) {
 			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
+		} else if (!StringUtils.isEmpty(wrapper.getFirstInStateFrom()) && !StringUtils.isEmpty(wrapper.getFirstInStateTo())) {
+			period = wrapper.getFirstInStateFrom() + " - " + wrapper.getFirstInStateTo();
 		}
 		params.put("period", period);
 		  

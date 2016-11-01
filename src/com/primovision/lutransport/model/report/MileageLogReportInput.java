@@ -9,6 +9,8 @@ public class MileageLogReportInput {
 	private String state;
 	private String company;
 	private String unit;
+	private String firstInStateFrom;
+	private String firstInStateTo;
 	
 	private String reportType;
 	
@@ -50,5 +52,17 @@ public class MileageLogReportInput {
 	}
 	public void setPeriodTo(String periodTo) {
 		this.periodTo = periodTo;
+	}
+	public String getFirstInStateFrom() {
+		return firstInStateFrom;
+	}
+	public void setFirstInStateFrom(String firstInStateFrom) {
+		this.firstInStateFrom = firstInStateFrom;
+	}
+	public String getFirstInStateTo() {
+		return firstInStateTo;
+	}
+	public void setFirstInStateTo(String firstInStateTo) {
+		this.firstInStateTo = firstInStateTo;
 	}
 }

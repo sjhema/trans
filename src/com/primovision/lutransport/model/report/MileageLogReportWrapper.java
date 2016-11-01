@@ -13,6 +13,9 @@ public class MileageLogReportWrapper {
 	String periodFrom = StringUtils.EMPTY;
 	String periodTo = StringUtils.EMPTY;
 	
+	String firstInStateFrom = StringUtils.EMPTY;
+	String firstInStateTo = StringUtils.EMPTY;
+	
 	String states = StringUtils.EMPTY;
 	String companies = StringUtils.EMPTY;
 	
@@ -71,5 +74,21 @@ public class MileageLogReportWrapper {
 
 	public List<MileageLog> getMileageLogList() {
 		return mileageLogList;
+	}
+
+	public String getFirstInStateFrom() {
+		return firstInStateFrom;
+	}
+
+	public void setFirstInStateFrom(String firstInStateFrom) {
+		this.firstInStateFrom = firstInStateFrom;
+	}
+
+	public String getFirstInStateTo() {
+		return firstInStateTo;
+	}
+
+	public void setFirstInStateTo(String firstInStateTo) {
+		this.firstInStateTo = firstInStateTo;
 	}
 }

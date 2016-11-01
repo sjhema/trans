@@ -3764,6 +3764,8 @@ throw new Exception("origin and destindation is empty");
 		String truck = input.getUnit();
 		String periodFrom = input.getPeriodFrom();
 		String periodTo = input.getPeriodTo();
+		String firstInStateFrom = ReportDateUtil.getFromDate(input.getFirstInStateFrom());
+		String firstInStateTo = ReportDateUtil.getToDate(input.getFirstInStateTo());
 		
 		StringBuffer query = new StringBuffer("select obj from MileageLog obj  where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from MileageLog obj where 1=1");
@@ -3800,6 +3802,17 @@ throw new Exception("origin and destindation is empty");
 				e.printStackTrace();
 			}
       }
+      
+      if (!StringUtils.isEmpty(firstInStateFrom) && !StringUtils.isEmpty(firstInStateTo)) {
+        	query.append(" and obj.firstInState >='"+firstInStateFrom+"'");
+			query.append(" and obj.firstInState <='"+firstInStateTo+"'");
+			countQuery.append(" and obj.firstInState >='"+firstInStateFrom+"'");
+			countQuery.append(" and obj.firstInState <='"+firstInStateTo+"'");
+			//query.append(" and  obj.firstInState between '" + firstInStateFrom
+			//		+ "' and '" + firstInStateTo + "'");
+			//countQuery.append(" and  obj.firstInState between '" + firstInStateFrom
+			//		+ "' and '" + firstInStateTo + "'");
+		}
 
       query.append(" order by obj.company.name asc, obj.state.name asc, obj.unitNum asc, obj.period desc");
       countQuery.append(" order by obj.period desc");
@@ -3822,6 +3835,8 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setStates(state);
 		wrapper.setPeriodFrom(periodFrom);
 		wrapper.setPeriodTo(periodTo);
+		wrapper.setFirstInStateFrom(firstInStateFrom);
+		wrapper.setFirstInStateTo(firstInStateTo);
 		
 		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
 		double totalMiles = 0.0;
