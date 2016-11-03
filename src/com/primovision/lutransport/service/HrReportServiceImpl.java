@@ -3435,6 +3435,9 @@ public class HrReportServiceImpl implements HrReportService {
 		if (!StringUtils.isEmpty(terminal)) {
 				query.append("and  obj.terminal in ("+terminal+")");
 			}
+		
+		query.append(" order by obj.company.name asc, obj.terminal.name asc, obj.empname.fullName asc");
+		
 			System.out.println("******* The query is "+query.toString());
 			List<RemainingLeaveInput> out=new ArrayList<RemainingLeaveInput>();
 			List<LeaveCurrentBalance> balances=genericDAO.executeSimpleQuery(query.toString()); 
@@ -3470,6 +3473,7 @@ public class HrReportServiceImpl implements HrReportService {
 				}				
 				remainingleave.setEmployeesId((balance.getEmpname()!=null)?balance.getEmpname().getStaffId():"");
 				remainingleave.setEmployees((balance.getEmpname()!=null)?balance.getEmpname().getFullName():"");
+				remainingleave.setCategory((balance.getEmpcategory()!=null)?balance.getEmpcategory().getName():"");
 				remainingleave.setCompany((balance.getCompany()!=null)?balance.getCompany().getName():"");
 				remainingleave.setTerminal((balance.getTerminal()!=null)?balance.getTerminal().getName():"");
 				remainingleave.setDaysEarned((balance.getDayssbalance()!=null)?balance.getDayssbalance():0.0);
