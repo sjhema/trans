@@ -690,7 +690,8 @@ function formatDate5(){
 <a href="/trans/admin/tripsheetreview/exportdata.do?type=pdf"><img src="/trans/images/pdf.png" border="0" class="toolbarButton"></a>
 <a href="/trans/admin/tripsheetreview/exportdata.do?type=xls"><img src="/trans/images/excel.png" border="0" class="toolbarButton"></a>
 <a href="/trans/admin/tripsheetreview/exportdata.do?type=csv"><img src="/trans/images/csv.png" border="0" class="toolbarButton"></a>
-
+<a href="/trans/admin/tripsheetreview/exportdata.do?type=csv&audit=true">
+	<img src="/trans/images/bluecsv.png" border="0" class="toolbarButton"></a>
 </td>
 </tr>
 </table>

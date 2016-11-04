@@ -826,7 +826,8 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/exportdata.do")
 	public void display(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response,@RequestParam(required = false, value = "type") String type,
-			@RequestParam(required = false, value = "jrxml") String jrxml) {
+			@RequestParam(required = false, value = "jrxml") String jrxml,
+			@RequestParam(required = false, value = "audit") boolean audit) {
 		Map<String,Object> datas = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		Map imagesMap = new HashMap();
@@ -1029,7 +1030,8 @@ for(TripSheet obj:tripsheettempList){
 						(List)datas.get("data"), params, type, request);
 			}
 			else if (type.equals("csv")) {
-				out = dynamicReportService.generateStaticReport("drivertripsheetreview",
+				String reportFile = audit ? "drivertripsheetreviewAudit" : "drivertripsheetreview";
+				out = dynamicReportService.generateStaticReport(reportFile,
 						(List)datas.get("data"), params, type, request);
 			}
 			else {

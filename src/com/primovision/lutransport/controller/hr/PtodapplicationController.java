@@ -1075,9 +1075,12 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 		List<LeaveCurrentBalance> leaveBalobs=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
 		if(leaveBalobs.isEmpty()){
 			if(entity.getApprovestatus()!=null && entity.getApprovestatus()==1){
-				setupCreate(model, request);
-				request.getSession().setAttribute("error", "Cannot find suitable record in Leave Balance Table for selected employee.");
-				return urlContext + "/form";
+				// Jury duty fix - 3rd Nov 2016
+				if (entity.getLeavetype().getId() != 9) {
+					setupCreate(model, request);
+					request.getSession().setAttribute("error", "Cannot find suitable record in Leave Balance Table for selected employee.");
+					return urlContext + "/form";
+				}
 			}
 			
 		}
