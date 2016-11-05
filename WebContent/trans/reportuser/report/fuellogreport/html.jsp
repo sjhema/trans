@@ -14,6 +14,7 @@
 	buffer.append("<input type=\"button\" value=\"Back\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/start.do'\">");
 	buffer.append("<input type=\"button\" value=\"Export As Pdf\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/export.do?type=pdf'\">");
 	buffer.append("<input type=\"button\" value=\"Export As CSV\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/export.do?type=csv'\">");
+	buffer.append("<input type=\"button\" value=\"Export As Pdf-2\" onclick=\"javascript:location.href='"+request.getContextPath()+"/reportuser/report/fuellogbilling/export.do?type=pdf&audit=true'\">");
 	buffer.append("</table>\n");
 	exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER, buffer.toString());
 	exporter.setParameter(JRHtmlExporterParameter.IMAGES_MAP, (Map)request.getAttribute("IMAGES_MAP"));

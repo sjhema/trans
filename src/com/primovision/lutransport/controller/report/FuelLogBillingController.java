@@ -234,7 +234,8 @@ public class FuelLogBillingController extends BaseController{
 		public String display(ModelMap model, HttpServletRequest request,
 				HttpServletResponse response,
 				@RequestParam(required = false, value = "type") String type,
-				@RequestParam(required = false, value = "jrxml") String jrxml) {
+				@RequestParam(required = false, value = "jrxml") String jrxml,
+				@RequestParam(required = false, value = "audit") boolean audit) {
 			System.out.println("\nfuellogBillingController==export()==type===>"+type+"\n"); 
 			Map imagesMap = new HashMap();
 			request.getSession().setAttribute("IMAGES_MAP", imagesMap);
@@ -267,7 +268,8 @@ public class FuelLogBillingController extends BaseController{
 							(List)datas.get("data"), params, type, request);
 				}*/
 				if (type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport(reportType+"pdf",
+					String reportFile = audit ? reportType+"pdfAudit" : reportType+"pdf";
+					out = dynamicReportService.generateStaticReport(reportFile,
 							(List)datas.get("data"), params, type, request);
 				}
 				else if (type.equals("csv")) {

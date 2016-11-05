@@ -1019,19 +1019,19 @@ for(TripSheet obj:tripsheettempList){
 				type = "xlsx";
 			if (!type.equals("html") && !(type.equals("print"))) {
 				response.setHeader("Content-Disposition",
-						"attachment;filename= Daily Driver Activity Schedule." + type);
+						"attachment;filename= Daily_Driver_Activity_Schedule." + type);
 			}
 			response.setContentType(MimeUtil.getContentType(type));
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			
 			
 			if (type.equals("pdf")) {
-				out = dynamicReportService.generateStaticReport("drivertripsheetreview"+"pdf",
+				String reportFile = audit ? "drivertripsheetreviewpdfAudit" : "drivertripsheetreviewpdf";
+				out = dynamicReportService.generateStaticReport(reportFile,
 						(List)datas.get("data"), params, type, request);
 			}
 			else if (type.equals("csv")) {
-				String reportFile = audit ? "drivertripsheetreviewAudit" : "drivertripsheetreview";
-				out = dynamicReportService.generateStaticReport(reportFile,
+				out = dynamicReportService.generateStaticReport("drivertripsheetreview",
 						(List)datas.get("data"), params, type, request);
 			}
 			else {
