@@ -288,6 +288,10 @@ public class SubcontractorBillingRateController extends ReportController<Subcont
 				out = dynamicReportService.generateStaticReport(reportName+"csv",
 						(List)datas.get("data"), params, type, request);
 			}
+			else if (type.equals("xls")) {
+				out = dynamicReportService.generateStaticReport(reportName+"xls",
+						(List)datas.get("data"), params, type, request);
+			}
 			else {
 				out = dynamicReportService.generateStaticReport(reportName,
 						(List)datas.get("data"), params, type, request);

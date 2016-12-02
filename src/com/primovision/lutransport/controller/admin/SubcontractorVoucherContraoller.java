@@ -170,6 +170,10 @@ public class SubcontractorVoucherContraoller extends CRUDController<Subcontracto
 			out = dynamicReportService.generateStaticReport("subcontractorbillingpdf",
 				datas, params, type, request);
 			}
+		if (type.equals("xls")){
+			out = dynamicReportService.generateStaticReport("subcontractorbillingxls",
+				datas, params, type, request);
+			}
 		if (type.equals("csv")){
 			out = dynamicReportService.generateStaticReport("subcontractorbillingcsv",
 				datas, params, type, request);
