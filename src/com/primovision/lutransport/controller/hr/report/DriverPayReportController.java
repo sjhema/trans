@@ -240,6 +240,10 @@ public class DriverPayReportController extends BaseController{
 								setDriver = true;
 								
 							}
+							// Jury duty fix - driver - 3rd Nov 2016
+							if(ptodapplication.getLeavetype().getId()==9){
+								setDriver = true;
+							}
 							if(ptodapplication.getLeavetype().getId()==4){
 								setDriver = true;
 								
@@ -712,6 +716,11 @@ public class DriverPayReportController extends BaseController{
 									sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
 								    sickSum+=sickParsonalAmount;
 								    numberOfSickDays=numberOfSickDays+(ptodapplication.getDayspaid()+ptodapplication.getPaidoutdays());
+								}
+								// Jury duty fix - driver - 3rd Nov 2016
+								if(ptodapplication.getLeavetype().getId()==9){
+									sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+								   sickSum+=sickParsonalAmount;
 								}
 								if(ptodapplication.getLeavetype().getId()==4){
 									vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());

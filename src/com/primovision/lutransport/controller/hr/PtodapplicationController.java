@@ -877,7 +877,8 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 		}
 		else
 		{
-			if(entity.getLeavetype().getId()==5 || entity.getLeavetype().getId()==6 || entity.getLeavetype().getId()==7 || entity.getLeavetype().getId()==8){
+			// Jury duty fix - 3rd Nov 2016 (leave type 9)
+			if(entity.getLeavetype().getId()==9 || entity.getLeavetype().getId()==5 || entity.getLeavetype().getId()==6 || entity.getLeavetype().getId()==7 || entity.getLeavetype().getId()==8){
 				
 				if(entity.getSubmitdate()==null){
 					bindingResult.rejectValue("submitdate", null, null, "Submit Date required");
@@ -898,7 +899,6 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 				if(entity.getApproveby()==null){
 					bindingResult.rejectValue("approveby", "error.select.option", null, null);
 				}
-					
 				
 				if (bindingResult.hasErrors()) {					
 					setupCreate(model, request);
@@ -914,23 +914,40 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 				if(entity.getHourlyamountpaid()==null){
 					entity.setHourlyamountpaid(0.0);
 				}
+				
+				// Jury duty fix - 3rd Nov 2016 (leave type 9)
+				if(entity.getDaysrequested()==null){
+					entity.setDaysrequested(0);
+				}
+				if(entity.getHoursrequested()==null){
+					entity.setHoursrequested(0.0);
+				}
+				
 				//entity.setBatchdate(null);
 				//entity.setCheckdate(null);
 				
 				entity.setDateapproved(entity.getDateapproved());
-				entity.setDayspaid(0);
-				entity.setDaysrequested(0);
+				
+				// Jury duty fix - 3rd Nov 2016 (leave type 9)
+				if(entity.getLeavetype().getId()!=9) {
+					entity.setDaysrequested(0);
+					entity.setDayspaid(0);
+					entity.setPtodrates(0.0);
+					
+					entity.setHoursrequested(0.0);
+					entity.setHourspaid(0.0);
+					entity.setPtodhourlyrate(0.0);
+					entity.setHourlyamountpaid(0.0);
+				}
+				
 				entity.setDaysunpaid(0);
 				entity.setEarneddays(0);
 				entity.setEarnedhours(0.0);
-				entity.setHourspaid(0.0);
-				entity.setHourlyamountpaid(0.0);
-				entity.setHoursrequested(0.0);
+				
 				entity.setHoursunpaid(0.0);
 				entity.setPaidoutdays(0);
 				entity.setPaidouthours(0.0);
-				entity.setPtodhourlyrate(0.0);
-				entity.setPtodrates(0.0);
+				
 				entity.setRemainingdays(0);
 				entity.setRemaininghours(0.0);
 				entity.setUseddays(0);
@@ -1658,6 +1675,9 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 			String employeeId = request.getParameter("driver");
 			String batchDate=request.getParameter("batch");
 			batchDate=ReportDateUtil.getFromDate(batchDate);
+			
+			// Jury duty fix - 3rd Nov 2016
+			String leaveTypeToBeUsed = StringUtils.equals(leavetype, "9") ? "1" : leavetype;
 
 			Integer dayspaid = Integer.valueOf(request.getParameter("dayspaid"));
 			Integer dayspaidout = Integer.valueOf(request.getParameter("dayspaidout"));
@@ -1694,7 +1714,9 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 						}
 					}
 					else{
-						String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category+"  and obj.leavetype='"+leavetype+"'";
+						// Jury duty fix - 3rd Nov 2016
+						String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category+" "
+								+ " and obj.leavetype='"+leaveTypeToBeUsed+"'"; // instead of leavetype
 						List<Ptod> ptodob = genericDAO.executeSimpleQuery(ptodquery);
 						if(!ptodob.isEmpty()){
 							Ptod ptod=ptodob.get(0);
@@ -1716,7 +1738,9 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 					}
 				}
 				else{
-					String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category+"  and obj.leavetype='"+leavetype+"'";
+					// Jury duty fix - 3rd Nov 2016
+					String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category
+							+"  and obj.leavetype='"+leaveTypeToBeUsed+"'";  // instead of leavetype
 					List<Ptod> ptodob = genericDAO.executeSimpleQuery(ptodquery);
 					if(!ptodob.isEmpty()){
 						Ptod ptod=ptodob.get(0);
@@ -1892,6 +1916,10 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 			String category = request.getParameter("category");
 			String batchDate=request.getParameter("batch");
 			batchDate=ReportDateUtil.getFromDate(batchDate);
+
+			// Jury duty fix - 3rd Nov 2016
+			String leaveTypeToBeUsed = StringUtils.equals(leavetype, "9") ? "1" : leavetype ;
+			
 			Double ptodrate=0.0;
 			Double hourlyptodrate=0.0;
 			boolean cal=false;
@@ -1932,7 +1960,9 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 				}
 			}
 			else{
-				String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category+"  and obj.leavetype='"+leavetype+"'";
+				// Jury duty fix - 3rd Nov 2016
+				String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category
+						+"  and obj.leavetype='"+leaveTypeToBeUsed+"'";  // instead of leavetype
 				List<Ptod> ptodob = genericDAO.executeSimpleQuery(ptodquery);
 				if(!ptodob.isEmpty()){
 					Ptod ptod=ptodob.get(0);

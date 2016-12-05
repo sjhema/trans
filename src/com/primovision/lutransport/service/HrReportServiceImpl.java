@@ -1475,6 +1475,10 @@ public class HrReportServiceImpl implements HrReportService {
 						if(ptodapplication.getLeavetype().getId()==1){
 							sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
 						}
+						// Jury duty fix - driver - 3rd Nov 2016
+						if(ptodapplication.getLeavetype().getId()==9){
+							sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+						}
 						if(ptodapplication.getLeavetype().getId()==4){
 							vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 							
@@ -1724,6 +1728,11 @@ public class HrReportServiceImpl implements HrReportService {
 						if(ptodapplication.getLeavetype().getId()==1){
 							setDriver = true;
 							sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());;
+						}
+						// Jury duty fix - driver - 3rd Nov 2016
+						if(ptodapplication.getLeavetype().getId()==9){
+							setDriver = true;
+							sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 						}
 						if(ptodapplication.getLeavetype().getId()==4){
 							setDriver = true;
@@ -4411,6 +4420,10 @@ public class HrReportServiceImpl implements HrReportService {
 					if(ptodap.getLeavetype().getId()==1){
 						sickParsanolAmount=sickParsanolAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());;
 					}
+					// Jury duty fix - 3rd Nov 2016
+					if(ptodap.getLeavetype().getId()==9){
+						sickParsanolAmount=sickParsanolAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
+					}
 					if(ptodap.getLeavetype().getId()==4){
 						vacationAmount=vacationAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
 						
@@ -4422,7 +4435,8 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 				}
 				
-				StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+timeSheet.getDriver().getFullName()+"' and obj.miscNotes!='Reimbursement'");
+				StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+timeSheet.getDriver().getFullName()
+						+"' and obj.miscNotes!='Reimbursement'");
 				
 					//miscamountquery.append(" and obj.batchFrom='"+mysqldf.format(timeSheet.getBatchdate())+"'")
 				
@@ -4431,7 +4445,15 @@ public class HrReportServiceImpl implements HrReportService {
 				}
 				if (!StringUtils.isEmpty(toDateStr)) {
 					miscamountquery.append(" and obj.batchTo<='"+toDateStr +"'");					
-				}				
+				}	
+				
+				// Misc amt dup emp fix - 10th Nov 2016
+				if (!StringUtils.isEmpty(company)) {
+					miscamountquery.append(" and  obj.company=").append(company);
+				}
+				if (!StringUtils.isEmpty(terminal)) {
+					miscamountquery.append(" and  obj.terminal=").append(terminal);
+				}
 				
 					List<MiscellaneousAmount> miscamounts=genericDAO.executeSimpleQuery(miscamountquery.toString());
 					int count=0;
@@ -4440,7 +4462,8 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 					
 					
-					StringBuffer reimburseamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+timeSheet.getDriver().getFullName()+"' and obj.miscNotes ='Reimbursement'");
+					StringBuffer reimburseamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+timeSheet.getDriver().getFullName()
+							+"' and obj.miscNotes ='Reimbursement'");
 					
 					//reimburseamountquery.append(" and obj.batchFrom='"+mysqldf.format(timeSheet.getBatchdate())+"'");
 				
@@ -4451,6 +4474,13 @@ public class HrReportServiceImpl implements HrReportService {
 						reimburseamountquery.append(" and obj.batchTo<='"+toDateStr +"'");					
 					}
 				
+					// Misc amt dup emp fix - 10th Nov 2016
+					if (!StringUtils.isEmpty(company)) {
+						reimburseamountquery.append(" and  obj.company=").append(company);
+					}
+					if (!StringUtils.isEmpty(terminal)) {
+						reimburseamountquery.append(" and  obj.terminal=").append(terminal);
+					}
 				
 					List<MiscellaneousAmount> reimburseamounts=genericDAO.executeSimpleQuery(reimburseamountquery.toString());
 					int reimbursecount=0;
@@ -4649,6 +4679,11 @@ public class HrReportServiceImpl implements HrReportService {
 						output.setBatchdate(sdf.format(ptodap.getBatchdate()));
 						sickParsanolAmount=sickParsanolAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());;
 					}
+					// Jury duty fix - 3rd Nov 2016
+					if(ptodap.getLeavetype().getId()==9){
+						output.setBatchdate(sdf.format(ptodap.getBatchdate()));
+						sickParsanolAmount=sickParsanolAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
+					}
 					if(ptodap.getLeavetype().getId()==4){
 						output.setBatchdate(sdf.format(ptodap.getBatchdate()));
 						vacationAmount=vacationAmount+(ptodap.getAmountpaid())+(ptodap.getHourlyamountpaid());
@@ -4662,13 +4697,22 @@ public class HrReportServiceImpl implements HrReportService {
 					
 				}
 				
-				StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+drvObj.getFullName()+"' and obj.miscNotes!='Reimbursement'");
+				StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+drvObj.getFullName()
+				+"' and obj.miscNotes!='Reimbursement'");
 				
 				if (!StringUtils.isEmpty(fromDateStr)) {
 					miscamountquery.append(" and obj.batchFrom>='"+fromDateStr+"'");						
 				}
 				if (!StringUtils.isEmpty(toDateStr)) {
 					miscamountquery.append(" and obj.batchTo<='"+toDateStr +"'");					
+				}
+				
+				// Misc amt dup emp fix - 10th Nov 2016
+				if (!StringUtils.isEmpty(company)) {
+					miscamountquery.append(" and  obj.company=").append(company);
+				}
+				if (!StringUtils.isEmpty(terminal)) {
+					miscamountquery.append(" and  obj.terminal=").append(terminal);
 				}
 				
 					List<MiscellaneousAmount> miscamounts=genericDAO.executeSimpleQuery(miscamountquery.toString());
@@ -4679,7 +4723,8 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 					
 					
-					StringBuffer reimburseamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+drvObj.getFullName()+"' and obj.miscNotes ='Reimbursement'");
+					StringBuffer reimburseamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.payRollStatus!=2 and obj.driver.fullName='"+drvObj.getFullName()
+					+"' and obj.miscNotes ='Reimbursement'");
 					
 					//reimburseamountquery.append(" and obj.batchFrom='"+mysqldf.format(timeSheet.getBatchdate())+"'");
 					if (!StringUtils.isEmpty(fromDateStr)) {
@@ -4689,6 +4734,13 @@ public class HrReportServiceImpl implements HrReportService {
 						reimburseamountquery.append(" and obj.batchTo<='"+toDateStr +"'");					
 					}
 				
+					// Misc amt dup emp fix - 10th Nov 2016
+					if (!StringUtils.isEmpty(company)) {
+						reimburseamountquery.append(" and  obj.company=").append(company);
+					}
+					if (!StringUtils.isEmpty(terminal)) {
+						reimburseamountquery.append(" and  obj.terminal=").append(terminal);
+					}
 				
 					List<MiscellaneousAmount> reimburseamounts=genericDAO.executeSimpleQuery(reimburseamountquery.toString());
 					int reimbursecount=0;
@@ -7070,6 +7122,11 @@ public class HrReportServiceImpl implements HrReportService {
 						sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 						paidSickPersonalAmount = paidSickPersonalAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
 					}
+					// Jury duty fix - salary - 3rd Nov 2016
+					if(ptodapplication.getLeavetype().getId()==9){
+						sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+						paidSickPersonalAmount = paidSickPersonalAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
+					}
 					if(ptodapplication.getLeavetype().getId()==4){
 						vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
 						paidVacationAmount = paidVacationAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
@@ -7726,6 +7783,10 @@ public class HrReportServiceImpl implements HrReportService {
 				for(Ptodapplication ptodapplication:ptodapplications){
 					boolean noSequenceNumber=true;
 					if(ptodapplication.getLeavetype().getId()==1){
+						// do nothing
+					}
+					// Jury duty fix - salary - 3rd Nov 2016
+					if(ptodapplication.getLeavetype().getId()==9){
 						// do nothing
 					}
 					if(ptodapplication.getLeavetype().getId()==4 ||
