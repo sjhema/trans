@@ -18,6 +18,114 @@ function deleteLineItem(lineItemId) {
 	}
 }
 
+function saveLineItemType() {
+	clearLineItemTypeDialogMsgs();
+	
+	var type = $('#lineItemTypeDialogType').val();
+	var description = $('#lineItemTypeDialogDescription').val();
+	var lineItemTypeSel = $('#lineItemType');
+	
+	var lineItemTypeDialogErrorMessageElem = $('#lineItemTypeDialogErrorMessage');
+	
+	$.ajax({
+  		url: "${ctx}/admin/vehiclemaint/repairorders/lineitemtype/ajax.do?action=save&type=" + type + "&description=" + description,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData.indexOf("success") == -1) {
+       			lineItemTypeDialogErrorMessageElem.html(responseData);
+       		} else {
+       			var id = responseData.substring(responseData.indexOf(":") + 1);
+       			var option = "<option value='" + id + "'>" + type + "</option>";
+       			lineItemTypeSel.append(option);
+       			lineItemTypeSel.val(id);
+       			
+       			closeLineItemTypeDialog();
+       		}
+		}
+	});
+}
+
+function clearLineItemTypeDialog() {
+	$('#lineItemTypeDialogType').val("");
+	$('#lineItemTypeDialogDescription').val("");
+	
+	clearLineItemTypeDialogMsgs();
+}
+
+function clearLineItemTypeDialogMsgs() {
+	$('#lineItemTypeDialogErrorMessage').html("");
+	$('#lineItemTypeDialogSuccessMessage').html("");
+}
+
+function openLineItemTypeDialog() {
+	clearLineItemTypeDialog();
+	$('#lineItemTypeDialog').dialog({ 
+		 modal: true,
+         bgiframe: true,
+         width: 500,
+         resizable: false
+     });
+}
+
+function closeLineItemTypeDialog() {
+	clearLineItemTypeDialog();
+	$('#lineItemTypeDialog').dialog('close');
+}
+
+function saveComponent() {
+	clearComponentDialogMsgs();
+	
+	var component = $('#componentDialogComponent').val();
+	var description = $('#componentDialogDescription').val();
+	var componentSel = $('#lineItemComponent');
+	
+	var componentDialogErrorMessageElem = $('#componentDialogErrorMessage');
+	
+	$.ajax({
+  		url: "${ctx}/admin/vehiclemaint/repairorders/component/ajax.do?action=save&component=" + component + "&description=" + description,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData.indexOf("success") == -1) {
+       			componentTypeDialogErrorMessageElem.html(responseData);
+       		} else {
+       			var id = responseData.substring(responseData.indexOf(":") + 1);
+       			var option = "<option value='" + id + "'>" + component + "</option>";
+       			componentSel.append(option);
+       			componentSel.val(id);
+       			
+       			closeComponentDialog();
+       		}
+		}
+	});
+}
+
+function clearComponentDialog() {
+	$('#componentDialogComponent').val("");
+	$('#componentDialogDescription').val("");
+	
+	clearComponentDialogMsgs();
+}
+
+function clearComponentDialogMsgs() {
+	$('#componentDialogErrorMessage').html("");
+	$('#componentSuccessMessage').html("");
+}
+
+function openComponentDialog() {
+	clearComponentDialog();
+	$('#componentDialog').dialog({ 
+		 modal: true,
+         bgiframe: true,
+         width: 500,
+         resizable: false
+     });
+}
+
+function closeComponentDialog() {
+	clearComponentDialog();
+	$('#componentDialog').dialog('close');
+}
+
 function editLineItem(lineItemId) {
 	$.ajax({
   		url: "ajax.do?action=retrieveLineItem" + "&lineItemId=" + lineItemId,
@@ -159,12 +267,12 @@ function populateCosts() {
 		<tr>
 			<td class="form-left"><primo:label code="Order No" /></td>
 			<td align="${left}">
-				<form:input path="id" style="background-color: #eee; min-width:150px; max-width:150px" cssClass="flat" 
+				<form:input path="id" style="background-color: #eee; min-width:162px; max-width:162px" cssClass="flat" 
 					 readonly="true" /> 
 			</td>
 			<td class="form-left"><primo:label code="Order Date" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input id="datepicker" path="repairOrderDate" style="min-width:150px; max-width:150px" cssClass="flat"  />
+				<form:input id="datepicker" path="repairOrderDate" style="min-width:158px; max-width:158px" cssClass="flat"  />
 				<br> 
 				<form:errors path="repairOrderDate" cssClass="errorMessage" />
 			</td>
@@ -172,7 +280,7 @@ function populateCosts() {
 		<tr>
 			<td class="form-left"><primo:label code="Description" /></td>
 			<td align="${left}" colspan="6">
-				<form:input path="description" style="min-width:581px; max-width:581px" cssClass="flat"  />
+				<form:input path="description" style="min-width:602px; max-width:602px" cssClass="flat"  />
 				<br> <form:errors path="description" cssClass="errorMessage" />   	
 			</td>
 		<tr>
@@ -182,7 +290,7 @@ function populateCosts() {
 				<primo:label code="Company" /><span class="errorMessage">*</span>
 			</td>
 			<td>
-				<form:select cssClass="flat" path="company" style="min-width:154px; max-width:154px">
+				<form:select cssClass="flat" path="company" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
 				</form:select> 
@@ -190,7 +298,7 @@ function populateCosts() {
 			</td>
 			<td class="form-left"><primo:label code="Subcontractor" /></td>
 			<td>
-				<form:select cssClass="flat" path="subcontractor" style="min-width:154px; max-width:154px">
+				<form:select cssClass="flat" path="subcontractor" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${subcontractors}" itemValue="id"	itemLabel="name" />
 				</form:select> 
@@ -201,14 +309,14 @@ function populateCosts() {
 		<tr>
 			<td class="form-left"><primo:label code="Vehicle" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="vehicle" id="truckId" style="min-width:154px; max-width:154px">
+				<form:select cssClass="flat" path="vehicle" id="truckId" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${vehicles}" itemValue="id" itemLabel="unit" />
 				</form:select> <br> <form:errors path="vehicle" cssClass="errorMessage" /><span id="spanId3" style="color:red; font-size:10px; font-weight:bold "> </span>
 			</td>
 			<td class="form-left"><primo:label code="Mechanic" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="mechanic" id="mechanic" style="min-width:154px; max-width:154px">
+				<form:select cssClass="flat" path="mechanic" id="mechanic" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${mechanics}" itemValue="id" itemLabel="fullName"/>
 				</form:select> 
@@ -218,7 +326,7 @@ function populateCosts() {
 		<tr>
 			<td class="form-left"><primo:label code="Total Order Cost" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="totalCost" style="background-color: #eee; min-width:150px; max-width:150px" cssClass="flat" 
+				<form:input path="totalCost" style="background-color: #eee; min-width:162px; max-width:162px" cssClass="flat" 
 					readonly="true" />
 				<br> <form:errors path="totalCost" cssClass="errorMessage" />
 			</td>
@@ -229,59 +337,68 @@ function populateCosts() {
 		<tr>
 			<td class="form-left"><primo:label code="Type" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="lineItemType" id="lineItemType" style="min-width:158px; max-width:158px" 
+				<form:select cssClass="flat" path="lineItemType" id="lineItemType" style="min-width:166px; max-width:166px" 
 					onchange="javascript:processLineItemTypeChange();">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${lineItemTypes}" itemValue="id" itemLabel="type" />
-				</form:select> <br> <form:errors path="lineItemType" cssClass="errorMessage" />
+				</form:select>
+				&nbsp;
+				<a href="javascript:openLineItemTypeDialog();">
+					<img class="toolbarButton" src="/trans/images/add.png" style="vertical-align: top" title="Add Line Item Type" border="0">
+				</a>
+				<br> <form:errors path="lineItemType" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Component" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="lineItemComponent" id="lineItemComponent" style="min-width:155px; max-width:155px" 
+				<form:select cssClass="flat" path="lineItemComponent" id="lineItemComponent" style="min-width:166px; max-width:166px" 
 					onchange="javascript:processLineItemComponentChange();">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${components}" itemValue="id" itemLabel="component" />
-				</form:select> 
+				</form:select>
+				&nbsp;
+				<a href="javascript:openComponentDialog();">
+					<img class="toolbarButton" src="/trans/images/add.png" style="vertical-align: top" title="Add Component" border="0">
+				</a>
 				<br> <form:errors path="lineItemComponent" cssClass="errorMessage" />
 			</td>
 		</tr>	
 		<tr>
-			<td class="form-left"><primo:label code="Description" /><span class="errorMessage">*</span></td>
+			<td class="form-left"><primo:label code="Description" /></td>
 			<td align="${left}" colspan="6">
-				<form:input path="lineItemDescription" style="min-width:581px; max-width:581px" cssClass="flat"  />
+				<form:input path="lineItemDescription" style="min-width:602px; max-width:602px" cssClass="flat"  />
 				<br> <form:errors path="lineItemDescription" cssClass="errorMessage" />   	
 			</td>
 		</tr>	
 		<tr>
 			<td class="form-left"><primo:label code="Labor Rate" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="lineItemLaborRate" style="min-width:150px; max-width:150px" cssClass="flat" 
-					 onChange="return populateCosts();"  /> 
+				<form:input path="lineItemLaborRate" style="min-width:158px; max-width:158px" cssClass="flat" 
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateCosts();"  /> 
 				<br> <form:errors path="lineItemLaborRate" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="No Of Hours" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="lineItemNoOfHours" style="min-width:150px; max-width:150px" cssClass="flat"
-					onChange="return populateCosts();"  />
+				<form:input path="lineItemNoOfHours" style="min-width:159px; max-width:159px" cssClass="flat"
+					 maxlength="6" onkeypress="return onlyNumbers(event, true)" onchange="return populateCosts();"  />
 				<br> <form:errors path="lineItemNoOfHours" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Total Labor Cost" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="lineItemTotalLaborCost" style="background-color: #eee; min-width:150px; max-width:150px" cssClass="flat" 
+				<form:input path="lineItemTotalLaborCost" style="background-color: #eee; min-width:162px; max-width:162px" cssClass="flat" 
 					readonly="true" /> 
 				<br> <form:errors path="lineItemTotalLaborCost" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Total Parts Cost" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="lineItemTotalPartsCost" style="min-width:150px; max-width:150px" cssClass="flat" 
-					onChange="return populateCosts();" /> 
+				<form:input path="lineItemTotalPartsCost" style="min-width:159px; max-width:159px" cssClass="flat" 
+					maxlength="8" onkeypress="return onlyNumbers(event, true)" onchange="return populateCosts();" /> 
 				<br> <form:errors path="lineItemTotalPartsCost" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Total Line Item Cost" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
-				<form:input path="lineItemTotalCost" style="background-color: #eee; min-width:150px; max-width:150px" cssClass="flat"
+				<form:input path="lineItemTotalCost" style="background-color: #eee; min-width:162px; max-width:162px" cssClass="flat"
 					readonly="true"  /> 
 				<br> <form:errors path="lineItemTotalCost" cssClass="errorMessage" />
 			</td>
@@ -317,4 +434,70 @@ function populateCosts() {
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
+
+<div id="lineItemTypeDialog" title="Add Repair Order Line Item Type" style="display:none;">
+	<div id="lineItemTypeDialogBody">
+		<div id="lineItemTypeDialogMessage">
+     		<div id="lineItemTypeDialogErrorMessage" style="color:red; font-size:14px; vertical-align:center;"></div>
+     		<div id="lineItemTypeDialogSuccessMessage" style="color:green; font-size:14px; vertical-align:center;"></div>
+     	</div>
+		<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
+			<tr>
+				<td class="form-left"><primo:label code="Type" /><span class="errorMessage">*</span></td>
+				<td align="${left}">
+					<input type="text" id="lineItemTypeDialogType" style="min-width:300px; max-width:300px" class="flat">
+				</td>
+			</tr>
+			<tr>
+				<td class="form-left"><primo:label code="Description" /></td>
+				<td align="${left}">
+					<input type="text" id="lineItemTypeDialogDescription" style="min-width:300px; max-width:300px" class="flat">
+				</td>
+			</tr>
+			<tr><td colspan="2"></td></tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td align="${left}" colspan="2">
+					<input type="button" id="lineItemTypeDialogCreate" onclick="javascript:saveLineItemType();"
+						value="<primo:label code="Save"/>" class="flat" />
+					<input type="button" id="lineItemTypeDialogCancel" value="<primo:label code="Cancel"/>" class="flat"
+						onClick="javascript:closeLineItemTypeDialog();" />
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<div id="componentDialog" title="Add Repair Order Component" style="display:none;">
+	<div id="componentDialogBody">
+		<div id="componentDialogMessage">
+     		<div id="componentDialogErrorMessage" style="color:red; font-size:14px; vertical-align:center;"></div>
+     		<div id="componentDialogSuccessMessage" style="color:green; font-size:14px; vertical-align:center;"></div>
+     	</div>
+		<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
+			<tr>
+				<td class="form-left"><primo:label code="Component" /><span class="errorMessage">*</span></td>
+				<td align="${left}">
+					<input type="text" id="componentDialogComponent" style="min-width:300px; max-width:300px" class="flat">
+				</td>
+			</tr>
+			<tr>
+				<td class="form-left"><primo:label code="Description" /></td>
+				<td align="${left}">
+					<input type="text" id="componentDialogDescription" style="min-width:300px; max-width:300px" class="flat">
+				</td>
+			</tr>
+			<tr><td colspan="2"></td></tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td align="${left}" colspan="2">
+					<input type="button" id="componentDialogCreate" onclick="javascript:saveComponent();"
+						value="<primo:label code="Save"/>" class="flat" />
+					<input type="button" id="componentDialogCancel" value="<primo:label code="Cancel"/>" class="flat"
+						onClick="javascript:closeComponentDialog();" />
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
 

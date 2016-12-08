@@ -1,7 +1,9 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -59,11 +61,12 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 	public DateUpdateService getDateupdateService() {
 		return dateupdateService;
 	}
+	
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 
 	@Override
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		
@@ -176,9 +179,6 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		} else {
 			if (StringUtils.isEmpty(entity.getLineItemComponent())) {
 				bindingResult.rejectValue("lineItemComponent", "error.select.option", null, null);
-			}
-			if (StringUtils.isEmpty(entity.getLineItemDescription())) {
-				bindingResult.rejectValue("lineItemDescription", "NotNull.java.lang.String", null, null);
 			}
 			if (entity.getLineItemNoOfHours() == null) {
 				bindingResult.rejectValue("lineItemNoOfHours", "NotNull.java.lang.Integer", null, null);
@@ -348,6 +348,37 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		return getUrlContext() + "/form";
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/copy.do")
+	public String copy(HttpServletRequest request, ModelMap model,
+			@RequestParam(value = "id") Long orderId) {
+		RepairOrder orderToBeCopied = genericDAO.getById(RepairOrder.class, orderId);
+		RepairOrder newOrder = new RepairOrder();
+		copy(orderToBeCopied, newOrder, request);
+		
+		genericDAO.save(newOrder);
+		
+		String query = "select obj from RepairOrderLineItem obj where obj.repairOrder=" + orderToBeCopied.getId()
+					+ " order by id asc";
+		List<RepairOrderLineItem> lineItemToBeCopiedList = genericDAO.executeSimpleQuery(query);
+		for (RepairOrderLineItem aLineItemToBeCopied : lineItemToBeCopiedList) {
+			RepairOrderLineItem newLineItem = new RepairOrderLineItem();
+			newLineItem.setCreatedAt(Calendar.getInstance().getTime());
+			newLineItem.setCreatedBy(getUser(request).getId());
+			newLineItem.setStatus(1);
+			newLineItem.setRepairOrder(newOrder);
+			
+			copy(aLineItemToBeCopied, newLineItem);
+			
+			genericDAO.save(newLineItem);
+		}
+		
+		model.addAttribute("modelObject", newOrder);
+		
+		setupCreate(model, request);
+		setupLineItem(model, request, newOrder);
+		return getUrlContext() + "/form";
+	}
+	
 	private void setupLineItem(ModelMap model, HttpServletRequest request, RepairOrder entity) {
 		String orderIdStr = request.getParameter("id");
 		if (entity == null && StringUtils.isEmpty(orderIdStr)) {
@@ -390,8 +421,7 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		RepairOrderLineItem similarLineItem = new RepairOrderLineItem();
 		emptyLineItem(similarLineItem);
 		
-		RepairOrderHourlyLaborRate repairOrderHourlyLaborRate = retrieveCurrentHourlyLaborRate();
-		Double currentLaborRate = repairOrderHourlyLaborRate.getLaborRate();
+		Double currentLaborRate =  retrieveCurrentHourlyLaborRate();
 		similarLineItem.setLaborRate(currentLaborRate);
 		
 		Long typeId = Long.valueOf(request.getParameter("typeId"));
@@ -414,13 +444,38 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		return similarLineItem;
 	}
 	
-	private RepairOrderHourlyLaborRate retrieveCurrentHourlyLaborRate() {
+	private Double retrieveCurrentHourlyLaborRate() {
 		String query = "select obj from RepairOrderHourlyLaborRate obj order by obj.id desc";
 		List<RepairOrderHourlyLaborRate> repairOrderHourlyLaborRateList = genericDAO.executeSimpleQuery(query);
-		return repairOrderHourlyLaborRateList.get(0);
+		if (repairOrderHourlyLaborRateList == null || repairOrderHourlyLaborRateList.isEmpty()) {
+			return new Double (0.0);
+		} else {
+			return repairOrderHourlyLaborRateList.get(0).getLaborRate();
+		}
 	}
 	
-	private RepairOrderLineItem copy(RepairOrderLineItem aLineItem, RepairOrderLineItem bLineItem) {
+	private void copy(RepairOrder aOrder, RepairOrder bOrder, HttpServletRequest request) {
+		bOrder.setCreatedAt(Calendar.getInstance().getTime());
+		bOrder.setCreatedBy(getUser(request).getId());
+		bOrder.setStatus(1);
+		
+		try {
+			String todayDateStr = dateFormat.format((new Date()));
+			Date todayDate = dateFormat.parse(todayDateStr);
+			bOrder.setRepairOrderDate(todayDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		bOrder.setDescription(aOrder.getDescription());
+		bOrder.setCompany(aOrder.getCompany());
+		bOrder.setSubcontractor(aOrder.getSubcontractor());
+		bOrder.setVehicle(aOrder.getVehicle());
+		bOrder.setMechanic(aOrder.getMechanic());
+		bOrder.setTotalCost(aOrder.getTotalCost());
+	}
+	
+	private void copy(RepairOrderLineItem aLineItem, RepairOrderLineItem bLineItem) {
 		bLineItem.setLineItemType(aLineItem.getLineItemType());
 		bLineItem.setComponent(aLineItem.getComponent());
 		bLineItem.setDescription(aLineItem.getDescription());
@@ -429,7 +484,5 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		bLineItem.setTotalLaborCost(aLineItem.getTotalLaborCost());
 		bLineItem.setTotalPartsCost(aLineItem.getTotalPartsCost());
 		bLineItem.setTotalCost(aLineItem.getTotalCost());
-		
-		return bLineItem;
 	}
 }

@@ -1,5 +1,6 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 
 import org.springframework.stereotype.Controller;
-
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 
 import org.springframework.validation.BindingResult;
@@ -20,6 +21,7 @@ import com.primovision.lutransport.controller.CRUDController;
 
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderComponent;
+import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderLineItemType;
 
 @Controller
 @RequestMapping("/admin/vehiclemaint/repairorders/component")
@@ -88,5 +90,30 @@ public class RepairOrderComponentController extends CRUDController<RepairOrderCo
 		setupCreate(model, request);
 		
 		return urlContext + "/form";
+	}
+	
+	private RepairOrderComponent save(HttpServletRequest request) {
+		String component = request.getParameter("component");
+		String description = request.getParameter("description");
+		
+		RepairOrderComponent entity = new RepairOrderComponent();
+		entity.setCreatedAt(Calendar.getInstance().getTime());
+		entity.setCreatedBy(getUser(request).getId());
+		entity.setComponent(component);
+		entity.setDescription(description);
+		
+		genericDAO.saveOrUpdate(entity);
+		return entity;
+	}
+	
+	@Override
+	public String processAjaxRequest(HttpServletRequest request,
+			String action, Model model) {
+		if (StringUtils.equalsIgnoreCase("save", action)) {
+			RepairOrderComponent entity = save(request);
+			return "Repair Order Component saved successfully:" + entity.getId();
+		} 
+		
+		return StringUtils.EMPTY;
 	}
 }

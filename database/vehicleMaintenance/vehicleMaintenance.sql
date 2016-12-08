@@ -1,11 +1,11 @@
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('30012', '/admin/vehiclemaint/repairorders/list.do?rst=1', 'Vehicle Maint.', '2', 'Vehicle Maint.', 
-'/admin/vehiclemaint/repairorders/list.do?rst=1,/admin/vehiclemaint/repairorders/create.do,/admin/vehiclemaint/repairorders/edit.do,/admin/vehiclemaint/repairorders/delete.do,/admin/vehiclemaint/repairorders/save.do,/admin/vehiclemaint/repairorders/search.do,/admin/vehiclemaint/repairorders/export.do,/admin/vehiclemaint/repairorders/ajax.do,/admin/vehiclemaint/repairorders/deleteLineItem.do', '1', '8', '0', '1', '/1/30012/');
+'/admin/vehiclemaint/repairorders/list.do?rst=1,/admin/vehiclemaint/repairorders/create.do,/admin/vehiclemaint/repairorders/edit.do,/admin/vehiclemaint/repairorders/delete.do,/admin/vehiclemaint/repairorders/save.do,/admin/vehiclemaint/repairorders/search.do,/admin/vehiclemaint/repairorders/export.do,/admin/vehiclemaint/repairorders/ajax.do,/admin/vehiclemaint/repairorders/deleteLineItem.do,/admin/vehiclemaint/repairorders/copy.do,/admin/vehiclemaint/repairorders/print.do', '1', '8', '0', '1', '/1/30012/');
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30012', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300121', '/admin/vehiclemaint/repairorders/list.do?rst=1', 'Manage Repair Orders', '3', 'Manage Repair Orders', 
-'/admin/vehiclemaint/repairorders/list.do?rst=1,/admin/vehiclemaint/repairorders/create.do,/admin/vehiclemaint/repairorders/edit.do,/admin/vehiclemaint/repairorders/delete.do,/admin/vehiclemaint/repairorders/save.do,/admin/vehiclemaint/repairorders/search.do,/admin/vehiclemaint/repairorders/export.do,/admin/vehiclemaint/repairorders/ajax.do,/admin/vehiclemaint/repairorders/deleteLineItem.do', '1', '1', '0', '30012', '/1/30012/300121/');
+'/admin/vehiclemaint/repairorders/list.do?rst=1,/admin/vehiclemaint/repairorders/create.do,/admin/vehiclemaint/repairorders/edit.do,/admin/vehiclemaint/repairorders/delete.do,/admin/vehiclemaint/repairorders/save.do,/admin/vehiclemaint/repairorders/search.do,/admin/vehiclemaint/repairorders/export.do,/admin/vehiclemaint/repairorders/ajax.do,/admin/vehiclemaint/repairorders/deleteLineItem.do,/admin/vehiclemaint/repairorders/copy.do,/admin/vehiclemaint/repairorders/print.do', '1', '1', '0', '30012', '/1/30012/300121/');
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '300121', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
@@ -98,7 +98,7 @@ CREATE TABLE `repair_order_line_item` (
   `repair_order` bigint(20) NOT NULL,
   `line_item_type` bigint(20) NOT NULL,
   `component` bigint(20) NOT NULL,
-  `description` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `no_of_hours` double NOT NULL,
   `labor_rate` double NOT NULL,
   `total_labor_cost` double NOT NULL,

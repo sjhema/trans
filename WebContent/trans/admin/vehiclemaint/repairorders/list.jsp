@@ -1,4 +1,15 @@
 <%@include file="/common/taglibs.jsp"%>
+
+<script type="text/javascript">
+function processCopy(orderId) {
+	if (!confirm("Do you want to Copy Order # " + orderId + "?")) {
+		return;
+	}
+	
+	document.location = "${ctx}/admin/vehiclemaint/repairorders/copy.do?id=" + orderId;
+}
+</script>
+
 <h3>
 	<primo:label code="Manage Repair Orders" />
 </h3>
@@ -101,15 +112,15 @@
 		editable="true" insertable="true" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false">
-		<primo:textcolumn headerText="Order #" dataField="id" width="60px"/>
+		<primo:textcolumn headerText="Ord #" dataField="id" width="50px"/>
 	    <primo:datecolumn headerText="Order Date" dataField="repairOrderDate" dataFormat="MM-dd-yyyy" width="95px"/>
         <primo:textcolumn headerText="Company" dataField="company.name" />
         <primo:textcolumn headerText="Subcontractor" dataField="subcontractor.name" />
-        <primo:textcolumn headerText="Vehicle" dataField="vehicle.unitNum" />
+        <primo:textcolumn headerText="Vehicle" dataField="vehicle.unitNum" width="40px"/>
         <primo:textcolumn headerText="Mechanic" dataField="mechanic.fullName" />
-        <primo:textcolumn headerText="Description" dataField="description" width="500px"/>
-        <primo:textcolumn headerText="Tot Cost" dataField="totalCost" width="75px"/>
-		<!--<primo:anchorcolumn headerText="Copy"  linkUrl="/admin/vehiclemaint/repairorders/copy.do?id={id}" linkText="Copy"/>-->
+        <primo:textcolumn headerText="Description" dataField="description" width="450px"/>
+        <primo:textcolumn headerText="Tot Cost" dataField="totalCost" width="60px"/>
+		<primo:imagecolumn headerText="Copy" linkUrl="javascript:processCopy('{id}');" imageSrc="${ctx}/images/copy.png" HAlign="center"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

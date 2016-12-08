@@ -35,7 +35,7 @@
 		editable="true" insertable="true" exportPdf="true" exportXls="true"
 		exportCsv="true" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
-		pagingLink="search.do" multipleDelete="false" searcheable="false">
+		multipleDelete="false" searcheable="false">
 		<primo:textcolumn headerText="Labor Rate" dataField="laborRate" />
 		<primo:datecolumn headerText="Effective Start Date" dataField="effectiveStartDate" dataFormat="MM-dd-yyyy"/>
 		<primo:datecolumn headerText="Effective End Date" dataField="effectiveEndDate" dataFormat="MM-dd-yyyy"/>

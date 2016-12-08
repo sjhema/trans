@@ -1,5 +1,6 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 
 import org.springframework.stereotype.Controller;
-
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 
 import org.springframework.validation.BindingResult;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.primovision.lutransport.controller.CRUDController;
 
 import com.primovision.lutransport.model.SearchCriteria;
-
 import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderLineItemType;
 
 @Controller
@@ -89,5 +89,30 @@ public class RepairOrderLineItemTypeController extends CRUDController<RepairOrde
 		setupCreate(model, request);
 		
 		return urlContext + "/form";
+	}
+	
+	private RepairOrderLineItemType save(HttpServletRequest request) {
+		String type = request.getParameter("type");
+		String description = request.getParameter("description");
+		
+		RepairOrderLineItemType entity = new RepairOrderLineItemType();
+		entity.setCreatedAt(Calendar.getInstance().getTime());
+		entity.setCreatedBy(getUser(request).getId());
+		entity.setType(type);
+		entity.setDescription(description);
+		
+		genericDAO.saveOrUpdate(entity);
+		return entity;
+	}
+	
+	@Override
+	public String processAjaxRequest(HttpServletRequest request,
+			String action, Model model) {
+		if (StringUtils.equalsIgnoreCase("save", action)) {
+			RepairOrderLineItemType entity = save(request);
+			return "Repair Order Line Item Type saved successfully:" + entity.getId();
+		} 
+		
+		return StringUtils.EMPTY;
 	}
 }
