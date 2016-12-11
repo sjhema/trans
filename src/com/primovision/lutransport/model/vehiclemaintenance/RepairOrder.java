@@ -31,11 +31,11 @@ public class RepairOrder extends AbstractBaseModel {
 	
 	@ManyToOne
 	@JoinColumn(name = "subcontractor")
-	protected SubContractor subcontractor;
+	private SubContractor subcontractor;
 	
 	@ManyToOne
 	@JoinColumn(name="mechanic")
-	protected Driver mechanic;
+	private Driver mechanic;
 	
 	@Column(name="total_cost")
 	private Double totalCost;

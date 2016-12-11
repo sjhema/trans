@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="repairOrderReport" pageWidth="1450" pageHeight="750" orientation="Landscape" columnWidth="1410" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="598"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="noOfLineItems" class="java.lang.Integer"/>
+	<parameter name="orderDateRange" class="java.lang.String"/>
+	<parameter name="company" class="java.lang.String"/>
+	<parameter name="totalCostForAllOrders" class="java.lang.Double" isForPrompting="false"/>
+	<parameter name="subcontractor" class="java.lang.String"/>
+	<field name="noOfHours" class="java.lang.Double"/>
+	<field name="laborRate" class="java.lang.Double"/>
+	<field name="component.component" class="java.lang.String"/>
+	<field name="lineItemType.type" class="java.lang.String"/>
+	<field name="description" class="java.lang.String"/>
+	<field name="totalLaborCost" class="java.lang.Double"/>
+	<field name="repairOrder.id" class="java.lang.Long"/>
+	<field name="totalPartsCost" class="java.lang.Double"/>
+	<field name="totalCost" class="java.lang.Double"/>
+	<field name="repairOrder.vehicle.unit" class="java.lang.Integer"/>
+	<field name="repairOrder.mechanic.fullName" class="java.lang.String"/>
+	<field name="repairOrder.repairOrderDate" class="java.util.Date"/>
+	<field name="repairOrder.totalCost" class="java.lang.Double"/>
+	<field name="repairOrder.company.name" class="java.lang.String"/>
+	<field name="repairOrder.subcontractor.name" class="java.lang.String"/>
+	<group name="repairOrderGroup" keepTogether="true">
+		<groupExpression><![CDATA[$F{repairOrder.id}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<staticText>
+					<reportElement mode="Opaque" x="649" y="0" width="139" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Component]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="788" y="0" width="165" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Description]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="953" y="0" width="93" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Labor rate]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="1120" y="0" width="88" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Labor Cost]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="539" y="0" width="110" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Line Item Type]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="1046" y="0" width="74" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[No Of Hours]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="3" y="0" width="49" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Order #]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="1208" y="0" width="77" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Parts Cost]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="1285" y="0" width="103" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Line Item Cost]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="379" y="0" width="51" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Vehicle]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="430" y="0" width="109" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Mechanic]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="288" y="0" width="91" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Order Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="52" y="0" width="113" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Company]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="165" y="0" width="123" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+					<box>
+						<pen lineWidth="1.0" lineColor="#333333"/>
+						<topPen lineWidth="1.0" lineColor="#333333"/>
+						<leftPen lineWidth="1.0" lineColor="#333333"/>
+						<bottomPen lineWidth="1.0" lineColor="#333333"/>
+						<rightPen lineWidth="1.0" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Subcontractor]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="34">
+				<staticText>
+					<reportElement x="3" y="0" width="110" height="21"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[No. of Line Items]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="113" y="0" width="127" height="21"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.Integer"><![CDATA[$V{repairOrderGroup_COUNT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="1180" y="0" width="105" height="21"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Order Cost]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="1285" y="0" width="103" height="24"/>
+					<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA["$"+ new java.text.DecimalFormat("###0.00").format($F{repairOrder.totalCost})]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="118">
+			<staticText>
+				<reportElement mode="Opaque" x="476" y="38" width="153" height="26" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPANY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="475" y="0" width="461" height="24" backcolor="#99CCFF"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPAIR ORDERS]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="476" y="64" width="153" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{company}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="767" y="38" width="170" height="26" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ORDER DATE RANGE]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="767" y="64" width="170" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{orderDateRange}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="629" y="38" width="138" height="26" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUBCONTRACTOR]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="629" y="64" width="138" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{subcontractor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="953" y="0" width="93" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{laborRate})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1120" y="0" width="88" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{totalLaborCost})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="788" y="0" width="165" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="649" y="0" width="139" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{component.component}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="539" y="0" width="110" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{lineItemType.type}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1046" y="0" width="74" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.0").format($F{noOfHours})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="3" y="0" width="49" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Long"><![CDATA[$F{repairOrder.id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1208" y="0" width="77" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{totalPartsCost})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1285" y="0" width="103" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{totalCost})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="379" y="0" width="51" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{repairOrder.vehicle.unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{repairOrder.mechanic.fullName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="0" width="91" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new SimpleDateFormat("MM-dd-yyyy").format($F{repairOrder.repairOrderDate})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="0" width="113" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{repairOrder.company.name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="165" y="0" width="123" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{repairOrder.subcontractor.name} == null ? "" : $F{repairOrder.subcontractor.name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="3" y="0" width="162" height="21"/>
+				<box>
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total No. of All Line Items]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="167" y="0" width="101" height="21"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$P{noOfLineItems}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1120" y="0" width="165" height="21"/>
+				<box>
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Cost For All Orders]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="1285" y="0" width="103" height="24"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+ new java.text.DecimalFormat("###0.00").format($P{totalCostForAllOrders})]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

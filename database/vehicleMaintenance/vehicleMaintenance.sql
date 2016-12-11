@@ -22,6 +22,11 @@ INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJ
 VALUES ('300124', '/admin/vehiclemaint/repairorders/component/list.do?rst=1', 'Manage Components', '3', 'Manage Components', 
 '/admin/vehiclemaint/repairorders/component/list.do?rst=1,/admin/vehiclemaint/repairorders/component/create.do,/admin/vehiclemaint/repairorders/component/edit.do,/admin/vehiclemaint/repairorders/component/delete.do,/admin/vehiclemaint/repairorders/component/save.do,/admin/vehiclemaint/repairorders/component/search.do,/admin/vehiclemaint/repairorders/component/export.do,/admin/vehiclemaint/repairorders/component/ajax.do', '1', '4', '0', '30012', '/1/30012/300124/');
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '300124', '1');
+
+INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
+VALUES ('3001250', '/admin/vehiclemaint/repairorders/report/repairorderreport/start.do', 'Repair Orders Report', '3', 'Repair Orders Report', 
+'/admin/vehiclemaint/repairorders/report/repairorderreport/start.do,/admin/vehiclemaint/repairorders/report/repairorderreport/search.do,/admin/vehiclemaint/repairorders/report/repairorderreport/export.do', '1', '50', '0', '30012', '/1/30012/3001250/');
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '3001250', '1'); -- ADMIN
 -------
 CREATE TABLE `repair_order_hourly_labor_rate` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

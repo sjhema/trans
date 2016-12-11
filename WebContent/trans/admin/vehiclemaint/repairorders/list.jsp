@@ -1,12 +1,42 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <script type="text/javascript">
-function processCopy(orderId) {
-	if (!confirm("Do you want to Copy Order # " + orderId + "?")) {
+function processCopy(lineItemId) {
+	if (!confirm("Do you want to Copy the selected Line Item?")) {
 		return;
 	}
 	
-	document.location = "${ctx}/admin/vehiclemaint/repairorders/copy.do?id=" + orderId;
+	document.location = "${ctx}/admin/vehiclemaint/repairorders/copy.do?lineItemId=" + lineItemId;
+}
+
+function processEdit(lineItemId) {
+	$.ajax({
+  		url: "ajax.do?action=retrieveLineItem" + "&lineItemId=" + lineItemId,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		var lineItem = jQuery.parseJSON(responseData);
+       		var orderId = lineItem.repairOrder.id;
+       		
+       		document.location = "${ctx}/admin/vehiclemaint/repairorders/edit.do?id=" + orderId;
+		}
+	});
+}
+
+function processDelete(lineItemId) {
+	$.ajax({
+  		url: "ajax.do?action=retrieveLineItem" + "&lineItemId=" + lineItemId,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		var lineItem = jQuery.parseJSON(responseData);
+       		var orderId = lineItem.repairOrder.id;
+       		
+       		if (!confirm("Do you want to Delete Order # " + orderId + "?")) {
+       			return;
+       		}
+       		
+       		document.location = "${ctx}/admin/vehiclemaint/repairorders/delete.do?id=" + orderId;
+		}
+	});
 }
 </script>
 
@@ -32,12 +62,47 @@ function processCopy(orderId) {
 					</c:forEach>
 				</select>
 			</td>
-			<td align="${left}" class="first"><primo:label code="Order Date"/></td>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Order Date From"/></td>
 			<td align="${left}">
-				<input id="datepicker" name="RepairOrderDate" style="min-width:150px; max-width:150px" class="flat" 
-					 value="${sessionScope.searchCriteria.searchMap.RepairOrderDate}" /> 
+				<input id="datepicker" name="repairOrderDateFrom" style="min-width:150px; max-width:150px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.repairOrderDateFrom}" /> 
+			</td>
+			<td align="${left}" class="first"><primo:label code="Order Date To"/></td>
+			<td align="${left}">
+				<input id="datepicker1" name="repairOrderDateTo" style="min-width:150px; max-width:150px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.repairOrderDateTo}" /> 
 			</td>
 		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Company"/></td>
+			<td align="${left}">
+				<select id="company.id" name="company.id" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${companies}" var="aCompany">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['company.id'] == aCompany.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
+			<td align="${left}">
+				<select id="subcontractor.id" name="subcontractor.id" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${subcontractors}" var="aSubcontractor">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['subcontractor.id'] == aSubcontractor.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${aSubcontractor.id}" ${selected}>${aSubcontractor.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+	   	</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
 			<td align="${left}">
@@ -68,34 +133,34 @@ function processCopy(orderId) {
 				</select>
 			</td>
 	   	</tr>
-        <tr>
-			<td align="${left}" class="first"><primo:label code="Company"/></td>
+	   	<!--<tr>
+			<td align="${left}" class="first"><primo:label code="Line Item Type"/></td>
 			<td align="${left}">
-				<select id="company" name="company.id" style="min-width:154px; max-width:154px">
+				<select id="lineItemType" name="lineItemType" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${companies}" var="aCompany">
+					<c:forEach items="${lineItemTypes}" var="aLineItemType">
 					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['company.id'] == aCompany.id}">
+					<c:if test="${sessionScope.searchCriteria.searchMap['lineItemType'] == aLineItemType.id}">
 						<c:set var="selected" value="selected"/>
 					</c:if>
-						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
+						<option value="${aLineItemType.id}" ${selected}>${aLineItemType.type}</option>
 					</c:forEach>
 				</select>
 			</td>
-			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
+			<td align="${left}" class="first"><primo:label code="Component"/></td>
 			<td align="${left}">
-				<select id="subcontractor" name="subcontractor.id" style="min-width:154px; max-width:154px">
+				<select id="lineItemComponent" name="lineItemComponent" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${subcontractors}" var="aSubcontractor">
+					<c:forEach items="${components}" var="alineItemComponent">
 					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['subcontractor.id'] == aSubcontractor.id}">
+					<c:if test="${sessionScope.searchCriteria.searchMap['lineItemComponent'] == alineItemComponent.id}">
 						<c:set var="selected" value="selected"/>
 					</c:if>
-						<option value="${aSubcontractor.id}" ${selected}>${aSubcontractor.name}</option>
+						<option value="${alineItemComponent.id}" ${selected}>${alineItemComponent.component}</option>
 					</c:forEach>
 				</select>
 			</td>
-	   	</tr>
+	   	</tr>-->
 	 	<tr>
 			<td align="${left}"></td>
 			<td align="${left}">
@@ -108,19 +173,28 @@ function processCopy(orderId) {
 </form:form>
 <br />
 <form:form name="repairOrderServiceForm" id="repairOrderServiceForm">
-	<primo:datatable urlContext="admin/vehiclemaint/repairorders" deletable="true"
-		editable="true" insertable="true" baseObjects="${list}"
+	<primo:datatable urlContext="admin/vehiclemaint/repairorders" deletable="false"
+		editable="false" insertable="true" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false">
-		<primo:textcolumn headerText="Ord #" dataField="id" width="50px"/>
-	    <primo:datecolumn headerText="Order Date" dataField="repairOrderDate" dataFormat="MM-dd-yyyy" width="95px"/>
-        <primo:textcolumn headerText="Company" dataField="company.name" />
-        <primo:textcolumn headerText="Subcontractor" dataField="subcontractor.name" />
-        <primo:textcolumn headerText="Vehicle" dataField="vehicle.unitNum" width="40px"/>
-        <primo:textcolumn headerText="Mechanic" dataField="mechanic.fullName" />
+		<primo:textcolumn headerText="Ord #" dataField="repairOrder.id" width="50px"/>
+	    <primo:datecolumn headerText="Order Date" dataField="repairOrder.repairOrderDate" dataFormat="MM-dd-yyyy" width="95px"/>
+        <primo:textcolumn headerText="Company" dataField="repairOrder.company.name" />
+        <primo:textcolumn headerText="Subcontractor" dataField="repairOrder.subcontractor.name" />
+        <primo:textcolumn headerText="Vehic" dataField="repairOrder.vehicle.unitNum" width="35px"/>
+        <primo:textcolumn headerText="Mechanic" dataField="repairOrder.mechanic.fullName" />
+        <primo:textcolumn headerText="Type" dataField="lineItemType.type" />
+        <primo:textcolumn headerText="Component" dataField="component.component" />
         <primo:textcolumn headerText="Description" dataField="description" width="450px"/>
-        <primo:textcolumn headerText="Tot Cost" dataField="totalCost" width="60px"/>
+        <primo:textcolumn headerText="Labor Rate" dataField="laborRate" width="75px"/>
+        <primo:textcolumn headerText="No Of Hrs" dataField="noOfHours" width="75px"/>
+        <primo:textcolumn headerText="Tot Labor Cost" dataField="totalLaborCost" width="75px"/>
+        <primo:textcolumn headerText="Tot Parts Cost" dataField="totalPartsCost" width="75px"/>
+       	<primo:textcolumn headerText="Tot Ln Itm Cost" dataField="totalCost" width="75px" />
+        <primo:textcolumn headerText="Tot Order Cost" dataField="repairOrder.totalCost" width="60px"/>
 		<primo:imagecolumn headerText="Copy" linkUrl="javascript:processCopy('{id}');" imageSrc="${ctx}/images/copy.png" HAlign="center"/>
+		<primo:imagecolumn headerText="Edit" linkUrl="javascript:processEdit('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center"/>
+		<primo:imagecolumn headerText="Del" linkUrl="javascript:processDelete('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

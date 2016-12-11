@@ -18,6 +18,11 @@ function deleteLineItem(lineItemId) {
 	}
 }
 
+function printOrder() {
+	var id = document.getElementById("id").value;
+	document.location = "${ctx}/admin/vehiclemaint/repairorders/print.do?id=" + id;
+}
+
 function saveLineItemType() {
 	clearLineItemTypeDialogMsgs();
 	
@@ -409,7 +414,10 @@ function populateCosts() {
 			<td align="${left}" colspan="2">
 				<input type="button" name="create" id="create" onclick="javascript:submitForm();"
 					value="<primo:label code="Save"/>" class="flat" />
-				<input type="reset" id="resetBtn" value="<primo:label code="Reset"/>" class="flat" /> 
+				<input type="reset" id="resetBtn"
+					value="<primo:label code="Reset"/>" class="flat" />
+				<input type="button" id="printBtn" onclick="javascript:printOrder();"
+					value="<primo:label code="Print"/>" class="flat" /> 
 				<input type="button" id="cancelBtn" value="<primo:label code="Cancel"/>" class="flat"
 					onClick="location.href='list.do'" />
 			</td>
@@ -429,8 +437,8 @@ function populateCosts() {
         <primo:textcolumn headerText="Tot Labor Cost" dataField="totalLaborCost" width="75px"/>
         <primo:textcolumn headerText="Tot Parts Cost" dataField="totalPartsCost" width="75px"/>
        	<primo:textcolumn headerText="Tot Ln Itm Cost" dataField="totalCost" width="75px" />
-       	<primo:imagecolumn headerText="EDIT" linkUrl="javascript:editLineItem('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center"/>
-       	<primo:imagecolumn headerText="DELETE" linkUrl="javascript:deleteLineItem('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center"/>
+       	<primo:imagecolumn headerText="EDIT" linkUrl="javascript:editLineItem('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
+       	<primo:imagecolumn headerText="DELETE" linkUrl="javascript:deleteLineItem('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center" width="25px"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

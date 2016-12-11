@@ -1,8 +1,11 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 
 import org.springframework.stereotype.Controller;
@@ -46,8 +49,6 @@ import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderComponent
 import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderHourlyLaborRate;
 import com.primovision.lutransport.model.vehiclemaintenance.RepairOrderLineItemType;
 
-import com.primovision.lutransport.service.DateUpdateService;
-
 @Controller
 @RequestMapping("/admin/vehiclemaint/repairorders")
 public class RepairOrderController extends CRUDController<RepairOrder> {
@@ -55,14 +56,8 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		setUrlContext("admin/vehiclemaint/repairorders");
 	}
 	
-	@Autowired
-	private DateUpdateService dateupdateService;
-	
-	public DateUpdateService getDateupdateService() {
-		return dateupdateService;
-	}
-	
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Override
 	@InitBinder
@@ -81,11 +76,9 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		setupList(model, request);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		getDateupdateService().updateDate(request, "RepairOrderDate", "repairOrderDate");
 		
-		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria, "id desc", null));
-		
-		criteria.getSearchMap().put("RepairOrderDate", request.getParameter("RepairOrderDate"));
+		List<RepairOrderLineItem> repairOrderLineItemList = performSearch(criteria);
+		model.addAttribute("list", repairOrderLineItemList);
 		
 		return urlContext + "/list";
 	}
@@ -97,13 +90,79 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(25);
 		
-		getDateupdateService().updateDate(request, "RepairOrderDate", "repairOrderDate");
-		
-		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria, "id desc", null));
-		
-		criteria.getSearchMap().put("RepairOrderDate", request.getParameter("RepairOrderDate"));
+		List<RepairOrderLineItem> repairOrderLineItemList = performSearch(criteria);
+		model.addAttribute("list", repairOrderLineItemList);
 		
 		return urlContext + "/list";
+	}
+	
+	private List<RepairOrderLineItem> performSearch(SearchCriteria criteria) {
+		String orderId = (String) criteria.getSearchMap().get("id");
+		String company = (String) criteria.getSearchMap().get("company.id");
+		String subcontractor = (String) criteria.getSearchMap().get("subcontractor.id");
+		String vehicle = (String) criteria.getSearchMap().get("vehicle.unit");	
+		String mechanic = (String) criteria.getSearchMap().get("mechanic.id");
+		String repairOrderDateFrom = (String) criteria.getSearchMap().get("repairOrderDateFrom");
+		String repairOrderDateTo = (String) criteria.getSearchMap().get("repairOrderDateTo");
+		String lineItemType = (String) criteria.getSearchMap().get("lineItemType");
+		String component = (String) criteria.getSearchMap().get("lineItemComponent");
+		
+		StringBuffer query = new StringBuffer("select obj from RepairOrderLineItem obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from RepairOrderLineItem obj where 1=1");
+		StringBuffer whereClause = new StringBuffer();
+		
+		if (StringUtils.isNotEmpty(orderId)) {
+			whereClause.append(" and obj.repairOrder=" + orderId);
+		}
+		if (StringUtils.isNotEmpty(company)) {
+			whereClause.append(" and obj.repairOrder.company=" + company);
+		}
+		if (StringUtils.isNotEmpty(subcontractor)) {
+			whereClause.append(" and obj.repairOrder.subcontractor=" + subcontractor);
+		}
+		if (StringUtils.isNotEmpty(vehicle)) {
+			whereClause.append(" and obj.repairOrder.vehicle.unit=" + vehicle);
+		}
+		if (StringUtils.isNotEmpty(mechanic)) {
+			whereClause.append(" and obj.repairOrder.mechanic.id=" + mechanic);
+		}
+	   if (StringUtils.isNotEmpty(repairOrderDateFrom)){
+        	try {
+        		whereClause.append(" and obj.repairOrder.repairOrderDate >='"+sdf.format(dateFormat.parse(repairOrderDateFrom))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+        	
+		}
+      if (StringUtils.isNotEmpty(repairOrderDateTo)){
+	     	try {
+	     		whereClause.append(" and obj.repairOrder.repairOrderDate <='"+sdf.format(dateFormat.parse(repairOrderDateTo))+"'");
+	     	} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+      if (StringUtils.isNotEmpty(lineItemType)) {
+      	whereClause.append(" and obj.lineItemType.id=" + lineItemType);
+		}
+      if (StringUtils.isNotEmpty(component)) {
+      	whereClause.append(" and obj.component.id=" + component);
+		}
+      
+      query.append(whereClause);
+      countQuery.append(whereClause);
+      
+      query.append(" order by repairOrder.id desc, lineItemType.type asc");
+      
+      Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
+		criteria.setRecordCount(recordCount.intValue());	
+		
+		List<RepairOrderLineItem> repairOrderLineItemList = 
+				genericDAO.getEntityManager().createQuery(query.toString())
+						.setMaxResults(criteria.getPageSize())
+						.setFirstResult(criteria.getPage() * criteria.getPageSize())
+						.getResultList();
+		
+		return repairOrderLineItemList;
 	}
 
 	@Override
@@ -115,8 +174,8 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 	
 		String query = "select obj from Driver obj where obj.catagory.id=3 order by obj.fullName";
 		List<Driver> mechanics = genericDAO.executeSimpleQuery(query);
-		
 		model.addAttribute("mechanics", mechanics);
+		
 		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
 		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class, criterias, "name", false));
 	
@@ -128,20 +187,11 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 	@Override
 	public void setupList(ModelMap model, HttpServletRequest request) {
 		populateSearchCriteria(request, request.getParameterMap());
+		setupCreate(model, request);
+		
 		Map criterias = new HashMap();
 		
 		model.addAttribute("repairOrders", genericDAO.findByCriteria(RepairOrder.class, criterias, "id desc", false));
-		
-		String query = "select obj from Driver obj where obj.catagory.id=3 order by obj.fullName";
-		List<Driver> mechanics = genericDAO.executeSimpleQuery(query);
-		model.addAttribute("mechanics", mechanics);
-		
-		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
-		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class, criterias, "name", false));
-		
-		criterias.clear();
-		criterias.put("type", 3);
-		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 	}
 
 	private void validateSave(RepairOrder entity, BindingResult bindingResult) {
@@ -206,7 +256,7 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		if(bindingResult.hasErrors()) {
         	setupCreate(model, request);
         	setupLineItem(model, request, entity);
-        	return getUrlContext()+"/form";
+        	return getUrlContext() + "/form";
       }
 	
 		beforeSave(request, entity, model);
@@ -348,9 +398,68 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		return getUrlContext() + "/form";
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/print.do")
+	public String print(HttpServletRequest request, Model model, HttpServletResponse response,
+			@RequestParam(value = "id") Long orderId) {
+		RepairOrder order = genericDAO.getById(RepairOrder.class, orderId);
+		
+		String query = "select obj from RepairOrderLineItem obj where obj.repairOrder=" + orderId
+				+ " order by obj.id asc";
+		List<RepairOrderLineItem> lineItems = genericDAO.executeSimpleQuery(query);
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("orderNo", String.valueOf(order.getId()));
+		params.put("orderDate", new SimpleDateFormat("MM-dd-yyyy").format(order.getRepairOrderDate()));
+		params.put("company", order.getCompany().getName());
+		
+		String subcontractorName = order.getSubcontractor() == null ? StringUtils.EMPTY : order.getSubcontractor().getName();
+		params.put("subcontractor", subcontractorName);
+		
+		params.put("vehicle", order.getVehicle().getUnit());
+		params.put("mechanic", order.getMechanic().getFullName());
+		
+		params.put("description", order.getDescription());
+		
+		params.put("totalOrderCost", order.getTotalCost());
+		params.put("noOfLineItems", new Integer(lineItems.size()));
+		
+		response.setHeader("Content-Disposition", "attachment;filename=repairOrderPrint_" + order.getId() + ".pdf");
+		
+		ByteArrayOutputStream out = null;
+		try {
+			out = dynamicReportService.generateStaticReport("repairOrderPrint", lineItems, params, 
+						"pdf", request);
+			
+			out.writeTo(response.getOutputStream());
+			
+			return null;
+		} catch(Exception ex){
+			ex.printStackTrace();
+			request.getSession().setAttribute("errors", "Unable to print order. Plesae try again later");
+			return "error";
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/copy.do")
 	public String copy(HttpServletRequest request, ModelMap model,
-			@RequestParam(value = "id") Long orderId) {
+			@RequestParam(value = "lineItemId") Long lineItemId) {
+		RepairOrder newOrder = processCopyLineItem(request, lineItemId);
+		model.addAttribute("modelObject", newOrder);
+		
+		setupCreate(model, request);
+		setupLineItem(model, request, newOrder);
+		return getUrlContext() + "/form";
+	}
+	
+	private RepairOrder processCopyOrder(HttpServletRequest request, Long orderId) {
 		RepairOrder orderToBeCopied = genericDAO.getById(RepairOrder.class, orderId);
 		RepairOrder newOrder = new RepairOrder();
 		copy(orderToBeCopied, newOrder, request);
@@ -372,11 +481,29 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 			genericDAO.save(newLineItem);
 		}
 		
-		model.addAttribute("modelObject", newOrder);
+		return newOrder;
+	}
+	
+	private RepairOrder processCopyLineItem(HttpServletRequest request, Long lineItemId) {
+		RepairOrderLineItem lineItemToBeCopied = genericDAO.getById(RepairOrderLineItem.class, lineItemId);
 		
-		setupCreate(model, request);
-		setupLineItem(model, request, newOrder);
-		return getUrlContext() + "/form";
+		RepairOrder newOrder = new RepairOrder();
+		copy(lineItemToBeCopied.getRepairOrder(), newOrder, request);
+		newOrder.setTotalCost(lineItemToBeCopied.getTotalCost());
+		
+		genericDAO.save(newOrder);
+		
+		RepairOrderLineItem newLineItem = new RepairOrderLineItem();
+		newLineItem.setCreatedAt(Calendar.getInstance().getTime());
+		newLineItem.setCreatedBy(getUser(request).getId());
+		newLineItem.setStatus(1);
+		newLineItem.setRepairOrder(newOrder);
+		
+		copy(lineItemToBeCopied, newLineItem);
+		
+		genericDAO.save(newLineItem);
+		
+		return newOrder;
 	}
 	
 	private void setupLineItem(ModelMap model, HttpServletRequest request, RepairOrder entity) {
@@ -391,7 +518,7 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		}
 		
 		String query = "select obj from RepairOrderLineItem obj where obj.repairOrder.id=" + orderId
-								+ " order by obj.id desc";
+								+ " order by obj.id asc";
 		List<RepairOrderLineItem> repairOrderLineItemList = genericDAO.executeSimpleQuery(query);
 		model.addAttribute("repairOrderLineItemList", repairOrderLineItemList);
 	}
