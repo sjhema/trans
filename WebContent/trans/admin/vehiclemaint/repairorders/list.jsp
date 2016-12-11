@@ -66,12 +66,12 @@ function processDelete(lineItemId) {
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Order Date From"/></td>
 			<td align="${left}">
-				<input id="datepicker" name="repairOrderDateFrom" style="min-width:150px; max-width:150px" class="flat" 
+				<input id="datepicker" name="repairOrderDateFrom" style="min-width:148px; max-width:148px" class="flat" 
 					 value="${sessionScope.searchCriteria.searchMap.repairOrderDateFrom}" /> 
 			</td>
 			<td align="${left}" class="first"><primo:label code="Order Date To"/></td>
 			<td align="${left}">
-				<input id="datepicker1" name="repairOrderDateTo" style="min-width:150px; max-width:150px" class="flat" 
+				<input id="datepicker1" name="repairOrderDateTo" style="min-width:148px; max-width:148px" class="flat" 
 					 value="${sessionScope.searchCriteria.searchMap.repairOrderDateTo}" /> 
 			</td>
 		</tr>
