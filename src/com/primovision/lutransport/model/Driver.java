@@ -26,8 +26,8 @@ public class Driver extends AbstractBaseModel{
 	@Column(name="oldstaff_id")
 	private String OldStaffId;	
 	
-	
-	
+	@Column(name="ssn")
+	private String ssn;
 	
 	@NotEmpty
 	@Column(name="first_name")
@@ -480,6 +480,14 @@ public class Driver extends AbstractBaseModel{
 
 	public void setGeneralProbationDays(int generalProbationDays) {
 		this.generalProbationDays = generalProbationDays;
+	}
+
+	public String getSsn() {
+		return ssn;
+	}
+
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
 	}
 	
 	 

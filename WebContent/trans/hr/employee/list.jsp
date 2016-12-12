@@ -194,6 +194,7 @@ function formatDate(){
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false" >
 			<primo:textcolumn headerText="Employee Id" dataField="staffId" />
+			<primo:textcolumn headerText="SSN" dataField="ssn" />
 			<primo:textcolumn headerText="Last Name" dataField="lastName" />
 			<primo:textcolumn headerText="First Name" dataField="firstName" />
 			<primo:textcolumn headerText="Category" dataField="catagory.name" />

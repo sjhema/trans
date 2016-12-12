@@ -668,6 +668,12 @@ function formatDate4(){
 			<td align="${left}"><form:input id="staffId"  style="min-width:150px; max-width:150px"   path="staffId" cssClass="flat"
 					  /> <br> <form:errors
 					path="staffId" cssClass="errorMessage" /></td>
+			<td class="form-left"><primo:label code="SSN" /></td>
+			<td align="${left}">
+				<form:input id="ssn" style="min-width:150px; max-width:150px"  path="ssn" cssClass="flat"
+					 maxlength="9" onkeypress="return onlyNumbers(event, false)"  /> 
+				<br><form:errors path="ssn" cssClass="errorMessage" />
+			</td>
 		</tr>
 		
 		<tr>
