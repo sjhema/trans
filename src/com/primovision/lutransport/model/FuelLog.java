@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -22,6 +23,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class FuelLog extends AbstractBaseModel implements ReportModel{
 
 	private static final long serialVersionUID = -7960731852472127475L;
+	
+	// JJ Keller Fuel card - 12th Dec 2016
+	@Transient
+	private String ssn = StringUtils.EMPTY;
 	
 	@ManyToOne
 	@JoinColumn(name="fuel_vendor")
@@ -536,5 +541,17 @@ public String getDriverFullName() {
 		}
 		return false;
 	}
+
+	@Transient
+	public String getSsn() {
+		return ssn;
+	}
+	
+	@Transient
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
+	
+	
 
 }

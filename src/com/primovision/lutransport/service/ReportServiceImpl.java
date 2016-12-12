@@ -4306,6 +4306,10 @@ throw new Exception("origin and destindation is empty");
 						.getDriversid().getFullName() : "");
 				output.setDriverCategory((fuelog.getDriversid() != null) && fuelog.getDriversid().getCatagory() != null ? fuelog
 						.getDriversid().getCatagory().getName() : "");
+			
+				// JJ Keller Fuel card - 12th Dec 2016
+				output.setSsn((fuelog.getDriversid() != null && fuelog.getDriversid().getSsn() != null) ? fuelog
+						.getDriversid().getSsn() : StringUtils.EMPTY);
 				// billing.setDestination((ticket.getDestination()!=null)?ticket.getDestination().getName():"");
 				/*
 				 * output.setFuelCardNumbers(fuelog.getFuelCardNumber().toString(

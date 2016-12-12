@@ -8,6 +8,8 @@ import com.primovision.lutransport.model.ReportModel;
 public class FuelLogReportInput /*implements ReportModel*/{
 	public static String REPORT_TYPE_FUEL_PURCHASE = "FUEL_PURCHASE";
 	public static String REPORT_TYPE_FUEL_TRUCK = "FUEL_TRUCK";
+	// JJ Keller Fuel card - 12th Dec 2016
+	public static String REPORT_TYPE_JJ_KELLER_FUEL_TXN = "JJ_KELLER_FUEL_TXN";
 	
 	private String fuelVendor;
 	private String company;

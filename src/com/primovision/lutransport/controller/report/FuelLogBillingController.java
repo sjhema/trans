@@ -1,6 +1,7 @@
 package com.primovision.lutransport.controller.report;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -180,15 +182,19 @@ public class FuelLogBillingController extends BaseController{
 		populateSearchCriteria(request, request.getParameterMap());
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
-		criteria.setPageSize(1000);
 		
+		// JJ Keller Fuel card - 12th Dec 2016
+		if (StringUtils.equals(FuelLogReportInput.REPORT_TYPE_JJ_KELLER_FUEL_TXN, input.getReportType())) {
+			criteria.setPageSize(15000);
+			criteria.setPage(0);
+		} else {
+			criteria.setPageSize(1000);
+		}
 		
 		if(p==null)
 			request.getSession().setAttribute("input", input);
 		
 		FuelLogReportInput input1=(FuelLogReportInput)request.getSession().getAttribute("input");
-		
-		
 		 
 		try {
 			Map<String, Object> datas; 
@@ -200,6 +206,10 @@ public class FuelLogBillingController extends BaseController{
 				 datas = generateData(criteria,request,input1);	
 			}
 			
+			// JJ Keller Fuel card - 12th Dec 2016
+			if (StringUtils.equals(FuelLogReportInput.REPORT_TYPE_JJ_KELLER_FUEL_TXN, input.getReportType())) {
+				return processJJKellerFuelTxnReportRequest(datas, request, response);
+			}
 			
 		    if (StringUtils.isEmpty(type))
 				type = "html";
@@ -229,7 +239,66 @@ public class FuelLogBillingController extends BaseController{
 
 	}
 	
-	 
+	// JJ Keller Fuel card - 12th Dec 2016
+	private String processJJKellerFuelTxnReportRequest(Map<String, Object> datas, HttpServletRequest request, HttpServletResponse response) {
+		StringBuffer reportBuff = new StringBuffer();
+		
+		String padChar = " ";
+		String ssn = StringUtils.EMPTY;
+		String txnDate = StringUtils.EMPTY;
+		String txnTime = StringUtils.EMPTY;
+		String city = StringUtils.EMPTY;
+		String state = StringUtils.EMPTY;
+		
+		List<FuelLog> fuelLogList = (List<FuelLog>) datas.get("data");
+		for (FuelLog aFuelLog : fuelLogList) {
+			ssn = StringUtils.rightPad(aFuelLog.getSsn(), 9, padChar);
+			
+			txnDate = StringUtils.replace(aFuelLog.getTransactionsDate(), "-", StringUtils.EMPTY);
+			txnDate = StringUtils.rightPad(txnDate, 8, padChar);
+			
+			txnTime = StringUtils.replace(aFuelLog.getTransactiontime(), ":", StringUtils.EMPTY);
+			txnTime = StringUtils.rightPad(txnTime, 4, padChar);
+			
+			city = StringUtils.rightPad(aFuelLog.getCity(), 50, padChar);
+			state = StringUtils.rightPad(aFuelLog.getStates(), 2, padChar);
+			
+			reportBuff.append(ssn)
+						 .append(txnDate)
+						 .append(txnTime)
+						 .append(city)
+						 .append(state)
+						 .append("\n");
+		}
+		
+		String type = "txt";
+		response.setHeader("Content-Disposition", "attachment;filename=JJKellerFuelCard." + type);
+		response.setContentType(MimeUtil.getContentType(type));
+		
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			out.write(reportBuff.toString().getBytes());
+			out.writeTo(response.getOutputStream());
+			
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 		@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
 		public String display(ModelMap model, HttpServletRequest request,
 				HttpServletResponse response,

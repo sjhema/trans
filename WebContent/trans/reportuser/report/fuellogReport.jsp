@@ -15,6 +15,13 @@ function searchFuelTruckReport() {
     document.forms[0].submit();
 }
 
+function searchJJKellerFuelCardReport() {
+	document.forms[0].elements["reportType"].value = 'JJ_KELLER_FUEL_TXN';
+	
+	/* document.forms[0].target="reportData"; */
+    document.forms[0].submit();
+}
+
 function getTime(timedata){
 	var timein=document.getElementById(timedata).value;
 	if(timein!=""){
@@ -461,6 +468,9 @@ $(document).ready(function(){
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 			onclick="javascript:searchFuelTruckReport()" value="Fuel - Truck report" />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+			onclick="javascript:searchJJKellerFuelCardReport()" value="Fuel - JJ Keller Report" />
 			</td>
 		</tr>
 		
