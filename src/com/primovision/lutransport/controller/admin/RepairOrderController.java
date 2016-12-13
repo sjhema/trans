@@ -423,12 +423,13 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		params.put("totalOrderCost", order.getTotalCost());
 		params.put("noOfLineItems", new Integer(lineItems.size()));
 		
-		response.setHeader("Content-Disposition", "attachment;filename=repairOrderPrint_" + order.getId() + ".pdf");
-		
+		//response.setHeader("Content-Disposition", "attachment;filename=repairOrderPrint_" + order.getId() + ".pdf");
+		//String type = "pdf";
+		String type = "print";
 		ByteArrayOutputStream out = null;
 		try {
 			out = dynamicReportService.generateStaticReport("repairOrderPrint", lineItems, params, 
-						"pdf", request);
+					type, request);
 			
 			out.writeTo(response.getOutputStream());
 			

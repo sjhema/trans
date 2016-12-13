@@ -20,7 +20,10 @@ function deleteLineItem(lineItemId) {
 
 function printOrder() {
 	var id = document.getElementById("id").value;
-	document.location = "${ctx}/admin/vehiclemaint/repairorders/print.do?id=" + id;
+	
+	var url = "${ctx}/admin/vehiclemaint/repairorders/print.do?id=" + id;
+	window.open(url, "Repair Order Print", "toolbar=0,location=0,scrollbars=yes,resizable=yes,top=500,left=500,width=1000,height=500");
+	//document.location = url;
 }
 
 function saveLineItemType() {
