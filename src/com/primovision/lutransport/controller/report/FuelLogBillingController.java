@@ -260,7 +260,8 @@ public class FuelLogBillingController extends BaseController{
 			txnTime = StringUtils.replace(aFuelLog.getTransactiontime(), ":", StringUtils.EMPTY);
 			txnTime = StringUtils.rightPad(txnTime, 4, padChar);
 			
-			city = StringUtils.rightPad(aFuelLog.getCity(), 50, padChar);
+			city = StringUtils.substring(aFuelLog.getCity(), 0, 50);
+			city = StringUtils.rightPad(city, 50, padChar);
 			state = StringUtils.rightPad(aFuelLog.getStates(), 2, padChar);
 			
 			reportBuff.append(ssn)
