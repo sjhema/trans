@@ -252,6 +252,10 @@ public class FuelLogBillingController extends BaseController{
 		
 		List<FuelLog> fuelLogList = (List<FuelLog>) datas.get("data");
 		for (FuelLog aFuelLog : fuelLogList) {
+			if (!StringUtils.equals("Driver", aFuelLog.getDriverCategory())) {
+				continue;
+			}
+			
 			ssn = StringUtils.rightPad(aFuelLog.getSsn(), 9, padChar);
 			
 			txnDate = StringUtils.replace(aFuelLog.getTransactionsDate(), "-", StringUtils.EMPTY);
@@ -273,7 +277,7 @@ public class FuelLogBillingController extends BaseController{
 		}
 		
 		String type = "txt";
-		response.setHeader("Content-Disposition", "attachment;filename=JJKellerFuelCard." + type);
+		response.setHeader("Content-Disposition", "attachment;filename=JJKellerFuelTxn." + type);
 		response.setContentType(MimeUtil.getContentType(type));
 		
 		ByteArrayOutputStream out = null;
