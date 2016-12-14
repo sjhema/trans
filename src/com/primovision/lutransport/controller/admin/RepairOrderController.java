@@ -37,7 +37,7 @@ import com.google.gson.Gson;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
-
+import com.primovision.lutransport.model.Company;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -423,9 +423,24 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		params.put("totalOrderCost", order.getTotalCost());
 		params.put("noOfLineItems", new Integer(lineItems.size()));
 		
-		//response.setHeader("Content-Disposition", "attachment;filename=repairOrderPrint_" + order.getId() + ".pdf");
-		//String type = "pdf";
-		String type = "print";
+		Company company = retrieveCompany(order.getCompany().getName());
+		if (company != null) {
+			params.put("companyName", company.getName());
+			params.put("companyAddress1", company.getAddress1());
+			
+			String address2 = StringUtils.isEmpty(company.getAddress2()) ? StringUtils.EMPTY : company.getAddress2();
+			params.put("companyAddress2", address2);
+			
+			params.put("companyCity", company.getCity());
+			params.put("companyState", company.getState().getCode());
+			params.put("companyZipCode", company.getZipcode());
+			params.put("companyPhone", company.getPhone());
+			params.put("companyFax", company.getFax());
+		}
+		
+		response.setHeader("Content-Disposition", "attachment;filename=repairOrderPrint_" + order.getId() + ".pdf");
+		String type = "pdf";
+		//String type = "print";
 		ByteArrayOutputStream out = null;
 		try {
 			out = dynamicReportService.generateStaticReport("repairOrderPrint", lineItems, params, 
@@ -446,6 +461,17 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+	
+	private Company retrieveCompany(String code) {
+		String query = "select obj from Company obj where obj.code='" + code +"'";
+		List<Company> companyList = genericDAO.executeSimpleQuery(query);
+		
+		if (companyList != null && !companyList.isEmpty()) {
+			return companyList.get(0);
+		} else {
+			return null;
 		}
 	}
 	

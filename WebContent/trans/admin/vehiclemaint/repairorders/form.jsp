@@ -22,8 +22,8 @@ function printOrder() {
 	var id = document.getElementById("id").value;
 	
 	var url = "${ctx}/admin/vehiclemaint/repairorders/print.do?id=" + id;
-	window.open(url, "Repair Order Print", "toolbar=0,location=0,scrollbars=yes,resizable=yes,top=500,left=500,width=1000,height=500");
-	//document.location = url;
+	//window.open(url, "Repair Order Print", "toolbar=0,location=0,scrollbars=yes,resizable=yes,top=500,left=500,width=800,height=500");
+	document.location = url;
 }
 
 function saveLineItemType() {
@@ -417,10 +417,13 @@ function populateCosts() {
 			<td align="${left}" colspan="2">
 				<input type="button" name="create" id="create" onclick="javascript:submitForm();"
 					value="<primo:label code="Save"/>" class="flat" />
+				&nbsp;
 				<input type="reset" id="resetBtn"
 					value="<primo:label code="Reset"/>" class="flat" />
+				&nbsp;
 				<input type="button" id="printBtn" onclick="javascript:printOrder();"
 					value="<primo:label code="Print"/>" class="flat" /> 
+				&nbsp;
 				<input type="button" id="cancelBtn" value="<primo:label code="Cancel"/>" class="flat"
 					onClick="location.href='list.do'" />
 			</td>

@@ -136,8 +136,42 @@ VALUES (now(), '1', 1, 'Body', 'Body');
 INSERT INTO `lutransport`.`repair_order_component`(`created_at`,`created_by`,`status`,`component`,`description`)
 VALUES (now(), '1', 1, 'Brakes', 'Brakes');
 
+---
+CREATE TABLE `company` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `modified_at` datetime DEFAULT NULL,
+  `modified_by` bigint(20) DEFAULT NULL,
+  `status` int(11) NOT NULL,
+   `code` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `address1` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `address2` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `city` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `phone` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `fax` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `zipcode` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `state` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `company_state_fk_idx` (`state`),
+  CONSTRAINT `company_state_fk` FOREIGN KEY (`state`) REFERENCES `state` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ALTER TABLE `lutransport`.`company` 
+ADD UNIQUE INDEX `company_code_UNQ` (`code` ASC);
 
+INSERT INTO `lutransport`.`company` (`id`, `created_at`, `created_by`, `status`, `code`, `name`, `address1`, `city`, `zipcode`, `state`,  `phone`,  `fax`) 
+VALUES ('1', now(), '1', '1', 'LU', 'LU Transport Inc', '2648 W 50th street', 'Chicago', '60632', 20, '773-476-6601', '773-476-6684');
+
+INSERT INTO `lutransport`.`company` (`id`, `created_at`, `created_by`, `status`, `code`, `name`, `address1`, `city`, `zipcode`, `state`,  `phone`,  `fax`) 
+VALUES ('2', now(), '1', '1', 'WB', 'WB Services', '5109 Bleigh Avenue', 'Philadelphia', '19136', 45, '773-476-6601 x106', '773-476-6684');
+
+INSERT INTO `lutransport`.`company` (`id`, `created_at`, `created_by`, `status`, `code`, `name`, `address1`, `city`, `zipcode`, `state`,  `phone`,  `fax`) 
+VALUES ('3', now(), '1', '1', 'DREW', 'Drew Transport', '2648 W. 50th Street', 'Chicago', '60632', 20, '773-476-6601', '773-476-6684');
+
+INSERT INTO `lutransport`.`company` (`id`, `created_at`, `created_by`, `status`, `code`, `name`, `address1`, `city`, `zipcode`, `state`,  `phone`,  `fax`) 
+VALUES ('4', now(), '1', '1', 'United Disposal', 'United Disposal Services', '2648 W. 50th Street', 'Chicago', '60632', 20, '773-476-6601', '773-476-6684');
 
 
 
