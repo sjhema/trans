@@ -1308,7 +1308,8 @@ public class ReportServiceImpl implements ReportService {
 					if ((billingRate.getCustomername()) != null)
 						billing.setCustomerId(billingRate.getCustomername());
 					if (billingRate.getBilledby().equals("bygallon")) {
-						billing.setGallon(ticket.getTransferNet()/8.34);
+					// Change to 8.35 - 28th Dec 2016
+						billing.setGallon(ticket.getTransferNet()/8.35);
 					} else {
 						billing.setGallon(0.0);
 					}
@@ -1413,7 +1414,8 @@ public class ReportServiceImpl implements ReportService {
 						}
 					}
 					billing.setRate(billingRate.getValue());
-					billing.setAmount((billing.getEffectiveNetWt() / 8.34)
+				// Change to 8.35 - 28th Dec 2016
+					billing.setAmount((billing.getEffectiveNetWt() / 8.35)
 							* billingRate.getValue());
 				} else if (rateType == 2) {
 					// per load
@@ -1558,7 +1560,8 @@ public class ReportServiceImpl implements ReportService {
 							}
 
 							if (fswrateType == 1) {
-								fuelSurcharge = (billing.getEffectiveNetWt() / 8.34)
+							// Change to 8.35 - 28th Dec 2016
+								fuelSurcharge = (billing.getEffectiveNetWt() / 8.35)
 										* fuelsurchargeweeklyrate
 												.getFuelSurchargeRate();
 							}
@@ -2612,7 +2615,8 @@ throw new Exception("origin and destindation is empty");
 							}
 						}
 						billing.setRate(billingRate.getValue());
-						billing.setAmount((billing.getEffectiveNetWt() / 8.34)
+					// Change to 8.35 - 28th Dec 2016
+						billing.setAmount((billing.getEffectiveNetWt() / 8.35)
 								* billingRate.getValue());
 					} else if (rateType == 2) {
 						// per load
@@ -2729,7 +2733,7 @@ throw new Exception("origin and destindation is empty");
 					 * (fswrateType == 2) { fuelSurcharge =
 					 * fuelsurchargeweeklyrate .getFuelSurchargeRate(); } if
 					 * (fswrateType == 1) { fuelSurcharge =
-					 * (billing.getEffectiveNetWt() / 8.34)
+					 * (billing.getEffectiveNetWt() / 8.35)
 					 * fuelsurchargeweeklyrate .getFuelSurchargeRate(); } } } }
 					 */// end of Weekly fuel surcharge calculation
 					Double otherCharges = billingRate.getOtherCharges();
@@ -9039,7 +9043,8 @@ if (wrapperlist.size() > 0) {
 					}
 				}
 				billing.setRate(billingRate.getValue());
-				billing.setAmount((billing.getEffectiveNetWt() / 8.34)
+			// Change to 8.35 - 28th Dec 2016
+				billing.setAmount((billing.getEffectiveNetWt() / 8.35)
 						* billingRate.getValue());
 			} else if (rateType == 2) {
 				// per load
@@ -9214,8 +9219,9 @@ if (wrapperlist.size() > 0) {
 						}
 
 						if (fswrateType == 1) {
+						// Change to 8.35 - 28th Dec 2016
 							fuelSurcharge = (billing
-									.getEffectiveNetWt() / 8.34)
+									.getEffectiveNetWt() / 8.35)
 									* fuelsurchargeweeklyrate
 											.getFuelSurchargeRate();
 						}
@@ -9500,7 +9506,8 @@ if (wrapperlist.size() > 0) {
 					}
 				}
 				billing.setRate(billingRate.getValue());
-				billing.setAmount((billing.getEffectiveNetWt() / 8.34)
+			// Change to 8.35 - 28th Dec 2016
+				billing.setAmount((billing.getEffectiveNetWt() / 8.35)
 						* billingRate.getValue());
 			} else if (rateType == 2) {
 				// per load

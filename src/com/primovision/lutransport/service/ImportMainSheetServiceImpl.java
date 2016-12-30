@@ -4381,7 +4381,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						ticket.setTransferNet(tgross - ttare);
 						ticket.setTransferTons((tgross - ttare) / 2000);
 						/* if(billingRate.getBilledby().equals("bygallon")){ */
-						ticket.setGallons(ticket.getTransferNet() / 8.34);
+					// Change to 8.35 - 28th Dec 2016
+						ticket.setGallons(ticket.getTransferNet() / 8.35);
 						// }
 					}
 					Double lgross = getValidAmount((String) getCellValue(row.getCell(16)));

@@ -491,7 +491,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			  entity.setCustomer((billingRate.getCustomername()!=null)?billingRate.getCustomername():null);
 			  entity.setCompanyLocation((billingRate.getCompanyLocation()!=null)?billingRate.getCompanyLocation():null);
 			  //if(billingRate.getBilledby().equals("bygallon")){
-        		  entity.setGallons(entity.getTransferNet()/8.34);
+			  	// Change to 8.35 - 28th Dec 2016
+        		  entity.setGallons(entity.getTransferNet()/8.35);
         	  // }
 			}
 			/*else
