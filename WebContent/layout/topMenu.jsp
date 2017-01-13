@@ -22,7 +22,8 @@ if (menuTree!=null) {
 			   || businessObject.getId()==205 || businessObject.getId()==206 || businessObject.getId()==301 
 			   || businessObject.getId()==306 || businessObject.getId()==20012 || businessObject.getId()==1005
 			   || businessObject.getId()==600110
-			   || businessObject.getId()==30012){ 
+			   || businessObject.getId()==30012
+			   || businessObject.getId()==30013){ 
 			
 				if (hierarchy.contains("/"+businessObject.getId()+"/")) {
 				cssClass="selected";
