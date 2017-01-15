@@ -1,7 +1,7 @@
-INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
-VALUES ('30013', '/admin/equipment/loan/list.do?rst=1', 'Equipment', '2', 'Equipment', 
-'/admin/equipment/loan/list.do?rst=1,/admin/equipment/loan/create.do,/admin/equipment/loan/edit.do,/admin/equipment/loan/delete.do,/admin/equipment/loan/save.do,/admin/equipment/loan/search.do,/admin/equipment/loan/export.do,/admin/equipment/loan/ajax.do,/admin/equipment/loan/print.do', '1', '9', '0', '1', '/1/30013/');
-INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30013', '1'); -- ADMIN
+-- INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
+-- VALUES ('30013', '/admin/equipment/loan/list.do?rst=1', 'Equipment', '2', 'Equipment', 
+-- '/admin/equipment/loan/list.do?rst=1,/admin/equipment/loan/create.do,/admin/equipment/loan/edit.do,/admin/equipment/loan/delete.do,/admin/equipment/loan/save.do,/admin/equipment/loan/search.do,/admin/equipment/loan/export.do,/admin/equipment/loan/ajax.do,/admin/equipment/loan/print.do', '1', '9', '0', '1', '/1/30013/');
+-- INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) VALUES (now(), '1', '30013', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300131', '/admin/equipment/loan/list.do?rst=1', 'Manage Vehicle Loan', '3', 'Manage Vehicle Loan', 
@@ -91,15 +91,18 @@ CREATE TABLE `vehicle_title` (
   `modified_by` bigint(20) DEFAULT NULL,
   `status` int(11) NOT NULL,
   `vehicle` bigint(20) NOT NULL,
-  `title` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  `title_date` datetime NOT NULL,
-  `owner` bigint(20) NOT NULL,
+  `title` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `title_owner` bigint(20) NOT NULL,
+  `registered_owner` bigint(20) NOT NULL,
   `holds_title` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `vehicletitleVehicle_fk_idx` (`vehicle`) USING BTREE,
-  KEY `vehicletitleLocation_fk_idx` (`owner`) USING BTREE,
+  KEY `vehicletitleOwnerLocation_fk_idx` (`title_owner`) USING BTREE,
+  KEY `vehicletitleRegOwnerLocation_fk_idx` (`registered_owner`) USING BTREE,
   CONSTRAINT `vehicletitleVehicle_fk` FOREIGN KEY (`vehicle`) REFERENCES `vehicle` (`id`),
-  CONSTRAINT `vehicletitleLocation_fk` FOREIGN KEY (`owner`) REFERENCES `location` (`id`)
+  CONSTRAINT `vehicletitleOwnerLocation_fk` FOREIGN KEY (`title_owner`) REFERENCES `location` (`id`),
+  CONSTRAINT `vehicletitleRegOwnerLocation_fk` FOREIGN KEY (`registered_owner`) REFERENCES `location` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `lutransport`.`vehicle_title` 
@@ -145,6 +148,40 @@ CREATE TABLE `vehicle_sale` (
   CONSTRAINT `vehiclesaleVehicle_fk` FOREIGN KEY (`vehicle`) REFERENCES `vehicle` (`id`),
   CONSTRAINT `vehiclesaleEquipmentBuyer_fk` FOREIGN KEY (`buyer`) REFERENCES `equipment_buyer` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Vehicle Loan', `OBJECT_NAME`='Vehicle Loan' WHERE `ID`='300131';
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Vehicle Title', `OBJECT_NAME`='Vehicle Title' WHERE `ID`='300133';
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Vehicle Sales', `OBJECT_NAME`='Vehicle Sales' WHERE `ID`='300134';
+
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='300131';
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='300132';
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='300133';
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='300134';
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='300135';
+UPDATE `lutransport`.`business_object` SET `parent_id`='202' WHERE `ID`='3001350';
+
+UPDATE `lutransport`.`business_object` SET `display_order`='12' WHERE `ID`='600115';
+UPDATE `lutransport`.`business_object` SET `display_order`='13' WHERE `ID`='600117';
+
+UPDATE `lutransport`.`business_object` SET `display_order`='14' WHERE `ID`='300131';
+UPDATE `lutransport`.`business_object` SET `display_order`='15' WHERE `ID`='300132';
+UPDATE `lutransport`.`business_object` SET `display_order`='16' WHERE `ID`='300133';
+UPDATE `lutransport`.`business_object` SET `display_order`='17' WHERE `ID`='300134';
+UPDATE `lutransport`.`business_object` SET `display_order`='18' WHERE `ID`='300135';
+
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/3001350/' WHERE `ID`='3001350';
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/300135/' WHERE `ID`='300135';
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/300134/' WHERE `ID`='300134';
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/300133/' WHERE `ID`='300133';
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/300132/' WHERE `ID`='300132';
+UPDATE `lutransport`.`business_object` SET `hierarchy`='/1/202/300131/' WHERE `ID`='300131';
+
+UPDATE `lutransport`.`business_object` SET `hidden`='1' WHERE `ID`='300132';
+UPDATE `lutransport`.`business_object` SET `hidden`='1' WHERE `ID`='300135';
+
+delete  from role_privilege where business_object_id = 30013;
+DELETE FROM `lutransport`.`business_object` WHERE `ID`='30013';
 
 
 

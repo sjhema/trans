@@ -21,6 +21,19 @@
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="Company"/></td>
+			<td align="${left}">
+				<select id="company" name="company" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${companies}" var="aCompany">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['company'] == aCompany.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
+					</c:forEach>
+				</select>
+			</td>
 	   	</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Loan No"/></td>
@@ -33,33 +46,6 @@
 							<c:set var="selected" value="selected" />
 						</c:if>
 						<option value="${aVehicleLoan.loanNo}"${selected}>${aVehicleLoan.loanNo}</option>
-					</c:forEach>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td align="${left}" class="first"><primo:label code="Loan Start Date"/></td>
-			<td align="${left}">
-				<input id="datepicker" name="loanStartDate" style="min-width:148px; max-width:148px" class="flat" 
-					 value="${sessionScope.searchCriteria.searchMap.loanStartDate}" /> 
-			</td>
-			<td align="${left}" class="first"><primo:label code="Loan End Date"/></td>
-			<td align="${left}">
-				<input id="datepicker1" name="loanEndDate" style="min-width:148px; max-width:148px" class="flat" 
-					 value="${sessionScope.searchCriteria.searchMap.loanEndDate}" /> 
-			</td>
-		</tr>
-		<tr>
-			<td align="${left}" class="first"><primo:label code="Company"/></td>
-			<td align="${left}">
-				<select id="company" name="company" style="min-width:154px; max-width:154px">
-					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${companies}" var="aCompany">
-					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['company'] == aCompany.id}">
-						<c:set var="selected" value="selected"/>
-					</c:if>
-						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
 					</c:forEach>
 				</select>
 			</td>
@@ -76,7 +62,73 @@
 					</c:forEach>
 				</select>
 			</td>
-	   	</tr>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Title Owner"/></td>
+			<td align="${left}">
+				<select id="titleOwner" name="titleOwner" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${owners}" var="aOwner">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['titleOwner'] == aOwner.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${aOwner.id}" ${selected}>${aOwner.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Registered Owner"/></td>
+			<td align="${left}">
+				<select id="registeredOwner" name="registeredOwner" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${owners}" var="aOwner">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['registeredOwner'] == aOwner.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${aOwner.id}" ${selected}>${aOwner.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Title"/></td>
+			<td align="${left}">
+				<select id="title" name="title" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${titles}" var="aTitle">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['title'] == aTitle.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${aTitle.id}" ${selected}>${aTitle.title}</option>
+					</c:forEach>
+				</select>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Holds Title"/></td>
+			<td align="${left}">
+				<select id="holdsTitle" name="holdsTitle" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<option value="Yes">Yes</option>
+					<option value="No">No</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Buyer"/></td>
+			<td align="${left}">
+				<select id="buyer" name="buyer" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${buyers}" var="aBuyer">
+						<c:set var="selected" value="" />
+						<c:if test="${sessionScope.searchCriteria.searchMap['buyer'] == aBuyer.id}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aBuyer.id}"${selected}>${aBuyer.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+		</tr>
 	 	<tr>
 			<td align="${left}"></td>
 			<td align="${left}">

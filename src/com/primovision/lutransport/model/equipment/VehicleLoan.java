@@ -48,7 +48,10 @@ public class VehicleLoan extends AbstractBaseModel {
 	private String description;
 	
 	@Transient
-	private int paymentsLeft;
+	private String lenderName;
+	
+	@Transient
+	private Integer paymentsLeft;
 
 	public String getLoanNo() {
 		return loanNo;
@@ -129,14 +132,24 @@ public class VehicleLoan extends AbstractBaseModel {
 	public void setNoOfPayments(Integer noOfPayments) {
 		this.noOfPayments = noOfPayments;
 	}
+	
+	@Transient
+	public String getLenderName() {
+		return lenderName;
+	}
 
 	@Transient
-	public int getPaymentsLeft() {
+	public void setLenderName(String lenderName) {
+		this.lenderName = lenderName;
+	}
+
+	@Transient
+	public Integer getPaymentsLeft() {
 		return paymentsLeft;
 	}
 
 	@Transient
-	public void setPaymentsLeft(int paymentsLeft) {
+	public void setPaymentsLeft(Integer paymentsLeft) {
 		this.paymentsLeft = paymentsLeft;
 	}
 }

@@ -12,7 +12,15 @@ public class EquipmentReportInput implements ReportModel {
 	
 	private String loanStartDate;
 	private String loanEndDate;
+
+	private String titleOwner;
+	private String registeredOwner;
 	
+	private String title;
+	private String holdsTitle;
+	
+	private String buyer;
+
 	public String getLoanNo() {
 		return loanNo;
 	}
@@ -48,5 +56,35 @@ public class EquipmentReportInput implements ReportModel {
 	}
 	public void setLoanEndDate(String loanEndDate) {
 		this.loanEndDate = loanEndDate;
+	}
+	public String getTitleOwner() {
+		return titleOwner;
+	}
+	public void setTitleOwner(String titleOwner) {
+		this.titleOwner = titleOwner;
+	}
+	public String getRegisteredOwner() {
+		return registeredOwner;
+	}
+	public void setRegisteredOwner(String registeredOwner) {
+		this.registeredOwner = registeredOwner;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getHoldsTitle() {
+		return holdsTitle;
+	}
+	public void setHoldsTitle(String holdsTitle) {
+		this.holdsTitle = holdsTitle;
+	}
+	public String getBuyer() {
+		return buyer;
+	}
+	public void setBuyer(String buyer) {
+		this.buyer = buyer;
 	}
 }

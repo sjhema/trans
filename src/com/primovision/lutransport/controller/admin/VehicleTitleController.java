@@ -1,23 +1,23 @@
 package com.primovision.lutransport.controller.admin;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.stereotype.Controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 
 import org.springframework.validation.BindingResult;
+
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
@@ -32,13 +32,8 @@ public class VehicleTitleController extends CRUDController<VehicleTitle> {
 		setUrlContext("admin/equipment/title");
 	}
 	
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-
 	@Override
 	public void initBinder(WebDataBinder binder) {
-		dateFormat.setLenient(false);
-		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
-		
 		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(Vehicle.class));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
 	}
@@ -59,21 +54,24 @@ public class VehicleTitleController extends CRUDController<VehicleTitle> {
 	public void setupList(ModelMap model, HttpServletRequest request) {
 		populateSearchCriteria(request, request.getParameterMap());
 		setupCreate(model, request);
+		
+		Map criterias = new HashMap();
+		model.addAttribute("titles", genericDAO.findByCriteria(VehicleTitle.class, criterias, "title", false));
 	}
 
 	private void validateSave(VehicleTitle entity, BindingResult bindingResult) {
 		if (entity.getVehicle() == null) {
 			bindingResult.rejectValue("vehicle", "error.select.option", null, null);
 		}
-		if (entity.getOwner() == null) {
-			bindingResult.rejectValue("owner", "error.select.option", null, null);
+		if (entity.getTitleOwner() == null) {
+			bindingResult.rejectValue("titleOwner", "error.select.option", null, null);
 		}
-		if (StringUtils.isEmpty(entity.getTitle())) {
+		if (entity.getRegisteredOwner() == null) {
+			bindingResult.rejectValue("registeredOwner", "error.select.option", null, null);
+		}
+		/*if (StringUtils.isEmpty(entity.getTitle())) {
 			bindingResult.rejectValue("title", "NotNull.java.lang.String", null, null);
-		}
-		if (entity.getTitleDate() == null) {
-			bindingResult.rejectValue("titleDate", "NotNull.java.util.Date", null, null);
-		}
+		}*/
 		if (StringUtils.isEmpty(entity.getHoldsTitle())) {
 			bindingResult.rejectValue("holdsTitle", "NotNull.java.lang.String", null, null);
 		}
@@ -99,8 +97,25 @@ public class VehicleTitleController extends CRUDController<VehicleTitle> {
 		
 		if (entity.getModifiedBy() == null) {
 			model.addAttribute("modelObject", new VehicleTitle());
+		} else {
+			Vehicle vehicle = genericDAO.getById(Vehicle.class, entity.getVehicle().getId());
+			entity.setVehicle(vehicle);
 		}
 		
 		return getUrlContext() + "/form";
+	}
+	
+	@Override
+	public String processAjaxRequest(HttpServletRequest request,
+			String action, Model model) {
+		Gson gson = new Gson();
+		
+		if (StringUtils.equalsIgnoreCase("retrieveVehicle", action)) {
+			String id = request.getParameter("id");
+			Vehicle vehicle = genericDAO.getById(Vehicle.class, Long.valueOf(id));
+			return gson.toJson(vehicle);
+		} 
+		
+		return StringUtils.EMPTY;
 	}
 }

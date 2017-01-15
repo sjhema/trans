@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Vehicle;
@@ -27,6 +28,9 @@ public class VehicleSale extends AbstractBaseModel {
 	
 	@Column(name="sale_price")
 	private Double salePrice;
+	
+	@Transient
+	private String buyerName;
 	
 	public Vehicle getVehicle() {
 		return vehicle;
@@ -58,5 +62,15 @@ public class VehicleSale extends AbstractBaseModel {
 
 	public void setSalePrice(Double salePrice) {
 		this.salePrice = salePrice;
+	}
+
+	@Transient
+	public String getBuyerName() {
+		return buyerName;
+	}
+
+	@Transient
+	public void setBuyerName(String buyerName) {
+		this.buyerName = buyerName;
 	}
 }

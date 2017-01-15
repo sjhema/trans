@@ -1,7 +1,5 @@
 package com.primovision.lutransport.model.equipment;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -20,17 +18,21 @@ public class VehicleTitle extends AbstractBaseModel {
 	private Vehicle vehicle;
 	
 	@ManyToOne
-	@JoinColumn(name="owner")
-	private Location owner;
+	@JoinColumn(name="title_owner")
+	private Location titleOwner;
+	
+	@ManyToOne
+	@JoinColumn(name="registered_owner")
+	private Location registeredOwner;
 	
 	@Column(name="title")
 	private String title;
 	
-	@Column(name="title_date")
-	private Date titleDate;
-	
 	@Column(name="holds_title")
 	private String holdsTitle;
+	
+	@Column(name="description")
+	private String description;
 
 	public Vehicle getVehicle() {
 		return vehicle;
@@ -48,20 +50,28 @@ public class VehicleTitle extends AbstractBaseModel {
 		this.title = title;
 	}
 
-	public Location getOwner() {
-		return owner;
+	public Location getTitleOwner() {
+		return titleOwner;
 	}
 
-	public void setOwner(Location owner) {
-		this.owner = owner;
+	public void setTitleOwner(Location titleOwner) {
+		this.titleOwner = titleOwner;
 	}
 
-	public Date getTitleDate() {
-		return titleDate;
+	public Location getRegisteredOwner() {
+		return registeredOwner;
 	}
 
-	public void setTitleDate(Date titleDate) {
-		this.titleDate = titleDate;
+	public void setRegisteredOwner(Location registeredOwner) {
+		this.registeredOwner = registeredOwner;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getHoldsTitle() {

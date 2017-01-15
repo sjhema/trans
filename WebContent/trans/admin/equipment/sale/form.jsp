@@ -42,6 +42,32 @@ function populateBuyerDetails() {
 		}
 	});
 }
+
+function populateVehicleDetails() {
+	$("#company").val("");
+	$("#vin").val("");
+	$("#year").val("");
+	$("#make").val("");
+	$("#model").val("");
+		
+	var id = $("#vehicle").val();
+	if (id == '') {
+		return;
+	}
+	
+	$.ajax({
+  		url: "ajax.do?action=retrieveVehicle" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		var vehicle = jQuery.parseJSON(responseData);
+       		$("#company").val(vehicle.owner.name);
+       		$("#vin").val(vehicle.vinNumber);
+       		$("#year").val(vehicle.year);
+       		$("#make").val(vehicle.make);
+       		$("#model").val(vehicle.model);
+		}
+	});
+}
 </script>
 <h3>
 	<primo:label code="Add/Update Vehicle Sale" />
@@ -55,7 +81,8 @@ function populateBuyerDetails() {
 		<tr>
 			<td class="form-left"><primo:label code="Vehicle" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="vehicle" id="vehicle" style="min-width:166px; max-width:166px">
+				<form:select cssClass="flat" path="vehicle" id="vehicle" style="min-width:166px; max-width:166px"
+					onChange="return populateVehicleDetails();">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${vehicles}" itemValue="id" itemLabel="unit" />
 				</form:select> 
@@ -63,16 +90,46 @@ function populateBuyerDetails() {
 			</td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Company" /></td>
+			<td align="${left}">
+				<input id="company" value="${modelObject.vehicle.owner.name}" style="background-color: #eee; min-width:162px; max-width:162px" 
+					readonly class="flat"  />
+			</td>
+			<td class="form-left"><primo:label code="VIN" /></td>
+			<td align="${left}">
+				<input id="vin" value="${modelObject.vehicle.vinNumber}" style="background-color: #eee; min-width:162px; max-width:162px" class="flat" readonly/>
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Year" /></td>
+			<td align="${left}">
+				<input id="year" value="${modelObject.vehicle.year}" style="background-color: #eee; min-width:162px; max-width:162px" class="flat" readonly/>
+			</td>
+			<td class="form-left"><primo:label code="Make" /></td>
+			<td align="${left}">
+				<input id="make" value="${modelObject.vehicle.make}" style="background-color: #eee; min-width:162px; max-width:162px" class="flat" readonly/>
+			</td>
+			<td class="form-left"><primo:label code="Model" /></td>
+			<td align="${left}">
+				<input id="model" value="${modelObject.vehicle.model}" style="background-color: #eee; min-width:162px; max-width:162px" class="flat" readonly/>
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Buyer" /><span class="errorMessage">*</span></td>
 			<td>
+				<!--
 				<form:select cssClass="flat" path="buyer" id="buyer" style="min-width:166px; max-width:166px"
 					onChange="return populateBuyerDetails();">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${buyers}" itemValue="id" itemLabel="name" />
 				</form:select> 
 				<br> <form:errors path="buyer" cssClass="errorMessage" />
+				-->
+				<form:input path="buyerName" style="min-width:210px; max-width:210px" cssClass="flat" />
+				<br><form:errors path="buyerName" cssClass="errorMessage" />
 			</td>
 		</tr>
+		<!-- 
 		<tr>
 			<td class="form-left"><primo:label code="Buyer Name" /></td>
 			<td align="${left}">
@@ -124,8 +181,9 @@ function populateBuyerDetails() {
 				<input id="buyerFax" value="${modelObject.buyer.fax}" style="background-color: #eee; min-width:162px; max-width:162px" class="flat" readonly/>
 			</td>
 		</tr>
+		 -->
 		<tr>
-			<td class="form-left"><primo:label code="Sale Date" /><span class="errorMessage">*</span></td>
+			<td class="form-left"><primo:label code="Sold Date" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
 				<form:input id="datepicker" path="saleDate" style="min-width:158px; max-width:158px" cssClass="flat"/>
 				<br> 

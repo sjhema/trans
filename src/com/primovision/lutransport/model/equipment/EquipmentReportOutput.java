@@ -7,12 +7,12 @@ import com.primovision.lutransport.model.ReportModel;
 public class EquipmentReportOutput implements ReportModel {
 	private String unit = StringUtils.EMPTY;
 	
-	private String company = StringUtils.EMPTY;
-	
 	private String vin = StringUtils.EMPTY;
 	private String year = StringUtils.EMPTY;
 	private String make = StringUtils.EMPTY;
 	private String model = StringUtils.EMPTY;
+	
+	private String company = StringUtils.EMPTY;
 	
 	private String lender = StringUtils.EMPTY;
 	private String loanNo = StringUtils.EMPTY;
@@ -22,15 +22,19 @@ public class EquipmentReportOutput implements ReportModel {
 	
 	private String loanStartDate = StringUtils.EMPTY;
 	private String loanEndDate = StringUtils.EMPTY;
-	private Double interestRate = new Double(0.00);;
-	private Integer noOfPayments = 0;
-	private Integer paymentsLeft = 0;
-	private String hasTitle = StringUtils.EMPTY;
-	private String owner = StringUtils.EMPTY;
+	private Double interestRate = new Double(0.00);
+	private Integer noOfPayments;
+	private Integer paymentsLeft;
+	
+	private String holdsTitle = StringUtils.EMPTY;
+	private String titleOwner = StringUtils.EMPTY;
+	private String registeredOwner = StringUtils.EMPTY;
 	private String title = StringUtils.EMPTY;
-	private String soldDate = StringUtils.EMPTY;
+	
+	private String saleDate = StringUtils.EMPTY;
 	private String buyer = StringUtils.EMPTY;
-	private Double salePrice = new Double(0.00);
+	private Double salePrice;
+	
 	public String getUnit() {
 		return unit;
 	}
@@ -121,17 +125,24 @@ public class EquipmentReportOutput implements ReportModel {
 	public void setPaymentsLeft(Integer paymentsLeft) {
 		this.paymentsLeft = paymentsLeft;
 	}
-	public String getHasTitle() {
-		return hasTitle;
+	
+	public String getHoldsTitle() {
+		return holdsTitle;
 	}
-	public void setHasTitle(String hasTitle) {
-		this.hasTitle = hasTitle;
+	public void setHoldsTitle(String holdsTitle) {
+		this.holdsTitle = holdsTitle;
 	}
-	public String getOwner() {
-		return owner;
+	public String getTitleOwner() {
+		return titleOwner;
 	}
-	public void setOwner(String owner) {
-		this.owner = owner;
+	public void setTitleOwner(String titleOwner) {
+		this.titleOwner = titleOwner;
+	}
+	public String getRegisteredOwner() {
+		return registeredOwner;
+	}
+	public void setRegisteredOwner(String registeredOwner) {
+		this.registeredOwner = registeredOwner;
 	}
 	public String getTitle() {
 		return title;
@@ -139,11 +150,12 @@ public class EquipmentReportOutput implements ReportModel {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getSoldDate() {
-		return soldDate;
+	
+	public String getSaleDate() {
+		return saleDate;
 	}
-	public void setSoldDate(String soldDate) {
-		this.soldDate = soldDate;
+	public void setSaleDate(String saleDate) {
+		this.saleDate = saleDate;
 	}
 	public String getBuyer() {
 		return buyer;

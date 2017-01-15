@@ -7,9 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
-
-import org.joda.time.DateTime;
-import org.joda.time.Months;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 
@@ -42,9 +37,11 @@ import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
 import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.core.util.PaymentUtil;
 
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.equipment.EquipmentLender;
 import com.primovision.lutransport.model.equipment.VehicleLoan;
@@ -149,17 +146,26 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 						.setFirstResult(criteria.getPage() * criteria.getPageSize())
 						.getResultList();
 		
-		populateNoOfPaymentsLeft(vehicleLoanList);
+		populateAdditionalData(vehicleLoanList);
 		
 		return vehicleLoanList;
 	}
 	
-	private void populateNoOfPaymentsLeft(List<VehicleLoan> vehicleLoanList) {
+	private void populateAdditionalData(List<VehicleLoan> vehicleLoanList) {
 		for (VehicleLoan aVehicleLoan : vehicleLoanList) {
-			int noOfPaymentsLeft = calculateNoOfPaymentsLeft(aVehicleLoan.getNoOfPayments(), 
-					aVehicleLoan.getEndDate(), aVehicleLoan.getPaymentDueDom());
-			aVehicleLoan.setPaymentsLeft(noOfPaymentsLeft);
+			populateAdditionalData(aVehicleLoan);
 		}
+	}
+	
+	private void populateAdditionalData(VehicleLoan aVehicleLoan) {
+		aVehicleLoan.setLenderName(aVehicleLoan.getLender().getName());
+		populateNoOfPaymentsLeft(aVehicleLoan);
+	}
+	
+	private void populateNoOfPaymentsLeft(VehicleLoan aVehicleLoan) {
+		int noOfPaymentsLeft = PaymentUtil.calculateNoOfPaymentsLeft(aVehicleLoan.getNoOfPayments(), 
+					aVehicleLoan.getEndDate(), aVehicleLoan.getPaymentDueDom());
+		aVehicleLoan.setPaymentsLeft(noOfPaymentsLeft);
 	}
 
 	@Override
@@ -194,8 +200,11 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		if (entity.getVehicle() == null) {
 			bindingResult.rejectValue("vehicle", "error.select.option", null, null);
 		}
-		if (entity.getLender() == null) {
+		/*if (entity.getLender() == null) {
 			bindingResult.rejectValue("lender", "error.select.option", null, null);
+		}*/
+		if (StringUtils.isEmpty(entity.getLenderName())) {
+			bindingResult.rejectValue("lenderName", "NotNull.java.lang.String", null, null);
 		}
 		if (entity.getPaymentAmount() == null) {
 			bindingResult.rejectValue("paymentAmount", "NotNull.java.lang.Float", null, null);
@@ -228,6 +237,9 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
       }
 		
 		beforeSave(request, entity, model);
+		
+		populateLender(entity);
+		
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
@@ -245,6 +257,47 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		return getUrlContext() + "/form";
 	}
 	
+	private void populateLender(VehicleLoan entity) {
+		String query = "select obj from EquipmentLender obj "
+						+ " where obj.name='" + entity.getLenderName() + "' order by id desc";
+		List<EquipmentLender> lenderList = genericDAO.executeSimpleQuery(query);
+		
+		EquipmentLender lender = null;
+		if (lenderList.isEmpty()) {
+			lender = addLender(entity);
+		} else {
+			lender = lenderList.get(0);
+		}
+		
+		entity.setLender(lender);
+	}
+	
+	private EquipmentLender addLender(VehicleLoan entity) {
+		EquipmentLender lender = new EquipmentLender();
+		lender.setName(entity.getLenderName());
+		lender.setAddress1("address1");
+		lender.setCity("Chicago");
+		
+		State state = retrieveState("IL");
+		lender.setState(state);
+		
+		lender.setZipcode("60632");
+		
+		lender.setCreatedAt(entity.getCreatedAt());
+		lender.setCreatedBy(entity.getCreatedBy());
+		
+		genericDAO.save(lender);
+		
+		return lender;
+	}
+	
+	private State retrieveState(String code) {
+		String query = "select obj from State obj "
+				+ " where obj.code='" + code + "'";
+		List<State> stateList = genericDAO.executeSimpleQuery(query);
+		return stateList.get(0);
+	}
+	
 	@Override
 	public String processAjaxRequest(HttpServletRequest request,
 			String action, Model model) {
@@ -255,8 +308,8 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 			String endDate = request.getParameter("endDate");
 			String paymentDueDom = request.getParameter("paymentDueDom");
 			
-			int noOfPayments = calculateNoOfPayments(startDate, endDate);
-			int noOfPaymentsLeft = calculateNoOfPaymentsLeft(noOfPayments, endDate, paymentDueDom);
+			int noOfPayments = PaymentUtil.calculateNoOfPayments(startDate, endDate);
+			int noOfPaymentsLeft = PaymentUtil.calculateNoOfPaymentsLeft(noOfPayments, endDate, paymentDueDom);
 			
 			Integer paymentsArr[] = new Integer[2];
 			paymentsArr[0] = noOfPayments;
@@ -274,6 +327,9 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 	@Override
 	public String edit2(ModelMap model, HttpServletRequest request) {
 		setupCreate(model, request);
+		
+		VehicleLoan entity = (VehicleLoan) model.get("modelObject");
+		populateAdditionalData(entity);
 		
 		return urlContext + "/form";
 	}
@@ -310,58 +366,6 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 				}
 			}
 		}
-	}
-	
-	private int calculateNoOfPayments(String startDate, String endDate) {
-		Date startDateDt = null;
-		Date endDateDt = null;
-		try {
-		   startDateDt = dateFormat.parse(startDate);
-			endDateDt = dateFormat.parse(endDate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		
-		Calendar startCal = new GregorianCalendar();
-		startCal.setTime(startDateDt);
-		Calendar endCal = new GregorianCalendar();
-		endCal.setTime(endDateDt);
-		
-		DateTime startDateTime = new DateTime().
-				withDate(startCal.get(Calendar.YEAR), startCal.get(Calendar.MONTH)+1, 1);
-		DateTime endDateTime = new DateTime().
-				withDate(endCal.get(Calendar.YEAR), endCal.get(Calendar.MONTH)+1, 1);
-		
-		Months months = Months.monthsBetween(startDateTime, endDateTime);
-		return months.getMonths() + 1;
-	}
-	
-	private int calculateNoOfPaymentsLeft(int noOfPayments, String endDate, String paymentDueDomStr) {
-		Date endDateDt = null;
-		try {
-			endDateDt = dateFormat.parse(endDate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		
-		return calculateNoOfPaymentsLeft(noOfPayments, endDateDt, paymentDueDomStr);
-	}
-	
-	private int calculateNoOfPaymentsLeft(int noOfPayments, Date endDate, String paymentDueDomStr) {
-		Date today = new Date();
-		String todayStr = dateFormat.format(today);
-		String endDateStr = dateFormat.format(endDate);
-		int noOfMonthsFromToday = calculateNoOfPayments(todayStr, endDateStr);
-		
-		int paymentDueDom = Integer.parseInt(paymentDueDomStr.replaceAll("[^0-9]", StringUtils.EMPTY));
-		
-		Calendar todayCal = new GregorianCalendar();
-		todayCal.setTime(today);
-		if (todayCal.get(Calendar.DATE) > paymentDueDom) {
-			noOfMonthsFromToday--;
-		}
-		
-		return noOfMonthsFromToday;
 	}
 	
 	private List<String> buildPaymentDueDates() {

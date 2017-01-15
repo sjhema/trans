@@ -40,6 +40,18 @@
 				</select>
 			</td>
 		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Sold Date From"/></td>
+			<td align="${left}">
+				<input id="datepicker" name="soldDateFrom" style="min-width:148px; max-width:148px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.loanStartDate}" /> 
+			</td>
+			<td align="${left}" class="first"><primo:label code="Sold Date To"/></td>
+			<td align="${left}">
+				<input id="datepicker1" name="soldDateTo" style="min-width:148px; max-width:148px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.loanEndDate}" /> 
+			</td>
+		</tr>
 	 	<tr>
 			<td align="${left}"></td>
 			<td align="${left}">
@@ -58,16 +70,14 @@
 		pagingLink="search.do" multipleDelete="false" searcheable="false"
 		exportPdf="true" exportCsv="true" exportXls="true">
 		<primo:textcolumn headerText="Unit" dataField="vehicle.unitNum" width="35px"/>
+		<primo:textcolumn headerText="Company" dataField="vehicle.owner.name" />
+		<primo:textcolumn headerText="VIN" dataField="vehicle.vinNumber" width="200px"/>
+		<primo:textcolumn headerText="Year" dataField="vehicle.year" width="35px"/>
+		<primo:textcolumn headerText="Make" dataField="vehicle.make" width="35px"/>
+		<primo:textcolumn headerText="Model" dataField="vehicle.model" width="200px"/>
+		<primo:textcolumn headerText="Buyer" dataField="buyer.name" />
 		<primo:datecolumn headerText="Sold Date" dataField="saleDate" dataFormat="MM-dd-yyyy" width="95px"/>
 		<primo:textcolumn headerText="Sale Price" dataField="salePrice" width="75px"/>
-		<primo:textcolumn headerText="Buyer" dataField="buyer.name" />
-        <primo:textcolumn headerText="Address1" dataField="buyer.address1" />
-        <primo:textcolumn headerText="Address2" dataField="buyer.address2"/>
-        <primo:textcolumn headerText="City" dataField="buyer.city"/>
-        <primo:textcolumn headerText="State" dataField="buyer.state.name" width="75px"/>
-        <primo:textcolumn headerText="Zipcode" dataField="buyer.zipcode" width="75px"/>
-        <primo:textcolumn headerText="Phone" dataField="buyer.phone" width="75px"/>
-        <primo:textcolumn headerText="Fax" dataField="buyer.fax" width="75px"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

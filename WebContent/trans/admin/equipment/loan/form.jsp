@@ -72,13 +72,6 @@ function populateVehicleDetails() {
 			<td colspan="6"><b><primo:label code="Vehicle Loan" /></b></td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Loan No" /></td>
-			<td align="${left}">
-				<form:input path="loanNo" style="min-width:162px; max-width:162px" cssClass="flat"/> 
-				<br> <form:errors path="loanNo" cssClass="errorMessage" />
-			</td>
-		</tr>
-		<tr>
 			<td class="form-left"><primo:label code="Vehicle" /><span class="errorMessage">*</span></td>
 			<td>
 				<form:select cssClass="flat" path="vehicle" id="vehicle" style="min-width:166px; max-width:166px"
@@ -119,11 +112,20 @@ function populateVehicleDetails() {
 				<primo:label code="Lender" /><span class="errorMessage">*</span>
 			</td>
 			<td>
+				<!--
 				<form:select cssClass="flat" path="lender" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${lenders}" itemValue="id" itemLabel="name" />
 				</form:select> 
 				<br><form:errors path="lender" cssClass="errorMessage" />
+				-->
+				<form:input path="lenderName" style="min-width:210px; max-width:210px" cssClass="flat" />
+				<br><form:errors path="lenderName" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Loan No" /></td>
+			<td align="${left}">
+				<form:input path="loanNo" style="min-width:162px; max-width:162px" cssClass="flat"/> 
+				<br> <form:errors path="loanNo" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
@@ -147,12 +149,6 @@ function populateVehicleDetails() {
 					maxlength="5" onkeypress="return onlyNumbers(event, true)"/>
 				<br> <form:errors path="interestRate" cssClass="errorMessage" />
 			</td>
-			<td class="form-left"><primo:label code="Payment Amount" /><span class="errorMessage">*</span></td>
-			<td align="${left}">
-				<form:input path="paymentAmount" style="min-width:162px; max-width:162px" cssClass="flat"
-					maxlength="8" onkeypress="return onlyNumbers(event, true)" />
-				<br> <form:errors path="paymentAmount" cssClass="errorMessage" />
-			</td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Payment Due Date" /><span class="errorMessage">*</span></td>
@@ -163,6 +159,14 @@ function populateVehicleDetails() {
 				</form:select> of the month
 				<br><form:errors path="paymentDueDom" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Payment Amount" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:input path="paymentAmount" style="min-width:162px; max-width:162px" cssClass="flat"
+					maxlength="8" onkeypress="return onlyNumbers(event, true)" />
+				<br> <form:errors path="paymentAmount" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="No Of Payments" /></td>
 			<td align="${left}">
 				<form:input path="noOfPayments" style="background-color: #eee; min-width:162px; max-width:162px" cssClass="flat" 
@@ -176,9 +180,9 @@ function populateVehicleDetails() {
 			</td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Description" /></td>
+			<td class="form-left"><primo:label code="Notes" /></td>
 			<td align="${left}" colspan="4">
-				<form:input path="description" style="min-width:500px; max-width:500px" cssClass="flat"  />
+				<form:input path="description" style="min-width:600px; max-width:600px" cssClass="flat"  />
 				<br> <form:errors path="description" cssClass="errorMessage" />   	
 			</td>
 		<tr>
