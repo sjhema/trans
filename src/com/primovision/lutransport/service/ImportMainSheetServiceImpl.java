@@ -5087,6 +5087,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			boolean foundExpectedColumn = false;
 			for (int i = startCellNumber; i < titleRow.getLastCellNum(); i++) {
 				String columnHeader = (String) getCellValue(((HSSFCell) titleRow.getCell(i)));
+				if (StringUtils.isEmpty(columnHeader.trim()) && StringUtils.isEmpty(entry.getValue().trim())) {
+					continue;
+				}
+				
 				if (columnHeader.trim().equalsIgnoreCase(entry.getValue().trim())) {
 					// match found
 					foundExpectedColumn = true;
