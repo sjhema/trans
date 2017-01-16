@@ -567,8 +567,10 @@ public class PayRollReport extends BaseController{
         */
         
         
-        
-		 StringBuilder driverpayfreezquery = new StringBuilder("select  obj from DriverPayFreezWrapper obj where 1=1 and obj.payRollBatch='"+payrollDate+"' and obj.billBatchDateFrom>='"+frombatch+"' and obj.billBatchDateTo<='"+tobatch+"'");
+       // 16th Jan 2016 - pay stub multiple fix
+		 //StringBuilder driverpayfreezquery = new StringBuilder("select  obj from DriverPayFreezWrapper obj where 1=1 and obj.payRollBatch='"+payrollDate+"' and obj.billBatchDateFrom>='
+		 //"+frombatch+"' and obj.billBatchDateTo<='"+tobatch+"'");
+		 StringBuilder driverpayfreezquery = new StringBuilder("select  obj from DriverPayFreezWrapper obj where 1=1 and obj.payRollBatch='"+payrollDate+"' and obj.billBatchDateFrom='"+frombatch+"' and obj.billBatchDateTo='"+tobatch+"'");
 		 if(!StringUtils.isEmpty(company)){
 			 driverpayfreezquery.append(" and obj.company="+company);
 		 }
