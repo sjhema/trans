@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="equipmentReport" pageWidth="1750" pageHeight="600" orientation="Landscape" columnWidth="1710" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="370"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="lender" class="java.lang.String"/>
 	<parameter name="titleOwner" class="java.lang.String"/>
@@ -304,7 +304,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Due Dt]]></text>
+				<text><![CDATA[Due Date]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="793" y="25" width="81" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -318,7 +318,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Loan Start Dt]]></text>
+				<text><![CDATA[Loan Start Date]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="874" y="25" width="63" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -332,7 +332,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Loan End Dt]]></text>
+				<text><![CDATA[Loan End Date]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="1058" y="25" width="56" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -388,7 +388,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Sold Dt]]></text>
+				<text><![CDATA[Sold Date]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="1546" y="25" width="83" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -416,7 +416,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Int. Rate]]></text>
+				<text><![CDATA[Interest Rate%]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="998" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
@@ -725,7 +725,7 @@
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement/>
+				<textElement textAlignment="Center"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{unit}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">

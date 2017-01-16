@@ -106,10 +106,10 @@
         <primo:textcolumn headerText="Lender" dataField="lender.name" />
         <primo:textcolumn headerText="Loan No" dataField="loanNo"/>
         <primo:textcolumn headerText="Payment Amt" dataField="paymentAmount" width="75px"/>
-        <primo:textcolumn headerText="Due Dt" dataField="paymentDueDom" width="75px"/>
+        <primo:textcolumn headerText="Due Date" dataField="paymentDueDom" width="75px"/>
         <primo:datecolumn headerText="Start Date" dataField="startDate" dataFormat="MM-dd-yyyy" width="95px"/>
         <primo:datecolumn headerText="End Date" dataField="endDate" dataFormat="MM-dd-yyyy" width="95px"/>
-       	<primo:textcolumn headerText="Int. Rate" dataField="interestRate" width="75px" dataFormat="##.00'%'"/>
+       	<primo:textcolumn headerText="Interest Rate" dataField="interestRate" width="75px" dataFormat="##.00'%'"/>
         <primo:textcolumn headerText="No Of Payments" dataField="noOfPayments" width="75px"/>
         <primo:textcolumn headerText="Payments Left" dataField="paymentsLeft" width="75px"/>
         <primo:textcolumn headerText="Notes" dataField="description" width="400px"/>
