@@ -492,7 +492,9 @@ public class HrReportServiceImpl implements HrReportService {
 							 
 					    (ticketObj.getUnloadDate().getTime() >= type.getDateFrom().getTime() && ticketObj.getUnloadDate().getTime() <= type.getDateTo().getTime())){
 						 
-						 payrate = payrate * 2.0;
+						 // 18th Jan 2017 - Double holiday pay fix
+						 //payrate = payrate * 2.0;
+						 
 						 String holidayKeyString = fs.get(0).getId()+"-"+payrate;
 						 holidayRateList.add(holidayKeyString);
 						 holidayRateMap.put(holidayKeyString,holidayKeyString);
@@ -630,8 +632,12 @@ public class HrReportServiceImpl implements HrReportService {
 					
 
 					 
-					DriverPay pay=new DriverPay();					
-					pay.setNoOfLoad(count);
+					DriverPay pay=new DriverPay();
+					
+					// 18th Jan 2017 - Double holiday pay fix
+					//pay.setNoOfLoad(count);
+					pay.setNoOfLoad(0);
+					
 					pay.setOrigin(ticket.getOrigin().getName());
 					pay.setDestination(ticket.getDestination().getName());
 					if(ticket.getDriver().getCompany()!=null)
@@ -7690,11 +7696,13 @@ public class HrReportServiceImpl implements HrReportService {
 			weeklyquery.append(" and obj.terminal="+terminalid);
 		}
 		
-		
-		
 		List<DriverPay> driverPays=genericDAO.executeSimpleQuery(driverquery.toString());
 		List<WeeklyPayDetail> payDetails=genericDAO.executeSimpleQuery(weeklyquery.toString());
 		List<HourlyPayrollInvoiceDetails> hourlyPayrollInvoiceDetails=genericDAO.executeSimpleQuery(timequery.toString());
+		
+		// 17th Jan 2016 - Split paychex
+		determineDriverMultipleBatch(driverPays);
+		
 		List<PayChexDetail> summary= new ArrayList<PayChexDetail>();
 		Map criterias=new HashMap();
 		for(WeeklyPayDetail payDetail:payDetails){
@@ -7964,6 +7972,12 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());				
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
+				
+				// 17th Jan 2016 - Split paychex
+				if (StringUtils.isNotEmpty(driverPay.getForceNewPaychexSeqNum())) {
+					detail.setSeqNo(Integer.parseInt(driverPay.getForceNewPaychexSeqNum()));
+				}
+				
 				if(driverPay.getTransportationAmount()!=null){
 					if(driverPay.getProbationDeductionAmount()!=null)
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount()-driverPay.getProbationDeductionAmount());
@@ -8008,6 +8022,12 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
+				
+				// 17th Jan 2016 - Split paychex
+				if (StringUtils.isNotEmpty(driverPay.getForceNewPaychexSeqNum())) {
+					detail.setSeqNo(Integer.parseInt(driverPay.getForceNewPaychexSeqNum()));
+				}
+				
 				if(driverPay.getTransportationAmount()!=null){
 					if(driverPay.getProbationDeductionAmount()!=null)
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount()-driverPay.getProbationDeductionAmount());
@@ -8098,6 +8118,12 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
+				
+				// 17th Jan 2016 - Split paychex
+				if (StringUtils.isNotEmpty(driverPay.getForceNewPaychexSeqNum())) {
+					detail.setSeqNo(Integer.parseInt(driverPay.getForceNewPaychexSeqNum()));
+				}
+				
 				if(driverPay.getTransportationAmount()!=null){
 					if(driverPay.getProbationDeductionAmount()!=null)
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount()-driverPay.getProbationDeductionAmount());
@@ -8230,6 +8256,12 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setPersonalSickAmount(driverPay.getSickPersonalAmount());
 				detail.setMiscAmount(driverPay.getMiscAmount()-diffMiscAmt);
 				detail.setReimburseAmount(driverPay.getReimburseAmount());
+				
+				// 17th Jan 2016 - Split paychex
+				if (StringUtils.isNotEmpty(driverPay.getForceNewPaychexSeqNum())) {
+					detail.setSeqNo(Integer.parseInt(driverPay.getForceNewPaychexSeqNum()));
+				}
+				
 				if(driverPay.getTransportationAmount()!=null){
 					if(driverPay.getProbationDeductionAmount()!=null)
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount()-driverPay.getProbationDeductionAmount());
@@ -8569,6 +8601,27 @@ public class HrReportServiceImpl implements HrReportService {
 		chain.addComparator(comparator2);
 		Collections.sort(summary, chain); 
 		return summary;
+	}
+	
+	// 17th Jan 2016 - Split paychex
+	private void determineDriverMultipleBatch(List<DriverPay> driverPayList) {
+		if (driverPayList == null || driverPayList.isEmpty()) {
+			return;
+		}
+		
+		Map<String, DriverPay> groupedDriverPay = new HashMap<String, DriverPay>();
+		for (DriverPay aDriverPay : driverPayList) {
+			DriverPay existingDriverPay = groupedDriverPay.get(aDriverPay.getDrivername());
+			if (existingDriverPay == null) {
+				groupedDriverPay.put(aDriverPay.getDrivername(), aDriverPay);
+			} else {
+				if (aDriverPay.getBillBatchDateTo().before(existingDriverPay.getBillBatchDateTo())) {
+					aDriverPay.setForceNewPaychexSeqNum("8");
+				} else {
+					existingDriverPay.setForceNewPaychexSeqNum("8");
+				}
+			}
+		}
 	}
 
 	@Override

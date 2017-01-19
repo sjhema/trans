@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Location;
 
@@ -39,6 +41,10 @@ public class DriverPay extends AbstractBaseModel{
 	
 	@Column(name="no_of_load")
 	int noOfLoad=0;
+	
+	// 17th Jan 2016 - Split paychex
+	@Transient
+	String forceNewPaychexSeqNum = StringUtils.EMPTY;
 	
 	@Transient
 	Double rate = 0.0;
@@ -473,6 +479,16 @@ public class DriverPay extends AbstractBaseModel{
 	public void setTotalAmountSpc(Double totalAmountSpc) {
 		this.totalAmountSpc = totalAmountSpc;
 	}
-	
+
+	// 17th Jan 2016 - Split paychex
+	@Transient
+	public String getForceNewPaychexSeqNum() {
+		return forceNewPaychexSeqNum;
+	}
+
+	@Transient
+	public void setForceNewPaychexSeqNum(String forceNewPaychexSeqNum) {
+		this.forceNewPaychexSeqNum = forceNewPaychexSeqNum;
+	}
 }
 
