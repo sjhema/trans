@@ -7079,7 +7079,8 @@ public class HrReportServiceImpl implements HrReportService {
 			String queryToFindRecInDPD = "SELECT w From WeeklyPayDetail w WHERE driver='"+employee2.getFullName()+"'AND w.company ='"+company+"' AND w.checkDate ='"+checkdate+"' AND w.payRollBatch='"+payrollDate+"'";
 			List<WeeklyPayDetail> wpdList = genericDAO.executeSimpleQuery(queryToFindRecInDPD);
 			
-			if((wpdList.size() == 0 && StringUtils.equalsIgnoreCase(from, "payroll")) || (wpdList.size() > 0 && StringUtils.equalsIgnoreCase(from, "payrollreport"))){
+			if((wpdList.size() == 0 && StringUtils.equalsIgnoreCase(from, "payroll")) 
+					|| (wpdList.size() > 0 && StringUtils.equalsIgnoreCase(from, "payrollreport"))){
 				
 				double sickParsonalAmount=0.0;
 				double paidSickPersonalAmount=0.0;
@@ -7212,7 +7213,28 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setTerminal(employee2.getTerminal());
 				detail.setPayRollBatch(paydate);
 				summary.add(detail);
-			}		
+			}
+			// 19th Jan 2017 - Salary payroll multiple run
+			else if((wpdList.size() > 0 && StringUtils.equalsIgnoreCase(from, "payroll"))) {
+				WeeklyPayDetail detail1 = processMultipleSalaryPayrollRun(employee2, payrollDate, 
+						 paydate, checkDate);
+				
+				//check 
+				if (detail1.getAmount() != null && detail1.getAmount() != 0.0) {
+					sumTotal+=detail1.getAmount();
+				}
+				
+				//check 
+				//sumAmount+=totalamount;
+				if (detail1.getTotalAmount() != null && detail1.getTotalAmount() != 0.0) {
+					sumAmount+=detail1.getTotalAmount();
+				}
+				
+				if ((detail1.getTotalAmount() != null && detail1.getTotalAmount() != 0.0) 
+						|| (detail1.getReimburseAmount() != null && detail1.getReimburseAmount() != 0.0)) {
+					summary.add(detail1);
+				}
+			}	
 		}
 		wrapper.setSumAmount(sumAmount);
 		wrapper.setPayRollBatch((String)criteria.getSearchMap().get("payrollDate"));
@@ -7228,6 +7250,150 @@ public class HrReportServiceImpl implements HrReportService {
 			wrapper.setTerminal(terminalid.getName());
 		}
 		return wrapper;
+	}
+	
+	// 19th Jan 2017 - Salary payroll multiple run
+	private WeeklyPayDetail processMultipleSalaryPayrollRun(Driver employee2, String payrollDate, Date paydate,
+			Date checkDate) {
+		double sickParsonalAmount=0.0;
+		double paidSickPersonalAmount=0.0;
+		double paidVacationAmount=0.0;
+		double vacationAmount=0.0;
+		double bonusAmount=0.0;
+		double holidayAmount=0.0;
+		Double miscamt=0.0;
+		Double reimburseamt=0.0;
+		// Bereavement change - salary
+		double bereavementAmount=0.0;
+		
+		WeeklyPayDetail detail=new WeeklyPayDetail();
+		detail.setCheckDate(checkDate);
+		detail.setDriver(employee2.getFullName());
+		detail.setCompanyname(employee2.getCompany().getName());
+		detail.setCategory(employee2.getCatagory().getName());
+		detail.setTerminalName(employee2.getTerminal().getName());
+		
+		//check
+		//detail.setAmount(weeklysalary);
+		detail.setAmount(0.0);
+		
+		StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.approvestatus=1 "
+				+ " and obj.driver.fullName='"+employee2.getFullName()+"' and obj.category="+employee2.getCatagory().getId());
+		if(!StringUtils.isEmpty(payrollDate)){
+			ptodquery.append(" and obj.batchdate='"+payrollDate+"'");
+		}
+		ptodquery.append(" and obj.payRollStatus=1");
+
+		List<Ptodapplication> ptodapplications= genericDAO.executeSimpleQuery(ptodquery.toString());
+		for(Ptodapplication ptodapplication:ptodapplications){
+			if(ptodapplication.getLeavetype().getId()==1){
+				sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+				paidSickPersonalAmount = paidSickPersonalAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
+			}
+			// Jury duty fix - salary - 3rd Nov 2016
+			if(ptodapplication.getLeavetype().getId()==9){
+				sickParsonalAmount=sickParsonalAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+				paidSickPersonalAmount = paidSickPersonalAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
+			}
+			if(ptodapplication.getLeavetype().getId()==4){
+				vacationAmount=vacationAmount+(ptodapplication.getAmountpaid())+(ptodapplication.getHourlyamountpaid());
+				paidVacationAmount = paidVacationAmount + (ptodapplication.getDayspaid()*ptodapplication.getPtodrates())+(ptodapplication.getHourspaid()*ptodapplication.getPtodhourlyrate());
+			}
+			
+			// Bereavement change - salary
+			if(ptodapplication.getLeavetype().getId() == 8) {
+				bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
+			}
+		}
+		detail.setVacationAmount(vacationAmount);
+		detail.setSickPersonalAmount(sickParsonalAmount);
+		
+		// Bereavement change - salary
+		detail.setBereavementAmount(bereavementAmount);
+
+		// Bereavement change - salary
+		// Check 
+		//detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount+bereavementAmount));
+		detail.setAmount((paidSickPersonalAmount+paidVacationAmount+bereavementAmount));
+
+		StringBuffer bonusquery=new StringBuffer("select obj from EmployeeBonus obj where obj.driver.fullName='"+employee2.getFullName()
+				+"' and obj.category="+employee2.getCatagory().getId());
+		if(!StringUtils.isEmpty(payrollDate)){
+			bonusquery.append(" and obj.batchFrom='"+payrollDate+"'");
+		}
+		bonusquery.append(" and obj.payRollStatus=1");
+
+		List<EmployeeBonus> bonuses=genericDAO.executeSimpleQuery(bonusquery.toString());
+		for(EmployeeBonus bonus:bonuses){
+			for(EmpBonusTypesList list:bonus.getBonusTypesLists()){
+				bonusAmount+=list.getBonusamount();
+			}
+		}
+		detail.setBonusAmount(bonusAmount);
+
+		StringBuffer miscamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.driver.fullName='"
+					+employee2.getFullName()+"' and obj.miscNotes!='Reimbursement'");
+		if(!StringUtils.isEmpty(payrollDate)){
+			miscamountquery.append(" and obj.batchFrom='"+payrollDate+"'");
+		}
+		miscamountquery.append(" and obj.payRollStatus=1");
+
+		List<MiscellaneousAmount> miscamounts=genericDAO.executeSimpleQuery(miscamountquery.toString());
+		int count=0;
+
+		for(MiscellaneousAmount miscamnt:miscamounts){
+			miscamt+=miscamnt.getMisamount();
+		}
+
+		detail.setMiscAmount(miscamt);
+
+		StringBuffer reimburseamountquery=new StringBuffer("select obj from MiscellaneousAmount obj where obj.driver.fullName='"
+					+employee2.getFullName()+"' and obj.miscNotes ='Reimbursement'");
+		if(!StringUtils.isEmpty(payrollDate)){
+			reimburseamountquery.append(" and obj.batchFrom='"+payrollDate+"'");
+		}
+		reimburseamountquery.append(" and obj.payRollStatus=1");
+
+		List<MiscellaneousAmount> reimburseamounts=genericDAO.executeSimpleQuery(reimburseamountquery.toString());
+		int reimbursecount=0;
+		for(MiscellaneousAmount reimburseamount:reimburseamounts){
+			reimburseamt+=reimburseamount.getMisamount();
+		}
+
+		detail.setReimburseAmount(reimburseamt);
+
+		StringBuffer holidayquery=new StringBuffer("select obj from HolidayType obj where obj.paid=1 and obj.company="+employee2.getCompany().getId()
+						+" and obj.terminal="+employee2.getTerminal().getId()+" and obj.catagory="+employee2.getCatagory().getId()+" and obj.leaveType=3");
+		if(!StringUtils.isEmpty(payrollDate)){
+			holidayquery.append(" and obj.batchdate='"+payrollDate+"'");
+		}
+		holidayquery.append(" and obj.payRollStatus=1");
+
+		List<HolidayType> holidayTypes=genericDAO.executeSimpleQuery(holidayquery.toString());
+		for(HolidayType type:holidayTypes){
+			holidayAmount=holidayAmount+type.getAmount();
+		}
+		detail.setHolidayAmount(holidayAmount);
+		
+		//check 
+		//sumTotal+=detail.getAmount();
+		
+		// Bereavement change - salary - Should bereavement be added below?
+		double totalamount=detail.getAmount()+detail.getSickPersonalAmount()+detail.getMiscAmount()+detail.getBonusAmount()+detail.getHolidayAmount();
+		totalamount=MathUtil.roundUp(totalamount, 2);
+		
+		//check 
+		//sumAmount+=totalamount;
+		
+		detail.setTotalAmount(totalamount);
+		detail.setCompany(employee2.getCompany());
+		detail.setTerminal(employee2.getTerminal());
+		detail.setPayRollBatch(paydate);
+		
+		// check 
+		//summary.add(detail);
+		
+		return detail;
 	}
 	
 	// Salary override req - 29th May 2016
