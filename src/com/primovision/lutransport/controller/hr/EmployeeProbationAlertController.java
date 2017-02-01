@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -481,6 +482,7 @@ public class EmployeeProbationAlertController extends BaseController{
 		SimpleDateFormat databasedf = new SimpleDateFormat("yyyy-MM-dd");
 		Date curr_date=new Date();		
 		String query="select obj from Driver obj where obj.status=1 and obj.nextAnniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
+		
 		List<Driver> employees=genericDAO.executeSimpleQuery(query);		
 		if(employees!=null && employees.size()>0){			
 			for(Driver empObj:employees){	
@@ -834,11 +836,20 @@ public class EmployeeProbationAlertController extends BaseController{
 			
 			now.set(Calendar.YEAR,nextyear);
 			now.set(Calendar.MONTH, month);
-			now.set(Calendar.DAY_OF_MONTH, day);			
-			empObj.setNextAnniversaryDate(now.getTime());			
+			now.set(Calendar.DAY_OF_MONTH, day);
+			
+			// Update vacation on anniversary fix - 1st Feb 2017
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			empObj.setNextAnniversaryDate(now.getTime());
+			
 			genericDAO.saveOrUpdate(empObj);
 		}
-	}	
+	}
+	
 }
 	
 

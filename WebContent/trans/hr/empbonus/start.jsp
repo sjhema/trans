@@ -12,11 +12,11 @@ function searchReport() {
 	
 	document.forms[0].submit();
 }
-/* function getComTerm(){
+function getComTerm(){
 	var employeselected=document.getElementById("empId");
 	var employee=employeselected.options[employeselected.selectedIndex].value;
   	jQuery.ajax({
-		url:'${ctx}/hr/empbonus/ajax.do?action=findDCompany&employee='+employee, 
+		url:'${ctx}/hr/empbonus/ajax.do?action=findDCompany&driver='+employee, 
 		success: function( data ) {
 			var listData=jQuery.parseJSON(data);
 			var options;
@@ -33,7 +33,7 @@ function searchReport() {
 		}); 
   	
   	jQuery.ajax({
-		url:'${ctx}/hr/empbonus/ajax.do?action=findDTerminal&employee='+employee, 
+		url:'${ctx}/hr/empbonus/ajax.do?action=findDTerminal&driver='+employee, 
 		success: function( data ) {
 			var listData=jQuery.parseJSON(data);
 			var options;
@@ -48,7 +48,7 @@ function searchReport() {
 		}
 			
 		}); 
-} */
+} 
 </script>
 <h3>
 	<primo:label code="Employee Bonus" />

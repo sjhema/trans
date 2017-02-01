@@ -1768,11 +1768,17 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	@Override
 	protected String processAjaxRequest(HttpServletRequest request,String action, Model model) 
 	{
+		 String driverQuery = "select obj from Driver obj where obj.status=1 and obj.fullName='";
 		
 		if("findDCompany".equalsIgnoreCase(action)){
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> company=new ArrayList<Location>();
- 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				
+ 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				driverQuery += (request.getParameter("driver") + "'");
+ 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				Driver driver = driverList.get(0);
+ 				
  				company.add(driver.getCompany());
  				Gson gson = new Gson();
  				return gson.toJson(company);
@@ -1790,7 +1796,12 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  		if("findDTerminal".equalsIgnoreCase(action)){
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> terminal=new ArrayList<Location>();
- 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				
+ 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				driverQuery += (request.getParameter("driver") + "'");
+ 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				Driver driver = driverList.get(0);
+ 				
  				terminal.add(driver.getTerminal());
  				Gson gson = new Gson();
  				return gson.toJson(terminal);
