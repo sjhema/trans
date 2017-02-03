@@ -813,6 +813,30 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 			entity.setSequenceNum4(0);
 		}
 		
+		if(entity.getSequenceAmt5()==null){
+			entity.setSequenceAmt5(0.0);
+		}
+		if(entity.getSequenceAmt6()==null){
+			entity.setSequenceAmt6(0.0);
+		}
+		if(entity.getSequenceAmt7()==null){
+			entity.setSequenceAmt7(0.0);
+		}
+		if(entity.getSequenceAmt8()==null){
+			entity.setSequenceAmt8(0.0);
+		}
+		if(entity.getSequenceNum5()==null){
+			entity.setSequenceNum5(0);
+		}
+		if(entity.getSequenceNum6()==null){
+			entity.setSequenceNum6(0);
+		}
+		if(entity.getSequenceNum7()==null){
+			entity.setSequenceNum7(0);
+		}
+		if(entity.getSequenceNum8()==null){
+			entity.setSequenceNum8(0);
+		}
 		
 		Integer tempdayspaid=entity.getTempdayspaid();
 		Double temphourspaid=entity.getTemphourspaid();	

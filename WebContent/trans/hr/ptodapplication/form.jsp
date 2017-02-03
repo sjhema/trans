@@ -1527,6 +1527,16 @@ function processForm() {
 			 	
 			 	<form:input path="sequenceNum4"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
 			 	
+			 	
+			 	<form:input path="sequenceNum5"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	<form:input path="sequenceNum6"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	<form:input path="sequenceNum7"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	
+			 	<form:input path="sequenceNum8"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
 	  </td>	   
 	   
 	  </tr> 
@@ -1543,6 +1553,15 @@ function processForm() {
 			 	
 			 	
 			 	<form:input path="sequenceAmt4"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	<form:input path="sequenceAmt5"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	<form:input path="sequenceAmt6"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	<form:input path="sequenceAmt7"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
+			 	
+			 	
+			 	<form:input path="sequenceAmt8"  cssClass="flat" style="min-width:75px; max-width:75px" maxlength="20" />
 			 	
 	  </td>	 
 	  </tr>

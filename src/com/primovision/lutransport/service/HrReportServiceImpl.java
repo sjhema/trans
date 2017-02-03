@@ -7773,8 +7773,17 @@ public class HrReportServiceImpl implements HrReportService {
 			sequenceAmount.add(ptodapplication.getSequenceAmt2());
 			sequenceAmount.add(ptodapplication.getSequenceAmt3());
 			sequenceAmount.add(ptodapplication.getSequenceAmt4());
-				
-			for(int i = 0; i < 4; i++) {
+			
+			sequenceNumber.add(ptodapplication.getSequenceNum5());
+			sequenceNumber.add(ptodapplication.getSequenceNum6());
+			sequenceNumber.add(ptodapplication.getSequenceNum7());
+			sequenceNumber.add(ptodapplication.getSequenceNum8());
+			sequenceAmount.add(ptodapplication.getSequenceAmt5());
+			sequenceAmount.add(ptodapplication.getSequenceAmt6());
+			sequenceAmount.add(ptodapplication.getSequenceAmt7());
+			sequenceAmount.add(ptodapplication.getSequenceAmt8());
+							
+			for(int i = 0; i < 8; i++) {
 				if(sequenceNumber.get(i) != 0 && sequenceAmount.get(i) != 0.0) {	
 					PayChexDetail detail2 = new PayChexDetail();
 					
@@ -7979,7 +7988,16 @@ public class HrReportServiceImpl implements HrReportService {
 						sequenceAmount.add(ptodapplication.getSequenceAmt3());
 						sequenceAmount.add(ptodapplication.getSequenceAmt4());
 						
-						for(int i=0;i<4;i++){
+						sequenceNumber.add(ptodapplication.getSequenceNum5());
+						sequenceNumber.add(ptodapplication.getSequenceNum6());
+						sequenceNumber.add(ptodapplication.getSequenceNum7());
+						sequenceNumber.add(ptodapplication.getSequenceNum8());
+						sequenceAmount.add(ptodapplication.getSequenceAmt5());
+						sequenceAmount.add(ptodapplication.getSequenceAmt6());
+						sequenceAmount.add(ptodapplication.getSequenceAmt7());
+						sequenceAmount.add(ptodapplication.getSequenceAmt8());
+						
+						for(int i=0;i<8;i++){
 							if(sequenceNumber.get(i)!=0 && sequenceAmount.get(i)!=0.0){	
 								noSequenceNumber = false;
 								PayChexDetail detail2 =new PayChexDetail();
@@ -8343,7 +8361,16 @@ public class HrReportServiceImpl implements HrReportService {
 						sequenceAmount.add(ptodapplication.getSequenceAmt3());
 						sequenceAmount.add(ptodapplication.getSequenceAmt4());
 						
-					for(int i=0;i<4;i++){
+						sequenceNumber.add(ptodapplication.getSequenceNum5());
+						sequenceNumber.add(ptodapplication.getSequenceNum6());
+						sequenceNumber.add(ptodapplication.getSequenceNum7());
+						sequenceNumber.add(ptodapplication.getSequenceNum8());
+						sequenceAmount.add(ptodapplication.getSequenceAmt5());
+						sequenceAmount.add(ptodapplication.getSequenceAmt6());
+						sequenceAmount.add(ptodapplication.getSequenceAmt7());
+						sequenceAmount.add(ptodapplication.getSequenceAmt8());
+						
+					for(int i=0;i<8;i++){
 							
 						if(sequenceNumber.get(i)!=0 && sequenceAmount.get(i)!=0.0){	
 							noSequenceNumber = false;
@@ -8481,7 +8508,16 @@ public class HrReportServiceImpl implements HrReportService {
 						sequenceAmount.add(ptodapplication.getSequenceAmt3());
 						sequenceAmount.add(ptodapplication.getSequenceAmt4());
 						
-					for(int i=0;i<4;i++){
+						sequenceNumber.add(ptodapplication.getSequenceNum5());
+						sequenceNumber.add(ptodapplication.getSequenceNum6());
+						sequenceNumber.add(ptodapplication.getSequenceNum7());
+						sequenceNumber.add(ptodapplication.getSequenceNum8());
+						sequenceAmount.add(ptodapplication.getSequenceAmt5());
+						sequenceAmount.add(ptodapplication.getSequenceAmt6());
+						sequenceAmount.add(ptodapplication.getSequenceAmt7());
+						sequenceAmount.add(ptodapplication.getSequenceAmt8());
+						
+					for(int i=0;i<8;i++){
 							
 						if(sequenceNumber.get(i)!=0 && sequenceAmount.get(i)!=0.0){	
 							noSequenceNumber = false;
@@ -8687,7 +8723,16 @@ public class HrReportServiceImpl implements HrReportService {
 								sequenceAmount.add(ptodapplication.getSequenceAmt3());
 								sequenceAmount.add(ptodapplication.getSequenceAmt4());
 								
-								for(int i=0;i<4;i++){
+								sequenceNumber.add(ptodapplication.getSequenceNum5());
+								sequenceNumber.add(ptodapplication.getSequenceNum6());
+								sequenceNumber.add(ptodapplication.getSequenceNum7());
+								sequenceNumber.add(ptodapplication.getSequenceNum8());
+								sequenceAmount.add(ptodapplication.getSequenceAmt5());
+								sequenceAmount.add(ptodapplication.getSequenceAmt6());
+								sequenceAmount.add(ptodapplication.getSequenceAmt7());
+								sequenceAmount.add(ptodapplication.getSequenceAmt8());
+								
+								for(int i=0;i<8;i++){
 									
 									if(sequenceNumber.get(i)!=0 && sequenceAmount.get(i)!=0.0){	
 										noSequenceNumber=false;

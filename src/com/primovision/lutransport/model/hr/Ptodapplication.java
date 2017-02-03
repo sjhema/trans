@@ -204,6 +204,17 @@ public class Ptodapplication extends AbstractBaseModel /*implements ReportModel*
 	@Column(name = "seq_num4")
 	private Integer sequenceNum4=0;
 	
+	@Column(name = "seq_num5")
+	private Integer sequenceNum5=0;
+	
+	@Column(name = "seq_num6")
+	private Integer sequenceNum6=0;
+	
+	@Column(name = "seq_num7")
+	private Integer sequenceNum7=0;
+	
+	@Column(name = "seq_num8")
+	private Integer sequenceNum8=0;
 	
 	@Column(name = "seq_amt1")
 	private Double sequenceAmt1=0.0;
@@ -217,7 +228,17 @@ public class Ptodapplication extends AbstractBaseModel /*implements ReportModel*
 	@Column(name = "seq_amt4")
 	private Double sequenceAmt4=0.0;
 	
+	@Column(name = "seq_amt5")
+	private Double sequenceAmt5=0.0;
 	
+	@Column(name = "seq_amt6")
+	private Double sequenceAmt6=0.0;
+	
+	@Column(name = "seq_amt7")
+	private Double sequenceAmt7=0.0;
+	
+	@Column(name = "seq_amt8")
+	private Double sequenceAmt8=0.0;
 	
 	public Double getPaidouthours() {
 		setTemppaidouthours(paidouthours);
@@ -649,6 +670,70 @@ public Double getSequenceAmt4() {
 
 public void setSequenceAmt4(Double sequenceAmt4) {
 	this.sequenceAmt4 = sequenceAmt4;
+}
+
+public Double getSequenceAmt5() {
+	return sequenceAmt5;
+}
+
+public void setSequenceAmt5(Double sequenceAmt5) {
+	this.sequenceAmt5 = sequenceAmt5;
+}
+
+public Double getSequenceAmt6() {
+	return sequenceAmt6;
+}
+
+public void setSequenceAmt6(Double sequenceAmt6) {
+	this.sequenceAmt6 = sequenceAmt6;
+}
+
+public Double getSequenceAmt7() {
+	return sequenceAmt7;
+}
+
+public void setSequenceAmt7(Double sequenceAmt7) {
+	this.sequenceAmt7 = sequenceAmt7;
+}
+
+public Double getSequenceAmt8() {
+	return sequenceAmt8;
+}
+
+public void setSequenceAmt8(Double sequenceAmt8) {
+	this.sequenceAmt8 = sequenceAmt8;
+}
+
+public Integer getSequenceNum5() {
+	return sequenceNum5;
+}
+
+public void setSequenceNum5(Integer sequenceNum5) {
+	this.sequenceNum5 = sequenceNum5;
+}
+
+public Integer getSequenceNum6() {
+	return sequenceNum6;
+}
+
+public void setSequenceNum6(Integer sequenceNum6) {
+	this.sequenceNum6 = sequenceNum6;
+}
+
+public Integer getSequenceNum7() {
+	return sequenceNum7;
+}
+
+public void setSequenceNum7(Integer sequenceNum7) {
+	this.sequenceNum7 = sequenceNum7;
+}
+
+public Integer getSequenceNum8() {
+	return sequenceNum8;
+}
+
+public void setSequenceNum8(Integer sequenceNum8) {
+	this.sequenceNum8 = sequenceNum8;
 }
 
 }
