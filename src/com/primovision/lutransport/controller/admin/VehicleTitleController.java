@@ -47,7 +47,7 @@ public class VehicleTitleController extends CRUDController<VehicleTitle> {
 		model.addAttribute("owners", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 	
 		criterias.clear();
-		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
 	}
 
 	@Override

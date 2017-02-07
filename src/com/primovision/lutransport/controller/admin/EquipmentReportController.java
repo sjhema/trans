@@ -36,6 +36,7 @@ import com.primovision.lutransport.core.util.PaymentUtil;
 
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.equipment.EquipmentBuyer;
 import com.primovision.lutransport.model.equipment.EquipmentLender;
 import com.primovision.lutransport.model.equipment.EquipmentReportInput;
@@ -442,7 +443,7 @@ public class EquipmentReportController extends BaseController {
 	public void setupList(ModelMap model, HttpServletRequest request) {
 		Map criterias = new HashMap();
 		
-		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
 		
 		criterias.clear();
 		criterias.put("type", 3);
