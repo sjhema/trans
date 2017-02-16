@@ -236,7 +236,7 @@ function getDrivers(){
 					<option value="">--Please Select--</option>
 					<option value="1">Driver PayRoll Report</option>
 					<option value="2">Hourly PayRoll Report</option>
-					<option value="3">weekly PayRoll Report</option>
+					<option value="3">Salary PayRoll Report</option>
 				</select>
 			</td>
 		
