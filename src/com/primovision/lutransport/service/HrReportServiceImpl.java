@@ -51,6 +51,7 @@ import com.primovision.lutransport.model.hr.HolidayType;
 import com.primovision.lutransport.model.hr.HourlyPayrollInvoice;
 import com.primovision.lutransport.model.hr.HourlyRate;
 import com.primovision.lutransport.model.hr.LeaveCurrentBalance;
+import com.primovision.lutransport.model.hr.LeaveType;
 import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.Ptod;
 import com.primovision.lutransport.model.hr.PtodRate;
@@ -69,6 +70,7 @@ import com.primovision.lutransport.model.hrreport.EmployeePayrollInput;
 import com.primovision.lutransport.model.hrreport.EmployeePayrollWrapper;
 import com.primovision.lutransport.model.hrreport.EmployeeWrapper;
 import com.primovision.lutransport.model.hrreport.HourlyPayrollInvoiceDetails;
+import com.primovision.lutransport.model.hrreport.LeaveAccrualReport;
 import com.primovision.lutransport.model.hrreport.PayChexDetail;
 import com.primovision.lutransport.model.hrreport.ProbationReportInput;
 import com.primovision.lutransport.model.hrreport.PtodApplicationInput;
@@ -3508,6 +3510,256 @@ public class HrReportServiceImpl implements HrReportService {
 			}
 			
 		return out;
+	}
+	
+	private List<Driver> retrieveEmployees(LeaveAccrualReport input) {
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		
+		criterias.put("status", 1);
+		
+		String company = input.getCompany();
+		if (StringUtils.isNotEmpty(company)) {
+			criterias.put("company.id", Long.valueOf(company));
+		}
+		
+		String terminal = input.getTerminal();
+		if (StringUtils.isNotEmpty(terminal)) {
+			criterias.put("terminal.id", Long.valueOf(terminal));
+		}
+		
+		String employee = input.getEmployee();
+		if (StringUtils.isNotEmpty(employee)) {
+			criterias.put("id", Long.valueOf(employee));
+		}
+		
+		String category = input.getCategory();
+		if (StringUtils.isNotEmpty(category)) {
+			criterias.put("catagory.id", Long.valueOf(category));
+		}
+		
+		List<Driver> employees = genericDAO.findByCriteria(Driver.class, criterias, "fullName", false);
+		return employees;
+	}
+	
+	private LeaveCurrentBalance retrieveLeaveCurrentBalance(Long employee, String leaveType,
+			Date searchDateFrom, Date searchDateTo) {
+		StringBuffer query = new StringBuffer();
+		query.append("select obj from LeaveCurrentBalance obj where 1=1");
+		query.append(" and obj.empname = " + employee);
+		query.append(" and obj.leavetype = " + leaveType);
+		query.append(" and obj.dateEffectiveFrom >= '" + mysqldf.format(searchDateFrom)+"'");
+		query.append(" and obj.dateEffectiveFrom <= '" + mysqldf.format(searchDateTo)+"'");
+		
+		List<LeaveCurrentBalance> leaveCurrentBalances = genericDAO.executeSimpleQuery(query.toString()); 
+		return leaveCurrentBalances.isEmpty() ? null : leaveCurrentBalances.get(0);
+	}
+	
+	private List<Ptodapplication> retrievePtodApplication(Long employee, String leaveType,
+			Date searchDateFrom, Date searchDateTo) {
+		StringBuffer query = new StringBuffer();
+		query.append("select obj from Ptodapplication obj where 1=1");
+		query.append(" and obj.driver = " + employee);
+		query.append(" and obj.leavetype = " + leaveType);
+		query.append(" and obj.batchdate >= '" + mysqldf.format(searchDateFrom)+"'");
+		query.append(" and obj.batchdate <= '" + mysqldf.format(searchDateTo)+"'");
+		
+		List<Ptodapplication> ptodapplicationList = genericDAO.executeSimpleQuery(query.toString()); 
+		return ptodapplicationList;
+	}
+	
+	private Double retrievePtodRate(Driver anEmployee, String leaveType) {
+		String ptodQuery = "select obj from Ptod obj where obj.company="+anEmployee.getCompany().getId()
+			+" and obj.terminal="+anEmployee.getTerminal().getId()
+			+" and obj.category="+anEmployee.getCatagory().getId()
+			+" and obj.leavetype="+leaveType+" and obj.status=1";
+		List<Ptod> ptodList = genericDAO.executeSimpleQuery(ptodQuery);
+		
+		Double ptodRate = 0.0;
+		if (ptodList.isEmpty()){
+			return ptodRate;
+		}
+		
+		Ptod ptod = ptodList.get(0);
+		if (ptod.getCalculateFlag() == 0) {
+			ptodRate = ptod.getRate();	
+		} else {
+			String ptodRateQuery="select obj from PtodRate obj where obj.driver="+anEmployee.getId()
+			+" and obj.catagory="+anEmployee.getCatagory().getId()+" and obj.company="+anEmployee.getCompany().getId()
+			+" and obj.terminal="+anEmployee.getTerminal().getId();
+			List<PtodRate> ptodRates = genericDAO.executeSimpleQuery(ptodRateQuery);
+			if (!ptodRates.isEmpty()){
+				ptodRate = ptodRates.get(0).getPtodRate();
+			}
+		}
+		
+		return ptodRate == null ? 0.0 : ptodRate;
+	}
+	
+	private Double retrieveHourlyRate(Driver anEmployee, Date searchDateTo) {
+		String query = "select obj from HourlyRate obj where obj.driver="+anEmployee.getId();
+		query += " and obj.catagory="+anEmployee.getCatagory().getId();
+		query += " and obj.company="+anEmployee.getCompany().getId();
+		query += " and obj.terminal="+anEmployee.getTerminal().getId();
+		
+		query += " and '"+mysqldf.format(searchDateTo)+"' BETWEEN obj.validFrom and obj.validTo";
+		
+		List<HourlyRate> hourlyRates = genericDAO.executeSimpleQuery(query);
+		Double hourlyRate = 0.0;
+		if (!hourlyRates.isEmpty()) {
+			hourlyRate = hourlyRates.get(0).getHourlyRegularRate();
+		}
+		
+		return hourlyRate == null ? 0.0 : hourlyRate;
+	}
+	
+	private Double retrieveWeeklyRate(Driver anEmployee, Date searchDateTo) {
+		String query = "select obj from WeeklySalary obj where obj.driver="+anEmployee.getId();
+		query += " and obj.catagory="+anEmployee.getCatagory().getId();
+		query += " and obj.company="+anEmployee.getCompany().getId();
+		query += " and obj.terminal="+anEmployee.getTerminal().getId();
+		
+		query += " and '"+mysqldf.format(searchDateTo)+"' BETWEEN obj.validFrom and obj.validTo";
+		
+		List<WeeklySalary> weeklySalaryRates = genericDAO.executeSimpleQuery(query);
+		Double weeklySalaryRate = 0.0;
+		if (!weeklySalaryRates.isEmpty()) {
+			weeklySalaryRate = weeklySalaryRates.get(0).getDailySalary();
+		}
+		
+		return weeklySalaryRate == null ? 0.0 : weeklySalaryRate;
+	}
+	
+	private LeaveType retrieveLeaveType(String leaveType) {
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("id", Long.valueOf(leaveType));
+		
+		List<LeaveType> leaveTypes = genericDAO.findByCriteria(LeaveType.class, criterias, null, false);
+		return leaveTypes.get(0);
+	}
+	
+	@Override
+	public List<LeaveAccrualReport> generateLeaveAccrualReport(SearchCriteria criteria, 
+			LeaveAccrualReport input) {
+		int accrualYear = input.getAccrualYear();
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.YEAR, accrualYear);
+		cal.set(Calendar.MONTH, Calendar.JANUARY);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		Date searchDateFrom = cal.getTime();
+		
+		cal.set(Calendar.MONTH, Calendar.DECEMBER);
+		cal.set(Calendar.DAY_OF_MONTH, 31);
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		Date searchDateTo = cal.getTime();
+		
+		List<LeaveAccrualReport> outLeaveAccrualReportList = new ArrayList<LeaveAccrualReport>();
+		
+		List<Driver> employees = retrieveEmployees(input);
+		if (employees.isEmpty()) {
+			return outLeaveAccrualReportList;
+		}
+		
+		String leaveType = input.getLeaveType();
+		for (Driver anEmployee : employees) {
+			Long employeeId = anEmployee.getId();
+		
+			LeaveCurrentBalance leaveCurrentBalance = retrieveLeaveCurrentBalance(employeeId, leaveType, 
+					searchDateFrom, searchDateTo);
+			if (leaveCurrentBalance == null) {
+				continue;
+			}
+			
+			Double daysAvailable = leaveCurrentBalance.getDaysavailable();
+			if (daysAvailable == null) {
+				daysAvailable = 0.0;
+			}
+			Double hoursAvailable = leaveCurrentBalance.getHoursavailable();
+			if (hoursAvailable == null) {
+				hoursAvailable = 0.0;
+			}
+			Date effectiveFromDate = leaveCurrentBalance.getDateEffectiveFrom();
+			
+			List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
+					effectiveFromDate, searchDateTo);
+			Double daysPaid = 0.0;
+			Double daysPaidOut = 0.0;
+			Double hoursPaid = 0.0;
+			Double hoursPaidOut = 0.0;
+			for (Ptodapplication aPtodapplication : ptodapplicationList) {
+				if (aPtodapplication.getDayspaid() != null) {
+					daysPaid += aPtodapplication.getDayspaid();
+				}
+				if (aPtodapplication.getPaidoutdays() != null) {
+					daysPaidOut += aPtodapplication.getPaidoutdays();
+				}
+				if (aPtodapplication.getHourspaid() != null) {
+					hoursPaid += aPtodapplication.getHourspaid();
+				}
+				if (aPtodapplication.getPaidouthours() != null) {
+					hoursPaidOut += aPtodapplication.getPaidouthours();
+				}
+				/*if (aPtodapplication.getPtodrates() != null) {
+					dailyRate = aPtodapplication.getPtodrates();
+				}
+				if (aPtodapplication.getPtodhourlyrate() != null) {
+					hourlyRate = aPtodapplication.getPtodhourlyrate();
+				}*/
+			}
+			
+			Double totalDaysPaid = daysPaid + daysPaidOut;
+			Double totalHoursPaid = hoursPaid + hoursPaidOut;
+			
+			/*if (totalHoursPaid == 0.0 && hourlyRate != 0.0) {
+				hourlyRate = 0.0;
+			}*/
+			
+			Double daysRemaining = daysAvailable - totalDaysPaid;
+			Double hoursRemaining = hoursAvailable - totalHoursPaid;
+			
+			Double dailyRate = 0.0;
+			Double hourlyRate = 0.0;
+			String payTerm = anEmployee.getPayTerm();
+			if ("3".equals(payTerm)) {
+				dailyRate = retrieveWeeklyRate(anEmployee, searchDateTo);
+			} else if ("1".equals(payTerm)){
+				dailyRate = retrievePtodRate(anEmployee, leaveType);
+			} else if ("2".equals(payTerm)){
+				hourlyRate = retrieveHourlyRate(anEmployee, searchDateTo);
+			}
+			
+			Double dailyAmount = daysRemaining * dailyRate;
+			Double hourlyAmount = hoursRemaining * hourlyRate;
+			
+			String leaveTypeName = retrieveLeaveType(leaveType).getName();
+			
+			LeaveAccrualReport outLeaveAccrualReport = new LeaveAccrualReport();
+			outLeaveAccrualReport.setEmployeeStaffId(anEmployee.getStaffId());
+			outLeaveAccrualReport.setEmployee(anEmployee.getFullName());
+			outLeaveAccrualReport.setCategory(anEmployee.getCatagory().getName());
+			outLeaveAccrualReport.setCompany(anEmployee.getCompany().getName());
+			outLeaveAccrualReport.setTerminal(anEmployee.getTerminal().getName());
+			outLeaveAccrualReport.setLeaveType(leaveTypeName);
+			outLeaveAccrualReport.setDaysAvailable(daysAvailable);
+			outLeaveAccrualReport.setDaysUsed(totalDaysPaid);
+			outLeaveAccrualReport.setDaysRemaining(daysRemaining);
+			outLeaveAccrualReport.setDailyRate(dailyRate);
+			outLeaveAccrualReport.setDailyAmount(dailyAmount);
+			outLeaveAccrualReport.setHoursAvailable(hoursAvailable);
+			outLeaveAccrualReport.setHoursUsed(totalHoursPaid);
+			outLeaveAccrualReport.setHoursRemaining(hoursRemaining);
+			outLeaveAccrualReport.setHourlyRate(hourlyRate);
+			outLeaveAccrualReport.setHourlyAmount(hourlyAmount);
+			
+			outLeaveAccrualReportList.add(outLeaveAccrualReport);
+		}	
+		
+		return outLeaveAccrualReportList;
 	}
 	
 	public EmployeePayrollWrapper  generateEmployeePayrollData(SearchCriteria criteria,EmployeePayrollInput input)

@@ -15,6 +15,7 @@ import com.primovision.lutransport.model.hrreport.EmployeeInput;
 import com.primovision.lutransport.model.hrreport.EmployeePayrollInput;
 import com.primovision.lutransport.model.hrreport.EmployeePayrollWrapper;
 import com.primovision.lutransport.model.hrreport.EmployeeWrapper;
+import com.primovision.lutransport.model.hrreport.LeaveAccrualReport;
 import com.primovision.lutransport.model.hrreport.PayChexDetail;
 import com.primovision.lutransport.model.hrreport.ProbationReportInput;
 import com.primovision.lutransport.model.hrreport.PtodApplicationInput;
@@ -43,6 +44,7 @@ public interface HrReportService {
 	public void saveHourlyPayrollData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	public EmployeePayrollWrapper generateEmployeePayrollData(SearchCriteria criteria,EmployeePayrollInput input);
 	public List<RemainingLeaveInput> generateRemainingLeaveReport(SearchCriteria criteria,RemainingLeaveInput input);
+	public List<LeaveAccrualReport> generateLeaveAccrualReport(SearchCriteria criteria, LeaveAccrualReport input);
 	public void saveDriverPayData(HttpServletRequest request,SearchCriteria criteria) throws Exception;
 	void deleteDriverPayData(DriverPayroll payroll) throws Exception;
 	public List<PtodApplicationInput> generatePtodApplicationReport(SearchCriteria criteria,PtodApplicationInput input);
