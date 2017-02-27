@@ -183,7 +183,13 @@ UPDATE `lutransport`.`business_object` SET `hidden`='1' WHERE `ID`='300135';
 delete  from role_privilege where business_object_id = 30013;
 DELETE FROM `lutransport`.`business_object` WHERE `ID`='30013';
 
+-----
+-- 27th Feb 2017:
+ALTER TABLE `lutransport`.`vehicle_loan` 
+DROP INDEX `vehicleloan_loanno_UNQ` ;
 
+ALTER TABLE `lutransport`.`vehicle_loan` 
+ADD INDEX `vehicleloan_loanno_idx` (`loan_no` ASC);
 
 
 

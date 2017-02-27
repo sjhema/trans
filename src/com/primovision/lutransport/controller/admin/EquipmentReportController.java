@@ -451,12 +451,14 @@ public class EquipmentReportController extends BaseController {
 		model.addAttribute("owners", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 		
 		criterias.clear();
-		model.addAttribute("vehicleLoans", genericDAO.findByCriteria(VehicleLoan.class, criterias, "id asc", false));
 		
 		model.addAttribute("lenders", genericDAO.findByCriteria(EquipmentLender.class, criterias, "name", false));
 		model.addAttribute("buyers", genericDAO.findByCriteria(EquipmentBuyer.class, criterias, "name", false));
 		
 		model.addAttribute("titles", genericDAO.findByCriteria(VehicleTitle.class, criterias, "title", false));
+	
+		String loanQuery = "select distinct obj.loanNo from VehicleLoan obj order by obj.loanNo asc";
+		model.addAttribute("vehicleLoans", genericDAO.executeSimpleQuery(loanQuery));
 	}
 	
 	@ModelAttribute("modelObject")

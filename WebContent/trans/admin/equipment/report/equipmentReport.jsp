@@ -40,12 +40,12 @@
 			<td align="${left}">
 				<select id="loanNo" name="loanNo" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${vehicleLoans}" var="aVehicleLoan">
+					<c:forEach items="${vehicleLoans}" var="aVehicleLoanNo">
 						<c:set var="selected" value="" />
-						<c:if test="${sessionScope.searchCriteria.searchMap['loanNo'] == aVehicleLoan.loanNo}">
+						<c:if test="${sessionScope.searchCriteria.searchMap['loanNo'] == aVehicleLoanNo}">
 							<c:set var="selected" value="selected" />
 						</c:if>
-						<option value="${aVehicleLoan.loanNo}"${selected}>${aVehicleLoan.loanNo}</option>
+						<option value="${aVehicleLoanNo}"${selected}>${aVehicleLoanNo}</option>
 					</c:forEach>
 				</select>
 			</td>

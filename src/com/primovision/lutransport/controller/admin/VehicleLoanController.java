@@ -190,8 +190,8 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		criterias.put("type", 3);
 		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 	
-		criterias.clear();
-		model.addAttribute("vehicleLoans", genericDAO.findByCriteria(VehicleLoan.class, criterias, "id asc", false));
+		String loanQuery = "select distinct obj.loanNo from VehicleLoan obj order by obj.loanNo asc";
+		model.addAttribute("vehicleLoans", genericDAO.executeSimpleQuery(loanQuery));
 	}
 
 	private void validateSave(VehicleLoan entity, BindingResult bindingResult) {
