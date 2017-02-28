@@ -259,8 +259,10 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 	}
 	
 	private void populateLender(VehicleLoan entity) {
+		String lenderName = StringUtils.replace(entity.getLenderName(), "'", "''", -1);
+		lenderName = StringUtils.upperCase(lenderName);
 		String query = "select obj from EquipmentLender obj "
-						+ " where obj.name='" + entity.getLenderName() + "' order by id desc";
+						+ " where UPPER(obj.name)='" + lenderName + "' order by id desc";
 		List<EquipmentLender> lenderList = genericDAO.executeSimpleQuery(query);
 		
 		EquipmentLender lender = null;

@@ -218,8 +218,10 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 	}
 	
 	private void populateBuyer(VehicleSale entity) {
+		String buyerName = StringUtils.replace(entity.getBuyerName(), "'", "''", -1);
+		buyerName = StringUtils.upperCase(buyerName);
 		String query = "select obj from EquipmentBuyer obj "
-						+ " where obj.name='" + entity.getBuyerName() + "' order by id desc";
+						+ " where UPPER(obj.name)='" + buyerName + "' order by id desc";
 		List<EquipmentBuyer> buyerList = genericDAO.executeSimpleQuery(query);
 		
 		EquipmentBuyer buyer = null;
