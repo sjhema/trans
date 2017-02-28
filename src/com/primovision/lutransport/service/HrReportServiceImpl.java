@@ -3512,32 +3512,45 @@ public class HrReportServiceImpl implements HrReportService {
 		return out;
 	}
 	
-	private List<Driver> retrieveEmployees(LeaveAccrualReport input) {
-		Map<String, Object> criterias = new HashMap<String, Object>();
+	private List<Driver> retrieveEmployees(LeaveAccrualReport input, Date searchDateTo) {
+		//Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		criterias.put("status", 1);
+		StringBuffer query = new StringBuffer("select obj from Driver obj where 1=1");
+		
+		//criterias.put("status", 1);
+		query.append(" and (");
+		query.append("(obj.status = 1)");
+		query.append(" OR (obj.status = 0 AND obj.dateTerminated > '"+mysqldf.format(searchDateTo)+"'" + ")");
+		query.append(")");
 		
 		String company = input.getCompany();
 		if (StringUtils.isNotEmpty(company)) {
-			criterias.put("company.id", Long.valueOf(company));
+			//criterias.put("company.id", Long.valueOf(company));
+			query.append(" and obj.company = " + company);
 		}
 		
 		String terminal = input.getTerminal();
 		if (StringUtils.isNotEmpty(terminal)) {
-			criterias.put("terminal.id", Long.valueOf(terminal));
+			//criterias.put("terminal.id", Long.valueOf(terminal));
+			query.append(" and obj.terminal = " + terminal);
 		}
 		
 		String employee = input.getEmployee();
 		if (StringUtils.isNotEmpty(employee)) {
-			criterias.put("id", Long.valueOf(employee));
+			//criterias.put("id", Long.valueOf(employee));
+			query.append(" and obj.id = " + employee);
 		}
 		
 		String category = input.getCategory();
 		if (StringUtils.isNotEmpty(category)) {
-			criterias.put("catagory.id", Long.valueOf(category));
+			//criterias.put("catagory.id", Long.valueOf(category));
+			query.append(" and obj.catagory = " + category);
 		}
 		
-		List<Driver> employees = genericDAO.findByCriteria(Driver.class, criterias, "fullName", false);
+		query.append(" order by obj.fullName asc");
+		
+		//List<Driver> employees = genericDAO.findByCriteria(Driver.class, criterias, "fullName", false);
+		List<Driver> employees = genericDAO.executeSimpleQuery(query.toString()); 
 		return employees;
 	}
 	
@@ -3660,7 +3673,7 @@ public class HrReportServiceImpl implements HrReportService {
 		
 		List<LeaveAccrualReport> outLeaveAccrualReportList = new ArrayList<LeaveAccrualReport>();
 		
-		List<Driver> employees = retrieveEmployees(input);
+		List<Driver> employees = retrieveEmployees(input, searchDateTo);
 		if (employees.isEmpty()) {
 			return outLeaveAccrualReportList;
 		}

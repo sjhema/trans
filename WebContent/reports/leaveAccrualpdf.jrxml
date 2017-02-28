@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="leaveAccrualpdf" pageWidth="1300" pageHeight="600" orientation="Landscape" columnWidth="1260" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="leaveAccrualpdf" pageWidth="1350" pageHeight="600" orientation="Landscape" columnWidth="1310" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="371"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="company" class="java.lang.String"/>
 	<parameter name="accrualYear" class="java.lang.Integer"/>
@@ -39,14 +39,14 @@
 	<pageHeader>
 		<band height="94">
 			<staticText>
-				<reportElement mode="Opaque" x="460" y="0" width="291" height="24" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="510" y="0" width="291" height="24" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Yearly Vacation Accrual Report]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="460" y="37" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="511" y="37" width="153" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -60,7 +60,7 @@
 				<text><![CDATA[COMPANY]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="613" y="63" width="138" height="20"/>
+				<reportElement x="664" y="63" width="138" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -72,7 +72,7 @@
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$P{accrualYear}]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="460" y="63" width="153" height="20"/>
+				<reportElement x="511" y="63" width="153" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -84,7 +84,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{company}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="613" y="37" width="138" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="664" y="37" width="138" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -102,7 +102,7 @@
 	<columnHeader>
 		<band height="55" splitType="Stretch">
 			<staticText>
-				<reportElement mode="Opaque" x="246" y="25" width="87" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="246" y="25" width="142" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -144,7 +144,7 @@
 				<text><![CDATA[Terminal]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="545" y="25" width="62" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="600" y="25" width="62" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -172,7 +172,7 @@
 				<text><![CDATA[Employee Id]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="607" y="25" width="87" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="662" y="25" width="87" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -186,7 +186,7 @@
 				<text><![CDATA[Days Remaining]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="934" y="25" width="74" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="989" y="25" width="74" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -200,7 +200,7 @@
 				<text><![CDATA[Hours Used]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1008" y="25" width="100" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1063" y="25" width="100" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -214,7 +214,7 @@
 				<text><![CDATA[Hours Remaining]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="389" y="25" width="77" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="444" y="25" width="77" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -226,7 +226,7 @@
 				<text><![CDATA[Leave Type]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="829" y="25" width="105" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="884" y="25" width="105" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -240,7 +240,7 @@
 				<text><![CDATA[Hours Available]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="466" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="521" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -254,7 +254,7 @@
 				<text><![CDATA[Days Available]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="333" y="25" width="56" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="388" y="25" width="56" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -268,7 +268,7 @@
 				<text><![CDATA[Category]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="694" y="25" width="59" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="749" y="25" width="59" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -282,7 +282,7 @@
 				<text><![CDATA[PTOD Rate]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="753" y="25" width="76" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="808" y="25" width="76" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -296,7 +296,7 @@
 				<text><![CDATA[Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1108" y="25" width="61" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1163" y="25" width="61" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -310,7 +310,7 @@
 				<text><![CDATA[PTOD Rate]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1169" y="25" width="70" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1224" y="25" width="70" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -356,7 +356,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{company}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="246" y="0" width="87" height="20"/>
+				<reportElement x="246" y="0" width="142" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -380,7 +380,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{employeeStaffId}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="389" y="0" width="77" height="20"/>
+				<reportElement x="444" y="0" width="77" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -392,7 +392,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{leaveType}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="545" y="0" width="62" height="20"/>
+				<reportElement x="600" y="0" width="62" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -404,7 +404,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{daysUsed}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="607" y="0" width="87" height="20"/>
+				<reportElement x="662" y="0" width="87" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -416,7 +416,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{daysRemaining}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="934" y="0" width="74" height="20"/>
+				<reportElement x="989" y="0" width="74" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -428,7 +428,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{hoursUsed}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1008" y="0" width="100" height="20"/>
+				<reportElement x="1063" y="0" width="100" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -440,7 +440,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{hoursRemaining}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="829" y="0" width="105" height="20"/>
+				<reportElement x="884" y="0" width="105" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -452,7 +452,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{hoursAvailable}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="466" y="0" width="79" height="20"/>
+				<reportElement x="521" y="0" width="79" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -464,7 +464,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{daysAvailable}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="333" y="0" width="56" height="20"/>
+				<reportElement x="388" y="0" width="56" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -476,7 +476,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{category}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="694" y="0" width="59" height="20"/>
+				<reportElement x="749" y="0" width="59" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -488,7 +488,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{dailyRate})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="753" y="0" width="76" height="20"/>
+				<reportElement x="808" y="0" width="76" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -500,7 +500,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{dailyAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1108" y="0" width="61" height="20"/>
+				<reportElement x="1163" y="0" width="61" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -512,7 +512,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{hourlyRate})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1169" y="0" width="70" height="20"/>
+				<reportElement x="1224" y="0" width="70" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -538,12 +538,12 @@
 				<textFieldExpression class="java.lang.Long"><![CDATA[$V{totalCount}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="694" y="0" width="55" height="20"/>
+				<reportElement x="749" y="0" width="55" height="20"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<text><![CDATA[Total]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="753" y="0" width="76" height="20"/>
+				<reportElement x="808" y="0" width="76" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -555,7 +555,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{sumDailyAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1169" y="0" width="70" height="20"/>
+				<reportElement x="1224" y="0" width="70" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
