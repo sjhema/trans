@@ -3547,7 +3547,7 @@ public class HrReportServiceImpl implements HrReportService {
 			query.append(" and obj.catagory = " + category);
 		}
 		
-		query.append(" order by obj.fullName asc");
+		query.append(" order by obj.company.name asc, obj.terminal.name asc, obj.fullName asc");
 		
 		//List<Driver> employees = genericDAO.findByCriteria(Driver.class, criterias, "fullName", false);
 		List<Driver> employees = genericDAO.executeSimpleQuery(query.toString()); 
