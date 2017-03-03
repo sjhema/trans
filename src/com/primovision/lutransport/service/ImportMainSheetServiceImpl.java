@@ -2504,7 +2504,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											} else {
 												error = true;
 												lineError.append(
-														"Unit is blank, No matching  Ticket, Fuel Log,  Odometer entry, ");
+														"Unit is either blank or not valid for given transaction date and no matching Ticket, Fuel Log, Odometer entry found while detrmining correct unit ");
 											}
 										}
 									}
@@ -3432,7 +3432,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							}
 
 							if (fuellogs.contains(fuellog)) {
-								lineError.append("Duplicate Fuel log,");
+								lineError.append("Duplicate Fuel log record in file,");
 								error = true;
 								errorcount++;
 							} else {

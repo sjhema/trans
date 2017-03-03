@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="equipmentReport" pageWidth="1750" pageHeight="600" orientation="Landscape" columnWidth="1710" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="equipmentReport" pageWidth="1850" pageHeight="600" orientation="Landscape" columnWidth="1810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="172"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="lender" class="java.lang.String"/>
 	<parameter name="titleOwner" class="java.lang.String"/>
@@ -265,7 +265,7 @@
 				<text><![CDATA[Model]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="444" y="25" width="139" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="444" y="25" width="137" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -279,7 +279,7 @@
 				<text><![CDATA[Lender]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="583" y="25" width="63" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="581" y="25" width="167" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -293,7 +293,7 @@
 				<text><![CDATA[Loan No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="728" y="25" width="65" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="832" y="25" width="65" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -307,7 +307,7 @@
 				<text><![CDATA[Due Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="793" y="25" width="81" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="897" y="25" width="81" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -321,7 +321,7 @@
 				<text><![CDATA[Loan Start Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="874" y="25" width="63" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="978" y="25" width="63" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -335,7 +335,7 @@
 				<text><![CDATA[Loan End Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1058" y="25" width="56" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1162" y="25" width="56" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -349,7 +349,7 @@
 				<text><![CDATA[Payments Left]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1114" y="25" width="51" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1218" y="25" width="51" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -363,7 +363,7 @@
 				<text><![CDATA[Holds Title]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1379" y="25" width="96" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1483" y="25" width="96" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -377,7 +377,7 @@
 				<text><![CDATA[Title No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1475" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1579" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -391,7 +391,7 @@
 				<text><![CDATA[Sold Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1546" y="25" width="83" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1650" y="25" width="83" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -405,7 +405,7 @@
 				<text><![CDATA[Buyer]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="937" y="25" width="61" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1041" y="25" width="61" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -419,7 +419,7 @@
 				<text><![CDATA[Interest Rate%]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="998" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1102" y="25" width="60" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -433,7 +433,7 @@
 				<text><![CDATA[No. Of Payments]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1165" y="25" width="110" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1269" y="25" width="110" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -447,7 +447,7 @@
 				<text><![CDATA[Title Owner]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="646" y="25" width="82" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="748" y="25" width="84" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -461,7 +461,7 @@
 				<text><![CDATA[Payment Amt]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1629" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1733" y="25" width="71" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -475,7 +475,7 @@
 				<text><![CDATA[Sale Price]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1275" y="25" width="104" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1379" y="25" width="104" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -549,7 +549,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{model}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="583" y="0" width="63" height="20"/>
+				<reportElement x="581" y="0" width="167" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -563,7 +563,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{loanNo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="728" y="0" width="65" height="20"/>
+				<reportElement x="832" y="0" width="65" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -577,7 +577,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{paymentDueDom}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="874" y="0" width="63" height="20"/>
+				<reportElement x="978" y="0" width="63" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -591,7 +591,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{loanEndDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1058" y="0" width="56" height="20"/>
+				<reportElement x="1162" y="0" width="56" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -605,7 +605,7 @@
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{paymentsLeft}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1114" y="0" width="51" height="20"/>
+				<reportElement x="1218" y="0" width="51" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -619,7 +619,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{holdsTitle}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1379" y="0" width="96" height="20"/>
+				<reportElement x="1483" y="0" width="96" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -633,7 +633,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{title}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="937" y="0" width="61" height="20"/>
+				<reportElement x="1041" y="0" width="61" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -647,7 +647,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{interestRate})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1546" y="0" width="83" height="20"/>
+				<reportElement x="1650" y="0" width="83" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -661,7 +661,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{buyer}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1475" y="0" width="71" height="20"/>
+				<reportElement x="1579" y="0" width="71" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -675,7 +675,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{saleDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="444" y="0" width="139" height="20"/>
+				<reportElement x="444" y="0" width="137" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -703,7 +703,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{company}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="998" y="0" width="60" height="20"/>
+				<reportElement x="1102" y="0" width="60" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -729,7 +729,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{unit}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="793" y="0" width="81" height="20"/>
+				<reportElement x="897" y="0" width="81" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -741,7 +741,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{loanStartDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="646" y="0" width="82" height="20"/>
+				<reportElement x="748" y="0" width="84" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -755,7 +755,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{paymentAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1629" y="0" width="71" height="20"/>
+				<reportElement x="1733" y="0" width="71" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -769,7 +769,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{salePrice} == null ? "" : (new java.text.DecimalFormat("###0.00").format($F{salePrice}))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1275" y="0" width="104" height="20"/>
+				<reportElement x="1379" y="0" width="104" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -783,7 +783,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{registeredOwner}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1165" y="0" width="110" height="20"/>
+				<reportElement x="1269" y="0" width="110" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>

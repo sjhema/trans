@@ -2,13 +2,16 @@ package com.primovision.lutransport.controller.admin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +20,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.apache.poi.ss.usermodel.Row;
+
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 
 import org.springframework.stereotype.Controller;
+
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 
@@ -29,13 +41,19 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
 
 import com.primovision.lutransport.controller.CRUDController;
+
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
+import com.primovision.lutransport.core.util.ExcelUtil;
+import com.primovision.lutransport.core.util.IOUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.PaymentUtil;
 
@@ -170,7 +188,7 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
-		Map criterias = new HashMap();
+		Map<String, Object> criterias = new HashMap();
 		
 		// select obj from Vehicle obj where obj.type=1 group by obj.unit
 		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
@@ -184,7 +202,7 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		populateSearchCriteria(request, request.getParameterMap());
 		setupCreate(model, request);
 		
-		Map criterias = new HashMap();
+		Map<String, Object> criterias = new HashMap<String, Object>();
 		
 		criterias.clear();
 		criterias.put("type", 3);
@@ -258,26 +276,103 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		return getUrlContext() + "/form";
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/uploadMain.do")
+	public String uploadMain(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return getUrlContext() + "/upload";
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/upload.do")
+	public void upload(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFile") MultipartFile file) {
+		Long createdBy = getUser(request).getId();
+		
+		ByteArrayOutputStream out = null;
+		InputStream dataFileInputStream1 = null;
+		InputStream dataFileInputStream2 = null;
+		try {
+			dataFileInputStream1 = file.getInputStream();
+			List<String> errorList = uploadVehicleLoan(dataFileInputStream1, createdBy);
+			IOUtil.closeInputStream(dataFileInputStream1);
+			
+			dataFileInputStream2 = file.getInputStream();
+			out = createVehicleLoanUploadResponse(dataFileInputStream2, errorList);
+			IOUtil.closeInputStream(dataFileInputStream2);
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			out = createVehicleLoanUploadExceptionResponse(ex);
+		} finally {
+			IOUtil.closeInputStream(dataFileInputStream1);
+			IOUtil.closeInputStream(dataFileInputStream2);
+		}
+		
+		String responseFileName = "VehicleLoanUploadResults_" + StringUtils.replace(file.getOriginalFilename(), " ", "_");
+		String type = file.getContentType();
+		response.setHeader("Content-Disposition", "attachment;filename="+ responseFileName);
+		response.setContentType(type);
+	
+		try {
+			out.writeTo(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			IOUtil.closeOutputStream(out);
+		}
+	}
+	
+	
+	public ByteArrayOutputStream createVehicleLoanUploadResponse(InputStream is, List<String> errors) throws IOException {
+		if (errors == null || errors.isEmpty()) {
+			return createVehicleLoanUploadSuccessResponse();
+		} else {
+			return createVehicleLoanUploadErrorResponse(is, errors);
+		}
+	}
+	
+	public ByteArrayOutputStream createVehicleLoanUploadErrorResponse(InputStream is, List<String> errors) throws IOException {
+		return ExcelUtil.createUploadErrorResponse(is, errors);
+	}
+	
+	public ByteArrayOutputStream createVehicleLoanUploadSuccessResponse() {
+		String msg = "ALL vehicle loan records uploaded successfully";
+		return ExcelUtil.createUploadSuccessResponse(msg);
+	}
+	
+	public ByteArrayOutputStream createVehicleLoanUploadExceptionResponse(Exception e) {
+		return ExcelUtil.createUploadExceptionResponse(e);
+	}
+	
 	private void populateLender(VehicleLoan entity) {
-		String lenderName = StringUtils.replace(entity.getLenderName(), "'", "''", -1);
-		lenderName = StringUtils.upperCase(lenderName);
+		EquipmentLender lender = checkAndAddLender(entity.getLenderName(), entity.getCreatedAt(), entity.getCreatedBy());
+		entity.setLender(lender);
+	}
+	
+	private EquipmentLender checkAndAddLender(String lenderName, Date createdAt, Long createdBy) {
+		if (StringUtils.isEmpty(lenderName)) {
+			return null;
+		}
+		
+		String escapedLenderName = StringUtils.replace(lenderName, "'", "''", -1);
+		escapedLenderName = StringUtils.upperCase(escapedLenderName);
 		String query = "select obj from EquipmentLender obj "
-						+ " where UPPER(obj.name)='" + lenderName + "' order by id desc";
+						+ " where UPPER(obj.name)='" + escapedLenderName + "' order by id desc";
 		List<EquipmentLender> lenderList = genericDAO.executeSimpleQuery(query);
 		
 		EquipmentLender lender = null;
 		if (lenderList.isEmpty()) {
-			lender = addLender(entity);
+			lender = addLender(lenderName, createdAt, createdBy);
 		} else {
 			lender = lenderList.get(0);
 		}
 		
-		entity.setLender(lender);
+		return lender;
 	}
 	
-	private EquipmentLender addLender(VehicleLoan entity) {
+	private EquipmentLender addLender(String lenderName, Date createdAt, Long createdBy) {
 		EquipmentLender lender = new EquipmentLender();
-		lender.setName(entity.getLenderName());
+		lender.setName(lenderName);
 		lender.setAddress1("address1");
 		lender.setCity("Chicago");
 		
@@ -286,8 +381,8 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		
 		lender.setZipcode("60632");
 		
-		lender.setCreatedAt(entity.getCreatedAt());
-		lender.setCreatedBy(entity.getCreatedBy());
+		lender.setCreatedAt(createdAt);
+		lender.setCreatedBy(createdBy);
 		
 		genericDAO.save(lender);
 		
@@ -337,6 +432,21 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		return urlContext + "/form";
 	}
 	
+	private List<VehicleLoan> searchForExport(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPage = criteria.getPage();
+		
+		criteria.setPage(0);
+		criteria.setPageSize(100000);
+		
+		List<VehicleLoan> vehicleLoanList = performSearch(criteria);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(25);
+		
+		return vehicleLoanList;
+	}
+	
 	@Override
 	public void export(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response, @RequestParam("type") String type,
@@ -346,8 +456,7 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 			response.setHeader("Content-Disposition", "attachment;filename=" + urlContext + "Report." + type);
 		}
 		
-		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		List<VehicleLoan> vehicleLoanList = performSearch(criteria);
+		List<VehicleLoan> vehicleLoanList = searchForExport(model, request);
 		
 		List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
 		ByteArrayOutputStream out = null;
@@ -392,5 +501,242 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
 		paymentDueDates.add("31st");
 		
 		return paymentDueDates;
+	}
+	
+	private List<String> uploadVehicleLoan(InputStream is, Long createdBy) throws Exception {
+		List<VehicleLoan> vehicleLoanList = new ArrayList<VehicleLoan>();
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator<Row> rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount == 1) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				boolean fatalRecordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				VehicleLoan aVehicleLoan = null;
+				try {
+					String unit = ((String) ExcelUtil.getCellValue(row.getCell(0), true));
+					if (StringUtils.equals("END_OF_DATA", unit)) {
+						break;
+					}
+					
+					aVehicleLoan = new VehicleLoan();
+					
+					Vehicle vehicle = retrieveVehicle(unit);
+					if (vehicle == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Unit#,");
+					} else {
+						aVehicleLoan.setVehicle(vehicle);
+					}
+					
+					String lenderName = ((String) ExcelUtil.getCellValue(row.getCell(6), true));
+					Date createdAt = Calendar.getInstance().getTime();
+					EquipmentLender lender = checkAndAddLender(lenderName, createdAt, createdBy);
+					if (lender == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Lender,");
+					} else {
+						aVehicleLoan.setLender(lender);
+					}
+					
+					String loanNo = ((String) ExcelUtil.getCellValue(row.getCell(7), true));
+					if (StringUtils.isEmpty(loanNo)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Loan No.,");
+					} else {
+						aVehicleLoan.setLoanNo(loanNo);
+					}
+					
+					String paymentAmount = ((String) ExcelUtil.getCellValue(row.getCell(8), true));
+					Double paymentAmountDbl = processPaymentAmount(paymentAmount);
+					if (paymentAmountDbl == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Payment Amount,");
+					} else {
+						aVehicleLoan.setPaymentAmount(paymentAmountDbl);
+					}
+					
+					String startDateStr = ((String) ExcelUtil.getCellValue(row.getCell(9), true));
+					Date startDate = processDate(startDateStr);
+					if (startDate == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Start Date,");
+					} else {
+						aVehicleLoan.setStartDate(startDate);;
+					}
+					
+					String endDateStr = ((String) ExcelUtil.getCellValue(row.getCell(10), true));
+					Date endDate = processDate(endDateStr);
+					if (endDate == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("End Date,");
+					} else {
+						aVehicleLoan.setEndDate(endDate);;
+					}
+					
+					row.getCell(11).toString();
+					String interestRate = ((String) ExcelUtil.getCellValue(row.getCell(11), true));
+					Double interestRateDbl = processInterestRate(interestRate);
+					if (interestRateDbl == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Interest Rate,");
+					} else {
+						aVehicleLoan.setInterestRate(interestRateDbl);
+					}
+					
+					String paymentDueDom = ((String) ExcelUtil.getCellValue(row.getCell(12), true));
+					if (StringUtils.isEmpty(paymentDueDom)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Due Date,");
+					} else {
+						aVehicleLoan.setPaymentDueDom(paymentDueDom);;
+					}
+					
+					if (StringUtils.isNotEmpty(startDateStr) && StringUtils.isNotEmpty(endDateStr)
+							&&  StringUtils.isNotEmpty(paymentDueDom)) {
+						int noOfPayments = PaymentUtil.calculateNoOfPayments(startDateStr, endDateStr);
+						aVehicleLoan.setNoOfPayments(noOfPayments);
+					}
+					
+					if (checkDuplicate(vehicleLoanList, aVehicleLoan)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Duplicate record,");
+					}
+				} catch (Exception ex) {
+					recordError = true;
+					fatalRecordError = true;
+					recordErrorMsg.append("Error while processing record,");
+				}
+				
+				if (recordError) {
+					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+					errorList.add(msgPreffix 
+							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					errorCount++;
+				} 
+				
+				if (!fatalRecordError) {
+					vehicleLoanList.add(aVehicleLoan);
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + vehicleLoanList.size());
+			if (!vehicleLoanList.isEmpty()) {
+				for (VehicleLoan aVehicleLoanToBeSaved : vehicleLoanList) {
+					aVehicleLoanToBeSaved.setCreatedBy(createdBy);
+					aVehicleLoanToBeSaved.setCreatedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(aVehicleLoanToBeSaved);
+				}
+			}
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Mileage log: " + ex);
+		}
+	
+		return errorList;
+	}
+	
+	private Date processDate(String dateStr) {
+		if (StringUtils.isEmpty(dateStr)) {
+			return null;
+		}
+		
+		Date date = null;
+		try {
+			date = dateFormat.parse(dateStr);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
+	}
+	
+	private boolean checkDuplicate(List<VehicleLoan> aVehicleLoanList, VehicleLoan aVehicleLoan) {
+		if (aVehicleLoan.getVehicle() == null || aVehicleLoan.getLender() == null
+				|| StringUtils.isEmpty(aVehicleLoan.getLoanNo())) {
+			return false;
+		}
+		
+		/*if (aVehicleLoanList.contains(aVehicleLoan)) {
+			return true;
+		}*/
+		
+		String query = "select obj from VehicleLoan obj where obj.loanNo='" + aVehicleLoan.getLoanNo() + "'"
+				+ " and obj.vehicle=" + aVehicleLoan.getVehicle().getId()
+				+ " and obj.lender=" + aVehicleLoan.getLender().getId();
+		
+		List<VehicleLoan> vehicleLoanList = genericDAO.executeSimpleQuery(query);
+		return !vehicleLoanList.isEmpty();
+	}
+	
+	private Double processPaymentAmount(String paymentAmount) {
+		if (StringUtils.isEmpty(paymentAmount)) {
+			return null;
+		}
+		
+		Double paymentAmountDbl = null;
+		try {
+			paymentAmountDbl = new Double(paymentAmount);
+			
+		} catch (Exception ex) {
+			log.warn("Exception while processing payment amount", ex);
+		}
+		
+		return paymentAmountDbl;
+	}
+	
+	private Double processInterestRate(String interestRate) {
+		if (StringUtils.isEmpty(interestRate)) {
+			return null;
+		}
+		
+		Double interestRateDbl = null;
+		try {
+			interestRateDbl = new Double(interestRate);
+		} catch (Exception ex) {
+			log.warn("Exception while processing interest rate", ex);
+		}
+		
+		return interestRateDbl;
+	}
+	
+	private Vehicle retrieveVehicle(String unit) {
+		if (StringUtils.isEmpty(unit)) {
+			return null;
+		}
+		
+		String query = "select obj from Vehicle obj where obj.unit=" + unit
+				+ " order by obj.id desc";
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(query);
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			return null;
+		} else {
+			return vehicleList.get(0);
+		}
 	}
 }
