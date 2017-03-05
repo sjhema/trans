@@ -153,7 +153,7 @@ public class VehicleLoanController extends CRUDController<VehicleLoan> {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.id asc");
+      query.append(" order by obj.loanNo asc, obj.vehicle.unit asc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	

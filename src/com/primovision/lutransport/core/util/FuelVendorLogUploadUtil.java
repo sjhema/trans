@@ -288,18 +288,18 @@ public class FuelVendorLogUploadUtil {
 		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
 		int expectedColumnStartIndex = 2;
 		
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery End DateTime");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Sales Order Number");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Delivery End DateTime");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit ID");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Volume");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Volume");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Price");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);

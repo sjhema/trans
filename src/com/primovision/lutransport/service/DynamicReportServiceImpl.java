@@ -656,14 +656,14 @@ public class DynamicReportServiceImpl implements
 		report.setWhenResourceMissing(JasperReport.WHEN_RESOURCE_MISSING_TYPE_NULL);
 		report.setPageSizeAndOrientation(Page.Page_A4_Landscape());
 
-		Style atStyle = new StyleBuilder(true).setFont(Font.COMIC_SANS_SMALL)
+		/*Style atStyle = new StyleBuilder(true).setFont(Font.COMIC_SANS_SMALL)
 				.setTextColor(Color.red).build();
 		AutoText autoText = new AutoText(AutoText.AUTOTEXT_CREATED_ON,
 				AutoText.POSITION_FOOTER, HorizontalBandAlignment.CENTER);
 		autoText.setWidth(new Integer(200));
 		autoText.setStyle(atStyle);
 		report.setFooterVariablesHeight(20);
-		report.addAutoText(autoText);
+		report.addAutoText(autoText);*/
 		
 		// Billing rate fix - 10thMar2016
 		if (StringUtils.equals(type, "pdf")) {
