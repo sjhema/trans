@@ -245,6 +245,11 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 			if (entity.getLineItemTotalCost() == null) {
 				bindingResult.rejectValue("lineItemTotalCost", "NotNull.java.lang.Float", null, null);
 			}
+			
+			if ((entity.getLineItemNoOfHours() != null && entity.getLineItemNoOfHours() != 0.0)
+					&& (entity.getLineItemLaborRate() == null || entity.getLineItemLaborRate() == 0.0)) {
+				bindingResult.rejectValue("lineItemLaborRate", "NotNull.java.lang.Float", null, null);
+			}
 		}
 	}
 	

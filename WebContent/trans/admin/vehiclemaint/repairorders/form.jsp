@@ -135,6 +135,12 @@ function closeComponentDialog() {
 }
 
 function editLineItem(lineItemId) {
+	emptyLineItem();
+	
+	$("#originalLineItemTotalCost").val("");
+	var originalTotalOrderCost = $("#originalTotalOrderCost").val();
+	$("#totalCost").val(originalTotalOrderCost);
+	
 	$.ajax({
   		url: "ajax.do?action=retrieveLineItem" + "&lineItemId=" + lineItemId,
        	type: "GET",
@@ -150,6 +156,9 @@ function editLineItem(lineItemId) {
        		$("#lineItemTotalPartsCost").val(lineItem.totalPartsCost);
        		$("#lineItemTotalCost").val(lineItem.totalCost);
        		$("#originalLineItemTotalCost").val(lineItem.totalCost);
+       		
+       		$("#totalCost").val(lineItem.repairOrder.totalCost);
+       		$("#originalTotalOrderCost").val(lineItem.repairOrder.totalCost);
 		}
 	});
 }
@@ -160,6 +169,15 @@ function processLineItemTypeChange() {
 
 function processLineItemComponentChange() {
 	populateSimilarLineItem();
+}
+
+function emptyLineItem() {
+	$("#lineItemDescription").val("");
+	$("#lineItemNoOfHours").val("");
+	$("#lineItemLaborRate").val("");
+	$("#lineItemTotalLaborCost").val("");
+	$("#lineItemTotalPartsCost").val("");
+	$("#lineItemTotalCost").val("");
 }
 
 function populateSimilarLineItem() {
@@ -180,6 +198,8 @@ function populateSimilarLineItem() {
 	var typeId = document.getElementById("lineItemType").value;
 	var componentId = document.getElementById("lineItemComponent").value;
 	if (typeId == '' || componentId == '') {
+		emptyLineItem();
+		populateCosts();
 		return;
 	}
 	
@@ -226,10 +246,8 @@ function populateCosts() {
 	if (originalTotalOrderCostElem.value != '') {
 		originalTotalOrderCost = parseFloat((parseFloat(originalTotalOrderCostElem.value)).toFixed(2));
 	}
-	if (lineItemIdElem.value != '') {
-		originalTotalOrderCost = originalTotalOrderCost - originalLineItemTotalCost;
-		originalTotalOrderCost = parseFloat((originalTotalOrderCost.toFixed(2)));
-	}
+	originalTotalOrderCost = originalTotalOrderCost - originalLineItemTotalCost;
+	originalTotalOrderCost = parseFloat((originalTotalOrderCost.toFixed(2)));
 	
 	var lineItemNoOfHours = parseFloat(0.0);
 	if (lineItemNoOfHoursElem.value != '') {
@@ -266,7 +284,7 @@ function populateCosts() {
 <form:form action="save.do" name="repairOrderForm" commandName="modelObject" method="post">
 	<form:hidden path="id" id="id" />
 	<form:hidden path="lineItemId" id="lineItemId" />
-	<input type="hidden" name="originalLineItemTotalCost" id="originalLineItemTotalCost" value="" />
+	<input type="hidden" name="originalLineItemTotalCost" id="originalLineItemTotalCost" value="${modelObject.lineItemTotalCost}" />
 	<input type="hidden" name="originalTotalOrderCost" id="originalTotalOrderCost" value="${modelObject.totalCost}" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
