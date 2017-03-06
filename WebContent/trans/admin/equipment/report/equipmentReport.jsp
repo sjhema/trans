@@ -6,21 +6,6 @@
 			<td colspan="4"><b><primo:label code="Search Equipment Report" /></b></td>
 		</tr>
 		<tr>
-			<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
-			<td align="${left}">
-				<select id="vehicle" name="vehicle" style="min-width:154px; max-width:154px">
-					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${vehicles}" var="item">
-						<c:set var="selected" value="" />
-						<c:if test="${sessionScope.searchCriteria.searchMap['vehicle'] ne ''}">
-							<c:if test="${sessionScope.searchCriteria.searchMap['vehicle'] == item.unit}">
-								<c:set var="selected" value="selected" />
-							</c:if>
-						</c:if>
-						<option value="${item.unit}"${selected}>${item.unit}</option>
-					</c:forEach>
-				</select>
-			</td>
 			<td align="${left}" class="first"><primo:label code="Company"/></td>
 			<td align="${left}">
 				<select id="company" name="company" style="min-width:154px; max-width:154px">
@@ -35,6 +20,24 @@
 				</select>
 			</td>
 	   	</tr>
+	   	<tr>
+	   		<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
+			<td align="${left}">
+				<select id="vehicle" name="vehicle" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${vehicles}" var="item">
+						<c:set var="selected" value="" />
+						<c:if test="${sessionScope.searchCriteria.searchMap['vehicle'] ne ''}">
+							<c:if test="${sessionScope.searchCriteria.searchMap['vehicle'] == item.unit}">
+								<c:set var="selected" value="selected" />
+							</c:if>
+						</c:if>
+						<option value="${item.unit}"${selected}>${item.unit}</option>
+					</c:forEach>
+				</select>
+			</td>
+	   	</tr>
+		<!--
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Loan No"/></td>
 			<td align="${left}">
@@ -129,6 +132,7 @@
 				</select>
 			</td>
 		</tr>
+		-->
 	 	<tr>
 			<td align="${left}"></td>
 			<td align="${left}">

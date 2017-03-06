@@ -3,10 +3,12 @@ package com.primovision.lutransport.controller.admin;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import java.text.ParseException;
+//import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class EquipmentReportController extends BaseController {
 	}
 	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	//private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/start.do")
 	public String start(ModelMap model, HttpServletRequest request) {
@@ -78,7 +80,7 @@ public class EquipmentReportController extends BaseController {
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
 	public String search(ModelMap model, HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("modelObject") EquipmentReportInput input) {
-		Map imagesMap = new HashMap();
+		Map<String, Object> imagesMap = new HashMap<String, Object>();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		request.getSession().setAttribute("input", input);
@@ -87,6 +89,7 @@ public class EquipmentReportController extends BaseController {
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(1000);
+		criteria.setPage(0);
 		
 		Map<String, Object> datas = generateData(criteria, request, input);
 		List<EquipmentReportOutput> equipmentReportOutputList = (List<EquipmentReportOutput>) datas.get("data");
@@ -113,7 +116,7 @@ public class EquipmentReportController extends BaseController {
 	public String export(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response,
 			@RequestParam(required = true, value = "type") String type) {
-		Map imagesMap = new HashMap();
+		Map<String, Object> imagesMap = new HashMap<String, Object>();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
@@ -134,7 +137,6 @@ public class EquipmentReportController extends BaseController {
 		try {
 			out = dynamicReportService.generateStaticReport("equipmentReport",
 					equipmentReportOutputList, params, type, request);
-			
 			out.writeTo(response.getOutputStream());
 			
 			return null;
@@ -220,6 +222,196 @@ public class EquipmentReportController extends BaseController {
 	}
 	
 	private List<EquipmentReportOutput> performSearch(SearchCriteria criteria, EquipmentReportInput input) {
+		String company = input.getCompany();
+		String vehicle = input.getVehicle();
+		
+		StringBuffer query = new StringBuffer("select obj from Vehicle obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from Vehicle obj where 1=1");
+		StringBuffer whereClause = new StringBuffer();
+		
+		if (StringUtils.isNotEmpty(company)) {
+			whereClause.append(" and obj.owner=" + company);
+		}
+		
+		if (StringUtils.isNotEmpty(vehicle)) {
+			whereClause.append(" and obj.unit=" + vehicle);
+		}
+      
+      query.append(whereClause);
+      countQuery.append(whereClause);
+      
+      query.append(" order by obj.unit asc");
+      
+      Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
+		criteria.setRecordCount(recordCount.intValue());	
+		
+		List<Vehicle> vehicleList = 
+				genericDAO.getEntityManager().createQuery(query.toString())
+					.setMaxResults(criteria.getPageSize())
+					.setFirstResult(criteria.getPage() * criteria.getPageSize())
+					.getResultList();
+		
+		List<EquipmentReportOutput> equipmentReportOutputList = new ArrayList<EquipmentReportOutput>();
+		map(equipmentReportOutputList, vehicleList);
+		sort(equipmentReportOutputList);
+		
+		return equipmentReportOutputList;
+	}
+	
+	private void sort(List<EquipmentReportOutput> equipmentReportOutputList) {
+		if (equipmentReportOutputList == null || equipmentReportOutputList.isEmpty()) {
+			return;
+		}
+		
+		Collections.sort(equipmentReportOutputList, new Comparator<EquipmentReportOutput>() {
+			@Override
+			public int compare(final EquipmentReportOutput record1, final EquipmentReportOutput record2) {
+				String loanNo1 = StringUtils.isEmpty(record1.getLoanNo()) ? StringUtils.EMPTY : record1.getLoanNo();
+				String loanNo2 = StringUtils.isEmpty(record2.getLoanNo()) ? StringUtils.EMPTY : record2.getLoanNo();
+				
+				String unit1 = StringUtils.isEmpty(record1.getUnit()) ? StringUtils.EMPTY : record1.getUnit();
+				String unit2 = StringUtils.isEmpty(record2.getUnit()) ? StringUtils.EMPTY : record2.getUnit();
+				
+				int c = loanNo1.compareTo(loanNo2);
+				if (c == 0) {
+					c = unit1.compareTo(unit2);
+				}
+				
+				return c;
+			}
+		});
+	}
+	
+	private void map(List<EquipmentReportOutput> equipmentReportOutputList, List<Vehicle> vehicleList) {
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			return;
+		}
+		
+		for (Vehicle aVehicle : vehicleList) {
+			VehicleLoan aVehicleLoan = retrieveVehicleLoan(aVehicle.getId());
+			VehicleTitle aVehicleTitle = retrieveVehicleTitle(aVehicle.getId());
+			VehicleSale aVehicleSale = retrieveVehicleSale(aVehicle.getId());
+			
+			if (aVehicleLoan == null && aVehicleTitle == null && aVehicleSale == null) {
+				continue;
+			}
+			
+			if (aVehicleLoan != null) {
+				int noOfPaymentsLeft = PaymentUtil.calculateNoOfPaymentsLeft(aVehicleLoan.getNoOfPayments(), 
+						aVehicleLoan.getEndDate(), aVehicleLoan.getPaymentDueDom());
+				aVehicleLoan.setPaymentsLeft(noOfPaymentsLeft);
+			}
+			
+			EquipmentReportOutput aEquipmentReportOutput = new EquipmentReportOutput();
+			map(aEquipmentReportOutput, aVehicle);
+			map(aEquipmentReportOutput, aVehicleLoan);
+			map(aEquipmentReportOutput, aVehicleTitle);
+			map(aEquipmentReportOutput, aVehicleSale);
+			
+			equipmentReportOutputList.add(aEquipmentReportOutput);
+		}
+	}
+	
+	private void map(EquipmentReportOutput equipmentReportOutput, Vehicle vehicle) {
+		equipmentReportOutput.setUnit(vehicle.getUnitNum());
+		equipmentReportOutput.setCompany(vehicle.getOwner().getName());
+		equipmentReportOutput.setVin(vehicle.getVinNumber());
+		equipmentReportOutput.setYear(vehicle.getYear());
+		equipmentReportOutput.setMake(vehicle.getMake());
+		equipmentReportOutput.setModel(vehicle.getModel());
+	}
+	
+	private void map(EquipmentReportOutput equipmentReportOutput, VehicleLoan vehicleLoan) {
+		if (vehicleLoan == null) {
+			return;
+		}
+		
+		equipmentReportOutput.setLoanNo(vehicleLoan.getLoanNo());
+		equipmentReportOutput.setLender(vehicleLoan.getLender().getName());
+		
+		equipmentReportOutput.setPaymentAmount(vehicleLoan.getPaymentAmount());
+		equipmentReportOutput.setPaymentDueDom(vehicleLoan.getPaymentDueDom());
+		equipmentReportOutput.setLoanStartDate(dateFormat.format(vehicleLoan.getStartDate()));
+		equipmentReportOutput.setLoanEndDate(dateFormat.format(vehicleLoan.getEndDate()));
+		equipmentReportOutput.setInterestRate(vehicleLoan.getInterestRate());
+		equipmentReportOutput.setNoOfPayments(vehicleLoan.getNoOfPayments());
+		equipmentReportOutput.setPaymentsLeft(vehicleLoan.getPaymentsLeft());
+	}
+	
+	private void map(EquipmentReportOutput equipmentReportOutput, VehicleTitle vehicleTitle) {
+		if (vehicleTitle == null) {
+			return;
+		}
+		
+		equipmentReportOutput.setHoldsTitle(vehicleTitle.getHoldsTitle());
+		equipmentReportOutput.setTitleOwner(vehicleTitle.getTitleOwner().getName());
+		equipmentReportOutput.setRegisteredOwner(vehicleTitle.getRegisteredOwner().getName());
+		
+		String title = StringUtils.isEmpty(vehicleTitle.getTitle()) ? StringUtils.EMPTY : vehicleTitle.getTitle();
+		equipmentReportOutput.setTitle(title);
+	}
+	
+	private void map(EquipmentReportOutput equipmentReportOutput, VehicleSale vehicleSale) {
+		if (vehicleSale == null) {
+			return;
+		}
+		
+		equipmentReportOutput.setBuyer(vehicleSale.getBuyer().getName());
+		equipmentReportOutput.setSaleDate(dateFormat.format(vehicleSale.getSaleDate()));
+		equipmentReportOutput.setSalePrice(vehicleSale.getSalePrice());
+	}
+	
+	private VehicleLoan retrieveVehicleLoan(Long vehicleId) {
+		String query = "select obj from VehicleLoan obj where obj.vehicle.id=" + vehicleId
+								+ " order by id desc";
+		List<VehicleLoan> vehicleLoanList = genericDAO.executeSimpleQuery(query);
+		
+		return (vehicleLoanList.isEmpty() ? null : vehicleLoanList.get(0));
+	}
+	
+	private VehicleTitle retrieveVehicleTitle(Long vehicleId) {
+		String query = "select obj from VehicleTitle obj where obj.vehicle.id=" + vehicleId
+								+ " order by id desc";
+		List<VehicleTitle> vehicleTitleList = genericDAO.executeSimpleQuery(query);
+		
+		return (vehicleTitleList.isEmpty() ? null : vehicleTitleList.get(0));
+	}
+	
+	private VehicleSale retrieveVehicleSale(Long vehicleId) {
+		String query = "select obj from VehicleSale obj where obj.vehicle.id=" + vehicleId
+								+ " order by id desc";
+		List<VehicleSale> vehicleSaleList = genericDAO.executeSimpleQuery(query);
+		
+		return (vehicleSaleList.isEmpty() ? null : vehicleSaleList.get(0));
+	}
+	
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
+		
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		model.addAttribute("owners", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
+		criterias.clear();
+		
+		model.addAttribute("lenders", genericDAO.findByCriteria(EquipmentLender.class, criterias, "name", false));
+		model.addAttribute("buyers", genericDAO.findByCriteria(EquipmentBuyer.class, criterias, "name", false));
+		
+		model.addAttribute("titles", genericDAO.findByCriteria(VehicleTitle.class, criterias, "title", false));
+	
+		String loanQuery = "select distinct obj.loanNo from VehicleLoan obj order by obj.loanNo asc";
+		model.addAttribute("vehicleLoans", genericDAO.executeSimpleQuery(loanQuery));
+	}
+	
+	@ModelAttribute("modelObject")
+	public EquipmentReportInput setupModel(HttpServletRequest request) {
+		return new EquipmentReportInput();
+	}
+	
+	/*private List<EquipmentReportOutput> performSearch(SearchCriteria criteria, EquipmentReportInput input) {
 		String loanNo = input.getLoanNo();
 		String company = input.getCompany();
 		String lender = input.getLender();
@@ -244,30 +436,30 @@ public class EquipmentReportController extends BaseController {
 			whereClause.append(" and obj.vehicle.unit=" + vehicle);
 		}
 	   if (StringUtils.isNotEmpty(loanStartDate)){
-        	try {
-        		whereClause.append(" and obj.startDate >='"+sdf.format(dateFormat.parse(loanStartDate))+"'");
+	     	try {
+	     		whereClause.append(" and obj.startDate >='"+sdf.format(dateFormat.parse(loanStartDate))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-        	
+	     	
 		}
-      if (StringUtils.isNotEmpty(loanEndDate)){
+	   if (StringUtils.isNotEmpty(loanEndDate)){
 	     	try {
 	     		whereClause.append(" and obj.endDate <='"+sdf.format(dateFormat.parse(loanEndDate))+"'");
 	     	} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
-      
-      addTitleCriteria(whereClause, input);
-      addSaleCriteria(whereClause, input);
-      
-      query.append(whereClause);
-      countQuery.append(whereClause);
-      
-      query.append(" order by obj.loanNo asc, obj.vehicle.unit asc");
-      
-      Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
+	   
+	   addTitleCriteria(whereClause, input);
+	   addSaleCriteria(whereClause, input);
+	   
+	   query.append(whereClause);
+	   countQuery.append(whereClause);
+	   
+	   query.append(" order by obj.loanNo asc, obj.vehicle.unit asc");
+	   
+	   Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
 		
 		List<VehicleLoan> vehicleLoanList = 
@@ -281,7 +473,7 @@ public class EquipmentReportController extends BaseController {
 		
 		return equipmentReportOutputList;
 	}
-	
+
 	private void addTitleCriteria(StringBuffer whereClause, EquipmentReportInput input) {
 		String titleOwner = input.getTitleOwner();
 		String registeredOwner = input.getRegisteredOwner();
@@ -374,95 +566,5 @@ public class EquipmentReportController extends BaseController {
 			
 			equipmentReportOutputList.add(aEquipmentReportOutput);
 		}
-	}
-	
-	private void map(EquipmentReportOutput equipmentReportOutput, VehicleLoan vehicleLoan) {
-		if (vehicleLoan == null) {
-			return;
-		}
-		
-		equipmentReportOutput.setLoanNo(vehicleLoan.getLoanNo());
-		
-		equipmentReportOutput.setUnit(vehicleLoan.getVehicle().getUnitNum());
-		equipmentReportOutput.setVin(vehicleLoan.getVehicle().getVinNumber());
-		equipmentReportOutput.setYear(vehicleLoan.getVehicle().getYear());
-		equipmentReportOutput.setMake(vehicleLoan.getVehicle().getMake());
-		equipmentReportOutput.setModel(vehicleLoan.getVehicle().getModel());
-		
-		equipmentReportOutput.setCompany(vehicleLoan.getVehicle().getOwner().getName());
-		equipmentReportOutput.setLender(vehicleLoan.getLender().getName());
-		
-		equipmentReportOutput.setPaymentAmount(vehicleLoan.getPaymentAmount());
-		equipmentReportOutput.setPaymentDueDom(vehicleLoan.getPaymentDueDom());
-		equipmentReportOutput.setLoanStartDate(dateFormat.format(vehicleLoan.getStartDate()));
-		equipmentReportOutput.setLoanEndDate(dateFormat.format(vehicleLoan.getEndDate()));
-		equipmentReportOutput.setInterestRate(vehicleLoan.getInterestRate());
-		equipmentReportOutput.setNoOfPayments(vehicleLoan.getNoOfPayments());
-		equipmentReportOutput.setPaymentsLeft(vehicleLoan.getPaymentsLeft());
-	}
-	
-	private void map(EquipmentReportOutput equipmentReportOutput, VehicleTitle vehicleTitle) {
-		if (vehicleTitle == null) {
-			return;
-		}
-		
-		equipmentReportOutput.setHoldsTitle(vehicleTitle.getHoldsTitle());
-		equipmentReportOutput.setTitleOwner(vehicleTitle.getTitleOwner().getName());
-		equipmentReportOutput.setRegisteredOwner(vehicleTitle.getRegisteredOwner().getName());
-		
-		String title = StringUtils.isEmpty(vehicleTitle.getTitle()) ? StringUtils.EMPTY : vehicleTitle.getTitle();
-		equipmentReportOutput.setTitle(title);
-	}
-	
-	private void map(EquipmentReportOutput equipmentReportOutput, VehicleSale vehicleSale) {
-		if (vehicleSale == null) {
-			return;
-		}
-		
-		equipmentReportOutput.setBuyer(vehicleSale.getBuyer().getName());
-		equipmentReportOutput.setSaleDate(dateFormat.format(vehicleSale.getSaleDate()));
-		equipmentReportOutput.setSalePrice(vehicleSale.getSalePrice());
-	}
-	
-	private VehicleTitle retrieveVehicleTitle(Long vehicleId) {
-		String query = "select obj from VehicleTitle obj where obj.vehicle.id=" + vehicleId
-								+ " order by id desc";
-		List<VehicleTitle> aVehicleTitleList = genericDAO.executeSimpleQuery(query);
-		
-		return (aVehicleTitleList.isEmpty() ? null : aVehicleTitleList.get(0));
-	}
-	
-	private VehicleSale retrieveVehicleSale(Long vehicleId) {
-		String query = "select obj from VehicleSale obj where obj.vehicle.id=" + vehicleId
-								+ " order by id desc";
-		List<VehicleSale> aVehicleSaleList = genericDAO.executeSimpleQuery(query);
-		
-		return (aVehicleSaleList.isEmpty() ? null : aVehicleSaleList.get(0));
-	}
-	
-	public void setupList(ModelMap model, HttpServletRequest request) {
-		Map criterias = new HashMap();
-		
-		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
-		
-		criterias.clear();
-		criterias.put("type", 3);
-		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
-		model.addAttribute("owners", genericDAO.findByCriteria(Location.class, criterias, "name", false));
-		
-		criterias.clear();
-		
-		model.addAttribute("lenders", genericDAO.findByCriteria(EquipmentLender.class, criterias, "name", false));
-		model.addAttribute("buyers", genericDAO.findByCriteria(EquipmentBuyer.class, criterias, "name", false));
-		
-		model.addAttribute("titles", genericDAO.findByCriteria(VehicleTitle.class, criterias, "title", false));
-	
-		String loanQuery = "select distinct obj.loanNo from VehicleLoan obj order by obj.loanNo asc";
-		model.addAttribute("vehicleLoans", genericDAO.executeSimpleQuery(loanQuery));
-	}
-	
-	@ModelAttribute("modelObject")
-	public EquipmentReportInput setupModel(HttpServletRequest request) {
-		return new EquipmentReportInput();
-	}
+	}*/
 }

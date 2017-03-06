@@ -17,12 +17,12 @@ public class EquipmentReportOutput implements ReportModel {
 	private String lender = StringUtils.EMPTY;
 	private String loanNo = StringUtils.EMPTY;
 	
-	private Double paymentAmount = new Double(0.00);
+	private Double paymentAmount;
 	private String paymentDueDom = StringUtils.EMPTY;
 	
 	private String loanStartDate = StringUtils.EMPTY;
 	private String loanEndDate = StringUtils.EMPTY;
-	private Double interestRate = new Double(0.00);
+	private Double interestRate;
 	private Integer noOfPayments;
 	private Integer paymentsLeft;
 	

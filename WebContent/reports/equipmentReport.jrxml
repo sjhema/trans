@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="equipmentReport" pageWidth="1850" pageHeight="600" orientation="Landscape" columnWidth="1810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="8"/>
+	<property name="ireport.x" value="439"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="lender" class="java.lang.String"/>
 	<parameter name="titleOwner" class="java.lang.String"/>
@@ -47,21 +47,7 @@
 				<text><![CDATA[EQUIPMENT  REPORT]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="748" y="35" width="170" height="26" backcolor="#99CCFF"/>
-				<box>
-					<pen lineWidth="1.0" lineColor="#333333"/>
-					<topPen lineWidth="1.0" lineColor="#333333"/>
-					<leftPen lineWidth="1.0" lineColor="#333333"/>
-					<bottomPen lineWidth="1.0" lineColor="#333333"/>
-					<rightPen lineWidth="1.0" lineColor="#333333"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[TITLE OWNER]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Opaque" x="457" y="35" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="775" y="35" width="153" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -74,20 +60,8 @@
 				</textElement>
 				<text><![CDATA[COMPANY]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="748" y="61" width="170" height="20"/>
-				<box>
-					<pen lineWidth="1.0"/>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{titleOwner}]]></textFieldExpression>
-			</textField>
 			<textField pattern="">
-				<reportElement x="457" y="61" width="153" height="20"/>
+				<reportElement x="775" y="61" width="153" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -98,84 +72,6 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{company}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement mode="Opaque" x="610" y="35" width="138" height="26" backcolor="#99CCFF"/>
-				<box>
-					<pen lineWidth="1.0" lineColor="#333333"/>
-					<topPen lineWidth="1.0" lineColor="#333333"/>
-					<leftPen lineWidth="1.0" lineColor="#333333"/>
-					<bottomPen lineWidth="1.0" lineColor="#333333"/>
-					<rightPen lineWidth="1.0" lineColor="#333333"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[LENDER]]></text>
-			</staticText>
-			<textField pattern="">
-				<reportElement x="610" y="61" width="138" height="20"/>
-				<box>
-					<pen lineWidth="1.0"/>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{lender}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="918" y="61" width="170" height="20"/>
-				<box>
-					<pen lineWidth="1.0"/>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{registeredOwner}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement mode="Opaque" x="918" y="35" width="170" height="26" backcolor="#99CCFF"/>
-				<box>
-					<pen lineWidth="1.0" lineColor="#333333"/>
-					<topPen lineWidth="1.0" lineColor="#333333"/>
-					<leftPen lineWidth="1.0" lineColor="#333333"/>
-					<bottomPen lineWidth="1.0" lineColor="#333333"/>
-					<rightPen lineWidth="1.0" lineColor="#333333"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[REGISTERED OWNER]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="1088" y="61" width="170" height="20"/>
-				<box>
-					<pen lineWidth="1.0"/>
-					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="1.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{buyer}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement mode="Opaque" x="1088" y="35" width="170" height="26" backcolor="#99CCFF"/>
-				<box>
-					<pen lineWidth="1.0" lineColor="#333333"/>
-					<topPen lineWidth="1.0" lineColor="#333333"/>
-					<leftPen lineWidth="1.0" lineColor="#333333"/>
-					<bottomPen lineWidth="1.0" lineColor="#333333"/>
-					<rightPen lineWidth="1.0" lineColor="#333333"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[BUYER]]></text>
-			</staticText>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -590,7 +486,7 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{loanEndDate}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="1162" y="0" width="56" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -632,7 +528,7 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{title}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="1041" y="0" width="61" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -644,7 +540,7 @@
 				<textElement textAlignment="Center">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{interestRate})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[($F{interestRate}) == null ? "" : new java.text.DecimalFormat("###0.00").format($F{interestRate})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1650" y="0" width="83" height="20"/>
@@ -702,7 +598,7 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{company}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="1102" y="0" width="60" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -740,7 +636,7 @@
 				<textElement textAlignment="Center"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{loanStartDate}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="748" y="0" width="84" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -752,7 +648,7 @@
 				<textElement textAlignment="Center">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{paymentAmount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[($F{paymentAmount} == null ? "" : new java.text.DecimalFormat("###0.00").format($F{paymentAmount}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1733" y="0" width="71" height="20"/>
