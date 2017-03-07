@@ -1,5 +1,8 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -9,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -23,11 +27,14 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+
+import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
@@ -57,7 +64,7 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 	
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
-		Map criterias = new HashMap();
+		Map<String, Object> criterias = new HashMap<String, Object>();
 		
 		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
 		model.addAttribute("buyers", genericDAO.findByCriteria(EquipmentBuyer.class, criterias, "name", false));
@@ -92,6 +99,39 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		model.addAttribute("list", vehicleSaleList);
 		
 		return urlContext + "/list";
+	}
+	
+	@Override
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html")) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + urlContext + "Report." + type);
+		}
+		
+		List<VehicleSale> vehicleSalesList = searchForExport(model, request);
+		
+		List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+		ByteArrayOutputStream out = null;
+		try {
+			out = dynamicReportService.exportReport(
+						urlContext + "Report", type, getEntityClass(), vehicleSalesList,
+						columnPropertyList, request);
+			out.writeTo(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+					out = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -150,7 +190,7 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.id asc");
+      query.append(" order by obj.vehicle.unit asc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
@@ -164,6 +204,21 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		populateAdditionalData(vehicleSaleList);
 		
 		return vehicleSaleList;
+	}
+	
+	private List<VehicleSale> searchForExport(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPage = criteria.getPage();
+		
+		criteria.setPage(0);
+		criteria.setPageSize(100000);
+		
+		List<VehicleSale> vehicleSalesList = performSearch(criteria);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(25);
+		
+		return vehicleSalesList;
 	}
 
 	private void validateSave(VehicleSale entity, BindingResult bindingResult) {

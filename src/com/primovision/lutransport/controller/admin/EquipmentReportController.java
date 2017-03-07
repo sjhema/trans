@@ -268,13 +268,14 @@ public class EquipmentReportController extends BaseController {
 			public int compare(final EquipmentReportOutput record1, final EquipmentReportOutput record2) {
 				String loanNo1 = StringUtils.isEmpty(record1.getLoanNo()) ? StringUtils.EMPTY : record1.getLoanNo();
 				String loanNo2 = StringUtils.isEmpty(record2.getLoanNo()) ? StringUtils.EMPTY : record2.getLoanNo();
-				
-				String unit1 = StringUtils.isEmpty(record1.getUnit()) ? StringUtils.EMPTY : record1.getUnit();
-				String unit2 = StringUtils.isEmpty(record2.getUnit()) ? StringUtils.EMPTY : record2.getUnit();
+				Integer unit1 = record1.getUnit();
+				Integer unit2 = record2.getUnit();
 				
 				int c = loanNo1.compareTo(loanNo2);
 				if (c == 0) {
-					c = unit1.compareTo(unit2);
+					c = ((unit1 == null) ?
+					         (unit2 == null ? 0 : -1):
+					         (unit2 == null ? 1 : unit1.compareTo(unit2)));
 				}
 				
 				return c;
@@ -313,7 +314,7 @@ public class EquipmentReportController extends BaseController {
 	}
 	
 	private void map(EquipmentReportOutput equipmentReportOutput, Vehicle vehicle) {
-		equipmentReportOutput.setUnit(vehicle.getUnitNum());
+		equipmentReportOutput.setUnit(vehicle.getUnit());
 		equipmentReportOutput.setCompany(vehicle.getOwner().getName());
 		equipmentReportOutput.setVin(vehicle.getVinNumber());
 		equipmentReportOutput.setYear(vehicle.getYear());

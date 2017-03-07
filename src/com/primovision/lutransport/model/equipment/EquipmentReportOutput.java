@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import com.primovision.lutransport.model.ReportModel;
 
 public class EquipmentReportOutput implements ReportModel {
-	private String unit = StringUtils.EMPTY;
+	private Integer unit;
 	
 	private String vin = StringUtils.EMPTY;
 	private String year = StringUtils.EMPTY;
@@ -35,10 +35,10 @@ public class EquipmentReportOutput implements ReportModel {
 	private String buyer = StringUtils.EMPTY;
 	private Double salePrice;
 	
-	public String getUnit() {
+	public Integer getUnit() {
 		return unit;
 	}
-	public void setUnit(String unit) {
+	public void setUnit(Integer unit) {
 		this.unit = unit;
 	}
 	public String getCompany() {
