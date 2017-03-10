@@ -293,7 +293,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
@@ -936,10 +936,12 @@ public class FuelVendorLogUploadUtil {
 			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 6) {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 7) { // Driver last name
+		} /*else if (columnIndex == 7) { // Driver last name
 			cell.setCellValue("Unknown");
 		} else if (columnIndex == 8) { // Driver first name
 			cell.setCellValue("Unknown VA");
+		} */else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue);
 		} else if (columnIndex == 9) { // Cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
