@@ -272,7 +272,7 @@ public class RepairOrderReportController extends BaseController {
 	}
 
 	public void setupList(ModelMap model, HttpServletRequest request) {
-		Map criterias = new HashMap();
+		Map<String, Object> criterias = new HashMap<String, Object>();
 		
 		model.addAttribute("lineItemTypes", genericDAO.findByCriteria(RepairOrderLineItemType.class, criterias, "type asc", false));
 		model.addAttribute("components", genericDAO.findByCriteria(RepairOrderComponent.class, criterias, "component asc", false));
@@ -281,7 +281,8 @@ public class RepairOrderReportController extends BaseController {
 		List<Driver> mechanics = genericDAO.executeSimpleQuery(query);
 		model.addAttribute("mechanics", mechanics);
 		
-		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
+		//model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
 		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class, criterias, "name", false));
 	
 		criterias.clear();
