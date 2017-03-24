@@ -5,6 +5,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Null;
 
 @Entity
 @Table(name="driver_fuelcard")
@@ -26,7 +27,9 @@ public class DriverFuelCard extends AbstractBaseModel{
 	protected Driver driver;
 	
 	
-
+	@ManyToOne
+	@JoinColumn(name="vehicle")
+	private Vehicle vehicle;
 	
 	
 	public void setFuelcard(FuelCard fuelcard) {
@@ -55,6 +58,14 @@ public class DriverFuelCard extends AbstractBaseModel{
 		this.fuelvendor = fuelvendor;
 	}
 
-	
+
+	public Vehicle getVehicle() {
+		return vehicle;
+	}
+
+
+	public void setVehicle(Vehicle vehicle) {
+		this.vehicle = vehicle;
+	}
 	
 }

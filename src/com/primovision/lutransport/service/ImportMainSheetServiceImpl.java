@@ -2776,14 +2776,18 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 											List<DriverFuelCard> driverfuelcard = genericDAO
 													.executeSimpleQuery(fuelCardQuery);
 											
-											if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0)
+											if (!driverfuelcard.isEmpty() && driverfuelcard.size() > 0) {
 												fuellog.setFuelcard(fuelcard.get(0));
-											else {
-												error = true;
-												lineError.append(
-														" Invalid  Fuel Card# for entered Fuel Vendor and Driver ,");
+											} else {
+												if (validateFuelCardForVehicle(fuellog, fuelcard.get(0))) {
+													fuellog.setFuelcard(fuelcard.get(0));
+												} else {
+													error = true;
+													lineError.append(
+														" Invalid Fuel Card# for entered Fuel Vendor and Driver/Vehicle, ");
+												}
 											}
-										}
+										} 
 									} else {
 										error = true;
 										lineError.append(" Invalid Card Number,");
@@ -4119,6 +4123,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		FuelCard fuelCard = null;
 		fuellog.setFuelcard(fuelCard);
 		return true;
+	}
+	
+	private boolean validateFuelCardForVehicle(FuelLog fuelLog, FuelCard fuelCard) {
+		if (fuelLog.getUnit() == null || fuelLog.getUnit().getId() == null
+				|| fuelLog.getFuelvendor() == null || fuelLog.getFuelvendor().getId() == null
+				|| fuelCard == null || fuelCard.getId() == null) {
+			return false;
+		}
+		
+		String fuelCardVehicleQuery = "select obj from DriverFuelCard obj where "
+				+ " obj.vehicle =" + fuelLog.getUnit().getId()
+						+ " and obj.fuelvendor =" + fuelLog.getFuelvendor().getId()
+						+ " and obj.fuelcard =" +  fuelCard.getId();
+		System.out.println("********Fuel card vehicle query is " + fuelCardVehicleQuery);
+		List<DriverFuelCard> driverFuelCardList = genericDAO.executeSimpleQuery(fuelCardVehicleQuery);
+		
+		return (driverFuelCardList != null && !driverFuelCardList.isEmpty());
 	}
 
 	@Override

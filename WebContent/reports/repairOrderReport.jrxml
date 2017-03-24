@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="repairOrderReport" pageWidth="1450" pageHeight="750" orientation="Landscape" columnWidth="1410" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="598"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="noOfLineItems" class="java.lang.Integer"/>
 	<parameter name="orderDateRange" class="java.lang.String"/>
@@ -23,6 +23,12 @@
 	<field name="repairOrder.totalCost" class="java.lang.Double"/>
 	<field name="repairOrder.company.name" class="java.lang.String"/>
 	<field name="repairOrder.subcontractor.name" class="java.lang.String"/>
+	<variable name="totalOrderLaborCost" class="java.lang.Double" resetType="Group" resetGroup="repairOrderGroup" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalLaborCost}]]></variableExpression>
+	</variable>
+	<variable name="totalOrderPartsCost" class="java.lang.Double" resetType="Group" resetGroup="repairOrderGroup" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalPartsCost}]]></variableExpression>
+	</variable>
 	<group name="repairOrderGroup" keepTogether="true">
 		<groupExpression><![CDATA[$F{repairOrder.id}]]></groupExpression>
 		<groupHeader>
@@ -228,7 +234,7 @@
 		<groupFooter>
 			<band height="34">
 				<staticText>
-					<reportElement x="3" y="0" width="110" height="21"/>
+					<reportElement x="3" y="0" width="110" height="24"/>
 					<box>
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.0"/>
@@ -242,14 +248,14 @@
 					<text><![CDATA[No. of Line Items]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="113" y="0" width="127" height="21"/>
+					<reportElement x="113" y="0" width="127" height="24"/>
 					<textElement verticalAlignment="Middle">
 						<font isBold="true"/>
 					</textElement>
 					<textFieldExpression class="java.lang.Integer"><![CDATA[$V{repairOrderGroup_COUNT}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="1180" y="0" width="105" height="21"/>
+					<reportElement x="1015" y="0" width="105" height="24"/>
 					<box>
 						<pen lineWidth="0.0"/>
 						<topPen lineWidth="0.0"/>
@@ -257,7 +263,7 @@
 						<bottomPen lineWidth="0.0"/>
 						<rightPen lineWidth="0.0"/>
 					</box>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
+					<textElement verticalAlignment="Middle">
 						<font size="11" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Total Order Cost]]></text>
@@ -275,6 +281,34 @@
 						<font isBold="true"/>
 					</textElement>
 					<textFieldExpression class="java.lang.String"><![CDATA["$"+ new java.text.DecimalFormat("###0.00").format($F{repairOrder.totalCost})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1120" y="0" width="88" height="24"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA["$"+ new java.text.DecimalFormat("###0.00").format($V{totalOrderLaborCost})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1208" y="0" width="77" height="24"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA["$"+ new java.text.DecimalFormat("###0.00").format($V{totalOrderPartsCost})]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupFooter>
@@ -580,7 +614,7 @@
 	<summary>
 		<band height="24" splitType="Stretch">
 			<staticText>
-				<reportElement x="3" y="0" width="162" height="21"/>
+				<reportElement x="3" y="0" width="162" height="24"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
@@ -594,14 +628,14 @@
 				<text><![CDATA[Total No. of All Line Items]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="167" y="0" width="101" height="21"/>
+				<reportElement x="171" y="0" width="101" height="24"/>
 				<textElement verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$P{noOfLineItems}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="1120" y="0" width="165" height="21"/>
+				<reportElement x="1120" y="0" width="165" height="24"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>

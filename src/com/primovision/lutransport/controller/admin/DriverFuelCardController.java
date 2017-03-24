@@ -2,6 +2,8 @@ package com.primovision.lutransport.controller.admin;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,8 @@ import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.equipment.EquipmentReportOutput;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 
 @Controller
@@ -53,6 +57,8 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 	public void initBinder(WebDataBinder binder) {
 		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(
 				Driver.class));
+		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(
+				Vehicle.class));
 		binder.registerCustomEditor(FuelCard.class, new AbstractModelEditor(
 				FuelCard.class));
 		binder.registerCustomEditor(FuelVendor.class, new AbstractModelEditor(
@@ -80,6 +86,9 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 			criterias.put("status", 1);
 			model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		}
+		
+		// select obj from Vehicle obj where obj.type=1 group by obj.unit
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery("select obj from Vehicle obj group by obj.unit, obj.type"));
 		
 		criterias.clear();
 		model.addAttribute("searchdriver", genericDAO.executeSimpleQuery("select obj from Driver obj group by obj.fullName"));
@@ -116,8 +125,47 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
 		criteria.setPageSize(25);
-		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"driver.lastName",false));
+		
+		List<DriverFuelCard> driverFuelCardList = performSearch(criteria); 
+		model.addAttribute("list", driverFuelCardList);
+		
 		return urlContext + "/list";
+	}
+	
+	private List<DriverFuelCard> performSearch(SearchCriteria criteria) {
+		/*String order = "driver.lastName";
+		if (!StringUtils.isEmpty(request.getParameter("vehicle.unit"))) {
+			order = "vehicle.unit";
+		}
+		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria,order,false));*/
+		
+		List<DriverFuelCard> driverFuelCardList = genericDAO.search(getEntityClass(), criteria, null, false); 
+		if (driverFuelCardList == null || driverFuelCardList.isEmpty()) {
+			return driverFuelCardList;
+		}
+		
+		Collections.sort(driverFuelCardList, new Comparator<DriverFuelCard>() {
+			@Override
+			public int compare(final DriverFuelCard record1, final DriverFuelCard record2) {
+				String driverLastName1 = (record1.getDriver() == null || StringUtils.isEmpty(record1.getDriver().getLastName()))
+						? StringUtils.EMPTY : record1.getDriver().getLastName();
+				String driverLastName2 =(record2.getDriver() == null || StringUtils.isEmpty(record2.getDriver().getLastName()))
+						? StringUtils.EMPTY : record2.getDriver().getLastName();
+				Integer unit1 = (record1.getVehicle() == null) ? null : record1.getVehicle().getUnit();
+				Integer unit2 = (record2.getVehicle() == null) ? null : record2.getVehicle().getUnit();
+				
+				int c = driverLastName1.compareTo(driverLastName2);
+				if (c == 0) {
+					c = ((unit1 == null) ?
+					         (unit2 == null ? 0 : -1):
+					         (unit2 == null ? 1 : unit1.compareTo(unit2)));
+				}
+				
+				return c;
+			}
+		});
+		
+		return driverFuelCardList;
 	}
 	
 	@Override
@@ -125,7 +173,10 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 		setupList(model, request);
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
-		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"driver.lastName",false));
+		
+		List<DriverFuelCard> driverFuelCardList = performSearch(criteria); 
+		model.addAttribute("list", driverFuelCardList);
+		
 		return urlContext + "/list";
 	}
 	
@@ -133,10 +184,10 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 	@Override
 	public String save(HttpServletRequest request, @ModelAttribute("modelObject") DriverFuelCard entity,
 			BindingResult bindingResult, ModelMap model) {	
-		if (entity.getDriver() == null) {
+		/*if (entity.getDriver() == null) {
 			bindingResult.rejectValue("driver", "error.select.option",
 					null, null);
-		}
+		}*/
 		if (entity.getFuelvendor() == null) {
 			bindingResult.rejectValue("fuelvendor", "error.select.option",
 					null, null);
@@ -186,7 +237,14 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 		
 		 Map prop=new HashMap();
     	 prop.put("fuelvendor",entity.getFuelvendor().getId() );
-    	 prop.put("driver",entity.getDriver().getId() );
+    	 
+    	 if (entity.getDriver() != null) {
+    		 prop.put("driver",entity.getDriver().getId() );
+    	 } else {
+   		 prop.put("vehicle",entity.getVehicle().getId() );
+   	 }
+    	 
+    	 
     	 prop.put("fuelcard",entity.getFuelcard().getId() );
     	  boolean rst=genericDAO.isUnique(DriverFuelCard.class,entity, prop);      	  
     	  if(!rst){
@@ -194,11 +252,33 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
     		  Map criteria = new HashMap();
 				criteria.put("fuelvendor.id",Long.parseLong(request.getParameter("fuelvendor")));
 				model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criteria,"fuelcardNum",false));
-    		  request.getSession().setAttribute("error","Duplicate Entry! Same Card is already been assigned to this Driver.");
+				
+				String errorMsg = (entity.getDriver() != null) ? "Driver": "Vehicle";
+    		  request.getSession().setAttribute("error","Duplicate Entry! Same Card has already been assigned to this " + errorMsg);
     		  return urlContext + "/form";
     	  }
-    	 
-    	 
+    	  
+    
+    	String driverFuelCardQuery = "select obj from DriverFuelCard obj where status=1";
+    	driverFuelCardQuery += " and fuelcard.id=" + entity.getFuelcard().getId();
+    	driverFuelCardQuery += " and fuelvendor.id=" + entity.getFuelvendor().getId();
+   	if (entity.getDriver() != null) {
+   		 driverFuelCardQuery += " and vehicle is not null";
+   	} else {
+   		 driverFuelCardQuery += " and driver is not null";
+   	}
+  		List<DriverFuelCard> driverFuelCardList = genericDAO.executeSimpleQuery(driverFuelCardQuery);
+  		if (driverFuelCardList != null && !driverFuelCardList.isEmpty()) {
+  			setupCreate(model, request);    
+  			Map criteria = new HashMap();
+			criteria.put("fuelvendor.id",Long.parseLong(request.getParameter("fuelvendor")));
+			model.addAttribute("fuelcard",genericDAO.findByCriteria(FuelCard.class,criteria,"fuelcardNum",false));
+			
+			String errorMsg = (entity.getDriver() != null) ? "Vehicle": "Driver";
+			request.getSession().setAttribute("error", "Duplicate Entry! Same Card has already been assigned to a " + errorMsg);
+		  return urlContext + "/form";
+  		}
+  		
 		beforeSave(request, entity, model);
 		// merge into datasource
 		genericDAO.saveOrUpdate(entity);

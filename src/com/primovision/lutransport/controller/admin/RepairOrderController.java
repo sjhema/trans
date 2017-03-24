@@ -271,6 +271,10 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		
 		saveLineItem(entity);
 		
+		if (reconcileCost(entity)) {
+			genericDAO.saveOrUpdate(entity);
+		}
+		
 		request.getSession().setAttribute("msg", "Repair order saved successfully");
 		
 		setupCreate(model, request);
@@ -278,6 +282,22 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		return getUrlContext() + "/form";
 	}
 	
+	private boolean reconcileCost(RepairOrder entity) {
+		String query = "select obj from RepairOrderLineItem obj where obj.repairOrder=" + entity.getId();
+		List<RepairOrderLineItem> repairOrderLineItemList = genericDAO.executeSimpleQuery(query);
+		Double actualTotalOrderCost = 0.0;
+		for (RepairOrderLineItem aRepairOrderLineItem : repairOrderLineItemList) {
+			actualTotalOrderCost += (aRepairOrderLineItem.getTotalLaborCost() + aRepairOrderLineItem.getTotalPartsCost());
+		}
+		
+		if (entity.getTotalCost() != actualTotalOrderCost) {
+			entity.setTotalCost(actualTotalOrderCost);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	private void saveLineItem(RepairOrder entity) {
 		if (StringUtils.isEmpty(entity.getLineItemType())) {
 			return;

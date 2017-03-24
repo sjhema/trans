@@ -1,5 +1,25 @@
 <%@ include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
+var submitting = false;
+function submitForm(){
+	if(submitting) {
+    	alert('Please wait a moment...');
+    } else {
+    	var driver = $("#driver").val();
+    	var vehicle = $("#vehicle").val();
+    	if (driver == "" && vehicle == "") {
+    		alert("Please choose either Driver or Vehicle");
+    		return false;
+    	}
+    	if (driver != "" && vehicle != "") {
+    		alert("Please choose one of either Driver or Vehicle");
+    		return false;
+    	}
+    	
+        submitting = true;
+        document.forms["fuelcardForm"].submit();
+	}
+}
 
 function findFuelCard(){
 	if(document.getElementById("fuelvendor").value == ""){
@@ -25,6 +45,7 @@ function findFuelCard(){
 		
 	}
 }
+
 	</script>
 
 <h3><primo:label code="Manage Driver Fuel Cards"/></h3>
@@ -49,8 +70,16 @@ function findFuelCard(){
 					<form:options items="${drivers}" itemValue="id"
 						itemLabel="fullName" />
 				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" /></td>
-			
-		
+			</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Vehicle" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="vehicle" id="vehicle" style="min-width:184px; max-width:184px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:options items="${vehicles}" itemValue="id" itemLabel="unit" />
+				</form:select> 
+				<br> <form:errors path="vehicle" cssClass="errorMessage" />
+			</td>
 		</tr>
 		
 		
@@ -95,9 +124,10 @@ function findFuelCard(){
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td align="${left}" colspan="2"><input type="submit"
-				name="create" id="create" onclick=""
-				value="<primo:label code="Save"/>" class="flat" /> <input
+			<td align="${left}" colspan="2">
+				<input type="button" name="create" id="create" onclick="javascript:submitForm();"
+					value="<primo:label code="Save"/>" class="flat" />
+				<input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"
 				value="<primo:label code="Cancel"/>" class="flat"

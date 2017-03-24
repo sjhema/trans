@@ -44,9 +44,26 @@
 					</c:forEach>
 			</select></td>
 		
-		
-		
-			<td align="${left}" class="first"><primo:label code="Fule Vendor" /></td>
+			<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
+			<td align="${left}">
+				<select id="vehicle.unit" name="vehicle.unit" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${vehicles}" var="item">
+						<c:set var="selected" value="" />
+						<c:if test="${sessionScope.searchCriteria.searchMap['vehicle.unit'] ne ''}">
+							<c:if test="${sessionScope.searchCriteria.searchMap['vehicle.unit'] == item.unit}">
+								<c:set var="selected" value="selected" />
+							</c:if>
+						</c:if>
+						<option value="${item.unit}"${selected}>${item.unit}</option>
+					</c:forEach>
+				</select>
+			</td>
+			
+
+</tr>
+<tr>
+	<td align="${left}" class="first"><primo:label code="Fule Vendor" /></td>
 			<td align="${left}"><select id="fuelvendor" name="fuelvendor.id" style="min-width:154px; max-width:154px">
 					<option value="">------
 					<primo:label code="Please Select" />
@@ -66,9 +83,6 @@
 			<%-- <td align="${left}" class="first"><primo:label code="Name" /></td>
 			<td align="${left}"><input name="name" type="text"
 				value="${sessionScope.searchCriteria.searchMap.name}" /></td> --%>
-
-</tr>
-<tr>
 
 			<td align="${left}" class="first"><primo:label code="Fuel Card Number" /></td>
 			<td align="${left}"><select id="fuelcardnum" name="fuelcard.id" style="min-width:154px; max-width:154px">
@@ -107,9 +121,10 @@
 		exportCsv="true" insertable="true" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false">
-		<primo:textcolumn headerText="Driver" dataField="driver.fullName" />
-		<primo:textcolumn width="100px" headerText="Fuel Vendor" dataField="fuelvendor.name" />
-		<primo:textcolumn width="100px" headerText="Fuel Card Number" dataField="fuelcard.fuelcardNum" />		
+		<primo:textcolumn headerText="Driver" dataField="driver.fullName" width="275px"/>
+		<primo:textcolumn headerText="Unit" dataField="vehicle.unitNum"/>
+		<primo:textcolumn headerText="Fuel Vendor" dataField="fuelvendor.name" width="250px"/>
+		<primo:textcolumn width="200px" headerText="Fuel Card Number" dataField="fuelcard.fuelcardNum" />		
 		<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS" />
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
