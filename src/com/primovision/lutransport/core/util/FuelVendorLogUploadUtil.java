@@ -328,7 +328,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Sales Order Number");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Delivery Date");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
@@ -1434,7 +1434,9 @@ public class FuelVendorLogUploadUtil {
 				cell.setCellValue(c.getTime());
 				System.out.println("Transaction date = " + c.getTime());
 			}
-		} else if (columnIndex == 5 && StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)) { // Txn time
+		} else if (columnIndex == 5 && 
+				(StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)
+						|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM))) { // Txn time
 			String specifiedTxnTime = convertToExpectedTimeFormat(dateStr, vendorDateFormat);
 			cell.setCellValue(specifiedTxnTime);
 			return;
