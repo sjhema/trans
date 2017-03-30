@@ -83,7 +83,16 @@ public final class AnchorColumn extends AbstractColumnTag
         try
         {
         	String url = linkUrl.substring(ctx.length()+1,linkUrl.length());
-			if (authenticationService.hasUserPermission(user, url)) {
+        	
+        	// Javascript anchor col change - 30th Mar 2017
+        	boolean hasPermission = true;
+        	if (!linkUrl.startsWith("javascript")) {
+        		hasPermission = authenticationService.hasUserPermission(user, url);
+        	}
+        	
+        	// Javascript anchor col change - 30th Mar 2017
+			//if (authenticationService.hasUserPermission(user, url)) {
+			if (hasPermission) {
 	            objTmp = (Datatable) getParent();
 	            objTmp.addColumn(getCopy());
 			}

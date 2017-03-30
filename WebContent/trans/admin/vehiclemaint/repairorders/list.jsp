@@ -1,12 +1,20 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <script type="text/javascript">
-function processCopy(lineItemId) {
+function processCopyLineItem(lineItemId) {
 	if (!confirm("Do you want to Copy the selected Line Item?")) {
 		return;
 	}
 	
 	document.location = "${ctx}/admin/vehiclemaint/repairorders/copy.do?lineItemId=" + lineItemId;
+}
+
+function processCopyOrder(orderId) {
+	if (!confirm("Do you want to Copy the selected Order?")) {
+		return;
+	}
+	
+	document.location = "${ctx}/admin/vehiclemaint/repairorders/copy.do?orderId=" + orderId;
 }
 
 function processEdit(lineItemId) {
@@ -192,7 +200,8 @@ function processDelete(lineItemId) {
         <primo:textcolumn headerText="Tot Parts Cost" dataField="totalPartsCost" width="75px"/>
        	<primo:textcolumn headerText="Tot Ln Itm Cost" dataField="totalCost" width="75px" />
         <primo:textcolumn headerText="Tot Order Cost" dataField="repairOrder.totalCost" width="60px"/>
-		<primo:imagecolumn headerText="Copy" linkUrl="javascript:processCopy('{id}');" imageSrc="${ctx}/images/copy.png" HAlign="center"/>
+       	<primo:anchorcolumn headerText="Cpy Ord" linkUrl="javascript:processCopyOrder('{repairOrder.id}');" linkText="Cpy Ord"/>
+		<primo:imagecolumn headerText="Cpy LI" linkUrl="javascript:processCopyLineItem('{id}');" imageSrc="${ctx}/images/copy.png" HAlign="center"/>
 		<primo:imagecolumn headerText="Edit" linkUrl="javascript:processEdit('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center"/>
 		<primo:imagecolumn headerText="Del" linkUrl="javascript:processDelete('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center"/>
 	</primo:datatable>

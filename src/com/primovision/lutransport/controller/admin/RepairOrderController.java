@@ -503,13 +503,20 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/copy.do")
 	public String copy(HttpServletRequest request, ModelMap model,
-			@RequestParam(value = "lineItemId") Long lineItemId) {
-		RepairOrder newOrder = processCopyLineItem(request, lineItemId);
+			@RequestParam(value = "orderId", required=false) Long orderId,
+			@RequestParam(value = "lineItemId", required=false) Long lineItemId) {
+		RepairOrder newOrder = null;
+		if (orderId != null) {
+			newOrder = processCopyOrder(request, orderId);
+		} else {
+			newOrder = processCopyLineItem(request, lineItemId);
+		}
+		
 		model.addAttribute("modelObject", newOrder);
 		
 		setupCreate(model, request);
 		setupLineItem(model, request, newOrder);
-		return getUrlContext() + "/form";
+		return getUrlContext() + "/form"; 
 	}
 	
 	private RepairOrder processCopyOrder(HttpServletRequest request, Long orderId) {
