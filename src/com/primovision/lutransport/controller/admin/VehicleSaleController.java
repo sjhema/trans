@@ -107,17 +107,20 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 			Object objectDAO, Class clazz) {
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html")) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + urlContext + "Report." + type);
+			response.setHeader("Content-Disposition", "attachment;filename=vehicleSalesReport." + type);
 		}
 		
 		List<VehicleSale> vehicleSalesList = searchForExport(model, request);
+		Map<String, Object> params = new HashMap<String, Object>();
 		
-		List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+		//List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
 		ByteArrayOutputStream out = null;
 		try {
-			out = dynamicReportService.exportReport(
+			/*out = dynamicReportService.exportReport(
 						urlContext + "Report", type, getEntityClass(), vehicleSalesList,
-						columnPropertyList, request);
+						columnPropertyList, request);*/
+			out = dynamicReportService.generateStaticReport("vehicleSales",
+					vehicleSalesList, params, type, request);
 			out.writeTo(response.getOutputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
