@@ -172,7 +172,8 @@ public class RepairOrderController extends CRUDController<RepairOrder> {
 		model.addAttribute("lineItemTypes", genericDAO.findByCriteria(RepairOrderLineItemType.class, criterias, "type asc", false));
 		model.addAttribute("components", genericDAO.findByCriteria(RepairOrderComponent.class, criterias, "component asc", false));
 	
-		String query = "select obj from Driver obj where obj.catagory.id=3 order by obj.fullName";
+		//where obj.catagory.id=3 -- mechanic
+		String query = "select obj from Driver obj order by obj.fullName";
 		List<Driver> mechanics = genericDAO.executeSimpleQuery(query);
 		model.addAttribute("mechanics", mechanics);
 		
