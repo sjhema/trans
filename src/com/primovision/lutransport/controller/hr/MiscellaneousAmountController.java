@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.hr;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +26,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.BaseController;
@@ -30,6 +34,7 @@ import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 import com.primovision.lutransport.core.util.DateUtil;
 import com.primovision.lutransport.core.util.MathUtil;
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
@@ -38,6 +43,7 @@ import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Terminal;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.equipment.VehicleLoan;
 import com.primovision.lutransport.model.hr.BonusType;
 import com.primovision.lutransport.model.hr.EmpBonusTypesList;
 //import com.primovision.lutransport.model.hr.Employee;
@@ -136,8 +142,27 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			setupList(model, request);
 			SearchCriteria criteria = (SearchCriteria) request.getSession()
 					.getAttribute("searchCriteria");
-			 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria));
+			 model.addAttribute("list", performSearch(criteria));
 			return urlContext + "/list";
+		}
+		
+		private List<MiscellaneousAmount> performSearch(SearchCriteria criteria) {
+			return genericDAO.search(getEntityClass(), criteria);
+		}
+		
+		private List<MiscellaneousAmount> searchForExport(ModelMap model, HttpServletRequest request) {
+			SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+			int origPage = criteria.getPage();
+			
+			criteria.setPage(0);
+			criteria.setPageSize(100000);
+			
+			List<MiscellaneousAmount> miscellaneousAmountList = performSearch(criteria);
+			
+			criteria.setPage(origPage);
+			criteria.setPageSize(25);
+			
+			return miscellaneousAmountList;
 		}
 		
 		@Override
@@ -242,6 +267,41 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 		}
 		
+		@Override
+		public void export(ModelMap model, HttpServletRequest request,
+				HttpServletResponse response, @RequestParam("type") String type,
+				Object objectDAO, Class clazz) {
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html")) {
+				response.setHeader("Content-Disposition", "attachment;filename=miscAmountReport." + type);
+			}
+			
+			List<MiscellaneousAmount> miscellaneousAmountList = searchForExport(model, request);
+			//Map<String, Object> params = new HashMap<String, Object>();
+			
+			List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+			ByteArrayOutputStream out = null;
+			try {
+				out = dynamicReportService.exportReport(
+							"miscAmountReport", type, getEntityClass(), miscellaneousAmountList,
+							columnPropertyList, request);
+				/*out = dynamicReportService.generateStaticReport("miscAmount",
+						miscellaneousAmountList, params, type, request);*/
+				out.writeTo(response.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.warn("Unable to create file :" + e);
+			} finally {
+				if (out != null) {
+					try {
+						out.close();
+						out = null;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 		
 		@Override
 		protected String processAjaxRequest(HttpServletRequest request,String action, Model model) 
