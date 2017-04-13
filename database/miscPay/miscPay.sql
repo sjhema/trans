@@ -1,0 +1,1 @@
+UPDATE `lutransport`.`business_object` SET `URL`='/hr/miscellaneousamount/list.do?rst=1,/hr/miscellaneousamount/create.do,/hr/miscellaneousamount/save.do,/hr/miscellaneousamount/ajax.do,/hr/miscellaneousamount/search.do,/hr/miscellaneousamount/edit.do,/hr/miscellaneousamount/delete.do,/hr/miscellaneousamount/export.do' WHERE `ID`='9081';

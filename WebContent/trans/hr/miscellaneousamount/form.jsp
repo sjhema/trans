@@ -428,7 +428,7 @@ function getDriver()
 </tr>
 
 <tr>
-<td class="form-left" ><primo:label code="Description/Notes" /><span
+<td class="form-left" ><primo:label code="Misc. Description" /><span
 				class="errorMessage">*</span></td>
 <td>
 				<form:select cssClass="flat" path="miscNotes" id="miscNotes" style="min-width:154px; max-width:154px;">

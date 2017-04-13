@@ -133,17 +133,20 @@ function formatDate(){
 			</td>
 			</tr>
 			<tr>
-				<td align="${left}" class="first"><primo:label code="Misc. Notes"/></td>
-				<td align="${left}"><select id="miscNotes" name="miscNotes" style="min-width:154px; max-width:154px">
+				<td align="${left}" class="first"><primo:label code="Misc. Description"/></td>
+				<td align="${left}">
+				<select id="miscNotes" name="miscNotes" style="min-width:154px; max-width:154px">
 					<option value="">------<primo:label code="Please Select"/>------</option>
 					<c:forEach items="${miscellaneousDesc}" var="miscellaneousDesc">
 					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['miscNotes'] == miscellaneousDesc.dataValue}">
+					
+					<c:if test="${sessionScope.searchCriteria.searchMap['miscNotes'] == miscellaneousDesc.dataLabel}">
 						<c:set var="selected" value="selected"/>
 					</c:if>
-						<option value="${miscellaneousDesc.dataValue}" ${selected}>${miscellaneousDesc.dataValue}</option>
+					
+						<option value="${miscellaneousDesc.dataLabel}" ${selected}>${miscellaneousDesc.dataLabel}</option>
 					</c:forEach>
-			</select></td>
+				</select></td>
 				<td align="${left}" class="first">
 			</td>
 			<td >
@@ -165,15 +168,17 @@ function formatDate(){
 </form:form></div>
 <br/>
 <div style="width:100%; margin:0px auto;"><form:form name="delete.do" id="customerForm">
-		<primo:datatable urlContext="hr/miscellaneousamount" deletable="true" editable="true" insertable="true" exportPdf="true" exportXls="true" exportCsv="true"
+		<primo:datatable urlContext="hr/miscellaneousamount" deletable="true" editable="true" 
+			insertable="true" exportPdf="true" exportXls="true" exportCsv="true"
 			baseObjects="${list}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
-			pagingLink="search.do" multipleDelete="false" searcheable="false" >
+			pagingLink="search.do" multipleDelete="false" searcheable="false"
+			 >
 			<primo:textcolumn headerText="Employee" dataField="driver.fullName" />			
 			<primo:textcolumn headerText="Company" dataField="company.name" />
 			<primo:textcolumn headerText="Terminal" dataField="terminal.name" />
 			<primo:textcolumn headerText="Misc. Amount" dataField="misamount" />
-			<primo:textcolumn headerText="Misc. Notes" dataField="miscNotes" />
+			<primo:textcolumn headerText="Misc. Description" dataField="miscNotes" />
 			<primo:datecolumn headerText="Bill Batch From" dataField="batchFrom"
 			dataFormat="MM-dd-yyyy" />
 		<primo:datecolumn headerText="Bill Batch To" dataField="batchTo"
