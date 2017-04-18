@@ -10,6 +10,11 @@ function searchReport1() {
 	document.forms[0].submit(); 
 }
 
+function searchReport2() {
+	document.getElementById('summaryByLoad').value='true' ;
+	document.forms[0].submit(); 
+}
+
 function formatDate(){
 	var date=document.getElementById("datepicker").value;
 	if(date!=""){
@@ -416,6 +421,7 @@ $(document).ready(function(){
 			<td  align="${left}">
 				From:<form:input size="10" path="voucherNumberFrom" cssClass="flat"/> To:<form:input size="10" path="voucherNumberTo" cssClass="flat"/>
                <input type="hidden" name="summary" id="sum">
+               <input type="hidden" name="summaryByLoad" id="summaryByLoad">
 			</td>
 		</tr>
 		<tr>
@@ -435,9 +441,13 @@ $(document).ready(function(){
 				onclick="javascript:searchReport()" value="Search" />&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				
 				<input type="button"
 			onclick="javascript:searchReport1()" value="Summary" />
+			&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+			onclick="javascript:searchReport2()" value="Summary By Loads" />
 				</td>
 			
 		</tr>

@@ -156,7 +156,10 @@ public class SubcontractorReportController extends BaseController {
 		
 		// Subcontractor summary report - 16thMar2016
 		String sum = request.getParameter("summary");
-		if (StringUtils.contains(sum, "true")) {
+		// Subcontractor summary by load report - 14thApr2017
+		String summaryByLoad = request.getParameter("summaryByLoad");
+		if (StringUtils.contains(sum, "true")
+				|| StringUtils.contains(summaryByLoad, "true")) { // Subcontractor summary by load report - 14thApr2017
 			try {
 				request.getSession().setAttribute("input", input);
 				
@@ -176,10 +179,20 @@ public class SubcontractorReportController extends BaseController {
 				}
 				response.setContentType(MimeUtil.getContentType(type));			
 			   
-				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("subContractorSummaryReport",
+				// Subcontractor summary by load report - 14thApr2017
+				String reportName = "subContractorSummaryReport";
+				String resultPage = "summayHtml";
+				if (StringUtils.contains(summaryByLoad, "true")) {
+					reportName = "subContractorSummaryByLoadReport";
+					resultPage = "summayByLoadHtml";
+				}
+				
+				// Subcontractor summary by load report - 14thApr2017
+				JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportName,
 						(List)subcontractorSummaryList, params, request);
 				request.setAttribute("jasperPrint", jasperPrint);	
-				return  "reportuser/report/subcontractorreport/summayHtml";
+				// Subcontractor summary by load report - 14thApr2017
+				return  "reportuser/report/subcontractorreport/" + resultPage;
 			} catch (Exception e) {
 				e.printStackTrace();
 				request.getSession().setAttribute("errors", e.getMessage());
@@ -246,7 +259,8 @@ public class SubcontractorReportController extends BaseController {
 		
 		// Subcontractor summary report - 16thMar2016
 		String sum=request.getParameter("typ");
-		if (StringUtils.equalsIgnoreCase(sum, "summary")) {
+		if (StringUtils.equalsIgnoreCase(sum, "summary")
+				|| StringUtils.equalsIgnoreCase(sum, "summaryByLoad")) { // Subcontractor summary by load report - 14thApr2017
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try {
 				List<SubcontractorSummary> subcontractorSummaryList = generateSubcontractorSummaryReport(criteria, input);           
@@ -257,20 +271,29 @@ public class SubcontractorReportController extends BaseController {
 				params.put("batchDateFrom", batchDateFrom);
 				params.put("batchDateTo", batchDateTo);
 				
+				// Subcontractor summary by load report - 14thApr2017
+				String reportName = "subContractorSummaryReport";
+				if (StringUtils.equalsIgnoreCase(sum, "summaryByLoad")) {
+					reportName = "subContractorSummaryByLoadReport";
+				}
+				
 				if (StringUtils.isEmpty(type))
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
+					// Subcontractor summary by load report - 14thApr2017
 					response.setHeader("Content-Disposition",
-							"attachment;filename=subContractorSummaryReport." + type);
+							"attachment;filename=" + reportName + "." + type);
 				}
 				response.setContentType(MimeUtil.getContentType(type));
 				
 				if (!type.equals("print")&&!type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("subContractorSummaryReport",
+					// Subcontractor summary by load report - 14thApr2017
+					out = dynamicReportService.generateStaticReport(reportName,
 							(List)subcontractorSummaryList, params, type, request);
 				}
 				else if(type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("subContractorSummaryReport",
+					// Subcontractor summary by load report - 14thApr2017
+					out = dynamicReportService.generateStaticReport(reportName,
 							(List)subcontractorSummaryList, params, type, request);
 				} 			
 				out.writeTo(response.getOutputStream());

@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.jasper.tagplugins.jstl.core.ForEach;
@@ -998,21 +999,45 @@ public class ReportServiceImpl implements ReportService {
 			return subcontractorSummaryList;
 		}
 		
+		// Subcontractor summary by load report - 14thApr2017
+		boolean summaryByLoad = false;
+		if (criteria.getSearchMap().get("summaryByLoad") != null) {
+			summaryByLoad = BooleanUtils.toBoolean((String)criteria.getSearchMap().get("summaryByLoad"));
+		}
+		
 		// Group by subcontractor name and calculate total amount paid
 		Map<String, SubcontractorSummary> subcontractorSummaryMap = new HashMap<String, SubcontractorSummary>();
 		for(SubcontractorBillingNew aSubcontractorBillingNew : subcontractorBillingNewList) {
 			String subContractorName = aSubcontractorBillingNew.getSubcontractor();
-			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryMap.get(subContractorName);
+			// Subcontractor summary by load report - 14thApr2017
+			String subContractorOrigin = aSubcontractorBillingNew.getSub_origin();
+			String subContractorDestination = aSubcontractorBillingNew.getSub_destination();
+			
+			// Subcontractor summary by load report - 14thApr2017
+			String key = subContractorName;
+			if (summaryByLoad) {
+				key += ("_" + subContractorOrigin + "_" + subContractorDestination);
+			}
+			
+			// Subcontractor summary by load report - 14thApr2017
+			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryMap.get(key);
 			if (aSubcontractorSummary == null) {
 				aSubcontractorSummary = new SubcontractorSummary();
 				aSubcontractorSummary.setSubcontractorName(subContractorName);
-				subcontractorSummaryMap.put(subContractorName, aSubcontractorSummary);
+				// Subcontractor summary by load report - 14thApr2017
+				aSubcontractorSummary.setOrigin(subContractorOrigin);
+				aSubcontractorSummary.setDestination(subContractorDestination);
+				aSubcontractorSummary.setLoadCount(0);
+				subcontractorSummaryMap.put(key, aSubcontractorSummary);
 				
 				subcontractorSummaryList.add(aSubcontractorSummary);
 			}
 			
 			Double amountPaid = aSubcontractorSummary.getAmountPaid() + aSubcontractorBillingNew.getTotAmt();
 			aSubcontractorSummary.setAmountPaid(amountPaid);
+			
+			// Subcontractor summary by load report - 14thApr2017
+			aSubcontractorSummary.setLoadCount(aSubcontractorSummary.getLoadCount() + 1);
 		}
 		
 		// Then get customer billing data for the same tickets retrieved above
@@ -1032,11 +1057,32 @@ public class ReportServiceImpl implements ReportService {
 				continue;
 			}
 			
-			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryBillingMap.get(subContractorName);
+			// Subcontractor summary by load report - 14thApr2017
+			String subContractorOrigin = aBillingNew.getT_origin();
+			String subContractorDestination = aBillingNew.getT_destination();
+		
+			// Subcontractor summary by load report - 14thApr2017
+			String key = subContractorName;
+			if (summaryByLoad) {
+				if (StringUtils.isEmpty(subContractorOrigin) || StringUtils.isEmpty(subContractorDestination)) {
+					System.out.println("Subcontractor summary by load report: Empty origin or destination in customer billing history");
+					continue;
+				}
+				
+				key += ("_" + subContractorOrigin + "_" + subContractorDestination);
+			}
+			
+			// Subcontractor summary by load report - 14thApr2017
+			SubcontractorSummary aSubcontractorSummary = subcontractorSummaryBillingMap.get(key);
 			if (aSubcontractorSummary == null) {
 				aSubcontractorSummary = new SubcontractorSummary();
 				aSubcontractorSummary.setSubcontractorName(subContractorName);
-				subcontractorSummaryBillingMap.put(subContractorName, aSubcontractorSummary);
+				// Subcontractor summary by load report - 14thApr2017
+				aSubcontractorSummary.setOrigin(subContractorOrigin);
+				aSubcontractorSummary.setDestination(subContractorDestination);
+				
+				// Subcontractor summary by load report - 14thApr2017
+				subcontractorSummaryBillingMap.put(key, aSubcontractorSummary);
 			}
 			
 			Double revenue = aSubcontractorSummary.getRevenue() + aBillingNew.getTotAmt();
@@ -1046,9 +1092,21 @@ public class ReportServiceImpl implements ReportService {
 		// Merge subcontractor paid data and customer billed data and calculate net amount
 		for(SubcontractorSummary aSubcontractorSummary : subcontractorSummaryList) {
 			String subContractorName = aSubcontractorSummary.getSubcontractorName();
-			SubcontractorSummary aSubcontractorBillingSummary = subcontractorSummaryBillingMap.get(subContractorName);
+			// Subcontractor summary by load report - 14thApr2017
+			String subContractorOrigin = aSubcontractorSummary.getOrigin();
+			String subContractorDestination = aSubcontractorSummary.getDestination();
+			
+			// Subcontractor summary by load report - 14thApr2017
+			String key = subContractorName;
+			if (summaryByLoad) {
+				key += ("_" + subContractorOrigin + "_" + subContractorDestination);
+			}
+			
+			// Subcontractor summary by load report - 14thApr2017
+			SubcontractorSummary aSubcontractorBillingSummary = subcontractorSummaryBillingMap.get(key);
 			if (aSubcontractorBillingSummary == null) {
-				System.out.println("Subcontractor summary report: Subcontractor not found in customer billing history: " + subContractorName);
+				System.out.println("Subcontractor summary report: Subcontractor not found in customer billing history: " + subContractorName
+						+ "/" + subContractorOrigin + "/" + subContractorDestination);
 			} else {
 				aSubcontractorSummary.setRevenue(aSubcontractorBillingSummary.getRevenue());
 				Double netAmount = aSubcontractorSummary.getRevenue() - aSubcontractorSummary.getAmountPaid();
@@ -6529,7 +6587,7 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 		
 		// Subcontractor summary report - 16thMar2016
 		if (isSummary) {
-			subinvquery += " order by obj.subcontractor";
+			subinvquery += " order by obj.subcontractor, obj.sub_origin, obj.sub_destination"; // Subcontractor summary by load report - 14thApr2017
 		}
 		
 		summarys=genericDAO.executeSimpleQuery(subinvquery);			
