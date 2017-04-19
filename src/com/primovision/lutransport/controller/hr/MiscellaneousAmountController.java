@@ -84,7 +84,6 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		
 		@Override
 		public String search2(ModelMap model, HttpServletRequest request) {
-			
 			setupList(model, request);
 			SearchCriteria criteria = (SearchCriteria) request.getSession()
 					.getAttribute("searchCriteria");
@@ -140,9 +139,16 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		@Override
 		public String list(ModelMap model, HttpServletRequest request) {
 			setupList(model, request);
-			SearchCriteria criteria = (SearchCriteria) request.getSession()
-					.getAttribute("searchCriteria");
-			 model.addAttribute("list", performSearch(criteria));
+			
+			SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+			
+			String rst = (String)request.getParameter("rst");
+			if (!StringUtils.isEmpty(rst)) {
+				criteria.setPageSize(25);
+				criteria.setPage(0);
+			}
+			
+			model.addAttribute("list", performSearch(criteria));
 			return urlContext + "/list";
 		}
 		

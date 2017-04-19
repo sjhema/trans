@@ -5,7 +5,8 @@
 	<property name="ireport.y" value="0"/>
 	<parameter name="company" class="java.lang.String"/>
 	<parameter name="terminal" class="java.lang.String"/>
-	<parameter name="batchDateRange" class="java.lang.String"/>
+	<parameter name="batchDateFromRange" class="java.lang.String"/>
+	<parameter name="batchDateToRange" class="java.lang.String"/>
 	<field name="company.name" class="java.lang.String"/>
 	<field name="terminal.name" class="java.lang.String"/>
 	<field name="driver.fullName" class="java.lang.String"/>
@@ -36,7 +37,7 @@
 				<text><![CDATA[MISCELLANEOUS PAY REPORT]]></text>
 			</staticText>
 			<textField pattern="">
-				<reportElement x="237" y="59" width="153" height="20"/>
+				<reportElement x="139" y="59" width="153" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -48,7 +49,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{company}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="237" y="33" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="139" y="33" width="153" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -62,7 +63,7 @@
 				<text><![CDATA[COMPANY]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="390" y="33" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="292" y="33" width="153" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -76,7 +77,7 @@
 				<text><![CDATA[TERMINAL]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="543" y="33" width="190" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="445" y="33" width="190" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -87,10 +88,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[BATCH DATE]]></text>
+				<text><![CDATA[BATCH DATE FROM]]></text>
 			</staticText>
 			<textField pattern="">
-				<reportElement x="390" y="59" width="153" height="20"/>
+				<reportElement x="292" y="59" width="153" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -102,7 +103,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{terminal}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="543" y="59" width="190" height="20"/>
+				<reportElement x="445" y="59" width="190" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -111,7 +112,33 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{batchDateRange}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{batchDateFromRange}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="635" y="33" width="190" height="26" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[BATCH DATE TO]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="635" y="59" width="190" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{batchDateToRange}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>

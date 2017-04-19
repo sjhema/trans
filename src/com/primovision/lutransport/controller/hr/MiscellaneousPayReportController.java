@@ -80,6 +80,7 @@ public class MiscellaneousPayReportController extends BaseController {
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(1000);
+		criteria.setPage(0);
 		
 		Map<String, Object> datas = generateData(criteria, request, input);
 		List<MiscellaneousAmount> MiscellaneousAmountList = (List<MiscellaneousAmount>) datas.get("data");
@@ -166,10 +167,15 @@ public class MiscellaneousPayReportController extends BaseController {
 		String terminalName = terminal == null ? StringUtils.EMPTY : terminal.getName();
 		params.put("terminal", terminalName);
 		
-		String batchDateRange = StringUtils.isEmpty(input.getBatchDateFrom()) ? StringUtils.EMPTY : input.getBatchDateFrom();
-		batchDateRange += " - ";
-		batchDateRange += StringUtils.isEmpty(input.getBatchDateTo()) ? StringUtils.EMPTY : input.getBatchDateTo();
-		params.put("batchDateRange", batchDateRange);
+		String batchDateFromRange = StringUtils.isEmpty(input.getBatchDateFromStart()) ? StringUtils.EMPTY : input.getBatchDateFromStart();
+		batchDateFromRange += " - ";
+		batchDateFromRange += StringUtils.isEmpty(input.getBatchDateFromEnd()) ? StringUtils.EMPTY : input.getBatchDateFromEnd();
+		params.put("batchDateFromRange", batchDateFromRange);
+		
+		String batchDateToRange = StringUtils.isEmpty(input.getBatchDateToStart()) ? StringUtils.EMPTY : input.getBatchDateToStart();
+		batchDateToRange += " - ";
+		batchDateToRange += StringUtils.isEmpty(input.getBatchDateToEnd()) ? StringUtils.EMPTY : input.getBatchDateToEnd();
+		params.put("batchDateToRange", batchDateToRange);
 		
 		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("data", miscellaneousAmountList);
@@ -192,8 +198,10 @@ public class MiscellaneousPayReportController extends BaseController {
 		String employee = input.getEmployee();
 		String miscellaneousDesc = input.getMiscellaneousDesc();
 		
-		String batchDateFrom = input.getBatchDateFrom();
-		String batchDateTo = input.getBatchDateTo();
+		String batchDateFromStart = input.getBatchDateFromStart();
+		String batchDateToStart = input.getBatchDateToStart();
+		String batchDateFromEnd = input.getBatchDateFromEnd();
+		String batchDateToEnd = input.getBatchDateToEnd();
 		
 		StringBuffer query = new StringBuffer("select obj from MiscellaneousAmount obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from MiscellaneousAmount obj where 1=1");
@@ -218,21 +226,55 @@ public class MiscellaneousPayReportController extends BaseController {
 			whereClause.append(" and obj.miscNotes in (" + miscDescIn + ")");
 		}
 		
-	   if (StringUtils.isNotEmpty(batchDateFrom)){
+		StringBuffer batchDateFromClause = new StringBuffer();
+		StringBuffer batchDateToClause = new StringBuffer();
+		StringBuffer batchDateClause = new StringBuffer();
+		
+	   if (StringUtils.isNotEmpty(batchDateFromStart)) {
         	try {
-        		whereClause.append(" and obj.batchFrom='"+sdf.format(dateFormat.parse(batchDateFrom))+"'");
+        		batchDateFromClause.append(" (obj.batchFrom>='"+sdf.format(dateFormat.parse(batchDateFromStart))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
         	
 		}
-      if (StringUtils.isNotEmpty(batchDateTo)){
+	   if (StringUtils.isNotEmpty(batchDateFromEnd)) {
+        	try {
+        		batchDateFromClause.append(" and obj.batchFrom<='"+sdf.format(dateFormat.parse(batchDateFromEnd))+"')");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+        	
+		}
+      if (StringUtils.isNotEmpty(batchDateToStart)) {
 	     	try {
-	     		whereClause.append(" and obj.batchTo='"+sdf.format(dateFormat.parse(batchDateTo))+"'");
+	     		batchDateToClause.append(" (obj.batchTo>='"+sdf.format(dateFormat.parse(batchDateToStart))+"'");
 	     	} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
+      if (StringUtils.isNotEmpty(batchDateToEnd)) {
+	     	try {
+	     		batchDateToClause.append(" and obj.batchTo<='"+sdf.format(dateFormat.parse(batchDateToEnd))+"')");
+	     	} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+      
+      if (StringUtils.isNotEmpty(batchDateFromClause.toString())) {
+      	batchDateClause.append(batchDateFromClause);
+      }
+      if (StringUtils.isNotEmpty(batchDateToClause.toString())) {
+      	if (StringUtils.isNotEmpty(batchDateClause.toString())) {
+         	batchDateClause.append(" OR ");
+         }
+      	batchDateClause.append(batchDateToClause);
+      }
+      if (StringUtils.isNotEmpty(batchDateClause.toString())) {
+      	whereClause.append(" and (")
+      				  .append(batchDateClause)
+      				  .append(" )");
+      }
       
       query.append(whereClause);
       countQuery.append(whereClause);

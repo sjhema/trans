@@ -10,8 +10,10 @@ public class MiscellaneousPayReportInput implements ReportModel {
 	
 	String miscellaneousDesc;
 	
-	String batchDateFrom;
-	String batchDateTo;
+	String batchDateFromStart;
+	String batchDateFromEnd;
+	String batchDateToStart;
+	String batchDateToEnd;
 	
 	public String getCompany() {
 		return company;
@@ -37,16 +39,28 @@ public class MiscellaneousPayReportInput implements ReportModel {
 	public void setMiscellaneousDesc(String miscellaneousDesc) {
 		this.miscellaneousDesc = miscellaneousDesc;
 	}
-	public String getBatchDateFrom() {
-		return batchDateFrom;
+	public String getBatchDateFromStart() {
+		return batchDateFromStart;
 	}
-	public void setBatchDateFrom(String batchDateFrom) {
-		this.batchDateFrom = batchDateFrom;
+	public void setBatchDateFromStart(String batchDateFromStart) {
+		this.batchDateFromStart = batchDateFromStart;
 	}
-	public String getBatchDateTo() {
-		return batchDateTo;
+	public String getBatchDateFromEnd() {
+		return batchDateFromEnd;
 	}
-	public void setBatchDateTo(String batchDateTo) {
-		this.batchDateTo = batchDateTo;
+	public void setBatchDateFromEnd(String batchDateFromEnd) {
+		this.batchDateFromEnd = batchDateFromEnd;
+	}
+	public String getBatchDateToStart() {
+		return batchDateToStart;
+	}
+	public void setBatchDateToStart(String batchDateToStart) {
+		this.batchDateToStart = batchDateToStart;
+	}
+	public String getBatchDateToEnd() {
+		return batchDateToEnd;
+	}
+	public void setBatchDateToEnd(String batchDateToEnd) {
+		this.batchDateToEnd = batchDateToEnd;
 	}
 }
