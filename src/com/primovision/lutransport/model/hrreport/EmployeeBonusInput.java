@@ -17,6 +17,9 @@ public class EmployeeBonusInput {
 	private String bonustype;
 	private String employeeNo;
 	
+	String batchFrom;
+	String batchTo;
+	
 	List<EmployeeBonus> employeeBonus=null;
 
 	public String getDriver() {
@@ -73,6 +76,22 @@ public class EmployeeBonusInput {
 
 	public void setEmployeeBonus(List<EmployeeBonus> employeeBonus) {
 		this.employeeBonus = employeeBonus;
+	}
+
+	public String getBatchFrom() {
+		return batchFrom;
+	}
+
+	public void setBatchFrom(String batchFrom) {
+		this.batchFrom = batchFrom;
+	}
+
+	public String getBatchTo() {
+		return batchTo;
+	}
+
+	public void setBatchTo(String batchTo) {
+		this.batchTo = batchTo;
 	}
 	
 	

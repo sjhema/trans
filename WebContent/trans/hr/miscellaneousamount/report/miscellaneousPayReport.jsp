@@ -2,19 +2,11 @@
 
 <script type="text/javascript">
 function processMiscellaneousPayReport() {
-	var batchDateFromStart = $("[name='batchDateFromStart']").val();
-	var batchDateFromEnd = $("[name='batchDateFromEnd']").val();
-	if ((batchDateFromStart != '' && batchDateFromEnd == '') ||
-			(batchDateFromEnd != '' && batchDateFromStart == '')) {
-		alert("Please enter both the values for Batch Date From");
-		return;
-	}
-	
-	var batchDateToStart = $("[name='batchDateToStart']").val();
-	var batchDateToEnd = $("[name='batchDateToEnd']").val();
-	if ((batchDateToStart != '' && batchDateToEnd == '') ||
-			(batchDateToEnd != '' && batchDateToStart == '')) {
-		alert("Please enter both the values for Batch Date To");
+	var batchDateFrom = $("[name='batchDateFrom']").val();
+	var batchDateTo = $("[name='batchDateTo']").val();
+	if ((batchDateFrom != '' && batchDateTo == '') ||
+			(batchDateTo != '' && batchDateFrom == '')) {
+		alert("Please enter both Batch Date From and To");
 		return;
 	}
 	
@@ -160,25 +152,15 @@ $(document).ready(function() {
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Batch Date From" /></td>
 			<td align="${left}">
-				From:&nbsp;
-				<input id="datepicker1" name="batchDateFromStart" style="min-width:150px; max-width:150px"
+				<input id="datepicker1" name="batchDateFrom" style="min-width:150px; max-width:150px"
 					type="text" onblur="return formatDate('datepicker1');"
-					value="${sessionScope.searchCriteria.searchMap.batchDateFromStart}"/>
-		    	&nbsp;To:&nbsp;
-		    	<input id="datepicker2" name="batchDateFromEnd" style="min-width:150px; max-width:150px"
-					type="text" onblur="return formatDate('datepicker2');"
-					value="${sessionScope.searchCriteria.searchMap.batchDateFromEnd}"/>
+					value="${sessionScope.searchCriteria.searchMap.batchDateFrom}"/>
 		    </td>
 		    <td align="${left}" class="first"><primo:label code="Batch Date To" /></td>
 			<td align="${left}">
-				From:&nbsp;
-				<input id="datepicker3" name="batchDateToStart" style="min-width:150px; max-width:150px"
-					type="text" onblur="return formatDate('datepicker3');"
-					value="${sessionScope.searchCriteria.searchMap.batchDateToStart}"/>
-		    	&nbsp;To:&nbsp;
-		    	<input id="datepicker4" name="batchDateToEnd" style="min-width:150px; max-width:150px"
-					type="text" onblur="return formatDate('datepicker4');"
-					value="${sessionScope.searchCriteria.searchMap.batchDateToEnd}"/>
+				<input id="datepicker2" name="batchDateTo" style="min-width:150px; max-width:150px"
+					type="text" onblur="return formatDate('datepicker2');"
+					value="${sessionScope.searchCriteria.searchMap.batchDateTo}"/>
 		    </td>
 		</tr>
 		<tr><td colspan="2"></td></tr>

@@ -1,6 +1,13 @@
 <%@ include file="/common/taglibs.jsp"%>
 <script language="javascript">
 function searchReport() {
+	var batchDateFrom = $("[name='batchFrom']").val();
+	var batchDateTo = $("[name='batchTo']").val();
+	if ((batchDateFrom != '' && batchDateTo == '') ||
+			(batchDateTo != '' && batchDateFrom == '')) {
+		alert("Please enter both Batch Date From and To");
+		return;
+	}
 	document.forms[0].submit();
 }
 
@@ -78,11 +85,11 @@ function searchReport() {
 		
 		 <tr>
 	          <td class="form-left"><primo:label code="Batch Date From" /></td>
-	          <td align="${left}"><input name="batchFrom" type="text" id="fromDate" size="15"
-				value="${sessionScope.searchCriteria.searchMap.fromDate}" "/>
+	          <td align="${left}"><input name="batchFrom" type="text" id="batchFrom" size="15"
+				value="${sessionScope.searchCriteria.searchMap.batchFrom}" "/>
 				<script type="text/javascript">
 			$(function() {
-			$("#fromDate").datepicker({
+			$("#batchFrom").datepicker({
 				dateFormat:'mm-dd-yy',
             	changeMonth: true,
     			changeYear: true
@@ -92,11 +99,11 @@ function searchReport() {
 		    </td>
 		  
 	          <td class="form-left"><primo:label code="Batch Date To" /></td>
-	          <td align="${left}"><input name="batchto" type="text" id="toDate" size="15"
-				value="${sessionScope.searchCriteria.searchMap.toDate}" "/>
+	          <td align="${left}"><input name="batchTo" type="text" id="batchTo" size="15"
+				value="${sessionScope.searchCriteria.searchMap.batchTo}" "/>
 				<script type="text/javascript">
 			$(function() {
-			$("#toDate").datepicker({
+			$("#batchTo").datepicker({
 				dateFormat:'mm-dd-yy',
             	changeMonth: true,
     			changeYear: true

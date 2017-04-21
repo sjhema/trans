@@ -98,8 +98,8 @@ public class EmployeeBonusReportController extends BaseController{
 		if (searchCriteria.getSearchMap().get("batchFrom")!=null) {
 			params.put("datefrom", (String)searchCriteria.getSearchMap().get("batchFrom"));
 		}
-		if (searchCriteria.getSearchMap().get("batchto")!=null) {
-			params.put("dateto", (String)searchCriteria.getSearchMap().get("batchto"));
+		if (searchCriteria.getSearchMap().get("batchTo")!=null) {
+			params.put("dateto", (String)searchCriteria.getSearchMap().get("batchTo"));
 		}
 		
 		EmployeeBonusWrapper wrapper = generateEmployeeBonusReport(searchCriteria,input);
@@ -174,7 +174,7 @@ public class EmployeeBonusReportController extends BaseController{
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
 					response.setHeader("Content-Disposition",
-							"attachment;filename= hourlyPayroll." + type);
+							"attachment;filename=BonusReport." + type);
 				}
 				response.setContentType(MimeUtil.getContentType(type));
 				ByteArrayOutputStream out = new ByteArrayOutputStream();

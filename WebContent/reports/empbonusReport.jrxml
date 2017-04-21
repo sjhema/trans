@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="1050" pageHeight="600" orientation="Landscape" columnWidth="1010" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="employeeBonus" pageWidth="1150" pageHeight="600" orientation="Landscape" columnWidth="1110" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -16,8 +16,8 @@
 	<field name="batchTos" class="java.lang.String"/>
 	<field name="amounts" class="java.lang.Double"/>
 	<field name="notes" class="java.lang.String"/>
-	<variable name="countLoad" class="java.lang.Double" calculation="Count">
-		<variableExpression><![CDATA[$F{amounts}]]></variableExpression>
+	<variable name="countLoad" class="java.lang.Long" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{employees}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -26,16 +26,16 @@
 		<band splitType="Stretch"/>
 	</title>
 	<pageHeader>
-		<band height="46">
+		<band height="84">
 			<staticText>
-				<reportElement mode="Opaque" x="331" y="0" width="208" height="16" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="451" y="0" width="208" height="16" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Employee Bonus Report]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="74" y="0" width="87" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="464" y="26" width="87" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -49,7 +49,7 @@
 				<text><![CDATA[Batch Date From]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="161" y="0" width="99" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="551" y="26" width="99" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -63,7 +63,7 @@
 				<text><![CDATA[Batch Date To]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="74" y="25" width="87" height="20"/>
+				<reportElement x="464" y="51" width="87" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -71,11 +71,11 @@
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{datefrom}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="161" y="25" width="99" height="20"/>
+				<reportElement x="551" y="51" width="99" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -83,7 +83,7 @@
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{dateto}]]></textFieldExpression>
 			</textField>
 		</band>
@@ -161,7 +161,7 @@
 				<text><![CDATA[Category]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="628" y="25" width="99" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="717" y="25" width="99" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -200,10 +200,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Batch Date ]]></text>
+				<text><![CDATA[Batch Date From]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="727" y="25" width="283" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="816" y="25" width="283" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -215,6 +215,20 @@
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Notes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="628" y="25" width="89" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Batch Date To]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -285,7 +299,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{categories}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="628" y="0" width="99" height="34"/>
+				<reportElement x="717" y="0" width="99" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -327,7 +341,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{batchFroms}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="727" y="0" width="283" height="34"/>
+				<reportElement x="816" y="0" width="283" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -340,12 +354,8 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{notes}]]></textFieldExpression>
 			</textField>
-		</band>
-	</detail>
-	<summary>
-		<band height="24" splitType="Stretch">
 			<textField>
-				<reportElement x="628" y="0" width="99" height="23"/>
+				<reportElement x="628" y="0" width="89" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -353,7 +363,25 @@
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{batchTos}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="717" y="0" width="99" height="23"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($P{sumtotalAmount})]]></textFieldExpression>
@@ -375,10 +403,10 @@
 			<textField>
 				<reportElement x="74" y="0" width="87" height="23"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0").format($V{countLoad})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.Long"><![CDATA[$V{countLoad}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="539" y="0" width="89" height="21"/>
+				<reportElement x="628" y="2" width="89" height="21"/>
 				<box>
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>

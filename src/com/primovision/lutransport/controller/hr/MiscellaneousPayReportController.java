@@ -167,15 +167,10 @@ public class MiscellaneousPayReportController extends BaseController {
 		String terminalName = terminal == null ? StringUtils.EMPTY : terminal.getName();
 		params.put("terminal", terminalName);
 		
-		String batchDateFromRange = StringUtils.isEmpty(input.getBatchDateFromStart()) ? StringUtils.EMPTY : input.getBatchDateFromStart();
-		batchDateFromRange += " - ";
-		batchDateFromRange += StringUtils.isEmpty(input.getBatchDateFromEnd()) ? StringUtils.EMPTY : input.getBatchDateFromEnd();
-		params.put("batchDateFromRange", batchDateFromRange);
-		
-		String batchDateToRange = StringUtils.isEmpty(input.getBatchDateToStart()) ? StringUtils.EMPTY : input.getBatchDateToStart();
-		batchDateToRange += " - ";
-		batchDateToRange += StringUtils.isEmpty(input.getBatchDateToEnd()) ? StringUtils.EMPTY : input.getBatchDateToEnd();
-		params.put("batchDateToRange", batchDateToRange);
+		String batchDateRange = StringUtils.isEmpty(input.getBatchDateFrom()) ? StringUtils.EMPTY : input.getBatchDateFrom();
+		batchDateRange += " - ";
+		batchDateRange += StringUtils.isEmpty(input.getBatchDateTo()) ? StringUtils.EMPTY : input.getBatchDateTo();
+		params.put("batchDateRange", batchDateRange);
 		
 		Map<String,Object> data = new HashMap<String,Object>();
 		data.put("data", miscellaneousAmountList);
@@ -198,10 +193,8 @@ public class MiscellaneousPayReportController extends BaseController {
 		String employee = input.getEmployee();
 		String miscellaneousDesc = input.getMiscellaneousDesc();
 		
-		String batchDateFromStart = input.getBatchDateFromStart();
-		String batchDateToStart = input.getBatchDateToStart();
-		String batchDateFromEnd = input.getBatchDateFromEnd();
-		String batchDateToEnd = input.getBatchDateToEnd();
+		String batchDateFrom = input.getBatchDateFrom();
+		String batchDateTo = input.getBatchDateTo();
 		
 		StringBuffer query = new StringBuffer("select obj from MiscellaneousAmount obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from MiscellaneousAmount obj where 1=1");
@@ -226,50 +219,23 @@ public class MiscellaneousPayReportController extends BaseController {
 			whereClause.append(" and obj.miscNotes in (" + miscDescIn + ")");
 		}
 		
-		StringBuffer batchDateFromClause = new StringBuffer();
-		StringBuffer batchDateToClause = new StringBuffer();
 		StringBuffer batchDateClause = new StringBuffer();
 		
-	   if (StringUtils.isNotEmpty(batchDateFromStart)) {
+	   if (StringUtils.isNotEmpty(batchDateFrom)) {
         	try {
-        		batchDateFromClause.append(" (obj.batchFrom>='"+sdf.format(dateFormat.parse(batchDateFromStart))+"'");
-			} catch (ParseException e) {
+        		batchDateClause.append(" (obj.batchFrom>='"+sdf.format(dateFormat.parse(batchDateFrom))+"'");
+        		batchDateClause.append(" and obj.batchFrom<='"+sdf.format(dateFormat.parse(batchDateTo))+"')");
+        		
+        		batchDateClause.append(" OR ");
+        		
+        		batchDateClause.append(" (obj.batchTo>='"+sdf.format(dateFormat.parse(batchDateFrom))+"'");
+        		batchDateClause.append(" and obj.batchTo<='"+sdf.format(dateFormat.parse(batchDateTo))+"')");
+   	   } catch (ParseException e) {
 				e.printStackTrace();
 			}
         	
-		}
-	   if (StringUtils.isNotEmpty(batchDateFromEnd)) {
-        	try {
-        		batchDateFromClause.append(" and obj.batchFrom<='"+sdf.format(dateFormat.parse(batchDateFromEnd))+"')");
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-        	
-		}
-      if (StringUtils.isNotEmpty(batchDateToStart)) {
-	     	try {
-	     		batchDateToClause.append(" (obj.batchTo>='"+sdf.format(dateFormat.parse(batchDateToStart))+"'");
-	     	} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-      if (StringUtils.isNotEmpty(batchDateToEnd)) {
-	     	try {
-	     		batchDateToClause.append(" and obj.batchTo<='"+sdf.format(dateFormat.parse(batchDateToEnd))+"')");
-	     	} catch (ParseException e) {
-				e.printStackTrace();
-			}
 		}
       
-      if (StringUtils.isNotEmpty(batchDateFromClause.toString())) {
-      	batchDateClause.append(batchDateFromClause);
-      }
-      if (StringUtils.isNotEmpty(batchDateToClause.toString())) {
-      	if (StringUtils.isNotEmpty(batchDateClause.toString())) {
-         	batchDateClause.append(" OR ");
-         }
-      	batchDateClause.append(batchDateToClause);
-      }
       if (StringUtils.isNotEmpty(batchDateClause.toString())) {
       	whereClause.append(" and (")
       				  .append(batchDateClause)

@@ -5396,6 +5396,9 @@ public class HrReportServiceImpl implements HrReportService {
 		String bonustype = input.getBonustype();
 		String empnumber = input.getEmployeeNo();
 		
+		String batchDateFrom = input.getBatchFrom();
+		String batchDateTo = input.getBatchTo();
+		
 		
 		StringBuffer query = new StringBuffer("");
 		StringBuffer queryCount = new StringBuffer("");
@@ -5430,6 +5433,38 @@ public class HrReportServiceImpl implements HrReportService {
 			queryCount.append("and  obj.empnumber ="+  empnumber +"" );
 			
 		}
+		
+		
+		SimpleDateFormat dateFormat1 = new SimpleDateFormat("MM-dd-yyyy");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+		StringBuffer batchDateClause = new StringBuffer();
+		
+		
+		  if (StringUtils.isNotEmpty(batchDateFrom)) {
+	        	try {
+	        		batchDateClause.append(" (obj.batchFrom>='"+sdf1.format(dateFormat1.parse(batchDateFrom))+"'");
+	        		batchDateClause.append(" and obj.batchFrom<='"+sdf1.format(dateFormat1.parse(batchDateTo))+"')");
+	        		
+	        		batchDateClause.append(" OR ");
+	        		
+	        		batchDateClause.append(" (obj.batchTo>='"+sdf1.format(dateFormat1.parse(batchDateFrom))+"'");
+	        		batchDateClause.append(" and obj.batchTo<='"+sdf1.format(dateFormat1.parse(batchDateTo))+"')");
+	   	   } catch (ParseException e) {
+					e.printStackTrace();
+				}
+	        	
+			}
+	      
+	      if (StringUtils.isNotEmpty(batchDateClause.toString())) {
+	      	query.append(" and (")
+	      				  .append(batchDateClause)
+	      				  .append(" )");
+	      	queryCount.append(" and (")
+				  .append(batchDateClause)
+				  .append(" )");
+	      }
+	      
+	      query.append(" order by obj.company.name asc, obj.terminal.name asc, obj.driver.fullName asc, obj.batchFrom asc, obj.batchTo asc");
 		
 		
 		
@@ -5641,7 +5676,11 @@ public class HrReportServiceImpl implements HrReportService {
 			output.setProbationStartDate(empObj.getDateProbationStart()!=null? sdf.format(empObj.getDateProbationStart()):"");
 			output.setProbationEndDate(empObj.getDateProbationEnd()!=null? sdf.format(empObj.getDateProbationEnd()):"");
 			output.setEmpanniversaryDate(empObj.getAnniversaryDate()!=null? sdf.format(empObj.getAnniversaryDate()):"");			
-			output.setEmpstatus(empObj.getStatus()==1 ? "Active": "Inactive");			
+			output.setEmpstatus(empObj.getStatus()==1 ? "Active": "Inactive");
+			
+			output.setSsn(empObj.getSsn()!=null?empObj.getSsn():"");
+			output.setPayTerm(empObj.getPayTerm()!=null?empObj.getPayTerm():"");
+			
 			summarys.add(output);				
 		}
 		
