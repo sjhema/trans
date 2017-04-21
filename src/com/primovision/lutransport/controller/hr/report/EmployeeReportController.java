@@ -98,6 +98,15 @@ public class EmployeeReportController extends BaseController{
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		
+		Location company = retrieveLocation(input.getCompany());
+		String companyName = company == null ? StringUtils.EMPTY : company.getName();
+		params.put("company", companyName);
+		
+		String hireDateRange = StringUtils.isEmpty(input.getDateHiredfrom()) ? StringUtils.EMPTY : input.getDateHiredfrom();
+		hireDateRange += " - ";
+		hireDateRange += StringUtils.isEmpty(input.getDateHiredto()) ? StringUtils.EMPTY : input.getDateHiredto();
+		params.put("hireDateRange", hireDateRange);
+		
 		EmployeeWrapper wrapper = generateEmployeereport(searchCriteria,input);		  
 		  
 		    //data.put("data", wrapper.getAttendance());
@@ -107,6 +116,13 @@ public class EmployeeReportController extends BaseController{
 		  return data;
 	}
 	
+	private Location retrieveLocation(String id) {
+		if (StringUtils.isEmpty(id)) {
+			return null;
+		}
+		
+		return genericDAO.getById(Location.class, Long.valueOf(id));
+	}
 	
 	public EmployeeWrapper generateEmployeereport(SearchCriteria searchCriteria,EmployeeInput input) {
 	return hrReportService.generateEmployeeReportData(searchCriteria,input);
