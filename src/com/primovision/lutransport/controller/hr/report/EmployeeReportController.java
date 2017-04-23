@@ -184,25 +184,28 @@ public class EmployeeReportController extends BaseController{
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
 					response.setHeader("Content-Disposition",
-							"attachment;filename= employee." + type);
+							"attachment;filename=employee." + type);
 				}
 				response.setContentType(MimeUtil.getContentType(type));
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				Map<String, Object> params = (Map<String,Object>)datas.get("params");
+				
 				/*if (!type.equals("print") &&!type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("fuellogReport",
+					out = dynamicReportService.generateStaticReport("employeeReport",
 							(List)datas.get("data"), params, type, request);
 				}*/
 				/*if (type.equals("pdf")) {
-					out = dynamicReportService.generateStaticReport("employeepayrollReportpdf",
+					out = dynamicReportService.generateStaticReport("employeeReport"+"pdf",
 							(List)datas.get("data"), params, type, request);
-				}
-				else if (type.equals("csv")) {*/
-					out = dynamicReportService.generateStaticReport("employeeReport",
-							(List)datas.get("data"), params, type, request);
-					/*out = dynamicReportService.generateStaticReport("fuellogReport"+"csv",
-							(List)datas.get("data"), params, type, request);*/
-				/*}*/
+				}*/
+			
+			if (type.equals("csv")) {
+				out = dynamicReportService.generateStaticReport("employeeReport"+"csv",
+						(List)datas.get("data"), params, type, request);
+			} else {
+				out = dynamicReportService.generateStaticReport("employeeReport",
+						(List)datas.get("data"), params, type, request);
+			}
 				
 			
 				out.writeTo(response.getOutputStream());

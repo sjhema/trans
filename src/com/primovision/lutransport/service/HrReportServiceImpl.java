@@ -5678,8 +5678,10 @@ public class HrReportServiceImpl implements HrReportService {
 			output.setEmpanniversaryDate(empObj.getAnniversaryDate()!=null? sdf.format(empObj.getAnniversaryDate()):"");			
 			output.setEmpstatus(empObj.getStatus()==1 ? "Active": "Inactive");
 			
-			output.setSsn(empObj.getSsn()!=null?empObj.getSsn():"");
-			output.setPayTerm(empObj.getPayTerm()!=null?empObj.getPayTerm():"");
+			output.setSsn(StringUtils.isNotEmpty(empObj.getSsn()) ? empObj.getSsn() : StringUtils.EMPTY);
+			
+			output.setPayTerm(StringUtils.isNotEmpty(empObj.getPayTerm())
+					? retrievePayTermText(empObj.getPayTerm()) : StringUtils.EMPTY);
 			
 			summarys.add(output);				
 		}
@@ -5688,10 +5690,10 @@ public class HrReportServiceImpl implements HrReportService {
 		return wrapper;
 	}
 	
-	
-	
-	
-	
+	private String retrievePayTermText(String dataValue) {
+		String dataType = "Pay Term";
+		return StaticDataUtil.getText(dataType, dataValue);
+	}
 	
 	///***********************************************************
 	///***********************************************************
