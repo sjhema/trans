@@ -34,10 +34,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
 
+import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.DriverFuelCard;
 import com.primovision.lutransport.model.FuelCard;
 import com.primovision.lutransport.model.FuelVendor;
-import com.primovision.lutransport.model.Vehicle;
 
 import com.primovision.lutransport.service.ImportMainSheetService;
 
@@ -183,7 +183,7 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TRANS DATE");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TRANS TIME");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "EQUIPMENT"); 
@@ -654,10 +654,24 @@ public class FuelVendorLogUploadUtil {
 				return oneCellValue;
 			}
 		} else if (StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)) {
-			if (cell.getColumnIndex() == 6) { // Unit 
+			if (cell.getColumnIndex() == 7 || cell.getColumnIndex() == 8) { // Driver last name or first name
+				String givenDriverName = oneRow.get(7) == null ? StringUtils.EMPTY : oneRow.get(7).toString();
+				if (StringUtils.isNotEmpty(givenDriverName)) {
+					if (cell.getColumnIndex() == 7) {
+						return givenDriverName;
+					} else {
+						return StringUtils.EMPTY;
+					}
+				}
+				
 				String cardNumber = oneRow.get(9) == null ? StringUtils.EMPTY : oneRow.get(9).toString();
-				String unitNum = determineUnitNumFromFuelCard(genericDAO, cardNumber, vendorId);
-				return unitNum;
+				Driver driver = determineDriverFromFuelCard(genericDAO, cardNumber, vendorId);
+				
+				if (cell.getColumnIndex() == 7) {
+					return driver == null ? StringUtils.EMPTY : driver.getLastName();
+				} else {
+					return driver == null ? StringUtils.EMPTY : driver.getFirstName();
+				}
 			} else if (cell.getColumnIndex() == 15) { // Gross Amount 
 				return determineGrossAmount(oneRow);
 			} else if (cell.getColumnIndex() == 18) { // Amount (net) 
@@ -1200,7 +1214,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static String determineUnitNumFromFuelCard(GenericDAO genericDAO, String cardNumber, Long vendorId) {
+	/*private static String determineUnitNumFromFuelCard(GenericDAO genericDAO, String cardNumber, Long vendorId) {
 		if (StringUtils.isEmpty(cardNumber) || vendorId == null) {
 			return StringUtils.EMPTY;
 		}
@@ -1221,6 +1235,25 @@ public class FuelVendorLogUploadUtil {
 			} else {
 				return fueCardVehicle.getUnitNum();
 			}
+		}
+	}*/
+	
+	private static Driver determineDriverFromFuelCard(GenericDAO genericDAO, String cardNumber, Long vendorId) {
+		if (StringUtils.isEmpty(cardNumber) || vendorId == null) {
+			return null;
+		}
+		
+		String fuelCardVehicleQuery = "select obj from DriverFuelCard obj where "
+						+ " obj.fuelvendor =" + vendorId
+						+ " and obj.fuelcard.fuelcardNum ='" +  cardNumber + "'"
+						+ " and obj.vehicle is null"
+						+ " order by obj.id desc";
+		List<DriverFuelCard> driverFuelCardList = genericDAO.executeSimpleQuery(fuelCardVehicleQuery);
+		
+		if (driverFuelCardList == null || driverFuelCardList.isEmpty()) {
+			return null;
+		} else {
+			return driverFuelCardList.get(0).getDriver();
 		}
 	}
 	
@@ -1257,7 +1290,7 @@ public class FuelVendorLogUploadUtil {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
 		
-		if (columnIndex == 7) { // lastname
+		if (columnIndex == 7) { // last name
 			if (StringUtils.isEmpty(driverName)) {
 				cell.setCellValue(StringUtils.EMPTY);
 				return;
@@ -1268,7 +1301,7 @@ public class FuelVendorLogUploadUtil {
 			return;
 		}  
 		
-		if (columnIndex == 8) { // firstname
+		if (columnIndex == 8) { // first name
 			if (!StringUtils.isEmpty(driverName)) {
 				cell.setCellValue(StringUtils.upperCase(driverName));
 				return;
