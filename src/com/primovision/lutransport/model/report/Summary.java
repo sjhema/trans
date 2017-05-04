@@ -10,7 +10,14 @@ public class Summary extends AbstractBaseModel {
 	String destination="";
 	Integer count=0;
 	Double amount=0.0;
+	Double billableTons = 0.0;
 	
+	public Double getBillableTons() {
+		return billableTons;
+	}
+	public void setBillableTons(Double billableTons) {
+		this.billableTons = billableTons;
+	}
 	public String getOrigin() {
 		return origin;
 	}

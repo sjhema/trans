@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.BaseController;
+import com.primovision.lutransport.core.util.MathUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.Customer;
 import com.primovision.lutransport.model.Driver;
@@ -209,6 +210,11 @@ public class BillingHistoryReportController extends BaseController {
 					summary.setAmount(Double.parseDouble(objArry[3].toString()));
 				if(objArry[4]!=null)
 					summary.setCompany(objArry[4].toString());
+				if(objArry[5]!=null) {
+					Double billableTon = Double.parseDouble(objArry[5].toString());
+					billableTon = MathUtil.roundUp(billableTon, 2);
+					summary.setBillableTons(billableTon);
+				}
 				summarylist.add(summary);
 			}	
 			if (StringUtils.isEmpty(type))
@@ -317,6 +323,11 @@ public class BillingHistoryReportController extends BaseController {
 				    	summary.setCompany(objArry[4].toString());
 				    else
 				    	summary.setCompany("");
+				    if(objArry[5]!=null) {
+							Double billableTon = Double.parseDouble(objArry[5].toString());
+							billableTon = MathUtil.roundUp(billableTon, 2);
+							summary.setBillableTons(billableTon);
+						}
 					summarylist.add(summary);
 					}	
 	 			if (StringUtils.isEmpty(type))

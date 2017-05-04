@@ -5662,7 +5662,7 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 				ticketIds.deleteCharAt(ticketIds.length() - 1);
 			}			
 			
-			String query="select obj.t_origin,obj.t_destination ,count(obj), sum(totAmt), obj.company from Billing_New obj where obj.ticket in ("
+			String query="select obj.t_origin,obj.t_destination ,count(obj), sum(totAmt), obj.company, sum(effectiveTonsWt) from Billing_New obj where obj.ticket in ("
 				+ticketIds.toString()+") group by t_origin,t_destination " + 
 				// Billing History Summary - Order fix	
 				//" order by obj.t_origin asc,obj.t_destination asc";
