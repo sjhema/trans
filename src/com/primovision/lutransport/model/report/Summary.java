@@ -11,7 +11,35 @@ public class Summary extends AbstractBaseModel {
 	Integer count=0;
 	Double amount=0.0;
 	Double billableTons = 0.0;
+	Integer countTrucks = 0;
+	Double netAmount=0.0;
+	Double fuelSurcharge=0.0;
+	Double driverPay=0.0;
 	
+	public Double getNetAmount() {
+		return netAmount;
+	}
+	public void setNetAmount(Double netAmount) {
+		this.netAmount = netAmount;
+	}
+	public Double getFuelSurcharge() {
+		return fuelSurcharge;
+	}
+	public void setFuelSurcharge(Double fuelSurcharge) {
+		this.fuelSurcharge = fuelSurcharge;
+	}
+	public Double getDriverPay() {
+		return driverPay;
+	}
+	public void setDriverPay(Double driverPay) {
+		this.driverPay = driverPay;
+	}
+	public Integer getCountTrucks() {
+		return countTrucks;
+	}
+	public void setCountTrucks(Integer countTrucks) {
+		this.countTrucks = countTrucks;
+	}
 	public Double getBillableTons() {
 		return billableTons;
 	}

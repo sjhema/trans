@@ -210,11 +210,23 @@ public class BillingHistoryReportController extends BaseController {
 					summary.setAmount(Double.parseDouble(objArry[3].toString()));
 				if(objArry[4]!=null)
 					summary.setCompany(objArry[4].toString());
-				if(objArry[5]!=null) {
+				if (objArry[5] != null) {
 					Double billableTon = Double.parseDouble(objArry[5].toString());
 					billableTon = MathUtil.roundUp(billableTon, 2);
 					summary.setBillableTons(billableTon);
 				}
+				 if (objArry[6] != null) {
+						summary.setCountTrucks(Integer.parseInt(objArry[6].toString()));
+				 }
+				 if (objArry[7] != null) {
+						summary.setNetAmount(Double.parseDouble(objArry[7].toString()));
+				 }
+				 if (objArry[8] != null) {
+						summary.setFuelSurcharge(Double.parseDouble(objArry[8].toString()));
+				 }
+				 if (objArry[9] != null) {
+						summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
+				 }
 				summarylist.add(summary);
 			}	
 			if (StringUtils.isEmpty(type))
@@ -323,12 +335,24 @@ public class BillingHistoryReportController extends BaseController {
 				    	summary.setCompany(objArry[4].toString());
 				    else
 				    	summary.setCompany("");
-				    if(objArry[5]!=null) {
+				    if (objArry[5] != null) {
 							Double billableTon = Double.parseDouble(objArry[5].toString());
 							billableTon = MathUtil.roundUp(billableTon, 2);
 							summary.setBillableTons(billableTon);
-						}
-					summarylist.add(summary);
+					 }
+				    if (objArry[6] != null) {
+							summary.setCountTrucks(Integer.parseInt(objArry[6].toString()));
+					 }
+				    if (objArry[7] != null) {
+							summary.setNetAmount(Double.parseDouble(objArry[7].toString()));
+					 }
+					 if (objArry[8] != null) {
+							summary.setFuelSurcharge(Double.parseDouble(objArry[8].toString()));
+					 }
+					 if (objArry[9] != null) {
+							summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
+					 }
+					 summarylist.add(summary);
 					}	
 	 			if (StringUtils.isEmpty(type))
 					type = "xlsx";
