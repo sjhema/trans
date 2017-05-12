@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryReport" pageWidth="1250" pageHeight="595" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="337"/>
+	<property name="ireport.x" value="339"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="batchDateFrom" class="java.lang.String"/>
 	<parameter name="batchDateTo" class="java.lang.String"/>
@@ -15,6 +15,7 @@
 	<field name="netAmount" class="java.lang.Double"/>
 	<field name="fuelSurcharge" class="java.lang.Double"/>
 	<field name="driverPay" class="java.lang.Double"/>
+	<field name="truckDriverInfo" class="java.lang.String"/>
 	<variable name="totalloadcount" class="java.lang.Integer" calculation="Sum">
 		<variableExpression><![CDATA[$F{count}]]></variableExpression>
 		<initialValueExpression><![CDATA[new Integer(0)]]></initialValueExpression>
@@ -346,7 +347,7 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{billableTons})]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField hyperlinkType="Reference">
 				<reportElement x="611" y="0" width="90" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -359,6 +360,7 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{countTrucks}]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA["javascript:showTruckDriverInfo('" + $F{truckDriverInfo} + "');"]]></hyperlinkReferenceExpression>
 			</textField>
 			<textField>
 				<reportElement x="820" y="0" width="141" height="20"/>

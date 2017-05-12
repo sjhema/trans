@@ -2,6 +2,8 @@ package com.primovision.lutransport.model.report;
 
 import java.util.Iterator;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.AbstractBaseModel;
 
 public class Summary extends AbstractBaseModel {
@@ -16,6 +18,14 @@ public class Summary extends AbstractBaseModel {
 	Double fuelSurcharge=0.0;
 	Double driverPay=0.0;
 	
+	String truckDriverInfo = StringUtils.EMPTY;
+	
+	public String getTruckDriverInfo() {
+		return truckDriverInfo;
+	}
+	public void setTruckDriverInfo(String truckDriverInfo) {
+		this.truckDriverInfo = truckDriverInfo;
+	}
 	public Double getNetAmount() {
 		return netAmount;
 	}

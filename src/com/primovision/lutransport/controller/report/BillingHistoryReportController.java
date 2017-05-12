@@ -189,7 +189,7 @@ public class BillingHistoryReportController extends BaseController {
 		
 		if(StringUtils.contains(sum, "true")){
 			Map<String,Object> params= new HashMap<String,Object>();
-			List<Summary> summarylist=new ArrayList<Summary>();			           
+			//List<Summary> summarylist=new ArrayList<Summary>();			           
 			List<Summary> list=reportService.generateSummaryNew(criteria, input);
 			if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
 				params.put("batchDateFrom",input.getBatchDateFrom());
@@ -197,7 +197,7 @@ public class BillingHistoryReportController extends BaseController {
 			if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 				params.put("batchDateTo",input.getBatchDateTo());
 			}
-			for(Object obj:list){						
+			/*for(Object obj:list){						
 				Object[] objArry=(Object[]) obj;
 				Summary summary=new Summary();	
 				if(objArry[0]!=null)
@@ -228,12 +228,12 @@ public class BillingHistoryReportController extends BaseController {
 						summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
 				 }
 				summarylist.add(summary);
-			}	
+			}*/
 			if (StringUtils.isEmpty(type))
 				type = "html";
 			response.setContentType(MimeUtil.getContentType(type));			
 		    //ByteArrayOutputStream out = new ByteArrayOutputStream();
-			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("summaryReport",(List)summarylist,params,request);
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("summaryReport",(List)list,params,request);
 			request.setAttribute("jasperPrint", jasperPrint);	
 			request.getSession().setAttribute("input", input);
 			return  "reportuser/report/summary/html";
@@ -314,7 +314,7 @@ public class BillingHistoryReportController extends BaseController {
 		  if(StringUtils.equalsIgnoreCase(sum,"summary")){
 				
 	        	 Map<String,Object> params= new HashMap<String,Object>();
-	 			List<Summary> summarylist=new ArrayList<Summary>();
+	 			//List<Summary> summarylist=new ArrayList<Summary>();
 	 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 	 			try{
 	 			List<Summary> list=reportService.generateSummaryNew(criteria, input);
@@ -324,7 +324,7 @@ public class BillingHistoryReportController extends BaseController {
 				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 					params.put("batchDateTo",input.getBatchDateTo());
 				}
-	 			for(Object obj:list){						
+	 			/*for(Object obj:list){						
 					Object[] objArry=(Object[]) obj;
 					Summary summary=new Summary();				
 					summary.setOrigin(objArry[0].toString());
@@ -353,7 +353,7 @@ public class BillingHistoryReportController extends BaseController {
 							summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
 					 }
 					 summarylist.add(summary);
-					}	
+					}*/	
 	 			if (StringUtils.isEmpty(type))
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
@@ -365,11 +365,11 @@ public class BillingHistoryReportController extends BaseController {
 	 			
 				if (!type.equals("print")&&!type.equals("pdf")) {
 					out = dynamicReportService.generateStaticReport("summaryReport",
-							(List)summarylist, params, type, request);
+							(List)list, params, type, request);
 				}
 				else if(type.equals("pdf")) {
 					out = dynamicReportService.generateStaticReport("summaryReportpdf",
-							(List)summarylist, params, type, request);
+							(List)list, params, type, request);
 				} 			
 				out.writeTo(response.getOutputStream());
 				criteria.setPageSize(500);				

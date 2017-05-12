@@ -21,4 +21,7 @@
     <decorator name="home" page="singleColumnLayout.jsp">
         <pattern>/trans/**</pattern>
     </decorator>
+    <decorator name="reportuserBillingHistorySummary" page="twoColumnLayoutBillingHistorySummary.jsp">
+    	<pattern>/trans/reportuser/report/summary/html.jsp</pattern>
+    </decorator>
 </decorators> 

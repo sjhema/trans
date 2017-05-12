@@ -5652,7 +5652,7 @@ throw new Exception("origin and destindation is empty");
 	}
 	
 	
-private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, String> params) {
+/*private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, String> params) {
 		
 		 StringBuffer ticketIds = new StringBuffer("-1,");
 			for (Ticket tkt : tickets) {
@@ -5672,9 +5672,110 @@ private List<Summary> processTicketsForSummary(List<Ticket> tickets,Map<String, 
 		
 	
 		return summarys;
-}
+}*/
 	
+	private List<Summary> processTicketsForSummary(List<Ticket> tickets ,Map<String, String> params) {
+		List<Summary> returnSummaryList = new ArrayList<Summary>();
+		if (tickets == null || tickets.isEmpty()) {
+			return returnSummaryList;
+		}
+		
+		StringBuffer ticketIds = new StringBuffer("-1,");
+		for (Ticket tkt : tickets) {
+			ticketIds.append(tkt.getId()).append(",");
+		}
+		
+		if (ticketIds.indexOf(",") != -1) {
+			ticketIds.deleteCharAt(ticketIds.length() - 1);
+		}			
+		
+		String query = "select obj.t_origin, obj.t_destination, count(obj), sum(amount), obj.company, sum(effectiveTonsWt), count(distinct t_unit), "
+				+ " sum(totAmt), sum(fuelSurcharge), sum(driverPayRate) from Billing_New obj where obj.ticket in ("
+			+ticketIds.toString()+") group by t_origin,t_destination " + 
+			// Billing History Summary - Order fix	
+			//" order by obj.t_origin asc,obj.t_destination asc";
+			" order by obj.company asc, obj.t_origin asc, obj.t_destination asc";
+		
+		List<Summary> summarys = genericDAO.executeSimpleQuery(query);	
+		if (summarys == null || summarys.isEmpty()) {
+			return returnSummaryList;
+		}
+		
+		for (Object obj : summarys) {						
+			Object[] objArry = (Object[]) obj;
+			Summary summary = new Summary();
+			
+			if (objArry[0]!=null)
+				summary.setOrigin(objArry[0].toString());
+			if (objArry[1]!=null)
+				summary.setDestination(objArry[1].toString());
+			if (objArry[2]!=null)
+				summary.setCount(Integer.parseInt(objArry[2].toString()));
+			if (objArry[3]!=null)
+				summary.setAmount(Double.parseDouble(objArry[3].toString()));
+			if (objArry[4]!=null)
+				summary.setCompany(objArry[4].toString());
+			if (objArry[5] != null) {
+				Double billableTon = Double.parseDouble(objArry[5].toString());
+				billableTon = MathUtil.roundUp(billableTon, 2);
+				summary.setBillableTons(billableTon);
+			}
+			if (objArry[6] != null) {
+				summary.setCountTrucks(Integer.parseInt(objArry[6].toString()));
+			}
+			if (objArry[7] != null) {
+				summary.setNetAmount(Double.parseDouble(objArry[7].toString()));
+			}
+			if (objArry[8] != null) {
+				summary.setFuelSurcharge(Double.parseDouble(objArry[8].toString()));
+			}
+			if (objArry[9] != null) {
+				summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
+			}
+			
+			String truckDriverInfo = retrieveBillingTruckDriverInfo(ticketIds.toString(), summary.getCompany(), 
+					summary.getOrigin(), summary.getDestination());
+			summary.setTruckDriverInfo(truckDriverInfo);
+			
+			returnSummaryList.add(summary);
+		}	
 	
+		return returnSummaryList;
+	}
+	
+	private String retrieveBillingTruckDriverInfo(String ticketIds, String company, String origin,
+			String destination) {
+		StringBuffer truckDriverInfo = new StringBuffer();
+		
+		String query = "select distinct obj.t_unit, obj.driver"
+				+ " from Billing_New obj "
+				+ " where obj.ticket in ("+ticketIds+")"
+				+ " and obj.company='" + company + "'"
+				+ " and obj.t_origin='" + origin + "'"
+				+ " and obj.t_destination='" + destination + "'"
+				+ " order by CAST(obj.t_unit AS int), obj.driver";
+		
+		List<Summary> summarys = genericDAO.executeSimpleQuery(query);
+		if (summarys == null || summarys.isEmpty()) {
+			return truckDriverInfo.toString();
+		}
+		
+		for (Object obj : summarys) {						
+			Object[] objArry = (Object[]) obj;
+			
+			if (objArry[0] != null) {
+				truckDriverInfo.append(objArry[0].toString());
+			}
+			if (objArry[1] != null) {
+				truckDriverInfo.append(":" + objArry[1].toString() + "|");
+			}
+		}
+		
+		if (truckDriverInfo.length() != 0) {
+			truckDriverInfo.deleteCharAt(truckDriverInfo.length() - 1);
+		}
+		return truckDriverInfo.toString();
+	}
 	
 	@Override
 	public List<Summary> generateSummary(SearchCriteria criteria,
