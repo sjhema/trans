@@ -33,7 +33,7 @@
 		<initialValueExpression><![CDATA[new Integer(0)]]></initialValueExpression>
 	</variable>
 	<variable name="totalNetAmount" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{netAmount}]]></variableExpression>
+		<variableExpression><![CDATA[$F{netAmount} - $F{driverPay}]]></variableExpression>
 		<initialValueExpression><![CDATA[new Double(0.0)]]></initialValueExpression>
 	</variable>
 	<variable name="totalFuelSurcharge" class="java.lang.Double" calculation="Sum">
@@ -402,7 +402,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{netAmount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{netAmount} - $F{driverPay})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

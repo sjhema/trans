@@ -3020,7 +3020,7 @@ public class HrReportServiceImpl implements HrReportService {
 		}
 		
 		if (!StringUtils.isEmpty(category)) {
-			query.append("and  obj.category in (" + category + ")");
+			query.append("and  obj.catagory in (" + category + ")");
 		}
 		
 		if (!StringUtils.isEmpty(weekstartDate) && !StringUtils.isEmpty(weekendDate)) {

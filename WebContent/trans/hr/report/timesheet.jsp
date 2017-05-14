@@ -133,7 +133,7 @@ function getEmpDetail(){
 			
 			<td class="form-left">Category</td>
 			<td align="${left}">
-				 <select name="catagory" id="categoryId"   style="min-width:120px; max-width:120px">
+				 <select name="category" id="categoryId"   style="min-width:120px; max-width:120px">
 					<option value="">Please Select</option>
 					<!--   <option value=""></option> -->
 					<c:forEach var="item" items="${categories}">
