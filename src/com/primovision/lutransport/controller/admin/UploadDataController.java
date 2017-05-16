@@ -93,6 +93,11 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/subcontractorrate";
 	}
 	
+	@RequestMapping("/employee.do")
+	public String employee(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/employee";
+	}
+	
 	@RequestMapping("/vehiclepermit.do")
 	public String vehiclepermit(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -349,6 +354,45 @@ public class UploadDataController extends BaseController {
 		}
 		
 		return "admin/uploaddata/subcontractorrate";
+	}
+	
+	@RequestMapping("/employee/upload.do")
+	public String saveEmployeeData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFile") MultipartFile file) {
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/employee";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/employee";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importEmployeeMainSheet(is)\n");
+			List<String> str = importMainSheetService.importEmployeeMainSheet(is, createdBy);
+			if (str.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all employee records");
+			} else {
+				model.addAttribute("errorList", str);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/employee";
+		}
+		
+		return "admin/uploaddata/employee";
 	}
 	
 	@RequestMapping("/fuellog/override.do")

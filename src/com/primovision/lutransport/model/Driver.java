@@ -40,6 +40,15 @@ public class Driver extends AbstractBaseModel{
 	@Column(name="full_name")
 	private String fullName;
 	
+	@Column(name="dob")
+	private Date dob;
+	
+	@Column(name="driver_license")
+	private String driverLicense;
+	
+	@ManyToOne
+	@JoinColumn(name="driver_license_state")
+	private State driverLicenseState;
 	
 	@Column(name="date_hired")
 	private Date dateHired;
@@ -160,7 +169,62 @@ public class Driver extends AbstractBaseModel{
 	@Transient
 	private String empshift;
 	
+	@Transient
+	private String userName;
 	
+	@Transient
+	private Role role;
+	
+	@Transient
+	private Long userId;
+	
+	@Transient
+	private String password;
+	
+	@Transient
+	public String getPassword() {
+		return password;
+	}
+
+	@Transient
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Transient
+	public Long getUserId() {
+		return userId;
+	}
+
+	@Transient
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public Date getDob() {
+		return dob;
+	}
+
+	public void setDob(Date dob) {
+		this.dob = dob;
+	}
+
+	public String getDriverLicense() {
+		return driverLicense;
+	}
+
+	public void setDriverLicense(String driverLicense) {
+		this.driverLicense = driverLicense;
+	}
+
+	public State getDriverLicenseState() {
+		return driverLicenseState;
+	}
+
+	public void setDriverLicenseState(State driverLicenseState) {
+		this.driverLicenseState = driverLicenseState;
+	}
+
 	public Date getDateHired() {
 		return dateHired;
 	}
@@ -488,6 +552,26 @@ public class Driver extends AbstractBaseModel{
 
 	public void setSsn(String ssn) {
 		this.ssn = ssn;
+	}
+
+	@Transient
+	public String getUserName() {
+		return userName;
+	}
+
+	@Transient
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	@Transient
+	public Role getRole() {
+		return role;
+	}
+
+	@Transient
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 	 

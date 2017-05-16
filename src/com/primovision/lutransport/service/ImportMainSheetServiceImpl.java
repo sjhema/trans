@@ -345,10 +345,235 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			}
 		} catch (Exception ex) {
 			errorList.add("Not able to upload XL!!! Please try again.");
-			log.warn("Error while importing Mileage log: " + ex);
+			log.warn("Error while importing Subcontractor Rate data: " + ex);
 		}
 		
 		return errorList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importEmployeeMainSheet(InputStream is, Long createdBy) throws Exception {
+		List<Driver> driverListToBeSaved = new ArrayList<Driver>();
+		List<String> errorList = new ArrayList<String>();
+		
+		SimpleDateFormat dobFormat = new SimpleDateFormat("M/d/yyyy");
+		
+		int recordCount = 0;
+		int dataSetIndex = 0;
+		int errorCount = 0;
+		String employeeName = StringUtils.EMPTY;
+		boolean dataSetError = false;
+		boolean fatalDataSetError = false;
+		StringBuffer dataSetErrorMsg = new StringBuffer();
+		List<Driver> dataSetDriverList = null;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				/*if (recordCount < 10) {
+					continue;
+				}*/
+				
+				try {
+					String endOfData = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", endOfData)) {
+						if (dataSetError) {
+							String msgPreffix = fatalDataSetError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+							errorList.add(msgPreffix 
+									+ "Data set: " + (dataSetIndex) + ","
+									+ " For employee: " + employeeName
+									+ "->Errors: " + dataSetErrorMsg.toString() + "<br/>");
+							errorCount++;
+						} 
+						
+						if (!fatalDataSetError && dataSetDriverList != null && !dataSetDriverList.isEmpty()) {
+							driverListToBeSaved.addAll(dataSetDriverList);
+						}
+						
+						break;
+					}
+					
+					String codeHeader = ((String) getCellValue(row.getCell(8)));
+					if (StringUtils.equals("Code:", codeHeader)) {
+						dataSetIndex++;
+						
+						if (dataSetError) {
+							String msgPreffix = fatalDataSetError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+							errorList.add(msgPreffix 
+									+ "Data set: " + (dataSetIndex-1) + ","
+									+ " For employee: " + employeeName
+									+ "->Errors: " + dataSetErrorMsg.toString() + "<br/>");
+							errorCount++;
+						} 
+						
+						if (!fatalDataSetError && dataSetDriverList != null && !dataSetDriverList.isEmpty()) {
+							driverListToBeSaved.addAll(dataSetDriverList);
+						}
+						
+						dataSetDriverList = null;
+						dataSetError = false;
+						fatalDataSetError = false;
+						dataSetErrorMsg = new StringBuffer();
+						
+						employeeName = ((String) getCellValue(row.getCell(1)));
+						employeeName = StringUtils.trimToEmpty(employeeName);
+						
+						dataSetDriverList = retrieveDriver(employeeName);
+						if (dataSetDriverList == null || dataSetDriverList.isEmpty()) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("Employee Name, ");
+							continue;
+						}
+						
+						String ssn = ((String) getCellValue(row.getCell(9)));
+						ssn = StringUtils.trimToEmpty(ssn);
+						if (StringUtils.isEmpty(ssn)) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("SSN, ");
+							continue;
+						}
+						
+						if (!fatalDataSetError && dataSetDriverList != null && !dataSetDriverList.isEmpty()) {
+							for (Driver driver: dataSetDriverList) {
+								driver.setSsn(ssn);
+							}
+						}
+					}
+					
+					String licenseHeader = ((String) getCellValue(row.getCell(1)));
+					if (StringUtils.equals("License Number:", licenseHeader)) {
+						String driverLicense = ((String) getCellValue(row.getCell(5)));
+						driverLicense = StringUtils.trimToEmpty(driverLicense);
+						if (StringUtils.isEmpty(driverLicense)) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("Driver License, ");
+							continue;
+						}
+						
+						String driverLicenseStateStr = ((String) getCellValue(row.getCell(8)));
+						driverLicenseStateStr = StringUtils.trimToEmpty(driverLicenseStateStr);
+						State driverLicenseState = retrieveStateByCode(driverLicenseStateStr);
+						if (driverLicenseState == null) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("Driver License State, ");
+							continue;
+						}
+						
+						if (!fatalDataSetError && dataSetDriverList != null && !dataSetDriverList.isEmpty()) {
+							for (Driver driver: dataSetDriverList) {
+								driver.setDriverLicense(driverLicense);
+								driver.setDriverLicenseState(driverLicenseState);
+							}
+						}
+					}
+					
+					String dobHeader = ((String) getCellValue(row.getCell(1)));
+					if (StringUtils.equals("Date of Birth:", dobHeader)) {
+						String dobStr = ((String) getCellValue(row.getCell(5)));
+						dobStr = StringUtils.trimToEmpty(dobStr);
+						if (StringUtils.isEmpty(dobStr)) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("DOB, ");
+							continue;
+						}
+						
+						Date dob = null;
+						try {
+							dob = dobFormat.parse(dobStr);
+						} catch (ParseException pe) {
+							dataSetError = true;
+							fatalDataSetError = true;
+							dataSetErrorMsg.append("DOB, ");
+							continue;
+						}
+						
+						if (!fatalDataSetError && dataSetDriverList != null && !dataSetDriverList.isEmpty()) {
+							for (Driver driver: dataSetDriverList) {
+								driver.setDob(dob);						
+							}
+						}
+					}
+					
+					/*if (checkDuplicate()) {
+						dataSetError = true;
+						fatalDataSetError = true;
+						dataSetErrorMsg.append("Duplicate Record, ");
+					}*/
+				} catch (Exception ex) {
+					dataSetError = true;
+					fatalDataSetError = true;
+					dataSetErrorMsg.append("Error while processing record, ");
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount
+					+ ". Data set count: " + dataSetIndex
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + driverListToBeSaved.size());
+			for (Driver driverToBeSaved : driverListToBeSaved) {
+				System.out.println("Now loading employee: " + driverToBeSaved.getFullName());
+				
+				driverToBeSaved.setModifiedBy(createdBy);
+				driverToBeSaved.setModifiedAt(Calendar.getInstance().getTime());
+				
+				genericDAO.saveOrUpdate(driverToBeSaved);
+			}
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Employee data: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	private List<Driver> retrieveDriver(String fullName) {
+		if (StringUtils.isEmpty(fullName)) {
+			return null;
+		}
+		
+		if (fullName.contains("'")) {
+			return null;
+		}
+		
+		String nameTokens[] = fullName.split("[\\s]", 2);
+		if (nameTokens.length < 2) {
+			return null;
+		}
+		
+		String baseQuery = "select obj from Driver obj where"; 
+		String whereClause = " obj.firstName='"+nameTokens[0]+"' and obj.lastName='"+nameTokens[1]+"'";		
+		List<Driver> driverList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		return driverList;
+	}
+	
+	private State retrieveStateByCode(String stateCode) {
+		if (StringUtils.isEmpty(stateCode)) {
+			return null;
+		}
+		
+		String baseQuery = "select obj from State obj where"; 
+		String whereClause = " obj.code='"+stateCode+"'";		
+		List<State> stateList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		if (stateList == null || stateList.isEmpty() || stateList.size() > 1) {
+			return null;
+		}
+		
+		return stateList.get(0);
 	}
 	
 	@Override

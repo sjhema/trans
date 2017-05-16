@@ -33,11 +33,15 @@ import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.ProbationType;
 import com.primovision.lutransport.model.hr.Ptod;
+import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DateUpdateService;
 /**
  * @author sudhir
@@ -98,6 +102,11 @@ public class DriverController extends CRUDController<Driver>{
 		criterias.clear();
 		criterias.put("probationCategory", "General");
 		model.addAttribute("generalProbationTypes", genericDAO.findByCriteria(ProbationType.class, criterias,"probationName",false));
+	
+		// User id change - 24th Apr 2017
+		criterias.clear();
+		model.addAttribute("roles", genericDAO.findAll(Role.class));
+		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
 	}
 	
 	@Override
@@ -125,6 +134,12 @@ public class DriverController extends CRUDController<Driver>{
 		model.addAttribute("payrollProbationTypes",genericDAO.executeSimpleQuery(payrollProbationQuery));
 		
 		model.addAttribute("leaveProbationTypes",genericDAO.executeSimpleQuery(leaveProbationQuery) );
+		
+		User user = retrieveUser(driver.getFirstName(), driver.getLastName());
+		if (user != null) {
+			map(driver, user);
+		}
+		
 		return urlContext + "/form";
 	}
 	
@@ -165,6 +180,9 @@ public class DriverController extends CRUDController<Driver>{
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
 		binder.registerCustomEditor(EmployeeCatagory.class, new AbstractModelEditor(EmployeeCatagory.class));
 		binder.registerCustomEditor(ProbationType.class, new AbstractModelEditor(ProbationType.class));
+		
+		binder.registerCustomEditor(Role.class, new AbstractModelEditor(Role.class));
+		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
 	}
 	
 	@Override
@@ -192,6 +210,11 @@ public class DriverController extends CRUDController<Driver>{
 	@Override
 	public String save(HttpServletRequest request, @ModelAttribute("modelObject") Driver entity,
 			BindingResult bindingResult, ModelMap model) {
+		boolean generateUserCreds = false;
+		if (entity.getId() == null) {
+			generateUserCreds = true;
+		}
+		
 		boolean err=true;
 		if(entity.getCatagory()==null){
 			bindingResult.rejectValue("catagory", "error.select.option",
@@ -207,25 +230,57 @@ public class DriverController extends CRUDController<Driver>{
 			bindingResult.rejectValue("terminal", "error.select.option",
 					null, null);
 			err=false;
-		}		
+		}
 		
+		if (entity.getRole() == null) {
+			bindingResult.rejectValue("role", "error.select.option", null, null);
+			err = false;
+		}
 		
-		if(StringUtils.isEmpty(entity.getLastName())){
+		String lastName = StringUtils.trimToEmpty(entity.getLastName());
+		if (StringUtils.isEmpty(lastName)) {
 			bindingResult.rejectValue("lastName", "NotEmpty.java.lang.String",
 					null, null);
 			err=false;
 		}
 		else{
-			 entity.setLastName(entity.getLastName().trim());
+			 entity.setLastName(lastName);
 		}
 		
-		if(StringUtils.isEmpty(entity.getFirstName())){
+		String firstName = StringUtils.trimToEmpty(entity.getFirstName());
+		if (StringUtils.isEmpty(firstName)) {
 			bindingResult.rejectValue("firstName", "NotEmpty.java.lang.String",
 					null, null);
 			err=false;
 		}
 		else{
-			entity.setFirstName(entity.getFirstName().trim());
+			entity.setFirstName(firstName);
+		}
+		
+		if (entity.getId() == null) {
+			String staffId = generateStaffId();
+			if (StringUtils.isEmpty(staffId) ) {
+				setupCreate(model, request);
+				request.getSession().setAttribute("error", "Error while gemerating Employee id");
+				return urlContext + "/form";
+			} 
+			entity.setStaffId(staffId);
+		}
+		
+		if (generateUserCreds) {
+			/*if (isDuplicateFirstNameLastName(firstName, lastName)) {
+				setupCreate(model, request);
+				request.getSession().setAttribute("error", "Duplicate First Name/Last Name");
+				return urlContext + "/form";
+			}*/
+			
+			String ssn = StringUtils.trimToEmpty(entity.getSsn());
+			if (StringUtils.isEmpty(ssn)) {
+				bindingResult.rejectValue("ssn", "NotEmpty.java.lang.String", null, null);
+				err = false;
+			} else {
+				entity.setSsn(ssn);
+			}
 		}
 		
 		if(entity.getDateHired()!=null&&entity.getDateTerminated()!=null){
@@ -282,7 +337,6 @@ public class DriverController extends CRUDController<Driver>{
 			}
 		 }
 		 
-		 
 		 try {
 				getValidator().validate(entity, bindingResult);
 			} catch (ValidationException e) {
@@ -293,7 +347,19 @@ public class DriverController extends CRUDController<Driver>{
 			if (bindingResult.hasErrors()) {
 				setupCreate(model, request);
 				return urlContext + "/form";
-			}			
+			}	
+			
+			User userCreds = null;
+			if (generateUserCreds) {
+				userCreds = generateUserCredentials(entity);
+				if (StringUtils.isEmpty(userCreds.getUsername()) 
+						|| StringUtils.isEmpty(userCreds.getPassword())
+						|| StringUtils.isEmpty(userCreds.getName())) {
+					setupCreate(model, request);
+					request.getSession().setAttribute("error", "Error while generating user name, password and name");
+					return urlContext + "/form";
+				}
+			}
 			
 			beforeSave(request, entity, model);	
 	
@@ -406,10 +472,15 @@ public class DriverController extends CRUDController<Driver>{
 				}
 			}
 			catch(Exception e){
-				System.out.println("An EXception Occured while parsing date in Driver controller");
+				System.out.println("An Exception Occured while parsing date in Driver controller");
 			}
 			
 			genericDAO.saveOrUpdate(entity);
+			
+			User user = saveUserAccess(entity, userCreds);
+			if (user != null) {
+				map(entity, user);
+			}
 		
 		  // merge into datasource
 				
@@ -419,6 +490,92 @@ public class DriverController extends CRUDController<Driver>{
 		     return "redirect:/" + urlContext + "/list.do";
 	}
 	
+	private User saveUserAccess(Driver driver, User userCreds) {
+		Long userId = driver.getUserId();
+		if (userId == null) {
+			userId = userCreds.getId();
+		}
+		
+		if (userId != null) {
+			User existingUser = genericDAO.getById(User.class, userId);
+			if (driver.getRole().getId().longValue() == existingUser.getRole().getId().longValue()
+					&& StringUtils.equals(driver.getFirstName(), existingUser.getFirstName())
+					&& StringUtils.equals(driver.getLastName(), existingUser.getLastName())) {
+				return existingUser;
+			} else {
+				existingUser.setFirstName(driver.getFirstName());
+				existingUser.setLastName(driver.getLastName());
+				existingUser.setRole(driver.getRole());
+				existingUser.setModifiedAt(driver.getModifiedAt());
+				existingUser.setModifiedBy(driver.getModifiedBy());
+				
+				genericDAO.save(existingUser);
+				return existingUser;
+			}
+		}
+		
+		User user = new User();
+		map(user, driver);
+		
+		user.setName(userCreds.getName());
+		user.setUsername(userCreds.getUsername());
+		user.setPassword(userCreds.getPassword());
+		
+		//determineNonDuplicate(user);
+		
+		user.setStatus(1);
+		user.setCreatedBy(driver.getCreatedBy());
+		user.setCreatedAt(driver.getCreatedAt());
+		
+		genericDAO.save(user);
+		return user;
+	}
+	
+	private void map(User user, Driver driver) {
+		user.setFirstName(StringUtils.trimToEmpty(driver.getFirstName()));
+		user.setLastName(StringUtils.trimToEmpty(driver.getLastName()));
+		//user.setUsername(StringUtils.trimToEmpty(driver.getUserName()));
+		//user.setPassword(StringUtils.trimToEmpty(driver.getPassword()));
+		user.setRole(driver.getRole());
+	}
+	
+	private void map(Driver driver, User user) {
+		driver.setUserId(user.getId());
+		driver.setUserName(user.getUsername());
+		//driver.setPassword(user.getPassword());
+		driver.setRole(user.getRole());
+	}
+	
+	private String generatePassword(String lastName, String ssn) {
+		String modLastName = StringUtils.trimToEmpty(lastName);
+		String modSSN = StringUtils.trimToEmpty(ssn);
+		
+		if (StringUtils.isEmpty(modLastName)
+				|| modSSN.length() < 4) {
+			return StringUtils.EMPTY;
+		}
+		
+		/*if (modLastName.length() > 6) {
+			modLastName = modLastName.substring(0, 6);
+		}*/
+		String password = modLastName + modSSN.substring(0, 4);
+		if (password.length() < 6) {
+			password = StringUtils.EMPTY;
+		}
+		return password;
+	}
+	
+	/*private void determineNonDuplicate(User user) {
+		String firstName = user.getFirstName();
+		String lastName = user.getLastName();
+		
+		int i = 0;
+		while (isDuplicateFirstNameLastName(firstName, lastName)) {
+			i++;
+			firstName = (firstName + i);
+		}
+		user.setFirstName(firstName);
+	}*/
 	
 	@Override
 	public String delete(@ModelAttribute("modelObject") Driver entity,
@@ -633,7 +790,128 @@ public class DriverController extends CRUDController<Driver>{
 			
 		}
 		
+		if ("generateUserName".equalsIgnoreCase(action)) {		
+			String firstName = request.getParameter("firstName");
+			String lastName = request.getParameter("lastName");
+			
+			Driver driver = new Driver();
+			driver.setFirstName(firstName);
+			driver.setLastName(lastName);
+			driver.setSsn(StringUtils.EMPTY);
+			
+			User user = generateUserCredentials(driver);
+			return user.getUsername();
+		}
 
 		return "";
+	}
+	
+	private User generateUserCredentials(Driver driver) {
+		User user = retrieveUser(driver.getFirstName(), driver.getLastName());
+		if (user != null) {
+			return user;
+		}
+		
+		user = new User();
+		user.setName(StringUtils.EMPTY);
+		user.setUsername(StringUtils.EMPTY);
+		user.setPassword(StringUtils.EMPTY);
+		
+		String modFirstName = StringUtils.trimToEmpty(driver.getFirstName());
+		String modLastName = StringUtils.trimToEmpty(driver.getLastName());
+		
+		if (StringUtils.isEmpty(modLastName) || StringUtils.isEmpty(modFirstName)) {
+			return user;
+		}
+		
+		/*
+		// "\\s+" "[^A-Za-z0-9]"
+		modFirstName = modFirstName.replaceAll("[^A-Za-z]", StringUtils.EMPTY);
+		modLastName = modLastName.replaceAll("[^A-Za-z]", StringUtils.EMPTY);
+			
+		if (StringUtils.isEmpty(modLastName) || StringUtils.isEmpty(modFirstName)) {
+			return user;
+		}
+		
+		if (modLastName.length() > 10) {
+			modLastName = modLastName.substring(0, 10);
+		}*/
+		
+		String modLastNameTokens[] = modLastName.split("[-\\s]");
+		modLastName = modLastNameTokens[0];
+		
+		String firstNameFirstChar = modFirstName.substring(0, 1);
+		
+		String origUserName = (modLastName + firstNameFirstChar);
+		String nonDupUserName = origUserName;
+		int i = 0;
+		while (isDuplicateUserName(nonDupUserName)) {
+			i++;
+			nonDupUserName = (origUserName + i);
+		}
+		user.setUsername(nonDupUserName);
+		
+		String origName = firstNameFirstChar + modLastName.substring(0, 1);
+		String nonDupName = origName;
+		i = 0;
+		while (isDuplicateName(nonDupName)) {
+			i++;
+			nonDupName = (origName + i);
+		}
+		user.setName(nonDupName);
+		
+		String password = generatePassword(modLastName, driver.getSsn());
+		user.setPassword(password);
+		
+		return user;
+	}
+	
+	private String generateStaffId() {
+		String staffId = StringUtils.EMPTY;
+		
+		String query = "select MAX(CAST(obj.staffId AS int)) from Driver obj";
+		List<Driver> drivers = genericDAO.executeSimpleQuery(query);
+		if (drivers == null || drivers.isEmpty()) {
+			return staffId;
+		}
+		
+		Object obj = drivers.get(0);
+		Integer staffIdInt = (Integer) obj;
+		staffIdInt++;
+		
+		staffId = staffIdInt.toString();
+		return staffId;
+	}
+	
+	private User retrieveUser(String firstName, String lastName) {
+		String baseQuery = "select obj from User obj where"; 
+		String whereClause = " obj.firstName='"+firstName+"' and obj.lastName='"+lastName+"'";		
+		List<User> userList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		return userList.isEmpty() ? null : userList.get(0);
+	}
+	
+	/*private boolean isDuplicateFirstNameLastName(String firstName, String lastName) {
+		String baseQuery = "select obj from User obj where"; 
+		String whereClause = " obj.firstName='"+firstName+"' and obj.lastName='"+lastName+"'";		
+		List<User> userList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		return !userList.isEmpty();
+	}*/
+	
+	private boolean isDuplicateName(String name) {
+		String baseQuery = "select obj from User obj where"; 
+		String whereClause = " obj.name='"+name+"'";		
+		List<User> userList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		return !userList.isEmpty();
+	}
+	
+	private boolean isDuplicateUserName(String userName) {
+		String baseQuery = "select obj from User obj where"; 
+		String whereClause = " obj.username='"+userName+"'";		
+		List<User> userList = genericDAO.executeSimpleQuery(baseQuery + whereClause);
+		
+		return !userList.isEmpty();
 	}
 }

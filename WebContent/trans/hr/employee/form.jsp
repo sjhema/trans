@@ -436,6 +436,91 @@ function formatDate4(){
 	 }
    }
 }
+
+function formatDate5(){
+	var date=document.getElementById("datepicker5").value;
+	if(date!=""){
+	if(date.length<8){
+		alert("Invalidte date format");
+		document.getElementById("datepicker5").value="";
+		return true;
+	}
+	else{
+		var str=new String(date);
+		if(!str.match("-")){
+			var mm=str.substring(0,2);
+			var dd=str.substring(2,4);
+			var yy=str.substring(4,8);
+			var enddigit=str.substring(6,8);
+			if(!enddigit==00 && enddigit%4==0 ){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker5").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}
+				else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}
+			}if(enddigit==00 && yy%400==0){
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker5").value="";
+						return true;
+					}
+				}if(mm==02 && dd>29){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}					
+			}else{
+				if(mm==04 || mm==06 || mm==09 || mm==11){
+					if(dd>30){
+						alert("invalid date format");
+						document.getElementById("datepicker5").value="";
+						return true;
+					}
+				}if(mm==02 && dd>28){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}else if(dd>31){
+					alert("invalid date format");
+					document.getElementById("datepicker5").value="";
+					return true;
+				}
+			}
+			var date=mm+"-"+dd+"-"+yy;
+			document.getElementById("datepicker5").value=date;
+		}
+	 }
+   }
+}
+
+function processLastNameChange(){
+	checklastname();
+	
+	generateUserName();
+}
+
+function processFirstNameChange(){
+	checkfirstname();
+	
+	generateUserName();
+}
+
        function checklastname(){
 
 	  var str=document.getElementById("lastname").value;	 
@@ -466,6 +551,38 @@ function formatDate4(){
     			});
     	   }
        } 
+       
+   function generateUserName() {
+	   var userId = document.getElementById("userId").value;
+	   if (userId != null && userId != "") {
+		   return;
+	   }
+	   
+	   var firstName = (document.getElementById("firstname").value).trim();
+	   var lastName = (document.getElementById("lastname").value).trim();
+	   
+	   var userNameElem = document.getElementById("userName");
+	   userNameElem.value = "";
+	   
+	   var passwordElem = document.getElementById("password");
+	   passwordElem.value = "";
+	   
+	   if (firstName == "" || lastName == "") {
+		  return;
+	   }
+	   
+	   jQuery.ajax({
+			url:'${ctx}/hr/employee/ajax.do?action=generateUserName&firstName='+firstName+'&lastName='+lastName, 
+			success: function( responseData ) {
+				if (responseData.indexOf("ErrorMsg") >= 0 ) {
+					document.getElementById("notes").innerHTML = responseData.replace("ErrorMsg: ", "");
+	        	} else {
+	        		userNameElem.value = responseData;
+	        		passwordElem.value = "xxxxxxxx";
+	        	}
+			}
+		});
+   } 
    
     	   
     function getEmpProbationDates(){    	
@@ -648,7 +765,18 @@ function formatDate4(){
   	   
      }
   }	   
-       
+    
+    function processSave() {
+    	/*var id = document.getElementById("id").value;
+    	if (id != null && id != "") {
+    		var userName = document.getElementById("userName").value;
+    		if (userName != null && userName != "") {
+    			alert("Please note the user name generated: " + userName);
+    		}
+    	}*/
+    	
+    	document.forms["employeeForm"].submit();
+    }
 
 </script>
 
@@ -658,17 +786,19 @@ function formatDate4(){
 <form:form action="save.do" name="employeeForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
+	<form:hidden path="userId" id="userId" />
 	<table width="65%" id="form-table" align="left">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Add/Update Employee"/></b></td>
 		</tr>
 		<tr>
-		<td class="form-left"><primo:label code="Employee Id" /><span
-				class="errorMessage">*</span></td>
-			<td align="${left}"><form:input id="staffId"  style="min-width:150px; max-width:150px"   path="staffId" cssClass="flat"
-					  /> <br> <form:errors
-					path="staffId" cssClass="errorMessage" /></td>
-			<td class="form-left"><primo:label code="SSN" /></td>
+			<td class="form-left"><primo:label code="Employee Id" /><span class="errorMessage">*</span></td>
+				<td align="${left}">
+				<form:input id="staffId" style="background-color: #eee; min-width:150px; max-width:150px" path="staffId" cssClass="flat"
+					readonly="true"/> 
+				<br><form:errors path="staffId" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="SSN" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
 				<form:input id="ssn" style="min-width:150px; max-width:150px"  path="ssn" cssClass="flat"
 					 maxlength="9" onkeypress="return onlyNumbers(event, false)"  /> 
@@ -685,6 +815,12 @@ function formatDate4(){
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Date Of Birth" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:input path="dob" style="min-width:150px; max-width:150px"
+					cssClass="flat" id="datepicker5" onblur="return formatDate5();"/> 
+				<br> <form:errors path="dob" cssClass="errorMessage" />
+			</td>
 		</tr>
 		<tr>
 		<td class="form-left"><primo:label code="Terminal" /><span
@@ -694,6 +830,11 @@ function formatDate4(){
 							code="Please Select" />------</form:option>
 					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Driver's License#" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:input id="driverLicense" style="min-width:150px; max-width:150px" path="driverLicense" cssClass="flat"/> 
+				<br><form:errors path="driverLicense" cssClass="errorMessage" />
 			</td>
 		</tr>
 			<tr>
@@ -705,19 +846,27 @@ function formatDate4(){
 					<form:options items="${catagories}" itemValue="id" itemLabel="name" />
 				</form:select> <br> <form:errors path="catagory" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="DL State" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="driverLicenseState" style="min-width:154px; max-width:154px" id="driverLicenseState">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${states}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br><form:errors path="driverLicenseState" cssClass="errorMessage" />
+			</td>
 		</tr>
 		
 		<tr>
 			<td class="form-left"><primo:label code="Last Name" /><span
 				class="errorMessage">*</span></td>
-			<td align="${left}"><form:input id="lastname" style="min-width:150px; max-width:150px"   onblur="return checklastname();"  path="lastName" cssClass="flat"
+			<td align="${left}"><form:input id="lastname" style="min-width:150px; max-width:150px"   onblur="return processLastNameChange();"  path="lastName" cssClass="flat"
 					  /> <br> <form:errors
 					path="lastName" cssClass="errorMessage" /></td>
 		<!-- </tr>
 		<tr> -->
 			<td class="form-left"><primo:label code="First Name" /><span
 				class="errorMessage">*</span></td>
-			<td align="${left}"><form:input id="firstname"  style="min-width:150px; max-width:150px"  onblur="return checkfirstname();"  path="firstName" cssClass="flat"
+			<td align="${left}"><form:input id="firstname"  style="min-width:150px; max-width:150px"  onblur="return processFirstNameChange();"  path="firstName" cssClass="flat"
 					  /> <br> <form:errors
 					path="firstName" cssClass="errorMessage" /></td>
 		</tr>
@@ -912,12 +1061,17 @@ function formatDate4(){
 			</td>
 		
 		</tr>
-		
-			<tr>
+		<tr>
 			<td class="form-left"><primo:label code="Date Terminated" /></td>
 			<td align="${left}"><form:input path="dateTerminated" style="min-width:150px; max-width:150px"
 					cssClass="flat"  id="datepicker4" onblur="return formatDate4();"/> 
 			<br> <form:errors path="dateTerminated" cssClass="errorMessage" /></td>
+			<td class="form-left"><primo:label code="User Name" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:input id="userName" style="background-color: #eee; min-width:150px; max-width:150px" path="userName" cssClass="flat"
+					maxlength="20" readonly="true"/> 
+				<br><form:errors path="userName" cssClass="errorMessage" />
+			</td>
 		</tr>
 		
 		<tr>
@@ -927,7 +1081,26 @@ function formatDate4(){
 					<form:options items="${employeestatus}" itemValue="dataValue" itemLabel="dataText" />
 				</form:select> <br> <form:errors path="status" cssClass="errorMessage" />
 			</td>
+			
+			<td class="form-left"><primo:label code="Password"/><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:input path="password" style="background-color: #eee; min-width:150px; max-width:150px" cssClass="flat"
+					maxlength="20" readonly="true" value="xxxxxxxx"/> 
+				<br><form:errors path="password" cssClass="errorMessage"/>
+			</td>
 					
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+			<td class="form-left"><primo:label code="Role"/><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:select path="role" style="min-width:154px; max-width:154px">
+					<form:option value="" label="--Please Select--"/>
+					<form:options items="${roles}" itemValue="id" itemLabel="name"/>
+				</form:select>
+				<br><form:errors path="role" cssClass="errorMessage" />
+			</td>
 		</tr>
 			<tr>
 		    <td class="form-left"><primo:label code="Notes" /><span
@@ -940,7 +1113,7 @@ function formatDate4(){
 		<tr>
 			<td>&nbsp;</td>
 			<td align="${left}"><input type="submit"
-				name="create" id="create" onclick=""
+				name="create" id="create" onclick="javascript:processSave();"
 				value="<primo:label code="Save"/>" class="flat" /> <input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"
