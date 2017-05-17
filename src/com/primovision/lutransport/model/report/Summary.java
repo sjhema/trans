@@ -18,14 +18,33 @@ public class Summary extends AbstractBaseModel {
 	Double fuelSurcharge=0.0;
 	Double driverPay=0.0;
 	
-	String truckDriverInfo = StringUtils.EMPTY;
+	/*// Truck driver report
+	String truckDriverInfo = StringUtils.EMPTY;*/
 	
+	// Truck driver report
+	String truck = StringUtils.EMPTY;
+	String driver = StringUtils.EMPTY;
+	
+	public String getTruck() {
+		return truck;
+	}
+	public void setTruck(String truck) {
+		this.truck = truck;
+	}
+	public String getDriver() {
+		return driver;
+	}
+	public void setDriver(String driver) {
+		this.driver = driver;
+	}
+	
+	/*
 	public String getTruckDriverInfo() {
 		return truckDriverInfo;
 	}
 	public void setTruckDriverInfo(String truckDriverInfo) {
 		this.truckDriverInfo = truckDriverInfo;
-	}
+	}*/
 	public Double getNetAmount() {
 		return netAmount;
 	}

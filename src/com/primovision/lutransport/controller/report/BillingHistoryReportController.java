@@ -2,6 +2,7 @@ package com.primovision.lutransport.controller.report;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -174,7 +175,6 @@ public class BillingHistoryReportController extends BaseController {
 	public String search(ModelMap model, HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("modelObject") BillingHistoryInput input, @RequestParam(required = false, value = "type") String type,
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
-
 		Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		populateSearchCriteria(request, request.getParameterMap());
@@ -187,6 +187,9 @@ public class BillingHistoryReportController extends BaseController {
 			return  "reportuser/report/summary";
 		}*/
 		
+		// Truck driver report
+		resetDrillDownCriteria(input);
+		
 		if(StringUtils.contains(sum, "true")){
 			Map<String,Object> params= new HashMap<String,Object>();
 			//List<Summary> summarylist=new ArrayList<Summary>();			           
@@ -197,38 +200,12 @@ public class BillingHistoryReportController extends BaseController {
 			if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 				params.put("batchDateTo",input.getBatchDateTo());
 			}
-			/*for(Object obj:list){						
-				Object[] objArry=(Object[]) obj;
-				Summary summary=new Summary();	
-				if(objArry[0]!=null)
-					summary.setOrigin(objArry[0].toString());
-				if(objArry[1]!=null)
-					summary.setDestination(objArry[1].toString());
-				if(objArry[2]!=null)
-					summary.setCount(Integer.parseInt(objArry[2].toString()));
-				if(objArry[3]!=null)
-					summary.setAmount(Double.parseDouble(objArry[3].toString()));
-				if(objArry[4]!=null)
-					summary.setCompany(objArry[4].toString());
-				if (objArry[5] != null) {
-					Double billableTon = Double.parseDouble(objArry[5].toString());
-					billableTon = MathUtil.roundUp(billableTon, 2);
-					summary.setBillableTons(billableTon);
-				}
-				 if (objArry[6] != null) {
-						summary.setCountTrucks(Integer.parseInt(objArry[6].toString()));
-				 }
-				 if (objArry[7] != null) {
-						summary.setNetAmount(Double.parseDouble(objArry[7].toString()));
-				 }
-				 if (objArry[8] != null) {
-						summary.setFuelSurcharge(Double.parseDouble(objArry[8].toString()));
-				 }
-				 if (objArry[9] != null) {
-						summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
-				 }
-				summarylist.add(summary);
-			}*/
+			
+			// Truck driver report
+			StringBuffer requestUrl = request.getRequestURL();
+			String truckDriverReportUrl = StringUtils.replace(requestUrl.toString(), "search.do", "truckDriverReport.do");
+			params.put("truckDriverReportUrl", truckDriverReportUrl);
+			
 			if (StringUtils.isEmpty(type))
 				type = "html";
 			response.setContentType(MimeUtil.getContentType(type));			
@@ -310,6 +287,9 @@ public class BillingHistoryReportController extends BaseController {
 		criteria.setPageSize(500000);
 		criteria.setPage(0);
 		BillingHistoryInput input = (BillingHistoryInput)request.getSession().getAttribute("input");
+		
+		// Truck driver report
+		resetDrillDownCriteria(input);
 		
 		  if(StringUtils.equalsIgnoreCase(sum,"summary")){
 				
@@ -424,6 +404,95 @@ public class BillingHistoryReportController extends BaseController {
 			out.flush();
 			out.close();
 			return "error";
+		}
+	}
+	
+	// Truck driver report
+	private void resetDrillDownCriteria(BillingHistoryInput input) {
+		input.setDrillDownCompany(StringUtils.EMPTY);
+		input.setDrillDownOrigin(StringUtils.EMPTY);
+		input.setDrillDownDestination(StringUtils.EMPTY);
+	}
+	
+	// Truck driver report
+	@RequestMapping(method = { RequestMethod.GET}, value = "/truckDriverReport.do")
+	public String processTruckDriverReport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = true) String company,
+			@RequestParam(required = true) String origin,
+			@RequestParam(required = true) String destination) throws IOException {
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPageSize = criteria.getPageSize();
+		int origPage = criteria.getPage();
+		
+		criteria.setPageSize(500000);
+		criteria.setPage(0);
+		
+		BillingHistoryInput input = (BillingHistoryInput)request.getSession().getAttribute("input");
+		input.setDrillDownCompany(company);
+		input.setDrillDownOrigin(origin);
+		input.setDrillDownDestination(destination);
+		
+		Map<String,Object> params = new HashMap<String,Object>();
+		
+		if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+			params.put("batchDateFrom", input.getBatchDateFrom());
+		}
+		if (!StringUtils.isEmpty(input.getBatchDateTo())) {
+			params.put("batchDateTo", input.getBatchDateTo());
+		}
+		
+		params.put("company", company);
+		params.put("origin", origin);
+		params.put("destination", destination);
+		
+		if (StringUtils.isEmpty(type)) {
+			type = "csv";
+		}
+     	
+		ByteArrayOutputStream out = null;
+		try {
+			List<Summary> summaryList = reportService.generateSummaryNew(criteria, input);
+			
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename=billingHistoryTruckDriverReport." + type);
+			}
+			
+			String reportName = "billingHistoryTruckDriverReport";
+			if (type.equals("pdf")) {
+				reportName = "billingHistoryTruckDriverReportpdf";
+			}
+			
+			out = dynamicReportService.generateStaticReport(reportName,
+						(List)summaryList, params, type, request);
+			
+			out.writeTo(response.getOutputStream());
+			
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			
+			return "error";
+		} finally {
+			criteria.setPageSize(origPageSize);
+			criteria.setPage(origPage);
+			
+			// Truck driver report
+			resetDrillDownCriteria(input);
+			
+			if (out != null) {
+				out.flush();
+				out.close();
+				out = null;
+			}
 		}
 	}
 	

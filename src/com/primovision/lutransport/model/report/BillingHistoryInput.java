@@ -1,5 +1,7 @@
 package com.primovision.lutransport.model.report;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.ReportModel;
 
 public class BillingHistoryInput implements ReportModel {
@@ -90,8 +92,35 @@ public class BillingHistoryInput implements ReportModel {
 	private Integer status;
 	private String ticketStatus;
 	
+	// Truck driver report
+	private String drillDownCompany = StringUtils.EMPTY;
+	private String drillDownOrigin = StringUtils.EMPTY;
+	private String drillDownDestination = StringUtils.EMPTY;
 	
-	
+	public String getDrillDownCompany() {
+		return drillDownCompany;
+	}
+
+	public void setDrillDownCompany(String drillDownCompany) {
+		this.drillDownCompany = drillDownCompany;
+	}
+
+	public String getDrillDownOrigin() {
+		return drillDownOrigin;
+	}
+
+	public void setDrillDownOrigin(String drillDownOrigin) {
+		this.drillDownOrigin = drillDownOrigin;
+	}
+
+	public String getDrillDownDestination() {
+		return drillDownDestination;
+	}
+
+	public void setDrillDownDestination(String drillDownDestination) {
+		this.drillDownDestination = drillDownDestination;
+	}
+
 	public String getDriverCompany() {
 		return driverCompany;
 	}

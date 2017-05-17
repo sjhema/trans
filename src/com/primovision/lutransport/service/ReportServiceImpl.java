@@ -5050,7 +5050,6 @@ throw new Exception("origin and destindation is empty");
 	@Override
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
 			BillingHistoryInput input) {
-
 		String fromDateInvoiceStr = ReportDateUtil.getFromDate(input
 				.getFromInvoiceDate());
 		String toDateInvoiceStr = ReportDateUtil.getToDate(input
@@ -5200,8 +5199,21 @@ throw new Exception("origin and destindation is empty");
 		String ticketStatus = input.getTicketStatus();
 		String terminal = input.getTerminal();
 		String createdBy = input.getCreatedBy();
+		
 		String origin = input.getOrigin();
+		/*// Truck driver report
+		String drillDownOrigin = input.getDrillDownOrigin();
+		if (!StringUtils.isEmpty(drillDownOrigin)) {
+			origin = drillDownOrigin;
+		}*/
+		
 		String destination = input.getDestination();
+		/*// Truck driver report
+		String drillDownDestination = input.getDrillDownDestination();
+		if (!StringUtils.isEmpty(drillDownDestination)) {
+			destination = drillDownDestination;
+		}*/
+		
 		String driver = input.getDriver();
 		String truck = input.getTruck();
 		String trailer = input.getTrailer();
@@ -5260,7 +5272,15 @@ throw new Exception("origin and destindation is empty");
 		params.put("tonnagePremiumTo", tonnagePremiumTo);
 		// String totAmtTo=input.getTotAmtTo();
 		params.put("totAmtTo", totAmtTo);
+		
+		
 		String company = input.getCompany();
+		/*// Truck driver report
+		String drillDownCompany = input.getDrillDownCompany();
+		if (!StringUtils.isEmpty(drillDownCompany)) {
+			company = drillDownCompany;
+		}*/
+		
 		params.put("company", company);
 		params.put("customer", input.getCustomer());
 
@@ -5647,8 +5667,15 @@ throw new Exception("origin and destindation is empty");
 				.getResultList();
 		// ticketIds1=null;
 		ticketIds = null;
-		return processTicketsForSummary(tickets, params);	
 		
+		// Truck driver report
+		if (!StringUtils.isEmpty(input.getDrillDownCompany())) {
+			return processTicketsForSummaryTruckDriver(tickets, input.getDrillDownCompany(), 
+					input.getDrillDownOrigin(), 
+					input.getDrillDownDestination());
+		} else {
+			return processTicketsForSummary(tickets, params);
+		}
 	}
 	
 	
@@ -5674,7 +5701,7 @@ throw new Exception("origin and destindation is empty");
 		return summarys;
 }*/
 	
-	private List<Summary> processTicketsForSummary(List<Ticket> tickets ,Map<String, String> params) {
+	private List<Summary> processTicketsForSummary(List<Ticket> tickets, Map<String, String> params) {
 		List<Summary> returnSummaryList = new ArrayList<Summary>();
 		if (tickets == null || tickets.isEmpty()) {
 			return returnSummaryList;
@@ -5733,9 +5760,10 @@ throw new Exception("origin and destindation is empty");
 				summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
 			}
 			
-			String truckDriverInfo = retrieveBillingTruckDriverInfo(ticketIds.toString(), summary.getCompany(), 
+			// Truck driver report
+			/*String truckDriverInfo = retrieveBillingTruckDriverInfoAsString(ticketIds.toString(), summary.getCompany(), 
 					summary.getOrigin(), summary.getDestination());
-			summary.setTruckDriverInfo(truckDriverInfo);
+			summary.setTruckDriverInfo(truckDriverInfo);*/
 			
 			returnSummaryList.add(summary);
 		}	
@@ -5743,10 +5771,49 @@ throw new Exception("origin and destindation is empty");
 		return returnSummaryList;
 	}
 	
-	private String retrieveBillingTruckDriverInfo(String ticketIds, String company, String origin,
-			String destination) {
-		StringBuffer truckDriverInfo = new StringBuffer();
+	// Truck driver report
+	private List<Summary> processTicketsForSummaryTruckDriver(List<Ticket> tickets, String drillDownCompany, String drillDownOrigin, 
+			String drillDownDestination) {
+		List<Summary> returnSummaryList = new ArrayList<Summary>();
+		if (tickets == null || tickets.isEmpty()) {
+			return returnSummaryList;
+		}
 		
+		StringBuffer ticketIds = new StringBuffer("-1,");
+		for (Ticket tkt : tickets) {
+			ticketIds.append(tkt.getId()).append(",");
+		}
+		
+		if (ticketIds.indexOf(",") != -1) {
+			ticketIds.deleteCharAt(ticketIds.length() - 1);
+		}
+		
+		List<Summary> summarys = retrieveBillingTruckDriverInfo(ticketIds.toString(), drillDownCompany, drillDownOrigin, 
+				drillDownDestination);
+		if (summarys == null || summarys.isEmpty()) {
+			return returnSummaryList;
+		}
+		
+		for (Object obj : summarys) {						
+			Object[] objArry = (Object[]) obj;
+			Summary summary = new Summary();
+			
+			if (objArry[0] != null) {
+				summary.setTruck(objArry[0].toString());
+			}
+			if (objArry[1] != null) {
+				summary.setDriver(objArry[1].toString());
+			}
+			
+			returnSummaryList.add(summary);
+		}
+		
+		return returnSummaryList;
+	}
+	
+	// Truck driver report
+	private List<Summary> retrieveBillingTruckDriverInfo(String ticketIds, String company, String origin,
+			String destination) {
 		String query = "select distinct obj.t_unit, obj.driver"
 				+ " from Billing_New obj "
 				+ " where obj.ticket in ("+ticketIds+")"
@@ -5756,6 +5823,16 @@ throw new Exception("origin and destindation is empty");
 				+ " order by CAST(obj.t_unit AS int), obj.driver";
 		
 		List<Summary> summarys = genericDAO.executeSimpleQuery(query);
+		return summarys;
+	}
+	
+	/*
+	// Truck driver report
+	private String retrieveBillingTruckDriverInfoAsString(String ticketIds, String company, String origin,
+			String destination) {
+		StringBuffer truckDriverInfo = new StringBuffer();
+		
+		List<Summary> summarys = retrieveBillingTruckDriverInfo(ticketIds, company, origin, destination);
 		if (summarys == null || summarys.isEmpty()) {
 			return truckDriverInfo.toString();
 		}
@@ -5775,7 +5852,7 @@ throw new Exception("origin and destindation is empty");
 			truckDriverInfo.deleteCharAt(truckDriverInfo.length() - 1);
 		}
 		return truckDriverInfo.toString();
-	}
+	}*/
 	
 	@Override
 	public List<Summary> generateSummary(SearchCriteria criteria,

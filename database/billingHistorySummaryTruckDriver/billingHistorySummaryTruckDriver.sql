@@ -1,0 +1,1 @@
+UPDATE `lutransport`.`business_object` SET `URL`='/reportuser/report/billinghistory/start.do,/reportuser/report/billinghistory/search.do,/reportuser/report/billinghistory/export.do,/reportuser/report/billinghistory/truckDriverReport.do' WHERE `ID`='3012';
