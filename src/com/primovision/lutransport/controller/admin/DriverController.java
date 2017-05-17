@@ -551,14 +551,14 @@ public class DriverController extends CRUDController<Driver>{
 		String modSSN = StringUtils.trimToEmpty(ssn);
 		
 		if (StringUtils.isEmpty(modLastName)
-				|| modSSN.length() < 4) {
+				|| modSSN.length() != 9) {
 			return StringUtils.EMPTY;
 		}
 		
 		/*if (modLastName.length() > 6) {
 			modLastName = modLastName.substring(0, 6);
 		}*/
-		String password = modLastName + modSSN.substring(0, 4);
+		String password = modLastName + StringUtils.substring(modSSN, 5);
 		if (password.length() < 6) {
 			password = StringUtils.EMPTY;
 		}
@@ -836,6 +836,9 @@ public class DriverController extends CRUDController<Driver>{
 		if (modLastName.length() > 10) {
 			modLastName = modLastName.substring(0, 10);
 		}*/
+		
+		modFirstName = StringUtils.lowerCase(modFirstName);
+		modLastName = StringUtils.lowerCase(modLastName);
 		
 		String modLastNameTokens[] = modLastName.split("[-\\s]");
 		modLastName = modLastNameTokens[0];
