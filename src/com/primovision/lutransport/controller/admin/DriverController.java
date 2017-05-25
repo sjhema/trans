@@ -213,6 +213,10 @@ public class DriverController extends CRUDController<Driver>{
 		boolean generateUserCreds = false;
 		if (entity.getId() == null) {
 			generateUserCreds = true;
+		} else {
+			if (StringUtils.isEmpty(entity.getUserName())) {
+				generateUserCreds = true;
+			}
 		}
 		
 		boolean err=true;
@@ -257,16 +261,6 @@ public class DriverController extends CRUDController<Driver>{
 			entity.setFirstName(firstName);
 		}
 		
-		if (entity.getId() == null) {
-			String staffId = generateStaffId();
-			if (StringUtils.isEmpty(staffId) ) {
-				setupCreate(model, request);
-				request.getSession().setAttribute("error", "Error while gemerating Employee id");
-				return urlContext + "/form";
-			} 
-			entity.setStaffId(staffId);
-		}
-		
 		if (generateUserCreds) {
 			/*if (isDuplicateFirstNameLastName(firstName, lastName)) {
 				setupCreate(model, request);
@@ -280,6 +274,19 @@ public class DriverController extends CRUDController<Driver>{
 				err = false;
 			} else {
 				entity.setSsn(ssn);
+			}
+		}
+		
+		if (entity.getId() == null) {
+			if (StringUtils.isNotEmpty(entity.getFirstName()) && StringUtils.isNotEmpty(entity.getLastName())
+					&& StringUtils.isNotEmpty(entity.getSsn()) && entity.getCompany() != null) {
+				String staffId = generateStaffId(entity);
+				if (StringUtils.isEmpty(staffId) ) {
+					setupCreate(model, request);
+					request.getSession().setAttribute("error", "Error while gemerating Employee id");
+					return urlContext + "/form";
+				} 
+				entity.setStaffId(staffId);
 			}
 		}
 		
@@ -869,16 +876,37 @@ public class DriverController extends CRUDController<Driver>{
 		return user;
 	}
 	
-	private String generateStaffId() {
+	private Driver retrieveDriver(String firstName, String lastName, Location company, String ssn) {
+		if (StringUtils.isEmpty(firstName) || StringUtils.isEmpty(lastName)
+				|| StringUtils.isEmpty(ssn) || company == null) {
+			return null;
+		}
+		
+		String query = "select obj from Driver obj where obj.company.id="+company.getId()
+				+ " and obj.firstName='"+firstName+"'"
+				+ " and obj.lastName='"+lastName+"'"
+				+ " and obj.ssn='"+ssn+"'";
+		
+		List<Driver> driverList = genericDAO.executeSimpleQuery(query);
+		return driverList.isEmpty() ? null : driverList.get(0);
+	}
+	
+	private String generateStaffId(Driver driver) {
+		Driver existingDriver = retrieveDriver(driver.getFirstName(), driver.getLastName(),
+				driver.getCompany(), driver.getSsn());
+		if (existingDriver != null) {
+			return existingDriver.getStaffId();
+		}
+		
 		String staffId = StringUtils.EMPTY;
 		
 		String query = "select MAX(CAST(obj.staffId AS int)) from Driver obj";
-		List<Driver> drivers = genericDAO.executeSimpleQuery(query);
-		if (drivers == null || drivers.isEmpty()) {
+		List<Driver> driverList = genericDAO.executeSimpleQuery(query);
+		if (driverList == null || driverList.isEmpty()) {
 			return staffId;
 		}
 		
-		Object obj = drivers.get(0);
+		Object obj = driverList.get(0);
 		Integer staffIdInt = (Integer) obj;
 		staffIdInt++;
 		
