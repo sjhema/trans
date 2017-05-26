@@ -700,7 +700,22 @@ function processFirstNameChange(){
   	   document.getElementById("dateGeneralProbationStartID").value='';
  	   document.getElementById("dateGeneralProbationEndId").value='';
      }
-  	   }
+  	}
+    
+    function processCompanyChange() {
+    	var subCompanyElem = $("#subcontractorCompany");
+    	subCompanyElem.val("");
+    	
+    	var companyElem = $("#company");
+    	var company = companyElem.val();
+   	    if (company != "149") { // Subcontractor
+   	    	subCompanyElem.attr("disabled", true); 
+   	    } else {
+   	    	subCompanyElem.attr("disabled", false); 
+   	    }
+   	    
+   	 	getEmpProbationTypes();
+    }
     
     function getEmpProbationTypes(){    	
   	   var datejoined=''; 	   
@@ -775,6 +790,9 @@ function processFirstNameChange(){
     		}
     	}*/
     	
+    	var subCompanyElem = $("#subcontractorCompany");
+    	subCompanyElem.attr("disabled", false); 
+    	
     	document.forms["employeeForm"].submit();
     }
 
@@ -809,7 +827,7 @@ function processFirstNameChange(){
 		<tr>
 		<td class="form-left"><primo:label code="Company" /><span
 				class="errorMessage">*</span></td>
-		<td><form:select cssClass="flat" path="company" id="company" style="min-width:154px; max-width:154px" onchange="javascript:getEmpProbationTypes()">
+		<td><form:select cssClass="flat" path="company" id="company" style="min-width:154px; max-width:154px" onchange="javascript:processCompanyChange()">
 					<form:option value="">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
@@ -1091,8 +1109,18 @@ function processFirstNameChange(){
 					
 		</tr>
 		<tr>
-			<td></td>
-			<td></td>
+			<td class="form-left"><primo:label code="Subcontractor Comp" /><span class="errorMessage"></span></td>
+			<td>
+				<c:set var="disabled" value="true"/>
+					<c:if test="${modelObject.company != null && modelObject.company.id == 149}"> 
+						<c:set var="disabled" value="false"/>
+					</c:if>
+				<form:select disabled="${disabled}" cssClass="flat" path="subcontractorCompany" id="subcontractorCompany" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select>
+				<br> <form:errors path="subcontractorCompany" cssClass="errorMessage" />
+			</td>
 			<td class="form-left"><primo:label code="Role"/><span class="errorMessage">*</span></td>
 			<td align="${left}">
 				<form:select path="role" style="min-width:154px; max-width:154px">

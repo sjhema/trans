@@ -67,6 +67,10 @@ public class Driver extends AbstractBaseModel{
 	private Location company;
 	
 	@ManyToOne
+	@JoinColumn(name="subcontractor_comp")
+	private Location subcontractorCompany;
+	
+	@ManyToOne
 	@JoinColumn(name="terminal")
 	private Location terminal;
 
@@ -199,6 +203,15 @@ public class Driver extends AbstractBaseModel{
 	@Transient
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	
+	public Location getSubcontractorCompany() {
+		return subcontractorCompany;
+	}
+
+	public void setSubcontractorCompany(Location subcontractorCompany) {
+		this.subcontractorCompany = subcontractorCompany;
 	}
 
 	public Date getDob() {

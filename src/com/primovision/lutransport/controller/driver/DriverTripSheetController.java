@@ -96,7 +96,13 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
 		
 		criterias.clear();
-		criterias.put("driverCompany", driver.getCompany());
+		
+		Location company = driver.getCompany();
+		if (driver.getSubcontractorCompany() != null) {
+			company = driver.getSubcontractorCompany();
+		}
+		
+		criterias.put("driverCompany", company);
 		criterias.put("terminal",driver.getTerminal());
 		criterias.put("type",1);
 		List<TripSheetLocation> locList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
@@ -114,7 +120,7 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		}
 		
 		criterias.clear();
-		criterias.put("driverCompany", driver.getCompany());
+		criterias.put("driverCompany", company);
 		criterias.put("terminal",driver.getTerminal());
 		criterias.put("type",2);
 		List<TripSheetLocation> destLocList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
