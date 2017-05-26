@@ -126,6 +126,8 @@
 		<primo:textcolumn headerText="Fuel Vendor" dataField="fuelvendor.name" width="250px"/>
 		<primo:textcolumn width="200px" headerText="Fuel Card Number" dataField="fuelcard.fuelcardNum" />		
 		<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS" />
+		<primo:textcolumn headerText="Valid From" dataField="validFrom" dataFormat="MM-dd-yyyy"/>
+        <primo:textcolumn headerText="Valid To" dataField="validTo" dataFormat="MM-dd-yyyy"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

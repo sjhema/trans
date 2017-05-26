@@ -64,6 +64,8 @@ public class FuelVendorLogUploadUtil {
 	static String expectedTimeFormatStr = "HH:mm";
 	static SimpleDateFormat expectedTimeFormat = new SimpleDateFormat("HH:mm");
 	
+	static SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
 	static HashMap<String, LinkedHashMap<String, String>> vendorToFuelLogMapping = new HashMap<String, LinkedHashMap<String, String>>();
 	static LinkedList<String> expectedColumnList = new LinkedList<String>();
 	
@@ -664,13 +666,20 @@ public class FuelVendorLogUploadUtil {
 					}
 				}
 				
-				String cardNumber = oneRow.get(9) == null ? StringUtils.EMPTY : oneRow.get(9).toString();
-				Driver driver = determineDriverFromFuelCard(genericDAO, cardNumber, vendorId);
+				if (oneRow.get(4) == null || !(oneRow.get(4) instanceof Date) || oneRow.get(9) == null) {
+					return StringUtils.EMPTY;
+				}
+				String cardNumber = oneRow.get(9).toString();
+				Date transactionDate = (Date) oneRow.get(4);
+				Driver driver = determineDriverFromFuelCard(genericDAO, cardNumber, transactionDate, vendorId);
+				if (driver == null) {
+					return StringUtils.EMPTY;
+				}
 				
 				if (cell.getColumnIndex() == 7) {
-					return driver == null ? StringUtils.EMPTY : driver.getLastName();
+					return driver.getLastName();
 				} else {
-					return driver == null ? StringUtils.EMPTY : driver.getFirstName();
+					return driver.getFirstName();
 				}
 			} else if (cell.getColumnIndex() == 15) { // Gross Amount 
 				return determineGrossAmount(oneRow);
@@ -1238,15 +1247,18 @@ public class FuelVendorLogUploadUtil {
 		}
 	}*/
 	
-	private static Driver determineDriverFromFuelCard(GenericDAO genericDAO, String cardNumber, Long vendorId) {
-		if (StringUtils.isEmpty(cardNumber) || vendorId == null) {
+	private static Driver determineDriverFromFuelCard(GenericDAO genericDAO, String cardNumber, Date transactionDate,
+			Long vendorId) {
+		if (StringUtils.isEmpty(cardNumber) || transactionDate ==  null || vendorId == null) {
 			return null;
 		}
 		
+		String transactiondate = dbDateFormat.format(transactionDate);
 		String fuelCardVehicleQuery = "select obj from DriverFuelCard obj where "
 						+ " obj.fuelvendor =" + vendorId
 						+ " and obj.fuelcard.fuelcardNum ='" +  cardNumber + "'"
 						+ " and obj.vehicle is null"
+						+ " and obj.validFrom <='" + transactiondate + "' and obj.validTo >= '" + transactiondate + "'"
 						+ " order by obj.id desc";
 		List<DriverFuelCard> driverFuelCardList = genericDAO.executeSimpleQuery(fuelCardVehicleQuery);
 		

@@ -55,6 +55,10 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 	@Override
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		dateFormat.setLenient(false);
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				dateFormat, true));
 		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(
 				Driver.class));
 		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(
