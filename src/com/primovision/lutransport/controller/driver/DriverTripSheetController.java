@@ -97,11 +97,13 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		
 		criterias.clear();
 		
+		// Driver trip sheet subcontractor company - 29th May 2017
 		Location company = driver.getCompany();
 		if (driver.getSubcontractorCompany() != null) {
 			company = driver.getSubcontractorCompany();
 		}
 		
+		// Driver trip sheet subcontractor company - 29th May 2017
 		criterias.put("driverCompany", company);
 		criterias.put("terminal",driver.getTerminal());
 		criterias.put("type",1);
@@ -120,6 +122,7 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		}
 		
 		criterias.clear();
+		// Driver trip sheet subcontractor company - 29th May 2017
 		criterias.put("driverCompany", company);
 		criterias.put("terminal",driver.getTerminal());
 		criterias.put("type",2);
@@ -411,13 +414,21 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 			entity.setIncomplete("No");
 		}
 		
-		entity.setDriverCompany(driver.getCompany());
+		// Driver trip sheet subcontractor company - 29th May 2017
+		Location company = driver.getCompany();
+		if (driver.getSubcontractorCompany() != null) {
+			company = driver.getSubcontractorCompany();
+		}
+		//entity.setDriverCompany(driver.getCompany());
+		entity.setDriverCompany(company);
    	  	
    	  	entity.setTerminal(driver.getTerminal());
    	  	
    	     entity.setTerminalName(driver.getTerminal().getName());
 	  	
-	  	entity.setCompanyName(driver.getCompany().getName());
+   	// Driver trip sheet subcontractor company - 29th May 2017
+	  	//entity.setCompanyName(driver.getCompany().getName());
+	  	entity.setCompanyName(company.getName());
 	  	
 	  	////////////////// NEW Code //////////////////////////////////////
 	  
