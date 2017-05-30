@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 
 import org.springframework.validation.BindingResult;
+
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -41,6 +42,7 @@ import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.equipment.EquipmentBuyer;
 import com.primovision.lutransport.model.equipment.VehicleSale;
+import com.primovision.lutransport.model.equipment.VehicleTitle;
 
 @Controller
 @RequestMapping("/admin/equipment/sale")
@@ -259,7 +261,10 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		request.getSession().setAttribute("msg", "Vehicle sale saved successfully");
+		// Delete vehicle title - 29th May 2017
+		deleteVehicleTitle(entity);
+		
+		request.getSession().setAttribute("msg", "Vehicle sale details saved successfully");
 		
 		setupCreate(model, request);
 		
@@ -274,6 +279,24 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		
 		return getUrlContext() + "/form";
 	}
+	
+	// Delete vehicle title - 29th May 2017
+	private void deleteVehicleTitle(VehicleSale vehicleSale) {
+		if (vehicleSale.getModifiedBy() != null) {
+			return;
+		}
+		
+		String query = "select obj from VehicleTitle obj where obj.vehicle=" + vehicleSale.getVehicle().getId();
+		List<VehicleTitle> vehicleTitleList = genericDAO.executeSimpleQuery(query);
+		if (vehicleTitleList == null || vehicleTitleList.isEmpty()) {
+			return;
+		}
+		
+		for (VehicleTitle aVehicleTitle : vehicleTitleList) {
+			genericDAO.delete(aVehicleTitle);
+		}
+	}
+	
 	
 	private void populateBuyer(VehicleSale entity) {
 		String buyerName = StringUtils.replace(entity.getBuyerName(), "'", "''", -1);
