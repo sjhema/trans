@@ -19,6 +19,14 @@
 			</td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Lomg Name" /><span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="longName" cssClass="flat"
+					style="min-width:250px; max-width:250px" /> 
+				<br><form:errors path="longName" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Code" />
 			</td>
 			<td align="${left}"><form:input path="code" cssClass="flat"

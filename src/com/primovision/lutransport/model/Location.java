@@ -1,5 +1,6 @@
 package com.primovision.lutransport.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -15,6 +16,17 @@ public class Location extends AbstractBaseModel {
 	private String code;
 	
 	private Integer type;
+	
+	@Column(name = "long_name")
+	private String longName;
+
+	public String getLongName() {
+		return longName;
+	}
+
+	public void setLongName(String longName) {
+		this.longName = longName;
+	}
 
 	public String getName() {
 		return name;

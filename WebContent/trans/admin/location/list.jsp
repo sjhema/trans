@@ -62,6 +62,7 @@
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false">
 		<primo:textcolumn headerText="Name" dataField="name" />
+		<primo:textcolumn headerText="Long Name" dataField="longName" />
 		<primo:textcolumn headerText="Code" dataField="code" />
 		<primo:staticdatacolumn dataType="LOCATION_TYPE" headerText="Type" dataField="type" />
 		<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS" />
