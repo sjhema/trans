@@ -36,6 +36,7 @@ import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -565,8 +566,16 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 				+ ", d.enteredByType='DRIVER'"
 				+ " where d.employeeName in ('"+driver.getFullName()+"') and d.entryDate='"+mysqldf.format(entity.getLoadDate())+"'";
 		genericDAO.executeSimpleUpdateQuery(mobileEntryTableUpdateQuery.toString());
-		
 
+		// WM Ticket change - 23rd May 2017
+		StringBuffer errorMsgBuff = new StringBuffer();
+		Ticket ticket = TicketUtils.createTicketForTripSheet(entity, errorMsgBuff, genericDAO);
+		String ticketErrors = errorMsgBuff.toString();
+		if (StringUtils.isNotEmpty(ticketErrors)) {
+			request.getSession().setAttribute("error", "Trip sheet is saved successfully, but following errors occured while creating Ticket for the Trip sheet: "
+					+ ticketErrors);
+		}
+		
 		if(!StringUtils.isEmpty(request.getParameter("id")) && request.getParameter("id")!=null){
 			request.getSession().setAttribute("msg","Trip sheet updated successfully");
 			return "redirect:list.do";

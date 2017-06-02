@@ -1,7 +1,6 @@
 package com.primovision.lutransport.core.util;
 
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
@@ -11,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 
 import org.joda.time.DateMidnight;
@@ -21,11 +18,8 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
-import org.springframework.ui.Model;
-
-import com.google.gson.Gson;
-
 import com.primovision.lutransport.core.dao.GenericDAO;
+
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
@@ -33,12 +27,66 @@ import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 
 public class TicketUtils {
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+	
+	public static String LOCATION_TYPE_ORIGIN = "ORIGIN";
+	public static String LOCATION_TYPE_DESTINATION = "DESTINATION";
+	
+	public static final String WM_COL_TICKET = "Ticket";
+	public static final String WM_COL_HAULING_TICKET = "Hauling Ticket";
+	public static final String WM_COL_TXN_DATE = "Txn date";
+	public static final String WM_COL_TIME_IN = "Time In";
+	public static final String WM_COL_TIME_OUT = "Time Out";
+	public static final String WM_COL_COMPANY = "Company";
+	public static final String WM_COL_VEHICLE = "Vehicle";
+	public static final String WM_COL_TRAILER = "Trailer";
+	public static final String WM_COL_GROSS = "Gross";
+	public static final String WM_COL_TARE = "Tare";
+	public static final String WM_COL_NET = "Net";
+	public static final String WM_COL_TONS = "Tons";
+	public static final String WM_COL_RATE = "Rate";
+	public static final String WM_COL_AMOUNT = "Amount";
+	
+	public static Map<String, Integer> getColMappingForOrigin() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(WM_COL_TXN_DATE, 0);
+		colMapping.put(WM_COL_TIME_IN, 1);
+		colMapping.put(WM_COL_TIME_OUT, 2);
+		colMapping.put(WM_COL_TICKET, 5);
+		colMapping.put(WM_COL_COMPANY, 7);
+		colMapping.put(WM_COL_VEHICLE, 8);
+		colMapping.put(WM_COL_TRAILER, 10);
+		colMapping.put(WM_COL_TONS, 20);
+		colMapping.put(WM_COL_GROSS, 23);
+		colMapping.put(WM_COL_TARE, 24);
+		colMapping.put(WM_COL_NET, 25);
+		
+		return colMapping;
+	}
+	
+	public static Map<String, Integer> getColMappingForDestination() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(WM_COL_COMPANY, 3);
+		colMapping.put(WM_COL_VEHICLE, 4);
+		colMapping.put(WM_COL_TICKET, 6);
+		colMapping.put(WM_COL_TONS, 8);
+		colMapping.put(WM_COL_HAULING_TICKET, 9);
+		colMapping.put(WM_COL_TXN_DATE, 10);
+		colMapping.put(WM_COL_TIME_IN, 10);
+		colMapping.put(WM_COL_TIME_OUT, 11);
+		colMapping.put(WM_COL_TARE, 12);
+		colMapping.put(WM_COL_AMOUNT, 13);
+		colMapping.put(WM_COL_RATE, 14);
+		colMapping.put(WM_COL_GROSS, 15);
+		
+		return colMapping;
+	}
 	
 	public static void save(Ticket entity, String type, StringBuffer errorMsgBuff, GenericDAO genericDAO) {
 		if (type.equals("complete")) {
@@ -621,6 +669,7 @@ public class TicketUtils {
 				originTSQuery = originTSQuery + " and obj.id != " + entity.getId();
 			}
 			List<TripSheet> tripsheets = genericDAO.executeSimpleQuery(originTSQuery);
+			
 			String originTicketQuery = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()
 					+ " and obj.originTicket="+entity.getOriginTicket();
 			List<Ticket> tickets = genericDAO.executeSimpleQuery(originTicketQuery);
@@ -847,176 +896,148 @@ public class TicketUtils {
 		}			
 	}
 	
-	private static String processAjaxRequest(HttpServletRequest request,
-			String action, Model model, GenericDAO genericDAO) {
-		if ("weekOfDate".equalsIgnoreCase(action)) {	
-			try {
-				List<String> list = new ArrayList<String>();
-				SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");				
-				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
-			
-			String unloadDate=dateFormat1.format(sdf.parse(request.getParameter("unloadDate")));			
-			LocalDate now = new LocalDate(unloadDate);			
-			LocalDate sunday = now.withDayOfWeek(DateTimeConstants.SUNDAY);
-			list.add(sdf.format(sunday.toDate()));
-			Gson gson = new Gson();
-			return gson.toJson(list);
-			} catch (ParseException e) {				
-				return "";
-			}			
+	public static void map(Ticket ticket, TripSheet tripSheet) {
+		ticket.setDriver(tripSheet.getDriver());
+		ticket.setDriverCompany(tripSheet.getDriverCompany());
+		ticket.setTerminal(tripSheet.getTerminal());
+		
+		ticket.setVehicle(tripSheet.getTruck()); 
+		ticket.setTrailer(tripSheet.getTrailer());  
+		
+		ticket.setBillBatch(tripSheet.getBatchDate());
+		
+		ticket.setOrigin(tripSheet.getOrigin());
+		ticket.setDestination(tripSheet.getDestination());
+		
+		ticket.setOriginTicket(tripSheet.getOriginTicket());
+		ticket.setDestinationTicket(tripSheet.getDestinationTicket());
+		
+		ticket.setLoadDate(tripSheet.getLoadDate());
+		ticket.setUnloadDate(tripSheet.getUnloadDate());
+	}
+	
+	public static void map(WMTicket wmTicket, TripSheet tripSheet) {
+		wmTicket.setDriver(tripSheet.getDriver());
+		wmTicket.setDriverCompany(tripSheet.getDriverCompany());
+		wmTicket.setTerminal(tripSheet.getTerminal());
+		
+		wmTicket.setVehicle(tripSheet.getTruck());
+		wmTicket.setTrailer(tripSheet.getTrailer());
+		
+		wmTicket.setBillBatch(tripSheet.getBatchDate());
+		
+		wmTicket.setOrigin(tripSheet.getOrigin());
+		wmTicket.setDestination(tripSheet.getDestination());
+		
+		wmTicket.setOriginTicket(tripSheet.getOriginTicket());
+		wmTicket.setDestinationTicket(tripSheet.getDestinationTicket());
+		
+		wmTicket.setLoadDate(tripSheet.getLoadDate());
+		wmTicket.setUnloadDate(tripSheet.getUnloadDate());
+	}
+	
+	public static WMTicket retrieveWMTicket(Long locationTicketNo, Location location, boolean byOrigin,
+			Integer processingStatus, GenericDAO genericDAO) {
+		String query = "select obj from WMTicket obj where obj.ticket=" + locationTicketNo + " and ";
+		String originCondn = " obj.origin=" + location.getId() + " and obj.originTicket=" + locationTicketNo;
+		String destinationCondn = " obj.destination=" + location.getId() + " and obj.destinationTicket=" + locationTicketNo;
+		
+		if (byOrigin) {
+			query += originCondn;
+		} else {
+			query += destinationCondn;
 		}
 		
-		if("getRemainingTicketData".equalsIgnoreCase(action)) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-			String landfill=request.getParameter("landfil");
-		    String landticket=request.getParameter("originTcket");
-		    List tickList = new ArrayList();
-		    String origin = "select obj from TripSheet obj where obj.origin.id="+landfill+" and obj.originTicket="+landticket;
-		    List<TripSheet> tripsheets = genericDAO.executeSimpleQuery(origin);
-			if (tripsheets!=null && tripsheets.size()>0){	
-				for(TripSheet tripSheetObj:tripsheets){
-					tickList.add(tripSheetObj.getDriverCompany().getId());
-					tickList.add(tripSheetObj.getDriver().getId());
-					tickList.add(tripSheetObj.getTerminal().getId());
-					//tickList.add(tripSheetObj.getTruck().getId());
-					tickList.add(tripSheetObj.getTruck().getUnitNum());
-					tickList.add(tripSheetObj.getTrailer().getId());
-					tickList.add(dateFormat.format(tripSheetObj.getBatchDate()));
-					tickList.add(tripSheetObj.getOrigin().getId());
-					tickList.add(tripSheetObj.getOriginTicket());
-					tickList.add(dateFormat.format(tripSheetObj.getLoadDate()));
-					tickList.add(tripSheetObj.getDestination().getId());
-					tickList.add(tripSheetObj.getDestinationTicket());
-					tickList.add(dateFormat.format(tripSheetObj.getUnloadDate()));
-					System.out.println("***** Enetered here");
-				}
-				Gson gson = new Gson();
-				return gson.toJson(tickList);
-			}
-			else{
-				return "";
+		if (processingStatus != null) {
+			query +=	" and obj.processingStatus="+ processingStatus;
+		}
+		
+		List<WMTicket> ticketList = genericDAO.executeSimpleQuery(query);
+		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	private static Ticket retrieveTicket(Long locationTicketNo, Location location, boolean byOrigin,
+			GenericDAO genericDAO) {
+		String query = "select obj from Ticket obj where";
+		String originCondn = " obj.origin=" + location.getId() + " and obj.originTicket=" + locationTicketNo;
+		String destinationCondn = " obj.destination=" + location.getId() + " and obj.destinationTicket=" + locationTicketNo;
+		
+		if (byOrigin) {
+			query += originCondn;
+		} else {
+			query += destinationCondn;
+		}
+		
+		List<Ticket> ticketList = genericDAO.executeSimpleQuery(query);
+		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	public static void mapAndSave(WMTicket wmTicket, TripSheet tripSheet, GenericDAO genericDAO) {
+		map(wmTicket, tripSheet);
+		
+		wmTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
+		wmTicket.setModifiedBy(tripSheet.getCreatedBy());
+		wmTicket.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(wmTicket);
+	}
+	
+	public static Ticket createTicketForTripSheet(TripSheet tripSheet, StringBuffer errorMsgBuff,
+			GenericDAO genericDAO) {
+		Ticket ticket = retrieveTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin(),
+				true, genericDAO);
+		if (ticket == null) {
+			ticket = retrieveTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination(),
+					false, genericDAO);
+			if (ticket != null) {
+				return null;
 			}
 		}
 		
-		if ("checkOriginTicket".equalsIgnoreCase(action)) {
-			String mssg="";
-			
-			String landfill=request.getParameter("landfil");
-		    String landticket=request.getParameter("originTcket");
-		    String tickId=request.getParameter("ticId");
-		    
-            if(StringUtils.isEmpty(tickId)){
-            	tickId=null;
-		    }
-		    
-		    
-		    String origin = "select obj from Ticket obj where obj.origin.id="+landfill+" and obj.originTicket="+landticket+" and obj.id != "+tickId;
-			List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
-			if (tickets!=null && tickets.size()>0){		
-				mssg="Duplicate Origin Ticket";	
-			}
-		    
-			 return mssg;
-			
+		WMTicket wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin(), 
+				true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmOriginTicket == null) {
+			//errorMsgBuff.append("No Matching WM Origin ticket found");
+			return null;
 		}
 		
-		if ("checkDestinationTicket".equalsIgnoreCase(action)) {
-			String mssg="";
-			
-			String transfersttn=request.getParameter("transferstation");
-		    String transferticket=request.getParameter("destinationTcket");
-		    String tickId=request.getParameter("ticId");
-			
-		    if(StringUtils.isEmpty(tickId)){
-            	tickId=null;
-		    }
-		    
-		    
-		    String destination = "select obj from Ticket obj where obj.destination.id="+transfersttn+" and obj.destinationTicket="+transferticket+" and obj.id != "+tickId;
-			List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
-			if (tickets1!=null && tickets1.size()>0){		
-				mssg="Duplicate Destination Ticket";			
-			}
-			 return mssg;
+		WMTicket wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination(), 
+				false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmDestinationTicket == null) {
+			//errorMsgBuff.append("Matching WM Origin ticket found, but NO Matching WM Destination ticket found");
+			return null;
 		}
 		
-		if ("checkVehicle".equalsIgnoreCase(action)) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-			
-			 boolean sendError=true;
-			String truckId=request.getParameter("truckId");
-		    String loaddte=request.getParameter("loaddte");
-		    String unloaddte=request.getParameter("unloaddte");
-			
-		    try{		   
-		    Date loaddate=dateFormat.parse(loaddte);
-		    Date unloaddate=dateFormat.parse(unloaddte);		    		
-			Vehicle vehob = genericDAO.getById(Vehicle.class,Long.parseLong(truckId));
-			
-			String vehiclequery="select obj from Vehicle obj where obj.type=1 and obj.unit in ("
-				+vehob.getUnit()
-				+") order by obj.validFrom desc";
-			
-			List<Vehicle> vehicleLists=genericDAO.executeSimpleQuery(vehiclequery);
-			
-			if(vehicleLists!=null && vehicleLists.size()>0){				
-			for(Vehicle vehicleObj : vehicleLists) {	
-				if(vehicleObj.getValidFrom()!=null && vehicleObj.getValidTo()!=null){
-				if ((loaddate.getTime()>= vehicleObj.getValidFrom().getTime() && loaddate.getTime()<= vehicleObj.getValidTo().getTime()) && (unloaddate.getTime()>= vehicleObj.getValidFrom().getTime() && unloaddate.getTime()<= vehicleObj.getValidTo().getTime())) {					
-					sendError=false;
-				}
-			}
-			}
-			}		    
-		    }
-		    catch (Exception e) {
-				// TODO: handle exception
-			}	
-		    if(sendError){
-		    	return "No Valid Vehicle Entry Found for Selected Truck.";
-		    } 
-		}
+		ticket = new Ticket();
 		
-		if ("checkTrailer".equalsIgnoreCase(action)) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-			
-			 boolean sendError=true;	
-			String trailerId=request.getParameter("trailerId");
-		    String loaddte=request.getParameter("loaddte");
-		    String unloaddte=request.getParameter("unloaddte");
-			
-		    try{		   
-		    Date loaddate=dateFormat.parse(loaddte);
-		    Date unloaddate=dateFormat.parse(unloaddte);
-		    
-		    Vehicle vehob=genericDAO.getById(Vehicle.class,Long.parseLong(trailerId));
-			String vehiclequery="select obj from Vehicle obj where obj.type=2 and obj.unit in ("
-				+vehob.getUnit()
-				+") order by obj.validFrom desc";
-			
-			List<Vehicle> vehicleLists=genericDAO.executeSimpleQuery(vehiclequery);
-			
-			if(vehicleLists!=null && vehicleLists.size()>0){				
-			for(Vehicle vehicleObj : vehicleLists) {					
-				if(vehicleObj.getValidFrom()!=null && vehicleObj.getValidTo()!=null){
-				if ((loaddate.getTime()>= vehicleObj.getValidFrom().getTime() && loaddate.getTime()<= vehicleObj.getValidTo().getTime()) && (unloaddate.getTime()>= vehicleObj.getValidFrom().getTime() && unloaddate.getTime()<= vehicleObj.getValidTo().getTime())) {
-					
-					sendError=false;
-				}	
-				}
-			}
-			}		    
-		    }
-		    catch (Exception e) {
-				// TODO: handle exception
-			}
-		    
-		    if(sendError){
-		    	return "No Valid Vehicle Entry Found for Selected Trailer.";
-		    }    
-		    
-		}
+		ticket.setTransferTimeIn(wmOriginTicket.getTransferTimeIn());
+		ticket.setTransferTimeOut(wmOriginTicket.getTransferTimeOut());
+		ticket.setTransferGross(wmOriginTicket.getTransferGross());
+		ticket.setTransferTare(wmOriginTicket.getTransferTare());
 		
-		return "";
+		ticket.setLandfillTimeIn(wmDestinationTicket.getLandfillTimeIn());
+		ticket.setLandfillTimeOut(wmDestinationTicket.getLandfillTimeOut());
+		ticket.setLandfillGross(wmDestinationTicket.getLandfillGross());
+		ticket.setLandfillTare(wmDestinationTicket.getLandfillTare());
+		
+		calculateNetAndTons(ticket);
+		
+		map(ticket, tripSheet);
+		
+		ticket.setEnteredBy("Automatic"); // 34 - Looks like this is not saved
+		ticket.setTicketStatus(1); // Available - Correct?
+		ticket.setPayRollStatus(1); // No - correct?
+		//ticketToBeSaved.setPayRollBatch(payRollBatch); // Required?
+		//ticketToBeSaved.setSubcontractor();  //Required?
+		
+		ticket.setStatus(1); // Required?
+		ticket.setCreatedBy(tripSheet.getCreatedBy());
+		ticket.setCreatedAt(Calendar.getInstance().getTime());
+		
+		save(ticket, "complete", errorMsgBuff, genericDAO);
+		
+		mapAndSave(wmOriginTicket, tripSheet, genericDAO);
+		mapAndSave(wmDestinationTicket, tripSheet, genericDAO);
+		
+		return ticket;
 	}
 }

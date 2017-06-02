@@ -590,7 +590,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Integer tonsCol = colMapping.get(TicketUtils.WM_COL_TONS);
 					if (tonsCol != null) {
 						Double tonWeight = row.getCell(tonsCol).getNumericCellValue();
-						currentWMTicket.setNet(tonWeight);
+						currentWMTicket.setTons(tonWeight);
 					}
 					Integer rateCol = colMapping.get(TicketUtils.WM_COL_RATE);
 					if (rateCol != null) {
@@ -640,7 +640,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						genericDAO.saveOrUpdate(currentWMTicket);
 						
 						recordError = true;
-						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  Have saved the WM Ticket for further processing" + "<br/>");
+						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  Have saved the WM Ticket for further processing." + "<br/>");
 						errorCount++;
 						
 						continue;
@@ -650,6 +650,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						
 					WMTicket wmOriginTicket = null;
 					WMTicket wmDestinationTicket = null;
+					WMTicket correspondingTicket = null;
 					if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, currentWMTicket.getTicketType())) {
 						wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination(), 
 								false, WMTicket.PROCESSING_STATUS_PROCESSING);
@@ -660,6 +661,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setLandfillTimeOut(wmDestinationTicket.getLandfillTimeOut());
 							
 							ticketToBeSaved = new Ticket();
+							correspondingTicket = wmDestinationTicket;
 						}
 					} else {
 						wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin(),
@@ -671,6 +673,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setTransferTimeOut(wmOriginTicket.getTransferTimeOut());
 							
 							ticketToBeSaved = new Ticket();
+							correspondingTicket = wmOriginTicket;
 						}
 					}
 					
@@ -706,17 +709,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
 					genericDAO.saveOrUpdate(currentWMTicket);
 					
-					if (wmOriginTicket != null) {
-						wmOriginTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
-						wmOriginTicket.setModifiedBy(createdBy);
-						wmOriginTicket.setModifiedAt(Calendar.getInstance().getTime());
-						genericDAO.saveOrUpdate(wmOriginTicket);
-					}
-					if (wmDestinationTicket != null) {
-						wmDestinationTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
-						wmDestinationTicket.setModifiedBy(createdBy);
-						wmDestinationTicket.setModifiedAt(Calendar.getInstance().getTime());
-						genericDAO.saveOrUpdate(wmDestinationTicket);
+					if (correspondingTicket != null) {
+						correspondingTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
+						correspondingTicket.setModifiedBy(createdBy);
+						correspondingTicket.setModifiedAt(Calendar.getInstance().getTime());
+						genericDAO.saveOrUpdate(correspondingTicket);
 					}
 				} catch (Exception ex) {
 					recordError = true;
