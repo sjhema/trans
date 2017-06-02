@@ -216,8 +216,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return genericDAO.findByCriteria(StaticData.class, criterias);
 	}
 	
+	private List<Location> retrieveLocationDataByLongName(int locationType, String locationLongName) {
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("status", 1);
+		criterias.put("type", locationType);
+		criterias.put("longName", locationLongName);
+		return genericDAO.findByCriteria(Location.class, criterias, "name", false);
+	}
+	
 	private List<Location> retrieveLocationData(int locationType, String locationName) {
-		Map criterias = new HashMap();
+		Map<String, Object> criterias = new HashMap<String, Object>();
 		criterias.put("status", 1);
 		criterias.put("type", locationType);
 		criterias.put("name", locationName);
@@ -373,12 +381,55 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return errorList;
 	}
 	
+	private Location retrieveOriginForWM(HSSFSheet sheet) {
+		HSSFRow originRow = sheet.getRow(2);
+		String originName = ((String) getCellValue(originRow.getCell(0)));
+		originName = StringUtils.trimToEmpty(originName);
+		if (StringUtils.isEmpty(originName)) {
+			return null;
+		}
+		
+		originName = StringUtils.substringAfter(originName, ":");
+		originName = StringUtils.substringBefore(originName, "-");
+		originName = StringUtils.trimToEmpty(originName);
+		if (StringUtils.isEmpty(originName)) {
+			return null;
+		}
+		
+		List<Location> originList = retrieveLocationDataByLongName(1, originName);
+		if (originList == null || originList.isEmpty()) {
+			return null;
+		} else {
+			return originList.get(0);
+		}
+	}
+	
+	private Location retrieveDestinationForWM(HSSFSheet sheet) {
+		HSSFRow destinationRow = sheet.getRow(1);
+		String destinationName = ((String) getCellValue(destinationRow.getCell(0)));
+		destinationName = StringUtils.trimToEmpty(destinationName);
+		if (StringUtils.isEmpty(destinationName)) {
+			return null;
+		}
+		
+		List<Location> destinationList = retrieveLocationDataByLongName(2, destinationName);
+		if (destinationList == null || destinationList.isEmpty()) {
+			return null;
+		} else {
+			return destinationList.get(0);
+		}
+	}
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public List<String> importWMTickets(InputStream is, Long createdBy) throws Exception {
-		SimpleDateFormat wmDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-		SimpleDateFormat wmTimeFormat = new SimpleDateFormat("EEE MMM dd hh:mm:ss z yyyy");
+	public List<String> importWMTickets(InputStream is, String locationType, Map<String, Integer> colMapping, Long createdBy) throws Exception {
+		SimpleDateFormat wmDateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
 		SimpleDateFormat requiredTimeFormat = new SimpleDateFormat("HH:mm");
+		
+		int recordsToBeSkipped = 1;
+		if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
+			recordsToBeSkipped = 12;
+		}
 		
 		List<String> errorList = new ArrayList<String>();
 		
@@ -390,13 +441,31 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFWorkbook wb = new HSSFWorkbook(fs);
 			HSSFSheet sheet = wb.getSheetAt(0);
 			
+			Location origin = null;
+			Location destination = null;
+			if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
+				origin = retrieveOriginForWM(sheet);
+				if (origin == null) {
+					errorList.add("Origin could not be determined");
+				}
+			} else {
+				destination = retrieveDestinationForWM(sheet);
+				if (destination == null) {
+					errorList.add("Destination could not be determined");
+				}
+			}
+			
+			if (!errorList.isEmpty()) {
+				return errorList;
+			}
+			
 			Iterator rows = sheet.rowIterator();
 			while (rows.hasNext()) {
 				HSSFRow row = (HSSFRow) rows.next();
 				
 				recordCount++;
 				System.out.println("Processing record No: " + recordCount);
-				if (recordCount < 5) {
+				if (recordCount <= recordsToBeSkipped) {
 					continue;
 				}
 				
@@ -410,48 +479,55 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						break;
 					}
 					
-					String wmTicketNo = ((String) getCellValue(row.getCell(0))); // Required?
-					String truckUnitStr = ((String) getCellValue(row.getCell(1))); // Unit or id?
-					String trailerUnitStr = ((String) getCellValue(row.getCell(2)));
-					String txnDateStr = ((String) getCellValue(row.getCell(3))); // What to do with this date
-					
-					Object timeInObj = getCellValue(row.getCell(4), true);
-					Object timeOutObj = getCellValue(row.getCell(5), true);
-					
-					String site = ((String) getCellValue(row.getCell(6))); // Required? Will this match origin/destination?
-					String origin = ((String) getCellValue(row.getCell(7)));
-					String destination = ((String) getCellValue(row.getCell(8)));
-					Double grossWeight = row.getCell(9).getNumericCellValue();
-					Double tareWeight = row.getCell(10).getNumericCellValue();
-					String ticketIdStr = ((String) getCellValue(row.getCell(11)));
-					
 					currentWMTicket = new WMTicket();
+					if (origin != null) {
+						currentWMTicket.setTicketType(WMTicket.ORIGIN_TICKET_TYPE);
+						currentWMTicket.setOrigin(origin);
+					} else {
+						currentWMTicket.setTicketType(WMTicket.DESTINATION_TICKET_TYPE);
+						currentWMTicket.setDestination(destination);
+					}
 					
-					if (StringUtils.isEmpty(wmTicketNo)) {
+					Integer ticketCol = colMapping.get(TicketUtils.WM_COL_TICKET);
+					String ticketStr = ((String) getCellValue(row.getCell(ticketCol)));
+					if (StringUtils.isEmpty(ticketStr)) {
 						recordError = true;
-						recordErrorMsg.append("WM Ticket No, ");
+						recordErrorMsg.append("Ticket, ");
 					} else {
-						currentWMTicket.setWmTicketNo(wmTicketNo);
+						Long ticket = Long.parseLong(ticketStr);
+						currentWMTicket.setTicket(ticket);
+						if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, currentWMTicket.getTicketType())) {
+							currentWMTicket.setOriginTicket(ticket);
+						} else {
+							currentWMTicket.setDestinationTicket(ticket);
+						}
 					}
-					if (StringUtils.isEmpty(ticketIdStr)) {
-						recordError = true;
-						recordErrorMsg.append("Ticket ID, ");
-					} else {
-						currentWMTicket.setTicketId(Long.parseLong(ticketIdStr));
+					
+					Integer haulingTicketCol = colMapping.get(TicketUtils.WM_COL_HAULING_TICKET);
+					if (haulingTicketCol != null) {
+						String haulingTicketStr = ((String) getCellValue(row.getCell(haulingTicketCol)));
+						if (StringUtils.isNotEmpty(haulingTicketStr)) {
+							currentWMTicket.setHaulingTicket(Long.parseLong(haulingTicketStr));
+						} 
 					}
-					if (StringUtils.isEmpty(txnDateStr)) {
+					
+					Integer txnDateCol = colMapping.get(TicketUtils.WM_COL_TXN_DATE);
+					Object txnDateObj = getCellValue(row.getCell(txnDateCol), true);
+					if (txnDateObj == null || !(txnDateObj instanceof Date)) {
 						recordError = true;
 						recordErrorMsg.append("Date, ");
 					} else {
-						currentWMTicket.setTxnDate(wmDateFormat.parse(txnDateStr)); // What to do with this date?
+						currentWMTicket.setTxnDate((Date)txnDateObj);
 					}
 					
-					if (timeInObj == null) {
+					Integer timeInCol = colMapping.get(TicketUtils.WM_COL_TIME_IN);
+					Object timeInObj = getCellValue(row.getCell(timeInCol), true);
+					if (timeInObj == null || !(timeInObj instanceof Date)) {
 						recordError = true;
 						recordErrorMsg.append("Time In, ");
 					} else {
 						String timeInStr = timeInObj.toString();
-						timeInStr = convertDateFormat(timeInStr, wmTimeFormat, requiredTimeFormat);
+						timeInStr = convertDateFormat(timeInStr, wmDateTimeFormat, requiredTimeFormat);
 						if (StringUtils.isEmpty(timeInStr)) {
 							recordError = true;
 							recordErrorMsg.append("Time In, ");
@@ -460,12 +536,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					if (timeOutObj == null) {
+					Integer timeOutCol = colMapping.get(TicketUtils.WM_COL_TIME_OUT);
+					Object timeOutObj = getCellValue(row.getCell(timeOutCol), true);
+					if (timeOutObj == null || !(timeOutObj instanceof Date)) {
 						recordError = true;
 						recordErrorMsg.append("Time Out, ");
 					} else {
 						String timeOutStr = timeOutObj.toString();
-						timeOutStr = convertDateFormat(timeOutStr, wmTimeFormat, requiredTimeFormat);
+						timeOutStr = convertDateFormat(timeOutStr, wmDateTimeFormat, requiredTimeFormat);
 						if (StringUtils.isEmpty(timeOutStr)) {
 							recordError = true;
 							recordErrorMsg.append("Time Out, ");
@@ -474,77 +552,62 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
+					Integer wmCompanyCol = colMapping.get(TicketUtils.WM_COL_COMPANY);
+					if (wmCompanyCol != null) {
+						String wmCompanyStr = ((String) getCellValue(row.getCell(wmCompanyCol)));
+						if (StringUtils.isNotEmpty(wmCompanyStr)) {
+							currentWMTicket.setWmCompany(wmCompanyStr);
+						} 
+					}
+					Integer wmVehicleCol = colMapping.get(TicketUtils.WM_COL_VEHICLE);
+					if (wmVehicleCol != null) {
+						String wmVehicleStr = ((String) getCellValue(row.getCell(wmVehicleCol)));
+						if (StringUtils.isNotEmpty(wmVehicleStr)) {
+							currentWMTicket.setWmVehicle(wmVehicleStr);
+						} 
+					}
+					Integer wmTrailerCol = colMapping.get(TicketUtils.WM_COL_TRAILER);
+					if (wmTrailerCol != null) {
+						String wmTrailerStr = ((String) getCellValue(row.getCell(wmTrailerCol)));
+						if (StringUtils.isNotEmpty(wmTrailerStr)) {
+							currentWMTicket.setWmTrailer(wmTrailerStr);
+						} 
+					}
+					
+					Integer grossCol = colMapping.get(TicketUtils.WM_COL_GROSS);
+					Double grossWeight = row.getCell(grossCol).getNumericCellValue();
 					currentWMTicket.setGross(grossWeight);
+					
+					Integer tareCol = colMapping.get(TicketUtils.WM_COL_TARE);
+					Double tareWeight = row.getCell(tareCol).getNumericCellValue();
 					currentWMTicket.setTare(tareWeight);
 					
-					if (StringUtils.isEmpty(truckUnitStr)) {
-						recordError = true;
-						recordErrorMsg.append("Truck, ");
-					} else {
-						Integer truckUnit = Integer.parseInt(truckUnitStr);
-						List<Vehicle> truckList = retrieveVehicleForUnit(truckUnit, currentWMTicket.getTxnDate(), 1);
-						if (truckList == null || truckList.isEmpty()) {
-							recordError = true;
-							recordErrorMsg.append("Truck, ");
-						} else {
-							currentWMTicket.setVehicle(truckList.get(0));
-						}
+					Integer netCol = colMapping.get(TicketUtils.WM_COL_NET);
+					if (netCol != null) {
+						Double netWeight = row.getCell(netCol).getNumericCellValue();
+						currentWMTicket.setNet(netWeight);
+					}
+					Integer tonsCol = colMapping.get(TicketUtils.WM_COL_TONS);
+					if (tonsCol != null) {
+						Double tonWeight = row.getCell(tonsCol).getNumericCellValue();
+						currentWMTicket.setNet(tonWeight);
+					}
+					Integer rateCol = colMapping.get(TicketUtils.WM_COL_RATE);
+					if (rateCol != null) {
+						Double rate = row.getCell(rateCol).getNumericCellValue();
+						currentWMTicket.setRate(rate);
+					}
+					Integer amountCol = colMapping.get(TicketUtils.WM_COL_AMOUNT);
+					if (amountCol != null) {
+						Double amount = row.getCell(amountCol).getNumericCellValue();
+						currentWMTicket.setAmount(amount);
 					}
 					
-					if (StringUtils.isEmpty(trailerUnitStr)) {
-						recordError = true;
-						recordErrorMsg.append("Trailer, ");
-					} else {
-						Integer trailerUnit = Integer.parseInt(trailerUnitStr);  // Unit or id?
-						List<Vehicle> trailerList = retrieveVehicleForUnit(trailerUnit, currentWMTicket.getTxnDate(), 2);
-						if (trailerList == null || trailerList.isEmpty()) {
-							recordError = true;
-							recordErrorMsg.append("Trailer, ");
-						} else {
-							currentWMTicket.setTrailer(trailerList.get(0));
-						}
-					}
+					mapBasedOnTicketType(currentWMTicket);
 					
-					if (StringUtils.isEmpty(site)) {
+					if (checkDuplicateWMTicket(currentWMTicket)) {
 						recordError = true;
-						recordErrorMsg.append("Site, ");
-					} else {
-						List<Location> siteList = retrieveLocationData(1, site);
-						if (siteList.isEmpty()) {
-							siteList = retrieveLocationData(2, site);
-						}
-						if (siteList.isEmpty()) {
-							recordError = true;
-							recordErrorMsg.append("Site, ");
-						} else {
-							currentWMTicket.setSite(siteList.get(0));
-						}
-					}
-					
-					if (StringUtils.isEmpty(origin)) {
-						recordError = true;
-						recordErrorMsg.append("Origin, ");
-					} else {
-						List<Location> originList = retrieveLocationData(1, origin);
-						if (originList.isEmpty()) {
-							recordError = true;
-							recordErrorMsg.append("Origin, ");
-						} else {
-							currentWMTicket.setOrigin(originList.get(0));
-						}
-					}
-					
-					if (StringUtils.isEmpty(destination)) {
-						recordError = true;
-						recordErrorMsg.append("Destination, ");
-					} else {
-						List<Location> destinationList = retrieveLocationData(2, destination);
-						if (destinationList.isEmpty()) {
-							recordError = true;
-							recordErrorMsg.append("Destination, ");
-						} else {
-							currentWMTicket.setDestination(destinationList.get(0));
-						}
+						recordErrorMsg.append("Duplicate WM Ticket, ");
 					}
 					
 					if (recordError) {
@@ -557,10 +620,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					currentWMTicket.setCreatedBy(createdBy);
 					currentWMTicket.setCreatedAt(Calendar.getInstance().getTime());
 					
-					Ticket existigTicket = retrieveTicket(currentWMTicket.getTicketId(), currentWMTicket.getOrigin(), 
+					Ticket existigTicket = retrieveTicket(currentWMTicket.getTicket(), currentWMTicket.getOrigin(), 
 							currentWMTicket.getDestination());
 					if (existigTicket != null) {
-						//currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_TICKET_EXISTS);
+						//currentWMTicket.setProcessingStatus(WMTicket.query);
 						//genericDAO.saveOrUpdate(currentWMTicket);
 						
 						recordError = true;
@@ -570,14 +633,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					}
 					
-					TripSheet tripSheet = retrieveTripSheet(currentWMTicket.getTicketId(), currentWMTicket.getVehicle(), 
-							currentWMTicket.getTrailer(), currentWMTicket.getOrigin(), currentWMTicket.getDestination());
+					TripSheet tripSheet = retrieveTripSheet(currentWMTicket.getTicket(), currentWMTicket.getOrigin(),
+							currentWMTicket.getDestination());
 					if (tripSheet == null) {
 						currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
 						genericDAO.saveOrUpdate(currentWMTicket);
 						
 						recordError = true;
-						errorList.add("Line " + recordCount + ": " + "Did not find matching trip sheet.  Have saved the WM Ticket for further processing" + "<br/>");
+						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  Have saved the WM Ticket for further processing" + "<br/>");
 						errorCount++;
 						
 						continue;
@@ -587,17 +650,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						
 					WMTicket wmOriginTicket = null;
 					WMTicket wmDestinationTicket = null;
-					if (currentWMTicket.getTicketId().longValue() == tripSheet.getOriginTicket().longValue()) {
-						//wmTicket.setOriginTicket(ticketId);
-						//wmTicket.setLoadDate(date);
-						currentWMTicket.setTicketType(WMTicket.ORIGIN_TICKET_TYPE);
-						currentWMTicket.setTransferGross(currentWMTicket.getGross());
-						currentWMTicket.setTransferTare(currentWMTicket.getTare());
-						currentWMTicket.setTransferTimeIn(currentWMTicket.getTimeIn());
-						currentWMTicket.setTransferTimeOut(currentWMTicket.getTimeOut());
-						
-						wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), 
-								tripSheet.getOrigin(), tripSheet.getDestination(), false, WMTicket.PROCESSING_STATUS_PROCESSING);
+					if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, currentWMTicket.getTicketType())) {
+						wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination(), 
+								false, WMTicket.PROCESSING_STATUS_PROCESSING);
 						if (wmDestinationTicket != null) {
 							currentWMTicket.setLandfillGross(wmDestinationTicket.getLandfillGross());
 							currentWMTicket.setLandfillTare(wmDestinationTicket.getLandfillTare());
@@ -605,19 +660,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setLandfillTimeOut(wmDestinationTicket.getLandfillTimeOut());
 							
 							ticketToBeSaved = new Ticket();
-							map(ticketToBeSaved, currentWMTicket);
 						}
-					} else if (currentWMTicket.getTicketId().longValue() == tripSheet.getDestinationTicket().longValue()) {
-						//wmTicket.setDestinationTicket(ticketId);
-						//wmTicket.setUnloadDate(date);
-						currentWMTicket.setTicketType(WMTicket.DESTINANTION_TICKET_TYPE);
-						currentWMTicket.setLandfillGross(currentWMTicket.getGross());
-						currentWMTicket.setLandfillTare(currentWMTicket.getTare());
-						currentWMTicket.setLandfillTimeIn(currentWMTicket.getTimeIn());
-						currentWMTicket.setLandfillTimeOut(currentWMTicket.getTimeOut());
-						
-						wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), 
-								tripSheet.getOrigin(), tripSheet.getDestination(), true, WMTicket.PROCESSING_STATUS_PROCESSING);
+					} else {
+						wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin(),
+								true, WMTicket.PROCESSING_STATUS_PROCESSING);
 						if (wmOriginTicket != null) {
 							currentWMTicket.setTransferGross(wmOriginTicket.getTransferGross());
 							currentWMTicket.setTransferTare(wmOriginTicket.getTransferTare());
@@ -625,7 +671,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setTransferTimeOut(wmOriginTicket.getTransferTimeOut());
 							
 							ticketToBeSaved = new Ticket();
-							map(ticketToBeSaved, currentWMTicket);
 						}
 					}
 					
@@ -635,10 +680,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					}
 					
+					map(ticketToBeSaved, currentWMTicket);
 					TicketUtils.calculateNetAndTons(ticketToBeSaved);
 						
-					//ticketToBeSaved.setBillBatch(date); // Required?
-					ticketToBeSaved.setEnteredBy("Automatic"); // 34
+					ticketToBeSaved.setEnteredBy("Automatic"); // 34 - Looks like this is not saved
 					ticketToBeSaved.setTicketStatus(1); // Available - Correct?
 					ticketToBeSaved.setPayRollStatus(1); // No - correct?
 					//ticketToBeSaved.setPayRollBatch(payRollBatch); // Required?
@@ -648,7 +693,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					ticketToBeSaved.setCreatedBy(createdBy);
 					ticketToBeSaved.setCreatedAt(Calendar.getInstance().getTime());
 					
-					TicketUtils.save(ticketToBeSaved, "complete", recordErrorMsg, genericDAO); // complete?
+					TicketUtils.save(ticketToBeSaved, "complete", recordErrorMsg, genericDAO);
 					
 					if (recordErrorMsg.length() != 0) {
 						errorList.add("Line " + recordCount + ": Error while saving Ticket: "
@@ -692,6 +737,20 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return errorList;
 	}
 	
+	private void mapBasedOnTicketType(WMTicket wmTicket) {
+		if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, wmTicket.getTicketType())) {
+			wmTicket.setTransferGross(wmTicket.getGross());
+			wmTicket.setTransferTare(wmTicket.getTare());
+			wmTicket.setTransferTimeIn(wmTicket.getTimeIn());
+			wmTicket.setTransferTimeOut(wmTicket.getTimeOut());
+		} else {
+			wmTicket.setLandfillGross(wmTicket.getGross());
+			wmTicket.setLandfillTare(wmTicket.getTare());
+			wmTicket.setLandfillTimeIn(wmTicket.getTimeIn());
+			wmTicket.setLandfillTimeOut(wmTicket.getTimeOut());
+		}
+	}
+	
 	private String convertDateFormat(String actualDateStr, SimpleDateFormat actualDateFormat, SimpleDateFormat requiredDateFormat) throws ParseException {
 		if (StringUtils.isEmpty(actualDateStr)) {
 			return StringUtils.EMPTY;
@@ -707,7 +766,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		wmTicket.setDriverCompany(tripSheet.getDriverCompany());
 		wmTicket.setTerminal(tripSheet.getTerminal());
 		
-		wmTicket.setBillBatch(tripSheet.getBatchDate()); // Ok?
+		wmTicket.setVehicle(tripSheet.getTruck());
+		wmTicket.setTrailer(tripSheet.getTrailer());
+		
+		wmTicket.setBillBatch(tripSheet.getBatchDate());
 		
 		wmTicket.setOrigin(tripSheet.getOrigin());
 		wmTicket.setDestination(tripSheet.getDestination());
@@ -752,50 +814,45 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	}
 	
 	private Ticket retrieveTicket(Long ticketNo, Location origin, Location destination) {
-		String baseQuery = "select obj from Ticket obj where"
-				+ " obj.origin=" + origin.getId() 
-				+ " and obj.destination=" + destination.getId();
-		String originQuery = " and obj.originTicket=" + ticketNo;
-		String destinationQuery = " and obj.destinationTicket=" + ticketNo;
-		
-		List<Ticket> ticketList = genericDAO.executeSimpleQuery(baseQuery + originQuery);
-		if (ticketList == null || ticketList.isEmpty()) {
-			ticketList = genericDAO.executeSimpleQuery(baseQuery + destinationQuery);
+		String query = "select obj from Ticket obj where";
+		if (origin != null) {
+			query += (" obj.origin=" + origin.getId() + " and obj.originTicket=" + ticketNo);
+		} else {
+			query += (" obj.destination=" + destination.getId() + " and obj.destinationTicket=" + ticketNo);
 		}
 		
+		List<Ticket> ticketList = genericDAO.executeSimpleQuery(query);
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
 	}
 	
-	private TripSheet retrieveTripSheet(Long ticketNo, Vehicle truck, Vehicle trailer, Location origin, Location destination) {
-		String baseQuery = "select obj from TripSheet obj where obj.truck=" + truck.getId()
-							+ " and obj.trailer=" + trailer.getId()
-							+ " and obj.origin=" + origin.getId() 
-							+ " and obj.destination=" + destination.getId();
-		String originQuery = " and obj.originTicket=" + ticketNo;
-		String destinationQuery = " and obj.destinationTicket=" + ticketNo;
-		
-		List<TripSheet> tripSheetList = genericDAO.executeSimpleQuery(baseQuery + originQuery);
-		if ((tripSheetList == null || tripSheetList.isEmpty())) {
-			tripSheetList = genericDAO.executeSimpleQuery(baseQuery + destinationQuery);
+	private TripSheet retrieveTripSheet(Long ticketNo, Location origin, Location destination) {
+		String query = "select obj from TripSheet obj where";
+		if (origin != null) {
+			query += (" obj.origin=" + origin.getId() + " and obj.originTicket=" + ticketNo);
+		} else {
+			query += (" obj.destination=" + destination.getId() + " and obj.destinationTicket=" + ticketNo);
 		}
 		
+		List<TripSheet> tripSheetList = genericDAO.executeSimpleQuery(query);
 		return (tripSheetList == null || tripSheetList.isEmpty()) ? null : tripSheetList.get(0);
 	}
 	
-	private WMTicket retrieveWMTicket(Long ticketNo, Location origin, Location destination, boolean byOrigin,
+	private WMTicket retrieveWMTicket(Long ticketNo, Location location, boolean byOrigin,
 			Integer processingStatus) {
-		String query = "select obj from WMTicket obj where"
-				+ " obj.origin=" + origin.getId()
-				+ " and obj.destination=" + destination.getId();
+		String query = "select obj from WMTicket obj where obj.ticket=" + ticketNo + " and ";
+		String originQuery = " obj.origin=" + location.getId() + " and obj.originTicket=" + ticketNo;
+		String destinationQuery = " obj.destination=" + location.getId() + " and obj.destinationTicket=" + ticketNo;
+		
+		if (byOrigin) {
+			query += originQuery;
+		} else {
+			query += destinationQuery;
+		}
 		
 		if (processingStatus != null) {
-			query +=	" and obj.processingStatus="+ processingStatus;
+			query +=	(" and obj.processingStatus="+ processingStatus);
 		}
-		if (byOrigin) {
-			query += " and obj.originTicket=" + ticketNo;
-		} else {
-			query += " and obj.destinationTicket=" + ticketNo;
-		}
+		
 		List<WMTicket> ticketList = genericDAO.executeSimpleQuery(query);
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
 	}
@@ -1222,6 +1279,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		List<MileageLog> mileageLogList = genericDAO.executeSimpleQuery(query);
 		return !mileageLogList.isEmpty();
+	}
+	
+	private boolean checkDuplicateWMTicket(WMTicket wmTicket) {
+		if (wmTicket == null || wmTicket.getTicket() == null
+				|| (wmTicket.getOrigin() == null && wmTicket.getDestination() == null)) {
+			return false;
+		}
+		
+		String query = "select obj from WMTicket obj where obj.ticket=" + wmTicket.getTicket();
+		if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, wmTicket.getTicketType())) {
+			query += (" and obj.origin=" + wmTicket.getOrigin().getId());
+		} else {
+			query += (" and obj.destination=" + wmTicket.getDestination().getId());
+		}
+		
+		List<WMTicket> wmTicketList = genericDAO.executeSimpleQuery(query);
+		return !wmTicketList.isEmpty();
 	}
 	
 	private boolean checkDuplicate(SubcontractorRate aSubcontractorRate) {

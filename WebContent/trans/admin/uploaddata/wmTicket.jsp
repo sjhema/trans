@@ -29,7 +29,17 @@
 		<td colspan="4"><b><primo:label code="Upload WM Tickets" /></b></td>
 	</tr>
 	<tr>
-		<td align="${left}" class="first"><primo:label code="Upload WM Tickets" /><span class="errorMessage">*</span>
+		<td align="${left}" class="first"><primo:label code="Location Type"/><span class="errorMessage">*</span></td>
+		<td align="${left}">
+			<select id="locationType" name="locationType" style="min-width:154px; max-width:154px">
+				<option value="">------<primo:label code="Please Select"/>------</option>
+				<option value="ORIGIN">Origin</option>
+				<option value="DESTINATION">Destination</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="${left}" class="first"><primo:label code="Upload WM Tickets" /><span class="errorMessage">*</span></td>
 		<td align="${left}">
 			<input type="file" id="dataFile" name="dataFile" onchange="return checkfile()"/>
 		</td>

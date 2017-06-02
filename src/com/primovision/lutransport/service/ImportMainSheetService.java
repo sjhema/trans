@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public interface ImportMainSheetService {
 	
@@ -20,6 +21,6 @@ public interface ImportMainSheetService {
 	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception;
 	public List<String> importSubcontractorRateMainSheet(InputStream is, Date validFrom, Date validTo, Long createdBy) throws Exception;
 	public List<String> importEmployeeMainSheet(InputStream is, Long createdBy) throws Exception;
-	public List<String> importWMTickets(InputStream is, Long createdBy) throws Exception;
+	public List<String> importWMTickets(InputStream is, String locationType, Map<String, Integer> colMapping, Long createdBy) throws Exception;
 }
 

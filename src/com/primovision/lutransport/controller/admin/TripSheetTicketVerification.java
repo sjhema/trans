@@ -982,6 +982,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 			String landfill=request.getParameter("landfil");
 		    String landticket=request.getParameter("originTcket");
+		    
+		    // WM Ticket change - 23rd May 2017
+		    String ticketNo = request.getParameter("ticId");
+		    
 		    List tickList = new ArrayList();
 		    String origin = "select obj from TripSheet obj where obj.origin.id="+landfill+" and obj.originTicket="+landticket;
 		    List<TripSheet> tripsheets = genericDAO.executeSimpleQuery(origin);
@@ -1002,6 +1006,11 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tickList.add(dateFormat.format(tripSheetObj.getUnloadDate()));
 					System.out.println("***** Enetered here");
 				}
+				
+				// WM Ticket change - 23rd May 2017
+				Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, true);
+				populateTicketData(ticket, tickList);
+				
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
@@ -1015,6 +1024,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 			String landfill=request.getParameter("transferstation");
 		    String landticket=request.getParameter("destinationTcket");
+		    
+		    // WM Ticket change - 23rd May 2017
+		    //String ticketNo = request.getParameter("ticId");
+		    
 		    List tickList = new ArrayList();
 		    String origin = "select obj from TripSheet obj where obj.destination.id="+landfill+" and obj.destinationTicket="+landticket;
 		    List<TripSheet> tripsheets = genericDAO.executeSimpleQuery(origin);
@@ -1035,6 +1048,11 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tickList.add(dateFormat.format(tripSheetObj.getUnloadDate()));
 					System.out.println("***** Enetered here 2");
 				}
+				
+				// WM Ticket change - 23rd May 2017
+				//Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, false);
+				//populateTicketData(ticket, tickList);
+				
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
@@ -1179,5 +1197,56 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		return "";
 	}
-
+	
+	// WM Ticket change - 23rd May 2017
+	private Ticket retrieveTicket(String ticketNo, String location, String locationTicketNo, boolean byOrigin) {
+		String baseQuery = "select obj from Ticket obj where";
+		String ticketNoCondn = " obj.id=" + ticketNo;
+		String originCondn = " obj.origin.id=" + location + " and obj.originTicket=" + locationTicketNo;
+		String destinationCondn = " obj.destination.id=" + location + " and obj.destinationTicket=" + locationTicketNo;
+		
+		String query = baseQuery;
+		if (byOrigin) {
+			query += originCondn;
+		} else {
+			query += destinationCondn;
+		}
+		if (StringUtils.isNotEmpty(ticketNo)) {
+			query += (" and " + ticketNoCondn);
+		}
+		
+		List<Ticket> ticketList = genericDAO.executeSimpleQuery(query);
+		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void populateTicketData(Ticket ticket, List ticketDataList) {
+		if (ticket == null) {
+			return;
+		}
+		
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		ticketDataList.add(ticket.getTransferTimeIn());
+		ticketDataList.add(ticket.getTransferTimeOut());
+		ticketDataList.add(df.format(ticket.getTransferGross()));
+		ticketDataList.add(df.format(ticket.getTransferTare()));
+		ticketDataList.add(df.format(ticket.getTransferNet()));
+		ticketDataList.add(df.format(ticket.getTransferTons()));
+		ticketDataList.add(ticket.getLandfillTimeIn());
+		ticketDataList.add(ticket.getLandfillTimeOut());
+		ticketDataList.add(df.format(ticket.getLandfillGross()));
+		ticketDataList.add(df.format(ticket.getLandfillTare()));
+		ticketDataList.add(df.format(ticket.getLandfillNet()));
+		ticketDataList.add(df.format(ticket.getLandfillTons()));
+		
+		ticketDataList.add(ticket.getCreatedBy());
+		ticketDataList.add(ticket.getTicketStatus());
+		ticketDataList.add(ticket.getPayRollStatus());
+		
+		if (ticket.getSubcontractor() != null) {
+			ticketDataList.add(ticket.getSubcontractor().getId());
+		}
+	}
 }
+

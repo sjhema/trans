@@ -416,6 +416,25 @@ function checkLandfillTicket() {
 					$("#destinationticket").val(listData[10]);
 					$("#datepicker1").val(listData[11]);
 					
+					// WM Ticket change - 23rd May 2017
+					$("#transfertimein").val(listData[12]);
+					$("#transfertimeout").val(listData[13]);
+					$("#transferGrossId").val(listData[14]);
+					$("#transferTareId").val(listData[15]);
+					$("#transferNetId").val(listData[16]);
+					$("#transferTons").val(listData[17]);
+					
+					$("#landfilltimein").val(listData[18]);
+					$("#landfilltimeout").val(listData[19]);
+					$("#landfillGrossId").val(listData[20]);
+					$("#landfillTareId").val(listData[21]);
+					$("#LandFillNetId").val(listData[22]);
+					$("#landfillTons").val(listData[23]);
+					
+					$("#createdBy").val(listData[24]);
+					$("#ticketStatus").val(listData[25]);
+					$("#payRollStatus").val(listData[26]);
+					$("#subcontractor").val(listData[27]);
 				}
 			}
 		});	
@@ -492,7 +511,6 @@ function checkTransferTicket() {
 					$("#destination").val(listData[9]);
 					$("#destinationticket").val(listData[10]);
 					$("#datepicker1").val(listData[11]);
-					
 				}
 			}
 		});

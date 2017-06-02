@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.FuelVendorLogUploadUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.core.util.TollCompanyTagUploadUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelSurcharge;
@@ -364,8 +365,13 @@ public class UploadDataController extends BaseController {
 	@RequestMapping("/wmTicket/upload.do")
 	public String saveWMTicket(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
+			@RequestParam("locationType") String locationType,
 			@RequestParam("dataFile") MultipartFile file) {
 		try {
+			if (StringUtils.isEmpty(locationType)) {
+			    request.getSession().setAttribute("error", "Please choose location type");
+			    return "admin/uploaddata/wmTicket";
+		   }
 			if (StringUtils.isEmpty(file.getOriginalFilename())) {
 			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
 			    return "admin/uploaddata/wmTicket";
@@ -377,10 +383,17 @@ public class UploadDataController extends BaseController {
           	return "admin/uploaddata/wmTicket";
 			}
 			
+			Map<String, Integer> colMapping = null;
+			if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
+				colMapping = TicketUtils.getColMappingForOrigin();
+			} else {
+				colMapping = TicketUtils.getColMappingForDestination();
+			}
+			
 			InputStream is = file.getInputStream();
 			Long createdBy = getUser(request).getId();
 			System.out.println("\nimportMainSheetService.importWMTicket(is)\n");
-			List<String> str = importMainSheetService.importWMTickets(is, createdBy);
+			List<String> str = importMainSheetService.importWMTickets(is, locationType, colMapping, createdBy);
 			if (str.isEmpty()) {
 				model.addAttribute("msg", "Successfully uploaded all WM tickets");
 			} else {
