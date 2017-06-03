@@ -403,6 +403,17 @@ function checkLandfillTicket() {
 			success: function( data ) {
 				var listData=jQuery.parseJSON(data);
 				if(listData){
+					// WM Ticket change - 23rd May 2017
+					if (listData[0] == "WM_TICKET_DATA") {
+						$("#transfertimein").val(listData[1]);
+						$("#transfertimeout").val(listData[2]);
+						$("#transferGrossId").val(listData[3]);
+						$("#transferTareId").val(listData[4]);
+						$("#transferNetId").val(listData[5]);
+						$("#transferTons").val(listData[6]);
+						return;
+					}
+					
 					$("#companyId").val(listData[0]);
 					$("#terminalId").val(listData[2]);
 					$("#driverId").val(listData[1]);
@@ -417,24 +428,26 @@ function checkLandfillTicket() {
 					$("#datepicker1").val(listData[11]);
 					
 					// WM Ticket change - 23rd May 2017
-					$("#transfertimein").val(listData[12]);
-					$("#transfertimeout").val(listData[13]);
-					$("#transferGrossId").val(listData[14]);
-					$("#transferTareId").val(listData[15]);
-					$("#transferNetId").val(listData[16]);
-					$("#transferTons").val(listData[17]);
-					
-					$("#landfilltimein").val(listData[18]);
-					$("#landfilltimeout").val(listData[19]);
-					$("#landfillGrossId").val(listData[20]);
-					$("#landfillTareId").val(listData[21]);
-					$("#LandFillNetId").val(listData[22]);
-					$("#landfillTons").val(listData[23]);
-					
-					$("#createdBy").val(listData[24]);
-					$("#ticketStatus").val(listData[25]);
-					$("#payRollStatus").val(listData[26]);
-					$("#subcontractor").val(listData[27]);
+					if (listData.length > 12) {
+						$("#transfertimein").val(listData[12]);
+						$("#transfertimeout").val(listData[13]);
+						$("#transferGrossId").val(listData[14]);
+						$("#transferTareId").val(listData[15]);
+						$("#transferNetId").val(listData[16]);
+						$("#transferTons").val(listData[17]);
+						
+						$("#landfilltimein").val(listData[18]);
+						$("#landfilltimeout").val(listData[19]);
+						$("#landfillGrossId").val(listData[20]);
+						$("#landfillTareId").val(listData[21]);
+						$("#LandFillNetId").val(listData[22]);
+						$("#landfillTons").val(listData[23]);
+						
+						$("#createdBy").val(listData[24]);
+						$("#ticketStatus").val(listData[25]);
+						$("#payRollStatus").val(listData[26]);
+						$("#subcontractor").val(listData[27]);
+					}
 				}
 			}
 		});	
@@ -499,6 +512,17 @@ function checkTransferTicket() {
 			success: function( data ) {
 				var listData=jQuery.parseJSON(data);
 				if(listData){
+					// WM Ticket change - 23rd May 2017
+					if (listData[0] == "WM_TICKET_DATA") {
+						$("#landfilltimein").val(listData[1]);
+						$("#landfilltimeout").val(listData[2]);
+						$("#landfillGrossId").val(listData[3]);
+						$("#landfillTareId").val(listData[4]);
+						$("#LandFillNetId").val(listData[5]);
+						$("#landfillTons").val(listData[6]);
+						return;
+					}
+					
 					$("#companyId").val(listData[0]);
 					$("#driverId").val(listData[1]);
 					$("#terminalId").val(listData[2]);

@@ -784,10 +784,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		ticket.setDriver(wmTicket.getDriver());
 		ticket.setDriverCompany(wmTicket.getDriverCompany());
+		ticket.setTerminal(wmTicket.getTerminal());
 		
 		ticket.setBillBatch(wmTicket.getBillBatch());
-		
-		ticket.setTerminal(wmTicket.getTerminal());
 		
 		ticket.setOrigin(wmTicket.getOrigin());
 		ticket.setDestination(wmTicket.getDestination());

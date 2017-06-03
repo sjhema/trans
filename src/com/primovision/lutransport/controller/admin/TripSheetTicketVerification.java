@@ -3,6 +3,7 @@ package com.primovision.lutransport.controller.admin;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
@@ -41,6 +44,7 @@ import com.primovision.lutransport.model.Terminal;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.service.DateUpdateService;
 import com.primovision.lutransport.service.ReportService;
@@ -776,12 +780,66 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			}
 			
+			// WM Ticket change - 23rd May 2017
+			WMTicket wmOriginTicket = retrieveWMTicket(entity.getOriginTicket().toString(), 
+					entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+			if (wmOriginTicket != null) {
+				mapAndSave(wmOriginTicket, entity);
+			}
+			
+			WMTicket wmDestinationTicket = retrieveWMTicket(entity.getDestinationTicket().toString(), 
+					entity.getDestination().getId().toString(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+			if (wmDestinationTicket == null) {
+				mapAndSave(wmDestinationTicket, entity);
+			}
+			
 			return "redirect:/admin/tripsheetticketverification/create.do";
 			
 			//return "redirect:/admin/tripsheetreview/list.do";
 		}
 	}
 	
+	// WM Ticket change - 23rd May 2017
+	private void mapAndSave(WMTicket wmTicket, Ticket entity) {
+		map(wmTicket, entity);
+		
+		wmTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
+		wmTicket.setModifiedBy(entity.getCreatedBy());
+		wmTicket.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(wmTicket);
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void map(WMTicket wmTicket, Ticket ticket) {
+		wmTicket.setVehicle(ticket.getVehicle());
+		wmTicket.setTrailer(ticket.getTrailer());
+		
+		wmTicket.setDriver(ticket.getDriver());
+		wmTicket.setDriverCompany(ticket.getDriverCompany());
+		wmTicket.setTerminal(ticket.getTerminal());
+		
+		wmTicket.setBillBatch(ticket.getBillBatch());
+		
+		wmTicket.setOrigin(ticket.getOrigin());
+		wmTicket.setDestination(ticket.getDestination());
+		
+		wmTicket.setOriginTicket(ticket.getOriginTicket());
+		wmTicket.setDestinationTicket(ticket.getDestinationTicket());
+		
+		wmTicket.setLoadDate(ticket.getLoadDate());
+		wmTicket.setUnloadDate(ticket.getUnloadDate());
+		
+		wmTicket.setTransferTimeIn(ticket.getTransferTimeIn());
+		wmTicket.setTransferTimeOut(ticket.getTransferTimeOut());
+		wmTicket.setLandfillTimeIn(ticket.getLandfillTimeIn());
+		wmTicket.setLandfillTimeOut(ticket.getLandfillTimeOut());
+		
+		wmTicket.setTransferGross(ticket.getTransferGross());
+		wmTicket.setTransferTare(ticket.getTransferTare());
+		
+		wmTicket.setLandfillGross(ticket.getLandfillGross());
+		wmTicket.setLandfillTare(ticket.getLandfillTare());
+	}
 	
 	@ModelAttribute("modelObject")
 	public Ticket setupModel(HttpServletRequest request) {
@@ -1014,8 +1072,17 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
-			else{
-				return "";
+			else {
+				// WM Ticket change - 23rd May 2017
+				WMTicket wmTicket = retrieveWMTicket(landticket, landfill, true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+				if (wmTicket == null) {
+					return "";
+				}
+				
+				// WM Ticket change - 23rd May 2017
+				populateWMTicketData(wmTicket, tickList, true);
+				Gson gson = new Gson();
+				return gson.toJson(tickList);
 			}
 		}
 		
@@ -1057,7 +1124,16 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				return gson.toJson(tickList);
 			}
 			else{
-				return "";
+				// WM Ticket change - 23rd May 2017
+				WMTicket wmTicket = retrieveWMTicket(landticket, landfill, false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+				if (wmTicket == null) {
+					return "";
+				}
+				
+				// WM Ticket change - 23rd May 2017
+				populateWMTicketData(wmTicket, tickList, false);
+				Gson gson = new Gson();
+				return gson.toJson(tickList);
 			}
 		}
 		
@@ -1217,6 +1293,64 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		List<Ticket> ticketList = genericDAO.executeSimpleQuery(query);
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private WMTicket retrieveWMTicket(String locationTicketNo, String location, boolean byOrigin,
+			Integer processingStatus) {
+		String query = "select obj from WMTicket obj where obj.ticket=" + locationTicketNo + " and ";
+		String originCondn = " obj.origin=" + location + " and obj.originTicket=" + locationTicketNo;
+		String destinationCondn = " obj.destination=" + location + " and obj.destinationTicket=" + locationTicketNo;
+		
+		if (byOrigin) {
+			query += originCondn;
+		} else {
+			query += destinationCondn;
+		}
+		
+		if (processingStatus != null) {
+			query +=	" and obj.processingStatus="+ processingStatus;
+		}
+		
+		List<WMTicket> ticketList = genericDAO.executeSimpleQuery(query);
+		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void populateWMTicketData(WMTicket wmTicket, List ticketDataList, boolean byOrigin) {
+		if (wmTicket == null) {
+			return;
+		}
+		
+		ticketDataList.add("WM_TICKET_DATA");
+		
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		if (byOrigin) {
+			ticketDataList.add(wmTicket.getTransferTimeIn());
+			ticketDataList.add(wmTicket.getTransferTimeOut());
+			
+			ticketDataList.add(df.format(wmTicket.getTransferGross()));
+			ticketDataList.add(df.format(wmTicket.getTransferTare()));
+			
+			Double transferNet = wmTicket.getTransferGross() - wmTicket.getTransferTare();
+			Double transferTons = transferNet / 2000.0;
+			
+			ticketDataList.add(df.format(transferNet));
+			ticketDataList.add(df.format(transferTons));
+		} else {
+			ticketDataList.add(wmTicket.getLandfillTimeIn());
+			ticketDataList.add(wmTicket.getLandfillTimeOut());
+			
+			ticketDataList.add(df.format(wmTicket.getLandfillGross()));
+			ticketDataList.add(df.format(wmTicket.getLandfillTare()));
+			
+			Double landfillNet = wmTicket.getLandfillGross() - wmTicket.getLandfillTare();
+			Double landfillTons = landfillNet / 2000.0;
+			
+			ticketDataList.add(df.format(landfillNet));
+			ticketDataList.add(df.format(landfillTons));
+		}
 	}
 	
 	// WM Ticket change - 23rd May 2017
