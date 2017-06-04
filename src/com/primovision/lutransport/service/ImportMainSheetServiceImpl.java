@@ -640,7 +640,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						genericDAO.saveOrUpdate(currentWMTicket);
 						
 						recordError = true;
-						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  Have saved the WM Ticket for further processing." + "<br/>");
+						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  WM Ticket is saved for further processing." + "<br/>");
 						errorCount++;
 						
 						continue;

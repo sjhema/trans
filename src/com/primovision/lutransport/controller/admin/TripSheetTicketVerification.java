@@ -587,6 +587,18 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				genericDAO.saveOrUpdate(tripsheet);			
 			}
 			
+			// WM Ticket change - 23rd May 2017
+			WMTicket wmOriginTicket = retrieveWMTicket(entity.getOriginTicket().toString(), 
+					entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+			if (wmOriginTicket != null) {
+				mapAndSave(wmOriginTicket, entity);
+			}
+			
+			WMTicket wmDestinationTicket = retrieveWMTicket(entity.getDestinationTicket().toString(), 
+					entity.getDestination().getId().toString(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+			if (wmDestinationTicket != null) {
+				mapAndSave(wmDestinationTicket, entity);
+			}
 			
 			//return "redirect:/admin/tripsheetreview/list.do";
 			return "redirect:/admin/tripsheetticketverification/create.do";
@@ -789,7 +801,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			WMTicket wmDestinationTicket = retrieveWMTicket(entity.getDestinationTicket().toString(), 
 					entity.getDestination().getId().toString(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-			if (wmDestinationTicket == null) {
+			if (wmDestinationTicket != null) {
 				mapAndSave(wmDestinationTicket, entity);
 			}
 			
