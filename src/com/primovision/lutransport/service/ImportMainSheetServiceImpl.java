@@ -381,55 +381,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return errorList;
 	}
 	
-	private Location retrieveOriginForWM(HSSFSheet sheet) {
-		HSSFRow originRow = sheet.getRow(2);
-		String originName = ((String) getCellValue(originRow.getCell(0)));
-		originName = StringUtils.trimToEmpty(originName);
-		if (StringUtils.isEmpty(originName)) {
-			return null;
-		}
-		
-		originName = StringUtils.substringAfter(originName, ":");
-		originName = StringUtils.substringBefore(originName, "-");
-		originName = StringUtils.trimToEmpty(originName);
-		if (StringUtils.isEmpty(originName)) {
-			return null;
-		}
-		
-		List<Location> originList = retrieveLocationDataByLongName(1, originName);
-		if (originList == null || originList.isEmpty()) {
-			return null;
-		} else {
-			return originList.get(0);
-		}
-	}
 	
-	private Location retrieveDestinationForWM(HSSFSheet sheet) {
-		HSSFRow destinationRow = sheet.getRow(1);
-		String destinationName = ((String) getCellValue(destinationRow.getCell(0)));
-		destinationName = StringUtils.trimToEmpty(destinationName);
-		if (StringUtils.isEmpty(destinationName)) {
-			return null;
-		}
-		
-		List<Location> destinationList = retrieveLocationDataByLongName(2, destinationName);
-		if (destinationList == null || destinationList.isEmpty()) {
-			return null;
-		} else {
-			return destinationList.get(0);
-		}
-	}
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public List<String> importWMTickets(InputStream is, String locationType, Map<String, Integer> colMapping, Long createdBy) throws Exception {
+	public List<String> importWMTickets(InputStream is, String locationType, Long createdBy) throws Exception {
 		SimpleDateFormat wmDateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+		// 5/30/2017 4:15:53 AM
+		SimpleDateFormat wmDateTimeStrFormat = new SimpleDateFormat("M/dd/yyyy h:mm:ss a");
 		SimpleDateFormat requiredTimeFormat = new SimpleDateFormat("HH:mm");
-		
-		int recordsToBeSkipped = 1;
-		if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
-			recordsToBeSkipped = 12;
-		}
 		
 		List<String> errorList = new ArrayList<String>();
 		
@@ -443,13 +403,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			
 			Location origin = null;
 			Location destination = null;
+			Location locationPtr = null;
 			if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
 				origin = retrieveOriginForWM(sheet);
+				locationPtr = origin;
 				if (origin == null) {
 					errorList.add("Origin could not be determined");
 				}
 			} else {
 				destination = retrieveDestinationForWM(sheet);
+				locationPtr = destination;
 				if (destination == null) {
 					errorList.add("Destination could not be determined");
 				}
@@ -458,6 +421,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			if (!errorList.isEmpty()) {
 				return errorList;
 			}
+			
+			int recordsToBeSkipped = TicketUtils.getRecordsToBeSkipped(locationPtr.getId());
+			Map<String, Integer> colMapping = TicketUtils.getColMapping(locationPtr.getId());
 			
 			Iterator rows = sheet.rowIterator();
 			while (rows.hasNext()) {
@@ -513,37 +479,51 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					Integer txnDateCol = colMapping.get(TicketUtils.WM_COL_TXN_DATE);
 					Object txnDateObj = getCellValue(row.getCell(txnDateCol), true);
-					if (txnDateObj == null || !(txnDateObj instanceof Date)) {
+					if (txnDateObj == null) {
 						recordError = true;
 						recordErrorMsg.append("Date, ");
-					} else {
+					} else if (txnDateObj instanceof Date) {
 						currentWMTicket.setTxnDate((Date)txnDateObj);
+					} else {
+						String txnDateStr = txnDateObj.toString();
+						Date txnDate = wmDateTimeStrFormat.parse(txnDateStr);
+						currentWMTicket.setTxnDate(txnDate);
 					}
 					
 					Integer timeInCol = colMapping.get(TicketUtils.WM_COL_TIME_IN);
 					Object timeInObj = getCellValue(row.getCell(timeInCol), true);
-					if (timeInObj == null || !(timeInObj instanceof Date)) {
+					if (timeInObj == null) {
 						recordError = true;
 						recordErrorMsg.append("Time In, ");
 					} else {
 						String timeInStr = timeInObj.toString();
-						timeInStr = convertDateFormat(timeInStr, wmDateTimeFormat, requiredTimeFormat);
+						SimpleDateFormat timeInDateFormat = wmDateTimeFormat;
+						if (!(timeInObj instanceof Date)) {
+							timeInDateFormat = wmDateTimeStrFormat;
+						}
+						
+						timeInStr = convertDateFormat(timeInStr, timeInDateFormat, requiredTimeFormat);
 						if (StringUtils.isEmpty(timeInStr)) {
 							recordError = true;
 							recordErrorMsg.append("Time In, ");
 						} else {
 							currentWMTicket.setTimeIn(timeInStr);
 						}
-					}
+					} 
 					
 					Integer timeOutCol = colMapping.get(TicketUtils.WM_COL_TIME_OUT);
 					Object timeOutObj = getCellValue(row.getCell(timeOutCol), true);
-					if (timeOutObj == null || !(timeOutObj instanceof Date)) {
+					if (timeOutObj == null) {
 						recordError = true;
 						recordErrorMsg.append("Time Out, ");
 					} else {
 						String timeOutStr = timeOutObj.toString();
-						timeOutStr = convertDateFormat(timeOutStr, wmDateTimeFormat, requiredTimeFormat);
+						SimpleDateFormat timeOutDateFormat = wmDateTimeFormat;
+						if (!(timeOutObj instanceof Date)) {
+							timeOutDateFormat = wmDateTimeStrFormat;
+						}
+						
+						timeOutStr = convertDateFormat(timeOutStr, timeOutDateFormat, requiredTimeFormat);
 						if (StringUtils.isEmpty(timeOutStr)) {
 							recordError = true;
 							recordErrorMsg.append("Time Out, ");
@@ -575,31 +555,67 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					}
 					
 					Integer grossCol = colMapping.get(TicketUtils.WM_COL_GROSS);
-					Double grossWeight = row.getCell(grossCol).getNumericCellValue();
+					Object grossObj = getCellValue(row.getCell(grossCol), true);
+					Double grossWeight = null;
+					if (grossObj instanceof Double) {
+						grossWeight = (Double) grossObj;
+					} else {
+						grossWeight = Double.valueOf((String) grossObj);
+					}
 					currentWMTicket.setGross(grossWeight);
 					
 					Integer tareCol = colMapping.get(TicketUtils.WM_COL_TARE);
-					Double tareWeight = row.getCell(tareCol).getNumericCellValue();
+					Object tareObj = getCellValue(row.getCell(tareCol), true);
+					Double tareWeight = null;
+					if (tareObj instanceof Double) {
+						tareWeight = (Double) tareObj;
+					} else {
+						tareWeight = Double.valueOf((String) tareObj);
+					}
 					currentWMTicket.setTare(tareWeight);
 					
 					Integer netCol = colMapping.get(TicketUtils.WM_COL_NET);
 					if (netCol != null) {
-						Double netWeight = row.getCell(netCol).getNumericCellValue();
+						Object netObj = getCellValue(row.getCell(netCol), true);
+						Double netWeight = null;
+						if (netObj instanceof Double) {
+							netWeight = (Double) netObj;
+						} else {
+							netWeight = Double.valueOf((String) netObj);
+						}
 						currentWMTicket.setNet(netWeight);
 					}
 					Integer tonsCol = colMapping.get(TicketUtils.WM_COL_TONS);
 					if (tonsCol != null) {
-						Double tonWeight = row.getCell(tonsCol).getNumericCellValue();
+						Object tonsObj = getCellValue(row.getCell(tonsCol), true);
+						Double tonWeight = null;
+						if (tonsObj instanceof Double) {
+							tonWeight = (Double) tonsObj;
+						} else {
+							tonWeight = Double.valueOf((String) tonsObj);
+						}
 						currentWMTicket.setTons(tonWeight);
 					}
 					Integer rateCol = colMapping.get(TicketUtils.WM_COL_RATE);
 					if (rateCol != null) {
-						Double rate = row.getCell(rateCol).getNumericCellValue();
+						Object rateObj = getCellValue(row.getCell(rateCol), true);
+						Double rate = null;
+						if (rateObj instanceof Double) {
+							rate = (Double) rateObj;
+						} else {
+							rate = Double.valueOf((String) rateObj);
+						}
 						currentWMTicket.setRate(rate);
 					}
 					Integer amountCol = colMapping.get(TicketUtils.WM_COL_AMOUNT);
 					if (amountCol != null) {
-						Double amount = row.getCell(amountCol).getNumericCellValue();
+						Object amountObj = getCellValue(row.getCell(amountCol), true);
+						Double amount = null;
+						if (amountObj instanceof Double) {
+							amount = (Double) amountObj;
+						} else {
+							amount = Double.valueOf((String) amountObj);
+						}
 						currentWMTicket.setAmount(amount);
 					}
 					
@@ -732,6 +748,52 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		return errorList;
+	}
+	
+	private Location retrieveOriginForWM(HSSFSheet sheet) {
+		int originRowNo = 2;
+		HSSFRow originRow = sheet.getRow(originRowNo);
+		String originName = ((String) getCellValue(originRow.getCell(0)));
+		originName = StringUtils.trimToEmpty(originName);
+		if (StringUtils.isEmpty(originName)) {
+			return null;
+		}
+		
+		originName = StringUtils.substringAfter(originName, ":");
+		
+		if (StringUtils.contains(originName, "Philadelphia")) { // Philadelphia
+			originName = StringUtils.substringAfter(originName, "-");
+		} else {
+			originName = StringUtils.substringBefore(originName, "-");
+		}
+		
+		originName = StringUtils.trimToEmpty(originName);
+		if (StringUtils.isEmpty(originName)) {
+			return null;
+		}
+		
+		List<Location> originList = retrieveLocationDataByLongName(1, originName);
+		if (originList == null || originList.isEmpty()) {
+			return null;
+		} else {
+			return originList.get(0);
+		}
+	}
+	
+	private Location retrieveDestinationForWM(HSSFSheet sheet) {
+		HSSFRow destinationRow = sheet.getRow(1);
+		String destinationName = ((String) getCellValue(destinationRow.getCell(0)));
+		destinationName = StringUtils.trimToEmpty(destinationName);
+		if (StringUtils.isEmpty(destinationName)) {
+			return null;
+		}
+		
+		List<Location> destinationList = retrieveLocationDataByLongName(2, destinationName);
+		if (destinationList == null || destinationList.isEmpty()) {
+			return null;
+		} else {
+			return destinationList.get(0);
+		}
 	}
 	
 	private void mapBasedOnTicketType(WMTicket wmTicket) {

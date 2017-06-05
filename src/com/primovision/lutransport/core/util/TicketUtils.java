@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
@@ -53,37 +54,69 @@ public class TicketUtils {
 	public static final String WM_COL_RATE = "Rate";
 	public static final String WM_COL_AMOUNT = "Amount";
 	
-	public static Map<String, Integer> getColMappingForOrigin() {
-		Map<String, Integer> colMapping = new HashMap<String, Integer>();
-		colMapping.put(WM_COL_TXN_DATE, 0);
-		colMapping.put(WM_COL_TIME_IN, 1);
-		colMapping.put(WM_COL_TIME_OUT, 2);
-		colMapping.put(WM_COL_TICKET, 5);
-		colMapping.put(WM_COL_COMPANY, 7);
-		colMapping.put(WM_COL_VEHICLE, 8);
-		colMapping.put(WM_COL_TRAILER, 10);
-		colMapping.put(WM_COL_TONS, 20);
-		colMapping.put(WM_COL_GROSS, 23);
-		colMapping.put(WM_COL_TARE, 24);
-		colMapping.put(WM_COL_NET, 25);
+	public static int getRecordsToBeSkipped(Long locationId) {
+		int recordsToBeSkipped = 1;
 		
-		return colMapping;
+		if (locationId == 55l // Philadelphia
+				|| locationId == 13l // BQE
+				|| locationId == 67l) { // Varick
+			recordsToBeSkipped = 12;
+		}
+		
+		return recordsToBeSkipped;
 	}
 	
-	public static Map<String, Integer> getColMappingForDestination() {
+	public static Map<String, Integer> getColMapping(Long locationId) {
 		Map<String, Integer> colMapping = new HashMap<String, Integer>();
-		colMapping.put(WM_COL_COMPANY, 3);
-		colMapping.put(WM_COL_VEHICLE, 4);
-		colMapping.put(WM_COL_TICKET, 6);
-		colMapping.put(WM_COL_TONS, 8);
-		colMapping.put(WM_COL_HAULING_TICKET, 9);
-		colMapping.put(WM_COL_TXN_DATE, 10);
-		colMapping.put(WM_COL_TIME_IN, 10);
-		colMapping.put(WM_COL_TIME_OUT, 11);
-		colMapping.put(WM_COL_TARE, 12);
-		colMapping.put(WM_COL_AMOUNT, 13);
-		colMapping.put(WM_COL_RATE, 14);
-		colMapping.put(WM_COL_GROSS, 15);
+		
+		if (locationId == 55l) { // Philadelphia
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 7);
+			colMapping.put(WM_COL_VEHICLE, 8);
+			colMapping.put(WM_COL_TRAILER, 9);
+			colMapping.put(WM_COL_TONS, 17);
+			colMapping.put(WM_COL_GROSS, 20);
+			colMapping.put(WM_COL_TARE, 21);
+			colMapping.put(WM_COL_NET, 22);
+		} else if (locationId == 13l) { // BQE
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 6);
+			colMapping.put(WM_COL_VEHICLE, 8);
+			colMapping.put(WM_COL_TONS, 15);
+			colMapping.put(WM_COL_GROSS, 18);
+			colMapping.put(WM_COL_TARE, 19);
+			colMapping.put(WM_COL_NET, 20);
+		} else if (locationId == 67l) { // Varick
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 6);
+			colMapping.put(WM_COL_VEHICLE, 8);
+			colMapping.put(WM_COL_TONS, 16);
+			colMapping.put(WM_COL_GROSS, 19);
+			colMapping.put(WM_COL_TARE, 20);
+			colMapping.put(WM_COL_NET, 21);
+		} else if (locationId == 392l) { // Fairless
+			colMapping.put(WM_COL_COMPANY, 3);
+			colMapping.put(WM_COL_VEHICLE, 4);
+			colMapping.put(WM_COL_TICKET, 6);
+			colMapping.put(WM_COL_TONS, 8);
+			colMapping.put(WM_COL_HAULING_TICKET, 9);
+			colMapping.put(WM_COL_TXN_DATE, 10);
+			colMapping.put(WM_COL_TIME_IN, 10);
+			colMapping.put(WM_COL_TIME_OUT, 11);
+			colMapping.put(WM_COL_TARE, 12);
+			colMapping.put(WM_COL_AMOUNT, 13);
+			colMapping.put(WM_COL_RATE, 14);
+			colMapping.put(WM_COL_GROSS, 15);
+		}
 		
 		return colMapping;
 	}

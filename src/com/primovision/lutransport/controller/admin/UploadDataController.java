@@ -367,6 +367,10 @@ public class UploadDataController extends BaseController {
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("locationType") String locationType,
 			@RequestParam("dataFile") MultipartFile file) {
+		model.addAttribute("errorList", new ArrayList<String>());
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
 		try {
 			if (StringUtils.isEmpty(locationType)) {
 			    request.getSession().setAttribute("error", "Please choose location type");
@@ -383,21 +387,14 @@ public class UploadDataController extends BaseController {
           	return "admin/uploaddata/wmTicket";
 			}
 			
-			Map<String, Integer> colMapping = null;
-			if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
-				colMapping = TicketUtils.getColMappingForOrigin();
-			} else {
-				colMapping = TicketUtils.getColMappingForDestination();
-			}
-			
 			InputStream is = file.getInputStream();
 			Long createdBy = getUser(request).getId();
 			System.out.println("\nimportMainSheetService.importWMTicket(is)\n");
-			List<String> str = importMainSheetService.importWMTickets(is, locationType, colMapping, createdBy);
-			if (str.isEmpty()) {
+			List<String> errorList = importMainSheetService.importWMTickets(is, locationType, createdBy);
+			if (errorList.isEmpty()) {
 				model.addAttribute("msg", "Successfully uploaded all WM tickets");
 			} else {
-				model.addAttribute("errorList", str);
+				model.addAttribute("errorList", errorList);
 			}
 		} catch (Exception ex) {
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
