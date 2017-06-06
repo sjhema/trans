@@ -422,8 +422,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				return errorList;
 			}
 			
-			int recordsToBeSkipped = TicketUtils.getRecordsToBeSkipped(locationPtr.getId());
 			Map<String, Integer> colMapping = TicketUtils.getColMapping(locationPtr.getId());
+			if (colMapping.size() <= 0) {
+				errorList.add("Location not supported");
+				return errorList;
+			}
+			
+			int recordsToBeSkipped = TicketUtils.getRecordsToBeSkipped(locationPtr.getId());
 			
 			Iterator rows = sheet.rowIterator();
 			while (rows.hasNext()) {
@@ -759,17 +764,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		}
 		
-		originName = StringUtils.substringAfter(originName, ":");
-		
-		if (StringUtils.contains(originName, "Philadelphia")) { // Philadelphia
-			originName = StringUtils.substringAfter(originName, "-");
-		} else {
-			originName = StringUtils.substringBefore(originName, "-");
-		}
-		
-		originName = StringUtils.trimToEmpty(originName);
-		if (StringUtils.isEmpty(originName)) {
-			return null;
+		if (StringUtils.contains(originName, Location.FORGE)) { 
+			originName = Location.FORGE;
+		} else if (StringUtils.contains(originName, Location.PHILADELPHIA)) { 
+			originName = Location.PHILADELPHIA;
+		} else if (StringUtils.contains(originName, Location.BQE)) { 
+			originName = Location.BQE;
+		} else if (StringUtils.contains(originName, Location.VARICK_I)) { 
+			originName = Location.VARICK_I;
 		}
 		
 		List<Location> originList = retrieveLocationDataByLongName(1, originName);

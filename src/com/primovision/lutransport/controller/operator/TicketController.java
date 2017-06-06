@@ -220,7 +220,9 @@ public class TicketController extends CRUDController<Ticket> {
 		
 		// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
 		String showDuplicateTicketOverrideMsg = "false";
-		if (getUser(request).getId() == 20) {
+		Long userId = getUser(request).getId() ;
+		if (userId == 20 || // Maria
+				userId == 295) { // Ela Tylka
 			showDuplicateTicketOverrideMsg = "true";
 		}
 		model.addAttribute("showDuplicateTicketOverrideMsg", showDuplicateTicketOverrideMsg);
@@ -338,14 +340,16 @@ public class TicketController extends CRUDController<Ticket> {
 				entity.setBillBatch(getUser(request).getBillBatchDate());
 			}*/		
 			
-			
+			// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+			Long userId = getUser(request).getId();
 			if(entity.getOrigin() != null && entity.getDestination() != null && entity.getOriginTicket() !=null && entity.getDestinationTicket() !=null){
 				/*String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.destination.id="+entity.getDestination().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;*/
 				String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
 				if (tickets!=null && tickets.size()>0){	
 					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
-					if (getUser(request).getId() != 20) {
+					if (userId != 20 && // Maria
+							userId != 295) { // Ela Tylka
 						bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);
 					}
 				}
@@ -354,7 +358,8 @@ public class TicketController extends CRUDController<Ticket> {
 				List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
 				if (tickets1!=null && tickets1.size()>0){	
 					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
-					if (getUser(request).getId() != 20) {
+					if (userId != 20 && // Maria
+							userId != 295) { // Ela Tylka
 						bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);	
 					}
 				}
@@ -921,14 +926,16 @@ public class TicketController extends CRUDController<Ticket> {
 						null, null);
 			}
 			
-			
+			// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
+			Long userId = getUser(request).getId();
 			if(entity.getOrigin() != null && entity.getDestination() != null && entity.getOriginTicket() !=null && entity.getDestinationTicket() !=null){
 				String origin = "select obj from Ticket obj where obj.origin.id="+entity.getOrigin().getId()+" and obj.originTicket="+entity.getOriginTicket()+" and obj.id != "+ticketId;
 				List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
 				
 				if (tickets!=null && tickets.size()>0){	
 					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
-					if (getUser(request).getId() != 20) {
+					if (userId != 20 && // Maria
+							userId != 295) { // Ela Tylka
 						bindingResult.rejectValue("originTicket", "error.duplicate.entry",	null, null);
 					}
 				}
@@ -936,7 +943,8 @@ public class TicketController extends CRUDController<Ticket> {
 				List<Ticket> tickets1 = genericDAO.executeSimpleQuery(destination);
 				if (tickets1!=null && tickets1.size()>0){	
 					// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
-					if (getUser(request).getId() != 20) {
+					if (userId != 20 && // Maria
+							userId != 295) { // Ela Tylka
 						bindingResult.rejectValue("destinationTicket", "error.duplicate.entry",	null, null);	
 					}
 				}

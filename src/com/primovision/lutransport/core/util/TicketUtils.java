@@ -59,7 +59,8 @@ public class TicketUtils {
 		
 		if (locationId == 55l // Philadelphia
 				|| locationId == 13l // BQE
-				|| locationId == 67l) { // Varick
+				|| locationId == 67l // Varick
+				|| locationId == 31l) { // Forge
 			recordsToBeSkipped = 12;
 		}
 		
@@ -81,28 +82,20 @@ public class TicketUtils {
 			colMapping.put(WM_COL_GROSS, 20);
 			colMapping.put(WM_COL_TARE, 21);
 			colMapping.put(WM_COL_NET, 22);
-		} else if (locationId == 13l) { // BQE
+		} else if (locationId == 13l // BQE
+				|| locationId == 67l // Varick
+				|| locationId == 31l) { // Forge
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
 			colMapping.put(WM_COL_TICKET, 5);
-			colMapping.put(WM_COL_COMPANY, 6);
+			colMapping.put(WM_COL_COMPANY, 7);
 			colMapping.put(WM_COL_VEHICLE, 8);
-			colMapping.put(WM_COL_TONS, 15);
-			colMapping.put(WM_COL_GROSS, 18);
-			colMapping.put(WM_COL_TARE, 19);
-			colMapping.put(WM_COL_NET, 20);
-		} else if (locationId == 67l) { // Varick
-			colMapping.put(WM_COL_TXN_DATE, 0);
-			colMapping.put(WM_COL_TIME_IN, 1);
-			colMapping.put(WM_COL_TIME_OUT, 2);
-			colMapping.put(WM_COL_TICKET, 5);
-			colMapping.put(WM_COL_COMPANY, 6);
-			colMapping.put(WM_COL_VEHICLE, 8);
-			colMapping.put(WM_COL_TONS, 16);
-			colMapping.put(WM_COL_GROSS, 19);
-			colMapping.put(WM_COL_TARE, 20);
-			colMapping.put(WM_COL_NET, 21);
+			colMapping.put(WM_COL_TRAILER, 10);
+			colMapping.put(WM_COL_TONS, 20);
+			colMapping.put(WM_COL_GROSS, 23);
+			colMapping.put(WM_COL_TARE, 24);
+			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 392l) { // Fairless
 			colMapping.put(WM_COL_COMPANY, 3);
 			colMapping.put(WM_COL_VEHICLE, 4);
