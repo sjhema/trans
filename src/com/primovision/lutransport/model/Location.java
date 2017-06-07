@@ -11,13 +11,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Table(name="location")
 public class Location extends AbstractBaseModel {
 	@Transient
-	public static String PHILADELPHIA = "Philadelphia Transfer Station";
+	public static String PHILADELPHIA_TRANSFER_STATION = "Philadelphia Transfer Station";
 	@Transient
-	public static String FORGE = "Philadelphia Transfer - Forge";
+	public static String FORGE_TRANSFER_STATION = "Philadelphia Transfer - Forge";
 	@Transient
-	public static String BQE = "BQE Transfer Station";
+	public static String BQE_TRANSFER_STATION = "BQE Transfer Station";
 	@Transient
-	public static String VARICK_I = "Varick I Transfer Station";
+	public static String VARICK_I_TRANSFER_STATION = "Varick I Transfer Station";
 	
 	@NotEmpty
 	private String name;

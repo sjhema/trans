@@ -644,8 +644,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Ticket existigTicket = retrieveTicket(currentWMTicket.getTicket(), currentWMTicket.getOrigin(), 
 							currentWMTicket.getDestination());
 					if (existigTicket != null) {
-						//currentWMTicket.setProcessingStatus(WMTicket.query);
-						//genericDAO.saveOrUpdate(currentWMTicket);
+						currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_TICKET_ALREADY_EXISTS);
+						genericDAO.saveOrUpdate(currentWMTicket);
 						
 						recordError = true;
 						errorList.add("Line " + recordCount + ": " + "Ticket already exists" + "<br/>");
@@ -764,14 +764,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		}
 		
-		if (StringUtils.contains(originName, Location.FORGE)) { 
-			originName = Location.FORGE;
-		} else if (StringUtils.contains(originName, Location.PHILADELPHIA)) { 
-			originName = Location.PHILADELPHIA;
-		} else if (StringUtils.contains(originName, Location.BQE)) { 
-			originName = Location.BQE;
-		} else if (StringUtils.contains(originName, Location.VARICK_I)) { 
-			originName = Location.VARICK_I;
+		if (StringUtils.contains(originName, Location.FORGE_TRANSFER_STATION)) { 
+			originName = Location.FORGE_TRANSFER_STATION;
+		} else if (StringUtils.contains(originName, Location.PHILADELPHIA_TRANSFER_STATION)) { 
+			originName = Location.PHILADELPHIA_TRANSFER_STATION;
+		} else if (StringUtils.contains(originName, Location.BQE_TRANSFER_STATION)) { 
+			originName = Location.BQE_TRANSFER_STATION;
+		} else if (StringUtils.contains(originName, Location.VARICK_I_TRANSFER_STATION)) { 
+			originName = Location.VARICK_I_TRANSFER_STATION;
 		}
 		
 		List<Location> originList = retrieveLocationDataByLongName(1, originName);

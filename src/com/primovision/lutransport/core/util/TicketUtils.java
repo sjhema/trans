@@ -55,12 +55,12 @@ public class TicketUtils {
 	public static final String WM_COL_AMOUNT = "Amount";
 	
 	public static int getRecordsToBeSkipped(Long locationId) {
-		int recordsToBeSkipped = 1;
+		int recordsToBeSkipped = 1; // Fairless Landfill
 		
-		if (locationId == 55l // Philadelphia
-				|| locationId == 13l // BQE
-				|| locationId == 67l // Varick
-				|| locationId == 31l) { // Forge
+		if (locationId == 55l // Philadelphia Transfer
+				|| locationId == 13l // BQE Transfer
+				|| locationId == 67l // Varick I Transfer
+				|| locationId == 31l) { // Forge Transfer
 			recordsToBeSkipped = 12;
 		}
 		
@@ -70,7 +70,7 @@ public class TicketUtils {
 	public static Map<String, Integer> getColMapping(Long locationId) {
 		Map<String, Integer> colMapping = new HashMap<String, Integer>();
 		
-		if (locationId == 55l) { // Philadelphia
+		if (locationId == 55l) { // Philadelphia Transfer
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
@@ -82,9 +82,9 @@ public class TicketUtils {
 			colMapping.put(WM_COL_GROSS, 20);
 			colMapping.put(WM_COL_TARE, 21);
 			colMapping.put(WM_COL_NET, 22);
-		} else if (locationId == 13l // BQE
-				|| locationId == 67l // Varick
-				|| locationId == 31l) { // Forge
+		} else if (locationId == 13l // BQE Transfer
+				|| locationId == 67l // Varick I Transfer
+				|| locationId == 31l) { // Forge Transfer
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
@@ -96,7 +96,7 @@ public class TicketUtils {
 			colMapping.put(WM_COL_GROSS, 23);
 			colMapping.put(WM_COL_TARE, 24);
 			colMapping.put(WM_COL_NET, 25);
-		} else if (locationId == 392l) { // Fairless
+		} else if (locationId == 392l) { // Fairless Landfill
 			colMapping.put(WM_COL_COMPANY, 3);
 			colMapping.put(WM_COL_VEHICLE, 4);
 			colMapping.put(WM_COL_TICKET, 6);

@@ -610,7 +610,8 @@ function formatDate3(){
 <table width="100%">
 	<tr>
 		<td align="left" colspan="3">		
-		<c:if test="${sessionScope.userInfo.role.id == 1 || sessionScope.userInfo.role.id == 8 || sessionScope.userInfo.role.id == 10}">
+		<c:if test="${sessionScope.userInfo.role.id == 1 || sessionScope.userInfo.role.id == 8 
+			|| sessionScope.userInfo.role.id == 10 || sessionScope.userInfo.id == 295}">
 			<img src="/trans/images/edit.png" border="0" title="BULK EDIT" class="toolbarButton"> <a href="javascript:;"  onclick="editMultipleData()">BULK EDIT</a>&nbsp;&nbsp;
 		    <a href="javascript:;"  onclick="payrollPendingYes()">PR Pend. - YES</a>&nbsp;&nbsp;
 			 <a href="javascript:;"  onclick="payrollPendingNo()">PR Pend. - NO</a>&nbsp;&nbsp;
