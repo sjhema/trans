@@ -28,6 +28,19 @@ public class Location extends AbstractBaseModel {
 	
 	@Column(name = "long_name")
 	private String longName;
+	
+	@Column(name = "hauling_name")
+	private String haulingName;
+	
+	
+
+	public String getHaulingName() {
+		return haulingName;
+	}
+
+	public void setHaulingName(String haulingName) {
+		this.haulingName = haulingName;
+	}
 
 	public String getLongName() {
 		return longName;

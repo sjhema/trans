@@ -1,9 +1,14 @@
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('1404', '/uploadData/wmTicket.do', 'Upload WM Ticket', '3', 'Upload WM Ticket', '/uploadData/wmTicket.do,/uploadData/wmTicket/upload.do', '1', '6', '0', '140', '/1/140/1404/');
-
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '1404', '1'); -- ADMIN
 
+ UPDATE `lutransport`.`business_object` SET `display_order`='7' WHERE `ID`='1404'; -- Upload WM Ticket
+
+INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`)
+VALUES ('1405', '/admin/wmTicket/list.do?rst=1', 'Manage WM Ticket', '3', 'Manage WM Ticket', '/admin/wmTicket/list.do,/admin/wmTicket/create.do,/admin/wmTicket/save.do,/admin/wmTicket/ajax.do,/admin/wmTicket/edit.do,/admin/wmTicket/delete.do,/admin/wmTicket/search.do', '1', '6', '0', '140', '/1/140/1405/');
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
+ VALUES (now(), '1', '1405', '1'); -- ADMIN
  
  ------
  CREATE TABLE `wm_ticket` (
@@ -74,5 +79,7 @@ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_ob
 ---
 ALTER TABLE `lutransport`.`location` 
 ADD COLUMN `long_name` VARCHAR(255) NULL DEFAULT NULL AFTER `code`;
+ALTER TABLE `lutransport`.`location` 
+ADD COLUMN `hauling_name` VARCHAR(255) NULL DEFAULT NULL AFTER `long_name`;
 
 
