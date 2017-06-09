@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
@@ -45,6 +43,8 @@ public class TicketUtils {
 	public static final String WM_COL_TIME_IN = "Time In";
 	public static final String WM_COL_TIME_OUT = "Time Out";
 	public static final String WM_COL_COMPANY = "Company";
+	public static final String WM_COL_HAULING_COMPANY = "Hauling Company";
+	public static final String WM_COL_DESTINATION = "Destination";
 	public static final String WM_COL_VEHICLE = "Vehicle";
 	public static final String WM_COL_TRAILER = "Trailer";
 	public static final String WM_COL_GROSS = "Gross";
@@ -75,6 +75,7 @@ public class TicketUtils {
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
 			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_DESTINATION, 6);
 			colMapping.put(WM_COL_COMPANY, 7);
 			colMapping.put(WM_COL_VEHICLE, 8);
 			colMapping.put(WM_COL_TRAILER, 9);
@@ -82,8 +83,20 @@ public class TicketUtils {
 			colMapping.put(WM_COL_GROSS, 20);
 			colMapping.put(WM_COL_TARE, 21);
 			colMapping.put(WM_COL_NET, 22);
-		} else if (locationId == 13l // BQE Transfer
-				|| locationId == 67l // Varick I Transfer
+		} else if (locationId == 13l) { // BQE Transfer
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 7);
+			colMapping.put(WM_COL_VEHICLE, 10);
+			colMapping.put(WM_COL_TRAILER, 8);
+			colMapping.put(WM_COL_DESTINATION, 12);
+			colMapping.put(WM_COL_TONS, 20);
+			colMapping.put(WM_COL_GROSS, 23);
+			colMapping.put(WM_COL_TARE, 24);
+			colMapping.put(WM_COL_NET, 25);
+		} else if (locationId == 67l // Varick I Transfer
 				|| locationId == 31l) { // Forge Transfer
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
@@ -92,11 +105,13 @@ public class TicketUtils {
 			colMapping.put(WM_COL_COMPANY, 7);
 			colMapping.put(WM_COL_VEHICLE, 8);
 			colMapping.put(WM_COL_TRAILER, 10);
+			colMapping.put(WM_COL_DESTINATION, 12);
 			colMapping.put(WM_COL_TONS, 20);
 			colMapping.put(WM_COL_GROSS, 23);
 			colMapping.put(WM_COL_TARE, 24);
 			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 392l) { // Fairless Landfill
+			colMapping.put(WM_COL_HAULING_COMPANY, 1);
 			colMapping.put(WM_COL_COMPANY, 3);
 			colMapping.put(WM_COL_VEHICLE, 4);
 			colMapping.put(WM_COL_TICKET, 6);
@@ -889,7 +904,7 @@ public class TicketUtils {
 		ticket.setTransferTons(Double.parseDouble(transferTonsStr));
 		
 		Double landfillGross = ticket.getLandfillGross();
-		Double landfillTare = ticket.getLandfillTare();;
+		Double landfillTare = ticket.getLandfillTare();
 		Double landfillNet = landfillGross - landfillTare;
 		Double landfillTons = landfillNet / 2000.0;
 		
@@ -898,6 +913,36 @@ public class TicketUtils {
 		
 		ticket.setLandfillNet(Double.parseDouble(landfillNetStr));
 		ticket.setLandfillTons(Double.parseDouble(landfillTonsStr));
+	}
+	
+	public static void calculateNetAndTons(WMTicket wmTicket) {
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		Double transferGross = wmTicket.getTransferGross();
+		Double transferTare = wmTicket.getTransferTare();
+		if (transferGross != null && transferTare != null) {
+			Double transferNet = transferGross - transferTare;
+			Double transferTons = transferNet / 2000.0;
+			
+			String transferNetStr = df.format(transferNet);
+			String transferTonsStr = df.format(transferTons);
+			
+			wmTicket.setTransferNet(Double.parseDouble(transferNetStr));
+			wmTicket.setTransferTons(Double.parseDouble(transferTonsStr));
+		}
+		
+		Double landfillGross = wmTicket.getLandfillGross();
+		Double landfillTare = wmTicket.getLandfillTare();
+		if (landfillGross != null && landfillTare != null) {
+			Double landfillNet = landfillGross - landfillTare;
+			Double landfillTons = landfillNet / 2000.0;
+			
+			String landfillNetStr = df.format(landfillNet);
+			String landfillTonsStr = df.format(landfillTons);
+			
+			wmTicket.setLandfillNet(Double.parseDouble(landfillNetStr));
+			wmTicket.setLandfillTons(Double.parseDouble(landfillTonsStr));
+		}
 	}
 	
 	public static void validateDates(Date loadDate, Date unloadDate, Date batchDate, StringBuffer errorMsgBuff) {
@@ -950,40 +995,74 @@ public class TicketUtils {
 		wmTicket.setVehicle(tripSheet.getTruck());
 		wmTicket.setTrailer(tripSheet.getTrailer());
 		
-		wmTicket.setBillBatch(tripSheet.getBatchDate());
+		if (wmTicket.getBillBatch() == null) {
+			wmTicket.setBillBatch(tripSheet.getBatchDate());
+		}
 		
-		wmTicket.setOrigin(tripSheet.getOrigin());
-		wmTicket.setDestination(tripSheet.getDestination());
+		if (wmTicket.getOrigin() == null) {
+			wmTicket.setOrigin(tripSheet.getOrigin());
+		}
+		if (wmTicket.getDestination() == null) {
+			wmTicket.setDestination(tripSheet.getDestination());
+		}
 		
-		wmTicket.setOriginTicket(tripSheet.getOriginTicket());
-		wmTicket.setDestinationTicket(tripSheet.getDestinationTicket());
+		if (wmTicket.getOriginTicket() == null) {
+			wmTicket.setOriginTicket(tripSheet.getOriginTicket());
+		}
+		if (wmTicket.getDestinationTicket() == null) {
+			wmTicket.setDestinationTicket(tripSheet.getDestinationTicket());
+		}
 		
-		wmTicket.setLoadDate(tripSheet.getLoadDate());
-		wmTicket.setUnloadDate(tripSheet.getUnloadDate());
+		if (wmTicket.getLoadDate() == null) {
+			wmTicket.setLoadDate(tripSheet.getLoadDate());
+		}
+		if (wmTicket.getUnloadDate() == null) {
+			wmTicket.setUnloadDate(tripSheet.getUnloadDate());
+		}
 	}
 	
-	public static WMTicket retrieveWMTicket(Long locationTicketNo, Location location, boolean byOrigin,
+	public static WMTicket retrieveWMTicket(String locationTicketNo, String location, boolean byOrigin,
 			Integer processingStatus, GenericDAO genericDAO) {
-		String query = "select obj from WMTicket obj where obj.ticket=" + locationTicketNo + " and ";
-		String originCondn = " obj.origin=" + location.getId() + " and obj.originTicket=" + locationTicketNo;
-		String destinationCondn = " obj.destination=" + location.getId() + " and obj.destinationTicket=" + locationTicketNo;
+		if (StringUtils.isEmpty(locationTicketNo) || StringUtils.isEmpty(location)) {
+			return null;
+		}
+		
+		return TicketUtils.retrieveWMTicket(Long.valueOf(locationTicketNo), Long.valueOf(location), 
+				byOrigin, processingStatus, genericDAO);
+	}
+	
+	public static WMTicket retrieveWMTicket(Long ticketNo, Long location, boolean byOrigin,
+			Integer processingStatus, GenericDAO genericDAO) {
+		if (ticketNo == null || location == null) {
+			return null;
+		}
+		
+		String query = "select obj from WMTicket obj where obj.ticket=" + ticketNo + " and ";
+		String originQuery = " obj.origin=" + location + " and obj.originTicket=" + ticketNo
+									+ " and obj.ticketType='" + WMTicket.ORIGIN_TICKET_TYPE + "'";
+		String destinationQuery = " obj.destination=" + location + " and obj.destinationTicket=" + ticketNo
+									 	+ " and obj.ticketType='" + WMTicket.DESTINATION_TICKET_TYPE + "'";
 		
 		if (byOrigin) {
-			query += originCondn;
+			query += originQuery;
 		} else {
-			query += destinationCondn;
+			query += destinationQuery;
 		}
 		
 		if (processingStatus != null) {
-			query +=	" and obj.processingStatus="+ processingStatus;
+			query +=	(" and obj.processingStatus="+ processingStatus);
 		}
 		
 		List<WMTicket> ticketList = genericDAO.executeSimpleQuery(query);
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
 	}
 	
-	private static Ticket retrieveTicket(Long locationTicketNo, Location location, boolean byOrigin,
+	public static Ticket retrieveTicket(Long locationTicketNo, Location location, boolean byOrigin,
 			GenericDAO genericDAO) {
+		if (locationTicketNo == null || location == null) {
+			return null;
+		}
+		
 		String query = "select obj from Ticket obj where";
 		String originCondn = " obj.origin=" + location.getId() + " and obj.originTicket=" + locationTicketNo;
 		String destinationCondn = " obj.destination=" + location.getId() + " and obj.destinationTicket=" + locationTicketNo;
@@ -998,13 +1077,44 @@ public class TicketUtils {
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
 	}
 	
-	public static void mapAndSave(WMTicket wmTicket, TripSheet tripSheet, GenericDAO genericDAO) {
+	public static void mapAndSave(WMTicket wmTicket, TripSheet tripSheet, Integer processingStatus,
+			GenericDAO genericDAO) {
 		map(wmTicket, tripSheet);
-		
-		wmTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_DONE);
-		wmTicket.setModifiedBy(tripSheet.getCreatedBy());
+		save(wmTicket, processingStatus, tripSheet.getCreatedBy(), genericDAO);
+	}
+	
+	public static void save(WMTicket wmTicket, Integer processingStatus, Long modifiedBy, GenericDAO genericDAO) {
+		wmTicket.setProcessingStatus(processingStatus);
+		wmTicket.setModifiedBy(modifiedBy);
 		wmTicket.setModifiedAt(Calendar.getInstance().getTime());
 		genericDAO.saveOrUpdate(wmTicket);
+	}
+	
+	public static List<Vehicle> retrieveVehicleForUnit(String unitStr, Date transactionDate, 
+			int type, GenericDAO genericDAO) {
+		 if (!StringUtils.isNumeric(unitStr) || transactionDate == null) {
+			return null;
+		}
+		 
+		 int unit = Integer.parseInt(unitStr); 
+		 return retrieveVehicleForUnit(unit, transactionDate, type, genericDAO);
+	}
+	
+	public static List<Vehicle> retrieveVehicleForUnit(Integer unit, Date transactionDate, 
+			int type, GenericDAO genericDAO) {
+		if (unit == null || transactionDate == null) {
+			return null;
+		}
+		
+		String transactionDateStr = dateFormat.format(transactionDate);
+		
+		String vehicleQuery = "Select obj from Vehicle obj where obj.unit=" + unit 
+			+ " and obj.validFrom <='" + transactionDateStr + "' and obj.validTo >= '" + transactionDateStr + "'"
+			+ " and obj.type=" + type
+			+ " order by obj.id DESC";
+		System.out.println("******************** Vehicle query is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		return vehicleList;
 	}
 	
 	public static Ticket createTicketForTripSheet(TripSheet tripSheet, StringBuffer errorMsgBuff,
@@ -1019,17 +1129,19 @@ public class TicketUtils {
 			}
 		}
 		
-		WMTicket wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin(), 
+		WMTicket wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin().getId(), 
 				true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
-		if (wmOriginTicket == null) {
-			//errorMsgBuff.append("No Matching WM Origin ticket found");
-			return null;
+		if (wmOriginTicket != null) {
+			mapAndSave(wmOriginTicket, tripSheet, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
 		}
 		
-		WMTicket wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination(), 
+		WMTicket wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination().getId(), 
 				false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
-		if (wmDestinationTicket == null) {
-			//errorMsgBuff.append("Matching WM Origin ticket found, but NO Matching WM Destination ticket found");
+		if (wmDestinationTicket != null) {
+			mapAndSave(wmDestinationTicket, tripSheet, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		
+		if (wmOriginTicket == null || wmDestinationTicket == null) {
 			return null;
 		}
 		
@@ -1048,6 +1160,9 @@ public class TicketUtils {
 		calculateNetAndTons(ticket);
 		
 		map(ticket, tripSheet);
+		ticket.setLoadDate(wmOriginTicket.getLoadDate());
+		ticket.setUnloadDate(wmDestinationTicket.getUnloadDate());
+		ticket.setBillBatch(wmDestinationTicket.getBillBatch());
 		
 		ticket.setEnteredBy("Automatic"); // 34 - Looks like this is not saved
 		ticket.setTicketStatus(1); // Available - Correct?
@@ -1061,9 +1176,23 @@ public class TicketUtils {
 		
 		save(ticket, "complete", errorMsgBuff, genericDAO);
 		
-		mapAndSave(wmOriginTicket, tripSheet, genericDAO);
-		mapAndSave(wmDestinationTicket, tripSheet, genericDAO);
+		save(wmOriginTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
+		save(wmDestinationTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
 		
 		return ticket;
+	}
+	
+	public static Date calculateBatchDate(Date unloadDate) {
+		if (unloadDate == null) {
+			return null;
+		}
+		
+		// 2015-07-26 00:00:00
+		SimpleDateFormat unloadDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String unloadDateStr = unloadDateFormat.format(unloadDate);	
+		
+		LocalDate now = new LocalDate(unloadDateStr);			
+		LocalDate sunday = now.withDayOfWeek(DateTimeConstants.SUNDAY);
+		return sunday.toDate();
 	}
 }

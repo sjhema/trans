@@ -28,6 +28,8 @@ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_ob
   `wm_company` varchar(75) DEFAULT NULL,
   `wm_vehicle` varchar(75) DEFAULT NULL,
   `wm_trailer` varchar(75) DEFAULT NULL,
+  `wm_destination` varchar(255) DEFAULT NULL,
+  `wm_hauling_company` varchar(255) DEFAULT NULL,
   `gross` double DEFAULT NULL,
   `tare` double DEFAULT NULL,
   `net` double DEFAULT NULL,

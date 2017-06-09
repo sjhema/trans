@@ -54,6 +54,8 @@ import com.primovision.lutransport.service.ReportService;
 public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	private SimpleDateFormat displayDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	
 	public TripSheetTicketVerification() {
 		setUrlContext("admin/tripsheetticketverification");
 	}
@@ -588,17 +590,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			}
 			
 			// WM Ticket change - 23rd May 2017
-			WMTicket wmOriginTicket = retrieveWMTicket(entity.getOriginTicket().toString(), 
-					entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-			if (wmOriginTicket != null) {
-				mapAndSave(wmOriginTicket, entity);
-			}
-			
-			WMTicket wmDestinationTicket = retrieveWMTicket(entity.getDestinationTicket().toString(), 
-					entity.getDestination().getId().toString(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-			if (wmDestinationTicket != null) {
-				mapAndSave(wmDestinationTicket, entity);
-			}
+			updateWMTicket(entity);
 			
 			//return "redirect:/admin/tripsheetreview/list.do";
 			return "redirect:/admin/tripsheetticketverification/create.do";
@@ -793,21 +785,34 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			}
 			
 			// WM Ticket change - 23rd May 2017
-			WMTicket wmOriginTicket = retrieveWMTicket(entity.getOriginTicket().toString(), 
-					entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-			if (wmOriginTicket != null) {
-				mapAndSave(wmOriginTicket, entity);
-			}
-			
-			WMTicket wmDestinationTicket = retrieveWMTicket(entity.getDestinationTicket().toString(), 
-					entity.getDestination().getId().toString(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-			if (wmDestinationTicket != null) {
-				mapAndSave(wmDestinationTicket, entity);
-			}
+			updateWMTicket(entity);
 			
 			return "redirect:/admin/tripsheetticketverification/create.do";
 			
 			//return "redirect:/admin/tripsheetreview/list.do";
+		}
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void updateWMTicket(Ticket entity) {
+		WMTicket wmOriginTicket = TicketUtils.retrieveWMTicket(entity.getOriginTicket().toString(), 
+				entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmOriginTicket == null) {
+			 wmOriginTicket = TicketUtils.retrieveWMTicket(entity.getOriginTicket().toString(), 
+						entity.getOrigin().getId().toString(), true, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		if (wmOriginTicket != null) {
+			mapAndSave(wmOriginTicket, entity);
+		}
+		
+		WMTicket wmDestinationTicket = TicketUtils.retrieveWMTicket(entity.getDestinationTicket(), 
+				entity.getDestination().getId(), false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmDestinationTicket == null) {
+			wmDestinationTicket = TicketUtils.retrieveWMTicket(entity.getDestinationTicket(), 
+					entity.getDestination().getId(), false, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		if (wmDestinationTicket != null) {
+			mapAndSave(wmDestinationTicket, entity);
 		}
 	}
 	
@@ -849,8 +854,14 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		wmTicket.setTransferGross(ticket.getTransferGross());
 		wmTicket.setTransferTare(ticket.getTransferTare());
 		
+		wmTicket.setTransferNet(ticket.getTransferNet());
+		wmTicket.setTransferTons(ticket.getTransferTons());
+		
 		wmTicket.setLandfillGross(ticket.getLandfillGross());
 		wmTicket.setLandfillTare(ticket.getLandfillTare());
+		
+		wmTicket.setLandfillNet(ticket.getLandfillNet());
+		wmTicket.setLandfillTons(ticket.getLandfillTons());
 	}
 	
 	@ModelAttribute("modelObject")
@@ -1049,6 +1060,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		
 		if("getRemainingTicketData".equalsIgnoreCase(action)) {
+			// WM Ticket change - 23rd May 2017
+			Long userId = getUser(request).getId();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 			String landfill=request.getParameter("landfil");
 		    String landticket=request.getParameter("originTcket");
@@ -1079,20 +1092,23 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				
 				// WM Ticket change - 23rd May 2017
 				Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, true);
-				populateTicketData(ticket, tickList);
+				if (ticket != null) {
+					populateTicketData(ticket, tickList);
+				} else {
+					//retrieveAndPopulateFromOriginWMTicketData(tickList, landticket, landfill, true, userId);
+					retrieveAndPopulateFromTripSheet(tickList, tripsheets.get(0), userId);
+				}
 				
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
 			else {
 				// WM Ticket change - 23rd May 2017
-				WMTicket wmTicket = retrieveWMTicket(landticket, landfill, true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-				if (wmTicket == null) {
+				retrieveAndPopulateFromOriginWMTicketData(tickList, landticket, landfill, false, userId);
+				if (tickList.isEmpty()) {
 					return "";
 				}
 				
-				// WM Ticket change - 23rd May 2017
-				populateWMTicketData(wmTicket, tickList, true);
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
@@ -1100,12 +1116,14 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		
 		if("getRemainingTicketDataDest".equalsIgnoreCase(action)) {
+			// WM Ticket change - 23rd May 2017
+			Long userId = getUser(request).getId();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 			String landfill=request.getParameter("transferstation");
 		    String landticket=request.getParameter("destinationTcket");
 		    
 		    // WM Ticket change - 23rd May 2017
-		    //String ticketNo = request.getParameter("ticId");
+		    String ticketNo = request.getParameter("ticId");
 		    
 		    List tickList = new ArrayList();
 		    String origin = "select obj from TripSheet obj where obj.destination.id="+landfill+" and obj.destinationTicket="+landticket;
@@ -1129,21 +1147,24 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				}
 				
 				// WM Ticket change - 23rd May 2017
-				//Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, false);
-				//populateTicketData(ticket, tickList);
+				Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, true);
+				if (ticket != null) {
+					populateTicketData(ticket, tickList);
+				} else {
+					//retrieveAndPopulateFromDestinationWMTicketData(tickList, landticket, landfill, true, userId);
+					retrieveAndPopulateFromTripSheet(tickList, tripsheets.get(0), userId);
+				}
 				
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
-			else{
+			else {
 				// WM Ticket change - 23rd May 2017
-				WMTicket wmTicket = retrieveWMTicket(landticket, landfill, false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
-				if (wmTicket == null) {
+				retrieveAndPopulateFromDestinationWMTicketData(tickList, landticket, landfill, false, userId);
+				if (tickList.isEmpty()) {
 					return "";
 				}
-				
-				// WM Ticket change - 23rd May 2017
-				populateWMTicketData(wmTicket, tickList, false);
+			
 				Gson gson = new Gson();
 				return gson.toJson(tickList);
 			}
@@ -1288,6 +1309,11 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	
 	// WM Ticket change - 23rd May 2017
 	private Ticket retrieveTicket(String ticketNo, String location, String locationTicketNo, boolean byOrigin) {
+		if (StringUtils.isEmpty(location) || StringUtils.isEmpty(locationTicketNo)) {
+			return null;
+			
+		}
+		
 		String baseQuery = "select obj from Ticket obj where";
 		String ticketNoCondn = " obj.id=" + ticketNo;
 		String originCondn = " obj.origin.id=" + location + " and obj.originTicket=" + locationTicketNo;
@@ -1308,17 +1334,15 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	}
 	
 	// WM Ticket change - 23rd May 2017
-	private WMTicket retrieveWMTicket(String locationTicketNo, String location, boolean byOrigin,
+	private WMTicket retrieveCorrespondingDestinationTicket(String originTicketNo, String origin,
 			Integer processingStatus) {
-		String query = "select obj from WMTicket obj where obj.ticket=" + locationTicketNo + " and ";
-		String originCondn = " obj.origin=" + location + " and obj.originTicket=" + locationTicketNo;
-		String destinationCondn = " obj.destination=" + location + " and obj.destinationTicket=" + locationTicketNo;
-		
-		if (byOrigin) {
-			query += originCondn;
-		} else {
-			query += destinationCondn;
+		if (StringUtils.isEmpty(originTicketNo) || StringUtils.isEmpty(origin)) {
+			return null;
 		}
+		
+		String query = "select obj from WMTicket obj where obj.haulingTicket=" + originTicketNo
+				+ " and obj.origin=" + origin
+				+ " and obj.ticketType='" + WMTicket.DESTINATION_TICKET_TYPE + "'";;
 		
 		if (processingStatus != null) {
 			query +=	" and obj.processingStatus="+ processingStatus;
@@ -1329,39 +1353,228 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	}
 	
 	// WM Ticket change - 23rd May 2017
-	private void populateWMTicketData(WMTicket wmTicket, List ticketDataList, boolean byOrigin) {
-		if (wmTicket == null) {
+	private void retrieveAndPopulateFromDestinationWMTicketData(List ticketDataList, String destinationTicketNo, String destination, 
+			boolean tripSheetExists, Long userId) {
+		if (StringUtils.isEmpty(destinationTicketNo) || StringUtils.isEmpty(destination)) {
 			return;
 		}
 		
-		ticketDataList.add("WM_TICKET_DATA");
+		WMTicket wmDestinationTicket = TicketUtils.retrieveWMTicket(destinationTicketNo, destination, false,
+				WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmDestinationTicket == null) {
+			wmDestinationTicket = TicketUtils.retrieveWMTicket(destinationTicketNo, destination, false, 
+					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+			if (wmDestinationTicket == null) {
+				return;
+			}
+		}
+		
+		if (!tripSheetExists) {
+			ticketDataList.add("WM_TICKET_DATA");
+		}
+		
+		if (wmDestinationTicket.getHaulingTicket() == null || wmDestinationTicket.getOrigin() == null) {
+			populateOriginWMTicketData(null, ticketDataList);
+			populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+			ticketDataList.add(userId);
+			ticketDataList.add("1");
+			ticketDataList.add("1");
+			return;
+		}
+		
+		WMTicket wmOriginTicket = TicketUtils.retrieveWMTicket(wmDestinationTicket.getHaulingTicket(), wmDestinationTicket.getOrigin().getId(), true, 
+				WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmOriginTicket == null) {
+			wmOriginTicket = TicketUtils.retrieveWMTicket(wmDestinationTicket.getHaulingTicket(), wmDestinationTicket.getOrigin().getId(), true, 
+					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		populateOriginWMTicketData(wmOriginTicket, ticketDataList);
+		
+		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		ticketDataList.add(userId);
+		ticketDataList.add("1");
+		ticketDataList.add("1");
+	}
+	
+	private void addEmptyTicketData(List ticketDataList, int noOfTimes) {
+		for (int i = 1; i <= noOfTimes; i++) {
+			ticketDataList.add(StringUtils.EMPTY);
+		}
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void retrieveAndPopulateFromTripSheet(List ticketDataList, TripSheet tripsheet, Long userId) {
+		if (tripsheet == null) {
+			return;
+		}
+		
+		WMTicket wmOriginTicket = TicketUtils.retrieveWMTicket(tripsheet.getOriginTicket(), tripsheet.getOrigin().getId(), true, 
+				WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmOriginTicket == null) {
+			wmOriginTicket = TicketUtils.retrieveWMTicket(tripsheet.getOriginTicket(), tripsheet.getOrigin().getId(), true, 
+					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		populateOriginWMTicketData(wmOriginTicket, ticketDataList);
+		
+		WMTicket wmDestinationTicket = TicketUtils.retrieveWMTicket(tripsheet.getDestinationTicket(), tripsheet.getDestination().getId(), false,
+				WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmDestinationTicket == null) {
+			wmDestinationTicket = TicketUtils.retrieveWMTicket(tripsheet.getDestinationTicket(), tripsheet.getDestination().getId(), false, 
+					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		}
+		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		
+		ticketDataList.add(userId);
+		ticketDataList.add("1");
+		ticketDataList.add("1");
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void retrieveAndPopulateFromOriginWMTicketData(List ticketDataList, String originTicketNo, String origin, 
+			boolean tripSheetExists, Long userId) {
+		if (StringUtils.isEmpty(originTicketNo) || StringUtils.isEmpty(origin)) {
+			return;
+		}
+		
+		WMTicket wmOriginTicket = TicketUtils.retrieveWMTicket(originTicketNo, origin, true, 
+				WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
+		if (wmOriginTicket == null) {
+			wmOriginTicket = TicketUtils.retrieveWMTicket(originTicketNo, origin, true, 
+					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+			if (wmOriginTicket == null) {
+				return;
+			}
+		}
+		
+		if (!tripSheetExists) {
+			ticketDataList.add("WM_TICKET_DATA");
+		}
+		
+		populateOriginWMTicketData(wmOriginTicket, ticketDataList);
+		
+		WMTicket wmDestinationTicket = retrieveCorrespondingDestinationTicket(originTicketNo, 
+				origin, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+		if (wmDestinationTicket == null) {
+			wmDestinationTicket = retrieveCorrespondingDestinationTicket(originTicketNo, 
+					origin, WMTicket.PROCESSING_STATUS_PROCESSING);
+		}
+		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		
+		ticketDataList.add(userId);
+		ticketDataList.add("1");
+		ticketDataList.add("1");
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void populateOriginWMTicketData(WMTicket wmTicket, List ticketDataList) {
+		if (wmTicket == null) {
+			addEmptyTicketData(ticketDataList, 10);
+			return;
+		}
+		
+		ticketDataList.add(wmTicket.getOrigin().getId());
+		ticketDataList.add(wmTicket.getTicket());
 		
 		DecimalFormat df = new DecimalFormat("#0.00");
 		
-		if (byOrigin) {
-			ticketDataList.add(wmTicket.getTransferTimeIn());
-			ticketDataList.add(wmTicket.getTransferTimeOut());
-			
+		ticketDataList.add(wmTicket.getTransferTimeIn());
+		ticketDataList.add(wmTicket.getTransferTimeOut());
+		
+		if (wmTicket.getTransferGross() != null) {
 			ticketDataList.add(df.format(wmTicket.getTransferGross()));
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		if (wmTicket.getTransferTare() != null) {
 			ticketDataList.add(df.format(wmTicket.getTransferTare()));
-			
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		
+		if (wmTicket.getTransferGross() != null && wmTicket.getTransferTare() != null) {
 			Double transferNet = wmTicket.getTransferGross() - wmTicket.getTransferTare();
 			Double transferTons = transferNet / 2000.0;
 			
 			ticketDataList.add(df.format(transferNet));
 			ticketDataList.add(df.format(transferTons));
 		} else {
-			ticketDataList.add(wmTicket.getLandfillTimeIn());
-			ticketDataList.add(wmTicket.getLandfillTimeOut());
-			
+			addEmptyTicketData(ticketDataList, 2);
+		}
+		
+		if (wmTicket.getLoadDate() != null) {
+			String loadDateStr = displayDateFormat.format(wmTicket.getLoadDate());
+			ticketDataList.add(loadDateStr);
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		
+		List<Vehicle> vehicleList = TicketUtils.retrieveVehicleForUnit(wmTicket.getWmTrailer(), wmTicket.getLoadDate(), 
+				2, genericDAO);
+		if (vehicleList != null && !vehicleList.isEmpty()) {
+			Vehicle trailer = vehicleList.get(0);
+			ticketDataList.add(trailer.getId());
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+	}
+	
+	// WM Ticket change - 23rd May 2017
+	private void populateDestinationWMTicketData(WMTicket wmTicket, List ticketDataList) {
+		if (wmTicket == null) {
+			addEmptyTicketData(ticketDataList, 11);
+			return;
+		}
+		
+		ticketDataList.add(wmTicket.getDestination().getId());
+		ticketDataList.add(wmTicket.getTicket());
+		
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		ticketDataList.add(wmTicket.getLandfillTimeIn());
+		ticketDataList.add(wmTicket.getLandfillTimeOut());
+		
+		if (wmTicket.getLandfillGross() != null) {
 			ticketDataList.add(df.format(wmTicket.getLandfillGross()));
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		if (wmTicket.getLandfillTare() != null) {
 			ticketDataList.add(df.format(wmTicket.getLandfillTare()));
-			
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		
+		if (wmTicket.getLandfillGross() != null && wmTicket.getLandfillTare() != null) {
 			Double landfillNet = wmTicket.getLandfillGross() - wmTicket.getLandfillTare();
 			Double landfillTons = landfillNet / 2000.0;
 			
 			ticketDataList.add(df.format(landfillNet));
 			ticketDataList.add(df.format(landfillTons));
+		} else {
+			addEmptyTicketData(ticketDataList, 2);
+		}
+		
+		if (wmTicket.getUnloadDate() != null) {
+			String unLoadDateStr = displayDateFormat.format(wmTicket.getUnloadDate());
+			ticketDataList.add(unLoadDateStr);
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		
+		if (wmTicket.getBillBatch() != null) {
+			String billBatchStr = displayDateFormat.format(wmTicket.getBillBatch());
+			ticketDataList.add(billBatchStr);
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
+		}
+		
+		List<Vehicle> vehicleList = TicketUtils.retrieveVehicleForUnit(wmTicket.getWmVehicle(), wmTicket.getUnloadDate(), 
+				1, genericDAO);
+		if (vehicleList != null && !vehicleList.isEmpty()) {
+			Vehicle truck = vehicleList.get(0);
+			ticketDataList.add(truck.getUnit());
+		} else {
+			addEmptyTicketData(ticketDataList, 1);
 		}
 	}
 	
@@ -1373,26 +1586,38 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		DecimalFormat df = new DecimalFormat("#0.00");
 		
+		ticketDataList.add(ticket.getOrigin().getId());
+		ticketDataList.add(ticket.getOriginTicket());
 		ticketDataList.add(ticket.getTransferTimeIn());
 		ticketDataList.add(ticket.getTransferTimeOut());
 		ticketDataList.add(df.format(ticket.getTransferGross()));
 		ticketDataList.add(df.format(ticket.getTransferTare()));
 		ticketDataList.add(df.format(ticket.getTransferNet()));
 		ticketDataList.add(df.format(ticket.getTransferTons()));
+		ticketDataList.add(displayDateFormat.format(ticket.getLoadDate()));
+		ticketDataList.add(ticket.getTrailer().getId());
+		
+		ticketDataList.add(ticket.getDestination().getId());
+		ticketDataList.add(ticket.getDestinationTicket());
 		ticketDataList.add(ticket.getLandfillTimeIn());
 		ticketDataList.add(ticket.getLandfillTimeOut());
 		ticketDataList.add(df.format(ticket.getLandfillGross()));
 		ticketDataList.add(df.format(ticket.getLandfillTare()));
 		ticketDataList.add(df.format(ticket.getLandfillNet()));
 		ticketDataList.add(df.format(ticket.getLandfillTons()));
+		ticketDataList.add(displayDateFormat.format(ticket.getUnloadDate()));
+		ticketDataList.add(displayDateFormat.format(ticket.getBillBatch()));
+		ticketDataList.add(ticket.getVehicle().getUnit());
 		
 		ticketDataList.add(ticket.getCreatedBy());
 		ticketDataList.add(ticket.getTicketStatus());
 		ticketDataList.add(ticket.getPayRollStatus());
 		
-		if (ticket.getSubcontractor() != null) {
+		/*if (ticket.getSubcontractor() != null) {
 			ticketDataList.add(ticket.getSubcontractor().getId());
-		}
+		} else {
+			ticketDataList.add(StringUtils.EMPTY);
+		}*/
 	}
 }
 

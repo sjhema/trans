@@ -13,9 +13,9 @@ import javax.persistence.Transient;
 @Table(name = "wm_ticket")
 public class WMTicket extends AbstractBaseModel {
 	@Transient
-	public static String ORIGIN_TICKET_TYPE = "ORIGIN";
+	public static String ORIGIN_TICKET_TYPE = "ORIGN";
 	@Transient
-	public static String DESTINATION_TICKET_TYPE = "DESTINANTION";
+	public static String DESTINATION_TICKET_TYPE = "DESTN";
 	
 	@Transient
 	public static Integer PROCESSING_STATUS_TICKET_ALREADY_EXISTS = 1;
@@ -55,6 +55,12 @@ public class WMTicket extends AbstractBaseModel {
 	
 	@Column(name="wm_trailer")
 	private String wmTrailer;
+	
+	@Column(name="wm_destination")
+	private String wmDestination;
+	
+	@Column(name="wm_hauling_company")
+	private String wmHaulingCompany;
 	
 	@Column(name = "gross")
 	private Double gross;
@@ -152,6 +158,22 @@ public class WMTicket extends AbstractBaseModel {
 	
 	@Column(name = "landfill_ton")
 	private Double landfillTons;
+	
+	public String getWmDestination() {
+		return wmDestination;
+	}
+
+	public void setWmDestination(String wmDestination) {
+		this.wmDestination = wmDestination;
+	}
+
+	public String getWmHaulingCompany() {
+		return wmHaulingCompany;
+	}
+
+	public void setWmHaulingCompany(String wmHaulingCompany) {
+		this.wmHaulingCompany = wmHaulingCompany;
+	}
 
 	public Long getTicket() {
 		return ticket;

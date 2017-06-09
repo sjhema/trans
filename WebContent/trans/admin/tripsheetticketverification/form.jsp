@@ -405,12 +405,7 @@ function checkLandfillTicket() {
 				if(listData){
 					// WM Ticket change - 23rd May 2017
 					if (listData[0] == "WM_TICKET_DATA") {
-						$("#transfertimein").val(listData[1]);
-						$("#transfertimeout").val(listData[2]);
-						$("#transferGrossId").val(listData[3]);
-						$("#transferTareId").val(listData[4]);
-						$("#transferNetId").val(listData[5]);
-						$("#transferTons").val(listData[6]);
+						populateFromTicketDataForNoTripSheet(listData);
 						return;
 					}
 					
@@ -429,30 +424,92 @@ function checkLandfillTicket() {
 					
 					// WM Ticket change - 23rd May 2017
 					if (listData.length > 12) {
-						$("#transfertimein").val(listData[12]);
-						$("#transfertimeout").val(listData[13]);
-						$("#transferGrossId").val(listData[14]);
-						$("#transferTareId").val(listData[15]);
-						$("#transferNetId").val(listData[16]);
-						$("#transferTons").val(listData[17]);
-						
-						$("#landfilltimein").val(listData[18]);
-						$("#landfilltimeout").val(listData[19]);
-						$("#landfillGrossId").val(listData[20]);
-						$("#landfillTareId").val(listData[21]);
-						$("#LandFillNetId").val(listData[22]);
-						$("#landfillTons").val(listData[23]);
-						
-						$("#createdBy").val(listData[24]);
-						$("#ticketStatus").val(listData[25]);
-						$("#payRollStatus").val(listData[26]);
-						$("#subcontractor").val(listData[27]);
+						populateFromTicketDataForYesTripSheet(listData);
 					}
 				}
 			}
 		});	
 	}
 	
+}
+
+function populateFromTicketDataForYesTripSheet(listData) {
+	/*$("#origin").val(listData[12]);
+	$("#originticket").val(listData[13]);*/
+	$("#transfertimein").val(listData[14]);
+	$("#transfertimeout").val(listData[15]);
+	$("#transferGrossId").val(listData[16]);
+	$("#transferTareId").val(listData[17]);
+	$("#transferNetId").val(listData[18]);
+	$("#transferTons").val(listData[19]);
+	if (listData[20] != '') {
+		$("#datepicker").val(listData[20]);
+	}
+	/*if ($("#trailerId").val() == '' && listData[21] != '') {
+		$("#trailerId").val(listData[21]);
+	}*/
+	
+	/*$("#destination").val(listData[22]);
+	$("#destinationticket").val(listData[23]);*/
+	$("#landfilltimein").val(listData[24]);
+	$("#landfilltimeout").val(listData[25]);
+	$("#landfillGrossId").val(listData[26]);
+	$("#landfillTareId").val(listData[27]);
+	$("#LandFillNetId").val(listData[28]);
+	$("#landfillTons").val(listData[29]);
+	if (listData[30] != '') {
+		$("#datepicker1").val(listData[30]);
+	}
+	if (listData[31] != '') {
+		$("#batch").val(listData[31]);
+	}
+	/*if ($("#truckId").val() == '' && listData[32] != '') {
+		$("#truckId").val(listData[32]);
+	}*/
+	
+	$("#createdBy").val(listData[33]);
+	$("#ticketStatus").val(listData[34]);
+	$("#payRollStatus").val(listData[35]);
+	//$("#subcontractor").val(listData[36]);
+}
+
+function populateFromTicketDataForNoTripSheet(listData) {
+	$("#origin").val(listData[1]);
+	$("#originticket").val(listData[2]);
+	$("#transfertimein").val(listData[3]);
+	$("#transfertimeout").val(listData[4]);
+	$("#transferGrossId").val(listData[5]);
+	$("#transferTareId").val(listData[6]);
+	$("#transferNetId").val(listData[7]);
+	$("#transferTons").val(listData[8]);
+	if (listData[9] != '') {
+		$("#datepicker").val(listData[9]);
+	}
+	if (listData[10] != '') {
+		$("#trailerId").val(listData[10]);
+	}
+	
+	$("#destination").val(listData[11]);
+	$("#destinationticket").val(listData[12]);
+	$("#landfilltimein").val(listData[13]);
+	$("#landfilltimeout").val(listData[14]);
+	$("#landfillGrossId").val(listData[15]);
+	$("#landfillTareId").val(listData[16]);
+	$("#LandFillNetId").val(listData[17]);
+	$("#landfillTons").val(listData[18]);
+	if (listData[19] != '') {
+		$("#datepicker1").val(listData[19]);
+	}
+	if (listData[20] != '') {
+		$("#batch").val(listData[20]);
+	}
+	if (listData[21] != '') {
+		$("#truckId").val(listData[21]);
+	}
+	
+	$("#createdBy").val(listData[22]);
+	$("#ticketStatus").val(listData[23]);
+	$("#payRollStatus").val(listData[24]);
 }
 
 function checkTransferTicketNew() {	
@@ -514,12 +571,7 @@ function checkTransferTicket() {
 				if(listData){
 					// WM Ticket change - 23rd May 2017
 					if (listData[0] == "WM_TICKET_DATA") {
-						$("#landfilltimein").val(listData[1]);
-						$("#landfilltimeout").val(listData[2]);
-						$("#landfillGrossId").val(listData[3]);
-						$("#landfillTareId").val(listData[4]);
-						$("#LandFillNetId").val(listData[5]);
-						$("#landfillTons").val(listData[6]);
+						populateFromTicketDataForNoTripSheet(listData);
 						return;
 					}
 					
@@ -535,6 +587,11 @@ function checkTransferTicket() {
 					$("#destination").val(listData[9]);
 					$("#destinationticket").val(listData[10]);
 					$("#datepicker1").val(listData[11]);
+					
+					// WM Ticket change - 23rd May 2017
+					if (listData.length > 12) {
+						populateFromTicketDataForYesTripSheet(listData);
+					}
 				}
 			}
 		});
