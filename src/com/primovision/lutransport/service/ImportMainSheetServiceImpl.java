@@ -816,12 +816,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		}
 		
+		if (StringUtils.isEmpty(wmTicket.getWmDestination())) {
+			return null;
+		}
 		List<Location> derivedDestinationList = retrieveLocationDataByQualifier(2, "haulingName", 
 				wmTicket.getWmDestination());
 		if (derivedDestinationList == null || derivedDestinationList.isEmpty()) {
 			return null;
 		} 
-		
 		Location derivedDestination = derivedDestinationList.get(0);
 		if (derivedDestination.getId() != 230l) { // Varick II Landfill
 			return null;

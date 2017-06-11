@@ -42,7 +42,7 @@
 				<input name="ticket" type="text" style="min-width:148px; max-width:148px"
 					value="${sessionScope.searchCriteria.searchMap.ticket}" />
 			</td>
-			<td align="${left}" class="first"><primo:label code="Process Status"/></td>
+			<td align="${left}" class="first"><primo:label code="Processing Status"/></td>
 			<td align="${left}">
 				<select id="processingStatus" name="processingStatus" style="min-width:154px; max-width:154px">
 				    <option value="">------<primo:label code="Please Select" />------</option>
