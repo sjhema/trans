@@ -1508,13 +1508,17 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			addEmptyTicketData(ticketDataList, 1);
 		}
 		
-		List<Vehicle> vehicleList = TicketUtils.retrieveVehicleForUnit(wmTicket.getWmTrailer(), wmTicket.getLoadDate(), 
-				2, genericDAO);
-		if (vehicleList != null && !vehicleList.isEmpty()) {
-			Vehicle trailer = vehicleList.get(0);
-			ticketDataList.add(trailer.getId());
+		if (wmTicket.getOrigin().getId().longValue() == 67l) { // Varick I Transfer
+			ticketDataList.add(575); // Trailer - 0
 		} else {
-			addEmptyTicketData(ticketDataList, 1);
+			List<Vehicle> vehicleList = TicketUtils.retrieveVehicleForUnit(wmTicket.getWmTrailer(), wmTicket.getLoadDate(), 
+					2, genericDAO);
+			if (vehicleList != null && !vehicleList.isEmpty()) {
+				Vehicle trailer = vehicleList.get(0);
+				ticketDataList.add(trailer.getId());
+			} else {
+				addEmptyTicketData(ticketDataList, 1);
+			}
 		}
 	}
 	

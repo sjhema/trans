@@ -1090,6 +1090,34 @@ public class TicketUtils {
 		genericDAO.saveOrUpdate(wmTicket);
 	}
 	
+	public static void processWMTicketForTicketDelete(Ticket ticket, Integer processingStatus, Long userId, GenericDAO genericDAO) {
+		WMTicket wmTicket = retrieveWMTicket(ticket.getOriginTicket(), ticket.getOrigin().getId(), true,
+					null, genericDAO);
+		if (wmTicket != null) {
+			save(wmTicket, processingStatus, userId, genericDAO);
+		}
+			
+		wmTicket = retrieveWMTicket(ticket.getDestinationTicket(), ticket.getDestination().getId(), false,
+				null, genericDAO);
+		if (wmTicket != null) {
+			save(wmTicket, processingStatus, userId, genericDAO);
+		}
+	}
+	
+	public static void processWMTicketForTripsheetDelete(TripSheet tripsheet, Integer processingStatus, Long userId, GenericDAO genericDAO) {
+		WMTicket wmTicket = retrieveWMTicket(tripsheet.getOriginTicket(), tripsheet.getOrigin().getId(), true,
+					null, genericDAO);
+		if (wmTicket != null) {
+			save(wmTicket, processingStatus, userId, genericDAO);
+		}
+			
+		wmTicket = retrieveWMTicket(tripsheet.getDestinationTicket(), tripsheet.getDestination().getId(), false,
+				null, genericDAO);
+		if (wmTicket != null) {
+			save(wmTicket, processingStatus, userId, genericDAO);
+		}
+	}
+	
 	public static List<Vehicle> retrieveVehicleForUnit(String unitStr, Date transactionDate, 
 			int type, GenericDAO genericDAO) {
 		 if (!StringUtils.isNumeric(unitStr) || transactionDate == null) {
@@ -1131,13 +1159,19 @@ public class TicketUtils {
 		
 		WMTicket wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin().getId(), 
 				true, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
-		if (wmOriginTicket != null) {
+		if (wmOriginTicket == null) {
+			wmOriginTicket = retrieveWMTicket(tripSheet.getOriginTicket(), tripSheet.getOrigin().getId(), 
+					true, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		} else {
 			mapAndSave(wmOriginTicket, tripSheet, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
 		}
 		
 		WMTicket wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination().getId(), 
 				false, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, genericDAO);
-		if (wmDestinationTicket != null) {
+		if (wmDestinationTicket == null) {
+			wmDestinationTicket = retrieveWMTicket(tripSheet.getDestinationTicket(), tripSheet.getDestination().getId(), 
+					false, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
+		} else {
 			mapAndSave(wmDestinationTicket, tripSheet, WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
 		}
 		

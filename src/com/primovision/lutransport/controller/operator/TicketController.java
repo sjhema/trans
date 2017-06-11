@@ -36,6 +36,7 @@ import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 import com.primovision.lutransport.core.util.ReportDateUtil;
+import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
@@ -46,6 +47,7 @@ import com.primovision.lutransport.model.Terminal;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.Employee;
@@ -1826,6 +1828,8 @@ public class TicketController extends CRUDController<Ticket> {
 	@Override
 	public String delete(@ModelAttribute("modelObject") Ticket entity,
 			BindingResult bindingResult, HttpServletRequest request) {
+		// WM Ticket change - 23rd May 2017
+		Long userId = getUser(request).getId();
 		try {
 		
 			if(entity.getTicketStatus()!=2){
@@ -1838,8 +1842,12 @@ public class TicketController extends CRUDController<Ticket> {
 						tripsheet.setVerificationStatus(null);
 						genericDAO.saveOrUpdate(tripsheet);
 					}
+					
 				}
 				genericDAO.delete(entity);
+				
+				// WM Ticket change - 23rd May 2017
+				TicketUtils.processWMTicketForTicketDelete(entity, WMTicket.PROCESSING_STATUS_PROCESSING, userId, genericDAO);
 			}
 			else
 			{

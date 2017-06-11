@@ -43,6 +43,7 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.driver.Odometer;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
@@ -797,6 +798,8 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 	@Override
 	public String delete(@ModelAttribute("modelObject") TripSheet entity,
 			BindingResult bindingResult, HttpServletRequest request) {
+		// WM Ticket change - 23rd May 2017
+		Long userId = getUser(request).getId();
 		try {
 			String ticketQuery = "Select obj from Ticket obj where obj.originTicket="+entity.getOriginTicket()+" and obj.destinationTicket="+entity.getDestinationTicket()+" and obj.driver in ("+entity.getDriver().getId()+") and obj.origin in ("+entity.getOrigin().getId()+") and obj.destination in ("+entity.getDestination().getId()+")";
 			
@@ -810,11 +813,17 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 					else{
 						genericDAO.delete(entity);
 						genericDAO.delete(ticket);
+						
+						// WM Ticket change - 23rd May 2017
+						TicketUtils.processWMTicketForTripsheetDelete(entity, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, userId, genericDAO);
 					}
 				}
 			}
 			else{
 				genericDAO.delete(entity);
+				
+				// WM Ticket change - 23rd May 2017
+				TicketUtils.processWMTicketForTripsheetDelete(entity, WMTicket.PROCESSING_STATUS_NO_TRIPSHEET, userId, genericDAO);
 			}
 			
 		} catch (Exception ex) {

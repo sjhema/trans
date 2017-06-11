@@ -854,8 +854,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		copy.setDriverCompany(orig.getDriverCompany());
 		copy.setTerminal(orig.getTerminal());
 		
-		copy.setBillBatch(orig.getBillBatch());
-		
 		copy.setTimeIn(orig.getTimeIn());
 		copy.setTimeOut(orig.getTimeOut());
 		
@@ -867,6 +865,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		copy.setTicketType(WMTicket.DESTINATION_TICKET_TYPE);
 		copy.setDestination(destination);
 		copy.setDestinationTicket(orig.getTicket());
+		
+		copy.setOrigin(orig.getOrigin());
+		copy.setHaulingTicket(orig.getTicket());
 		
 		copy.setUnloadDate(orig.getLoadDate());
 		Date batchDate = TicketUtils.calculateBatchDate(copy.getUnloadDate());
