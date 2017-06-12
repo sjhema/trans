@@ -415,7 +415,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			Location origin = null;
 			Location destination = null;
 			Location locationPtr = null;
-			if (StringUtils.equals(TicketUtils.LOCATION_TYPE_ORIGIN, locationType)) {
+			if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, locationType)) {
 				origin = retrieveOriginForWM(sheet);
 				locationPtr = origin;
 				if (origin == null) {

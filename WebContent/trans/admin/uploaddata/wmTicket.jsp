@@ -33,8 +33,8 @@
 		<td align="${left}">
 			<select id="locationType" name="locationType" style="min-width:154px; max-width:154px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
-				<option value="ORIGIN">Origin</option>
-				<option value="DESTINATION">Destination</option>
+				<option value="ORIGN">Origin</option>
+				<option value="DESTN">Destination</option>
 			</select>
 		</td>
 	</tr>

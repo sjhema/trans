@@ -34,9 +34,6 @@ public class TicketUtils {
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
 	
-	public static String LOCATION_TYPE_ORIGIN = "ORIGIN";
-	public static String LOCATION_TYPE_DESTINATION = "DESTINATION";
-	
 	public static final String WM_COL_TICKET = "Ticket";
 	public static final String WM_COL_HAULING_TICKET = "Hauling Ticket";
 	public static final String WM_COL_TXN_DATE = "Txn date";
