@@ -367,7 +367,6 @@ public class TicketUtils {
 		User user = genericDAO.getById(User.class, entity.getCreatedBy());
 		entity.setEnteredBy(user.getName());
 		entity.setCreatedAt(Calendar.getInstance().getTime());
-		entity.setCreatedBy(user.getId());
 		
 		// Merge into datasource
 		genericDAO.saveOrUpdate(entity);
@@ -545,7 +544,6 @@ public class TicketUtils {
 		User user = genericDAO.getById(User.class, entity.getCreatedBy());
 		entity.setEnteredBy(user.getName());
 		entity.setCreatedAt(Calendar.getInstance().getTime());
-		entity.setCreatedBy(user.getId());
 		
 		genericDAO.saveOrUpdate(entity);
 		
@@ -1117,12 +1115,19 @@ public class TicketUtils {
 	
 	public static List<Vehicle> retrieveVehicleForUnit(String unitStr, Date transactionDate, 
 			int type, GenericDAO genericDAO) {
-		 if (!StringUtils.isNumeric(unitStr) || transactionDate == null) {
+		if (StringUtils.isEmpty(unitStr) || transactionDate == null) {
+			return null;
+		}
+		
+		if (StringUtils.startsWithIgnoreCase(unitStr, "t")) {
+			unitStr = StringUtils.substring(unitStr, 1);
+		}
+		if (!StringUtils.isNumeric(unitStr)) {
 			return null;
 		}
 		 
-		 int unit = Integer.parseInt(unitStr); 
-		 return retrieveVehicleForUnit(unit, transactionDate, type, genericDAO);
+		int unit = Integer.parseInt(unitStr); 
+		return retrieveVehicleForUnit(unit, transactionDate, type, genericDAO);
 	}
 	
 	public static List<Vehicle> retrieveVehicleForUnit(Integer unit, Date transactionDate, 
@@ -1140,6 +1145,16 @@ public class TicketUtils {
 		System.out.println("******************** Vehicle query is " + vehicleQuery);
 		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
 		return vehicleList;
+	}
+	
+	public static void setAutomaticTicketData(Ticket ticket) {
+		ticket.setEnteredBy("Automatic"); // 34
+		ticket.setTicketStatus(1); // Available
+		ticket.setPayRollStatus(1); // No
+		
+		ticket.setStatus(1); 
+		ticket.setCreatedBy(34l); // Automatic
+		ticket.setCreatedAt(Calendar.getInstance().getTime());
 	}
 	
 	public static Ticket createTicketForTripSheet(TripSheet tripSheet, StringBuffer errorMsgBuff,
@@ -1195,15 +1210,7 @@ public class TicketUtils {
 		ticket.setUnloadDate(wmDestinationTicket.getUnloadDate());
 		ticket.setBillBatch(wmDestinationTicket.getBillBatch());
 		
-		ticket.setEnteredBy("Automatic"); // 34 - Looks like this is not saved
-		ticket.setTicketStatus(1); // Available - Correct?
-		ticket.setPayRollStatus(1); // No - correct?
-		//ticketToBeSaved.setPayRollBatch(payRollBatch); // Required?
-		//ticketToBeSaved.setSubcontractor();  //Required?
-		
-		ticket.setStatus(1); // Required?
-		ticket.setCreatedBy(tripSheet.getCreatedBy());
-		ticket.setCreatedAt(Calendar.getInstance().getTime());
+		setAutomaticTicketData(ticket);
 		
 		save(ticket, "complete", errorMsgBuff, genericDAO);
 		

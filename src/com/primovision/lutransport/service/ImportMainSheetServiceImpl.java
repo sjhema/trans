@@ -759,17 +759,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					map(ticketToBeSaved, currentWMTicket);
 					TicketUtils.calculateNetAndTons(ticketToBeSaved);
-						
-					ticketToBeSaved.setEnteredBy("Automatic"); // 34 - Looks like this is not saved
-					ticketToBeSaved.setTicketStatus(1); // Available - Correct?
-					ticketToBeSaved.setPayRollStatus(1); // No - correct?
-					//ticketToBeSaved.setPayRollBatch(payRollBatch); // Required?
-					//ticketToBeSaved.setSubcontractor();  //Required?
-					
-					ticketToBeSaved.setStatus(1); // Required?
-					ticketToBeSaved.setCreatedBy(createdBy);
-					ticketToBeSaved.setCreatedAt(Calendar.getInstance().getTime());
-					
+					TicketUtils.setAutomaticTicketData(ticketToBeSaved);
 					TicketUtils.save(ticketToBeSaved, "complete", recordErrorMsg, genericDAO);
 					
 					if (recordErrorMsg.length() != 0) {

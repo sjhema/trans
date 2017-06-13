@@ -1375,7 +1375,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		if (wmDestinationTicket.getHaulingTicket() == null || wmDestinationTicket.getOrigin() == null) {
 			populateOriginWMTicketData(null, ticketDataList);
-			populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+			populateDestinationWMTicketData(wmDestinationTicket, null, ticketDataList);
 			ticketDataList.add(userId);
 			ticketDataList.add("1");
 			ticketDataList.add("1");
@@ -1390,7 +1390,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		}
 		populateOriginWMTicketData(wmOriginTicket, ticketDataList);
 		
-		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		populateDestinationWMTicketData(wmDestinationTicket, wmOriginTicket, ticketDataList);
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
 		ticketDataList.add("1");
@@ -1422,7 +1422,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			wmDestinationTicket = TicketUtils.retrieveWMTicket(tripsheet.getDestinationTicket(), tripsheet.getDestination().getId(), false, 
 					WMTicket.PROCESSING_STATUS_PROCESSING, genericDAO);
 		}
-		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		populateDestinationWMTicketData(wmDestinationTicket, wmOriginTicket, ticketDataList);
 		
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
@@ -1458,7 +1458,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			wmDestinationTicket = retrieveCorrespondingDestinationTicket(originTicketNo, 
 					origin, WMTicket.PROCESSING_STATUS_PROCESSING);
 		}
-		populateDestinationWMTicketData(wmDestinationTicket, ticketDataList);
+		populateDestinationWMTicketData(wmDestinationTicket, wmOriginTicket, ticketDataList);
 		
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
@@ -1523,33 +1523,34 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	}
 	
 	// WM Ticket change - 23rd May 2017
-	private void populateDestinationWMTicketData(WMTicket wmTicket, List ticketDataList) {
-		if (wmTicket == null) {
+	private void populateDestinationWMTicketData(WMTicket wmDestinationTicket, WMTicket wmOriginTicket, 
+			List ticketDataList) {
+		if (wmDestinationTicket == null) {
 			addEmptyTicketData(ticketDataList, 11);
 			return;
 		}
 		
-		ticketDataList.add(wmTicket.getDestination().getId());
-		ticketDataList.add(wmTicket.getTicket());
+		ticketDataList.add(wmDestinationTicket.getDestination().getId());
+		ticketDataList.add(wmDestinationTicket.getTicket());
 		
 		DecimalFormat df = new DecimalFormat("#0.00");
 		
-		ticketDataList.add(wmTicket.getLandfillTimeIn());
-		ticketDataList.add(wmTicket.getLandfillTimeOut());
+		ticketDataList.add(wmDestinationTicket.getLandfillTimeIn());
+		ticketDataList.add(wmDestinationTicket.getLandfillTimeOut());
 		
-		if (wmTicket.getLandfillGross() != null) {
-			ticketDataList.add(df.format(wmTicket.getLandfillGross()));
+		if (wmDestinationTicket.getLandfillGross() != null) {
+			ticketDataList.add(df.format(wmDestinationTicket.getLandfillGross()));
 		} else {
 			addEmptyTicketData(ticketDataList, 1);
 		}
-		if (wmTicket.getLandfillTare() != null) {
-			ticketDataList.add(df.format(wmTicket.getLandfillTare()));
+		if (wmDestinationTicket.getLandfillTare() != null) {
+			ticketDataList.add(df.format(wmDestinationTicket.getLandfillTare()));
 		} else {
 			addEmptyTicketData(ticketDataList, 1);
 		}
 		
-		if (wmTicket.getLandfillGross() != null && wmTicket.getLandfillTare() != null) {
-			Double landfillNet = wmTicket.getLandfillGross() - wmTicket.getLandfillTare();
+		if (wmDestinationTicket.getLandfillGross() != null && wmDestinationTicket.getLandfillTare() != null) {
+			Double landfillNet = wmDestinationTicket.getLandfillGross() - wmDestinationTicket.getLandfillTare();
 			Double landfillTons = landfillNet / 2000.0;
 			
 			ticketDataList.add(df.format(landfillNet));
@@ -1558,22 +1559,32 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			addEmptyTicketData(ticketDataList, 2);
 		}
 		
-		if (wmTicket.getUnloadDate() != null) {
-			String unLoadDateStr = displayDateFormat.format(wmTicket.getUnloadDate());
+		if (wmDestinationTicket.getUnloadDate() != null) {
+			String unLoadDateStr = displayDateFormat.format(wmDestinationTicket.getUnloadDate());
 			ticketDataList.add(unLoadDateStr);
 		} else {
 			addEmptyTicketData(ticketDataList, 1);
 		}
 		
-		if (wmTicket.getBillBatch() != null) {
-			String billBatchStr = displayDateFormat.format(wmTicket.getBillBatch());
+		if (wmDestinationTicket.getBillBatch() != null) {
+			String billBatchStr = displayDateFormat.format(wmDestinationTicket.getBillBatch());
 			ticketDataList.add(billBatchStr);
 		} else {
 			addEmptyTicketData(ticketDataList, 1);
 		}
 		
-		List<Vehicle> vehicleList = TicketUtils.retrieveVehicleForUnit(wmTicket.getWmVehicle(), wmTicket.getUnloadDate(), 
-				1, genericDAO);
+		
+		List<Vehicle> vehicleList = null;
+		long originId = (wmOriginTicket == null) ? -1l : wmOriginTicket.getOrigin().getId();
+		if (originId == 55l // Philadelphia Transfer
+				|| originId == 31l) { // Forge Transfer
+			vehicleList = TicketUtils.retrieveVehicleForUnit(wmOriginTicket.getWmVehicle(), 
+					wmOriginTicket.getLoadDate(), 1, genericDAO);
+		} 
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			vehicleList = TicketUtils.retrieveVehicleForUnit(wmDestinationTicket.getWmVehicle(), 
+				wmDestinationTicket.getUnloadDate(), 1, genericDAO);
+		}
 		if (vehicleList != null && !vehicleList.isEmpty()) {
 			Vehicle truck = vehicleList.get(0);
 			ticketDataList.add(truck.getUnit());
