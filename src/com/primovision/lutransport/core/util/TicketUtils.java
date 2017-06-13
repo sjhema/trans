@@ -1113,6 +1113,18 @@ public class TicketUtils {
 		}
 	}
 	
+	public static List<Vehicle> retrieveTruckFromOriginWMTicket(WMTicket wmOriginTicket, GenericDAO genericDAO) {
+		List<Vehicle> vehicleList = null;
+		long originId = (wmOriginTicket == null) ? -1l : wmOriginTicket.getOrigin().getId();
+		if (originId == 55l // Philadelphia Transfer
+				|| originId == 31l) { // Forge Transfer
+			vehicleList = TicketUtils.retrieveVehicleForUnit(wmOriginTicket.getWmVehicle(), 
+					wmOriginTicket.getLoadDate(), 1, genericDAO);
+		}
+		
+		return vehicleList;
+	}
+	
 	public static List<Vehicle> retrieveVehicleForUnit(String unitStr, Date transactionDate, 
 			int type, GenericDAO genericDAO) {
 		if (StringUtils.isEmpty(unitStr) || transactionDate == null) {

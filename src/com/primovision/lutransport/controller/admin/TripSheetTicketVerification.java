@@ -1526,7 +1526,15 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 	private void populateDestinationWMTicketData(WMTicket wmDestinationTicket, WMTicket wmOriginTicket, 
 			List ticketDataList) {
 		if (wmDestinationTicket == null) {
-			addEmptyTicketData(ticketDataList, 11);
+			addEmptyTicketData(ticketDataList, 10);
+			
+			List<Vehicle> vehicleList = TicketUtils.retrieveTruckFromOriginWMTicket(wmOriginTicket, genericDAO);
+			if (vehicleList != null && !vehicleList.isEmpty()) {
+				Vehicle truck = vehicleList.get(0);
+				ticketDataList.add(truck.getUnit());
+			} else {
+				addEmptyTicketData(ticketDataList, 1);
+			}
 			return;
 		}
 		
@@ -1574,13 +1582,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		}
 		
 		
-		List<Vehicle> vehicleList = null;
-		long originId = (wmOriginTicket == null) ? -1l : wmOriginTicket.getOrigin().getId();
-		if (originId == 55l // Philadelphia Transfer
-				|| originId == 31l) { // Forge Transfer
-			vehicleList = TicketUtils.retrieveVehicleForUnit(wmOriginTicket.getWmVehicle(), 
-					wmOriginTicket.getLoadDate(), 1, genericDAO);
-		} 
+		List<Vehicle> vehicleList = TicketUtils.retrieveTruckFromOriginWMTicket(wmOriginTicket, genericDAO);
 		if (vehicleList == null || vehicleList.isEmpty()) {
 			vehicleList = TicketUtils.retrieveVehicleForUnit(wmDestinationTicket.getWmVehicle(), 
 				wmDestinationTicket.getUnloadDate(), 1, genericDAO);
