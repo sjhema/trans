@@ -474,14 +474,30 @@ function populateFromTicketDataForYesTripSheet(listData) {
 }
 
 function populateFromTicketDataForNoTripSheet(listData) {
-	$("#origin").val(listData[1]);
-	$("#originticket").val(listData[2]);
-	$("#transfertimein").val(listData[3]);
-	$("#transfertimeout").val(listData[4]);
-	$("#transferGrossId").val(listData[5]);
-	$("#transferTareId").val(listData[6]);
-	$("#transferNetId").val(listData[7]);
-	$("#transferTons").val(listData[8]);
+	if (listData[1] != '') {
+		$("#origin").val(listData[1]);
+	}
+	if (listData[2] != '') {
+		$("#originticket").val(listData[2]);
+	}
+	if (listData[3] != '') {
+		$("#transfertimein").val(listData[3]);
+	}
+	if (listData[4] != '') {
+		$("#transfertimeout").val(listData[4]);
+	}
+	if (listData[5] != '') {
+		$("#transferGrossId").val(listData[5]);
+	}
+	if (listData[6] != '') {
+		$("#transferTareId").val(listData[6]);
+	}
+	if (listData[7] != '') {
+		$("#transferNetId").val(listData[7]);
+	}
+	if (listData[8] != '') {
+		$("#transferTons").val(listData[8]);
+	}
 	if (listData[9] != '') {
 		$("#datepicker").val(listData[9]);
 	}
@@ -489,14 +505,30 @@ function populateFromTicketDataForNoTripSheet(listData) {
 		$("#trailerId").val(listData[10]);
 	}
 	
-	$("#destination").val(listData[11]);
-	$("#destinationticket").val(listData[12]);
-	$("#landfilltimein").val(listData[13]);
-	$("#landfilltimeout").val(listData[14]);
-	$("#landfillGrossId").val(listData[15]);
-	$("#landfillTareId").val(listData[16]);
-	$("#LandFillNetId").val(listData[17]);
-	$("#landfillTons").val(listData[18]);
+	if (listData[11] != '') {
+		$("#destination").val(listData[11]);
+	}
+	if (listData[12] != '') {
+		$("#destinationticket").val(listData[12]);
+	}
+	if (listData[13] != '') {
+		$("#landfilltimein").val(listData[13]);
+	}
+	if (listData[14] != '') {
+		$("#landfilltimeout").val(listData[14]);
+	}
+	if (listData[15] != '') {
+		$("#landfillGrossId").val(listData[15]);
+	}
+	if (listData[16] != '') {
+		$("#landfillTareId").val(listData[16]);
+	}
+	if (listData[17] != '') {
+		$("#LandFillNetId").val(listData[17]);
+	}
+	if (listData[18] != '') {
+		$("#landfillTons").val(listData[18]);
+	}
 	if (listData[19] != '') {
 		$("#datepicker1").val(listData[19]);
 	}

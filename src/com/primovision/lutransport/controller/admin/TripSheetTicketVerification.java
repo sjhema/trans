@@ -1147,7 +1147,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				}
 				
 				// WM Ticket change - 23rd May 2017
-				Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, true);
+				Ticket ticket = retrieveTicket(ticketNo, landfill, landticket, false);
 				if (ticket != null) {
 					populateTicketData(ticket, tickList);
 				} else {
