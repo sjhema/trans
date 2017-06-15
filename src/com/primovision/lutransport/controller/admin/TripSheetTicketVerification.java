@@ -524,6 +524,9 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			beforeSave(request, entity, model);
 			User user=genericDAO.getById(User.class,entity.getCreatedBy());
 			entity.setEnteredBy(user.getName());
+			
+			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
+			
 			// merge into datasource
 			genericDAO.saveOrUpdate(entity);
 			cleanUp(request);
@@ -684,6 +687,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			beforeSave(request, entity, model);
 			User user=genericDAO.getById(User.class,entity.getCreatedBy());
 			entity.setEnteredBy(user.getName());
+			
+			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
 			
 			genericDAO.saveOrUpdate(entity);
 			
@@ -1190,7 +1195,8 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				mssg="Duplicate Origin Ticket";
 				
 				Ticket aTicket = tickets.get(0);
-				if (aTicket.getPaperVerifiedStatus().intValue() == Ticket.PAPER_VERIFIED_STATUS_NO) {
+				if (aTicket.getPaperVerifiedStatus().intValue() == Ticket.PAPER_VERIFIED_STATUS_NO
+						&& StringUtils.equals("Automatic", aTicket.getEnteredBy())) { // Use auto created instead?
 					mssg += " with id:" + aTicket.getId();;
 				}
 			}
