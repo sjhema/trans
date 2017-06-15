@@ -1196,7 +1196,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				
 				Ticket aTicket = tickets.get(0);
 				if (aTicket.getPaperVerifiedStatus().intValue() == Ticket.PAPER_VERIFIED_STATUS_NO
-						&& StringUtils.equals("Automatic", aTicket.getEnteredBy())) { // Use auto created instead?
+						&& aTicket.getAutoCreated().intValue() == Ticket.AUTO_CREATED_YES) { 
 					mssg += " with id:" + aTicket.getId();;
 				}
 			}
