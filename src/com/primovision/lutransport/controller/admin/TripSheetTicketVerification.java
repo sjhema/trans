@@ -1187,7 +1187,12 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		    String origin = "select obj from Ticket obj where obj.origin.id="+landfill+" and obj.originTicket="+landticket+" and obj.id != "+tickId;
 			List<Ticket> tickets = genericDAO.executeSimpleQuery(origin);
 			if (tickets!=null && tickets.size()>0){		
-				mssg="Duplicate Origin Ticket";	
+				mssg="Duplicate Origin Ticket";
+				
+				Ticket aTicket = tickets.get(0);
+				if (aTicket.getPaperVerifiedStatus().intValue() == Ticket.PAPER_VERIFIED_STATUS_NO) {
+					mssg += " with id:" + aTicket.getId();;
+				}
 			}
 		    
 			 return mssg;
@@ -1216,6 +1221,25 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				mssg="Duplicate Destination Ticket";			
 			}
 			 return mssg;
+		}
+		
+		if ("processPaperVerify".equalsIgnoreCase(action)) {
+			String ticketId = request.getParameter("ticketId");
+			Ticket ticket = genericDAO.getById(Ticket.class, Long.valueOf(ticketId));
+			
+			ticket.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES); // Verified
+			ticket.setTicketStatus(1); // Available
+			ticket.setPayRollStatus(1); // No - not penidng
+			
+			User user = getUser(request);
+			ticket.setEnteredBy(user.getName());
+			ticket.setCreatedBy(user.getId());
+			ticket.setModifiedBy(user.getId());
+			ticket.setModifiedAt(Calendar.getInstance().getTime());
+			
+			genericDAO.saveOrUpdate(ticket);
+			
+			return "Ticket verified successfully by:" + user.getId();
 		}
 		
 		

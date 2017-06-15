@@ -84,4 +84,11 @@ ADD COLUMN `long_name` VARCHAR(255) NULL DEFAULT NULL AFTER `code`;
 ALTER TABLE `lutransport`.`location` 
 ADD COLUMN `hauling_name` VARCHAR(255) NULL DEFAULT NULL AFTER `long_name`;
 
+------------
+ALTER TABLE `lutransport`.`ticket` 
+ADD COLUMN `paperVerifiedStatus` INT(11) NULL DEFAULT 0 AFTER `driver_payrate`;
+
+ALTER TABLE `lutransport`.`ticket` 
+ADD COLUMN `autoCreated` INT(11) NULL DEFAULT 0 AFTER `paperVerifiedStatus`;
+
 

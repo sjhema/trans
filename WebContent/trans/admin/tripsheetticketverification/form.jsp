@@ -346,6 +346,37 @@ function checkBatchDate() {
 	
 } */
 
+function processPaperVerify() {
+	var  ticketIdForVerifn = document.getElementById("ticketIdForVerifn").value;
+	if (ticketIdForVerifn == '') {
+		return;
+	}
+	
+	jQuery.ajax({
+		url:'${ctx}/admin/tripsheetticketverification/ajax.do?action=processPaperVerify&ticketId='+ticketIdForVerifn, 
+		success: function( data ) {
+			if (data.indexOf("success") != -1) {
+				var ticketStatusSel = document.getElementById("ticketStatus");
+				ticketStatusSel.value = "1"; // Available
+				
+				var payrollStatusSel = document.getElementById("payRollStatus");
+				payrollStatusSel.value = "1"; // No - not Pending
+				
+				var dataTokens = data.split(":");
+				var createdBy = dataTokens[1];
+				
+				var createdBySel = document.getElementById("createdBy");
+				createdBySel.value = createdBy;
+				
+				var paperVerifyButton = document.getElementById("paperVerifyButton");
+				paperVerifyButton.disabled = true;
+				
+				var ticketIdForVerifn = document.getElementById("ticketIdForVerifn");
+				ticketIdForVerifn.value = "";
+			}
+		}
+	});		
+}
 
 function checkLandfillTicketNew() {
 	var landfill=document.getElementById("origin").value;
@@ -381,6 +412,12 @@ function checkLandfillTicket() {
 	var originTicket=document.getElementById("originticket").value;
 	var  ticID=document.getElementById("id").value;
 	
+	var ticketIdForVerifn = document.getElementById("ticketIdForVerifn");
+	var paperVerifyButton = document.getElementById("paperVerifyButton");
+	
+	ticketIdForVerifn.value = "";
+	paperVerifyButton.disabled = true;
+	
 	if(landfill!="" && originTicket!=""){
 		jQuery.ajax({
 			url:'${ctx}/admin/tripsheetticketverification/ajax.do?action=checkOriginTicket&landfil='+landfill+'&originTcket='+originTicket+'&ticId='+ticID, 
@@ -389,6 +426,12 @@ function checkLandfillTicket() {
 					document.getElementById("spanId1").innerHTML="Duplicate Origin Ticket";					
 					$("#errorMessageID").addClass( "error" );
 					document.getElementById("errorMessageID").innerHTML='<img src="${ctx}/images/iconWarning.gif" alt="Warning" class="icon" /> This trip sheet entry has been verified already';
+					
+					var dataTokens = data.split(":");
+					if (dataTokens.length == 2) {
+						ticketIdForVerifn.value = dataTokens[1];
+						paperVerifyButton.disabled = false;
+					}
 				}
 				else{
 					document.getElementById("spanId1").innerHTML="";
@@ -819,6 +862,7 @@ function formatDate1(){
 <form:form action="save.do" name="tripsheetTicketForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
+	<input type=hidden id="ticketIdForVerifn" name="ticketIdForVerifn" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Common Information" />
@@ -1121,6 +1165,10 @@ function formatDate1(){
 			<td align="${left}" colspan="2">
 			
 				<c:if test="${modelObject.ticketStatus != 2}">
+				<input type="button"
+					name="paperVerifyButton" id="paperVerifyButton" onclick="javascript:processPaperVerify();"
+					value="<primo:label code="Verify"/>" class="flat" disabled/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 				name="create" id="create" onclick="javascript:submitform('complete');"
 				value="<primo:label code="Save"/>" class="flat" />

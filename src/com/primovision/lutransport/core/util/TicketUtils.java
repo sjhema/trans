@@ -1160,11 +1160,14 @@ public class TicketUtils {
 	}
 	
 	public static void setAutomaticTicketData(Ticket ticket) {
-		ticket.setEnteredBy("Automatic"); // 34
-		ticket.setTicketStatus(1); // Available
-		ticket.setPayRollStatus(1); // No
+		ticket.setAutoCreated(Ticket.AUTO_CREATED_YES);
+		
+		ticket.setTicketStatus(0); // On Hold
+		ticket.setPayRollStatus(0); // Yes (Pending)
+		ticket.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_NO); // No
 		
 		ticket.setStatus(1); 
+		ticket.setEnteredBy("Automatic"); // 34
 		ticket.setCreatedBy(34l); // Automatic
 		ticket.setCreatedAt(Calendar.getInstance().getTime());
 	}
