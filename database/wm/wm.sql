@@ -90,5 +90,13 @@ ADD COLUMN `paperVerifiedStatus` INT(11) NULL DEFAULT 0 AFTER `driver_payrate`;
 
 ALTER TABLE `lutransport`.`ticket` 
 ADD COLUMN `autoCreated` INT(11) NULL DEFAULT 0 AFTER `paperVerifiedStatus`;
+----
 
+update ticket 
+set autoCreated=1
+where entered_by = 'Automatic';
+
+update ticket set paperVerifiedStatus = 1
+where ticketStatus=2
+and id!=0;
 
