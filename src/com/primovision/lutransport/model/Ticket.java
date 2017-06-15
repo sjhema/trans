@@ -21,6 +21,16 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class Ticket extends AbstractBaseModel {
 
 	private static final long serialVersionUID = 1807241954265797561L;
+	
+	@Transient
+	public static Integer PAPER_VERIFIED_STATUS_NO = 0;
+	@Transient
+	public static Integer PAPER_VERIFIED_STATUS_YES = 1;
+	
+	@Transient
+	public static Integer AUTO_CREATED_NO = 0;
+	@Transient
+	public static Integer AUTO_CREATED_YES = 1;
 
 	@NotNull
 	@Column(name = "load_date")
@@ -161,6 +171,22 @@ public class Ticket extends AbstractBaseModel {
 	
 	protected Integer payRollStatus;
 	
+	@Column(name="paperVerifiedStatus")
+	private Integer paperVerifiedStatus;
+	
+	@Column(name="autoCreated")
+	private Integer autoCreated;
+	
+	
+	
+	public Integer getAutoCreated() {
+		return autoCreated;
+	}
+
+	public void setAutoCreated(Integer autoCreated) {
+		this.autoCreated = autoCreated;
+	}
+
 	@Column(name = "notes")
 	private String notes;
 	
@@ -175,6 +201,18 @@ public class Ticket extends AbstractBaseModel {
 	@Transient
 	protected String trailers;
 	
+	
+	
+	
+
+	public Integer getPaperVerifiedStatus() {
+		return paperVerifiedStatus;
+	}
+
+	public void setPaperVerifiedStatus(Integer paperVerifiedStatus) {
+		this.paperVerifiedStatus = paperVerifiedStatus;
+	}
+
 	public String getCount() {
 		return count;
 	}
