@@ -100,3 +100,55 @@ update ticket set paperVerifiedStatus = 1
 where ticketStatus=2
 and id!=0;
 
+
+select distinct t.id, t.origin, t.origin_ticket from ticket t, wm_ticket wm where t.origin = wm.origin 
+and t.origin_ticket = wm.origin_ticket
+and t.entered_by in ('admin', 'Automatic')
+and wm.processing_status=4;
+
+select distinct t.id, t.destination, t.destination_ticket from ticket t, wm_ticket wm where t.destination = wm.destination 
+and t.destination_ticket = wm.destination_ticket
+and t.entered_by in ('admin', 'Automatic')
+and wm.processing_status=4;
+
+update ticket 
+set autoCreated=1
+where id in 
+(select t.id from
+(select distinct t1.id from ticket t1, wm_ticket wm where 
+t1.destination_ticket = wm.ticket
+and t1.destination = wm.destination 
+and t1.destination_ticket = wm.destination_ticket
+and wm.processing_status=4) as t
+)
+-- and id!=0;
+
+update ticket 
+set autoCreated=1
+where id in 
+(select t.id from
+(select distinct t1.id from ticket t1, wm_ticket wm where 
+t1.origin_ticket = wm.ticket
+and t1.origin = wm.origin 
+and t1.origin_ticket = wm.origin_ticket
+and wm.processing_status=4) as t
+);
+-- and t1.entered_by in ('admin', 'Automatic')
+
+SELECT entered_by, count(*) FROM `ticket`
+where paperVerifiedStatus=0
+and autoCreated=1
+and bill_batch = '2017-06-11'
+group by entered_by;
+
+SELECT entered_by, id, origin_ticket, destination_ticket, origin, destination, autoCreated as ac, paperVerifiedStatus as pv FROM `ticket`
+where paperVerifiedStatus=0
+and autoCreated=1
+and bill_batch = '2017-06-11'
+and entered_by = 'AS'
+
+select entered_by, id, origin_ticket, destination_ticket, origin, destination, autoCreated as ac, paperVerifiedStatus as pv, ticketStatus as ts, payrollStatus as ps FROM `ticket`
+where origin = 31 and origin_ticket = 1477662
+
+select * from wm_ticket where ticket=1477662 and origin=31 and origin_ticket=1477662
+

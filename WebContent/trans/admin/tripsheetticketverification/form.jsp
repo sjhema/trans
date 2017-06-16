@@ -373,6 +373,9 @@ function processPaperVerify() {
 				
 				var ticketIdForVerifn = document.getElementById("ticketIdForVerifn");
 				ticketIdForVerifn.value = "";
+				
+				clearOriginDestination();
+				clearOriginErrorMsg();
 			}
 		}
 	});		
@@ -424,14 +427,21 @@ function checkLandfillTicket() {
 			success: function( data ) {
 				if(data!=''){
 					document.getElementById("spanId1").innerHTML="Duplicate Origin Ticket";					
+					
 					$("#errorMessageID").addClass( "error" );
-					document.getElementById("errorMessageID").innerHTML='<img src="${ctx}/images/iconWarning.gif" alt="Warning" class="icon" /> This trip sheet entry has been verified already';
+					var errorMsg = "This trip sheet entry has been verified already";
 					
 					var dataTokens = data.split(":");
 					if (dataTokens.length == 2) {
 						ticketIdForVerifn.value = dataTokens[1];
 						paperVerifyButton.disabled = false;
+						
+						errorMsg = "System created ticket, verify ticket info and click Verify button";
 					}
+					
+					document.getElementById("errorMessageID").innerHTML =
+						'<img src="${ctx}/images/iconWarning.gif" alt="Warning" class="icon" />'
+						+ errorMsg;
 				}
 				else{
 					document.getElementById("spanId1").innerHTML="";
@@ -474,6 +484,34 @@ function checkLandfillTicket() {
 		});	
 	}
 	
+}
+
+function clearOriginErrorMsg() {
+	document.getElementById("spanId1").innerHTML="";
+	$("#errorMessageID").removeClass( "error" );
+	document.getElementById("errorMessageID").innerHTML='';
+}
+
+function clearOriginDestination() {
+	$("#origin").val('');
+	$("#originticket").val('');
+	$("#transfertimein").val('');
+	$("#transfertimeout").val('');
+	$("#transferGrossId").val('');
+	$("#transferTareId").val('');
+	$("#transferNetId").val('');
+	$("#transferTons").val('');
+	$("#datepicker").val('');
+	
+	$("#destination").val('');
+	$("#destinationticket").val('');
+	$("#landfilltimein").val('');
+	$("#landfilltimeout").val('');
+	$("#landfillGrossId").val('');
+	$("#landfillTareId").val('');
+	$("#LandFillNetId").val('');
+	$("#landfillTons").val('');
+	$("#datepicker1").val('');
 }
 
 function populateFromTicketDataForYesTripSheet(listData) {

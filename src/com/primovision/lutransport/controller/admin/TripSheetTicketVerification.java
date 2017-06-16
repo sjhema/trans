@@ -1235,7 +1235,7 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			ticket.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES); // Verified
 			ticket.setTicketStatus(1); // Available
-			ticket.setPayRollStatus(1); // No - not penidng
+			ticket.setPayRollStatus(1); // No - not pending
 			
 			User user = getUser(request);
 			ticket.setEnteredBy(user.getName());
