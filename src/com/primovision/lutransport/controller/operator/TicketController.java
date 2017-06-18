@@ -587,6 +587,7 @@ public class TicketController extends CRUDController<Ticket> {
 			User user=genericDAO.getById(User.class,entity.getCreatedBy());
 			entity.setEnteredBy(user.getName());
 			
+			entity.setAutoCreated(Ticket.AUTO_CREATED_NO);
 			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
 			
 			// merge into datasource
@@ -1006,6 +1007,7 @@ public class TicketController extends CRUDController<Ticket> {
 			User user=genericDAO.getById(User.class,entity.getCreatedBy());
 			entity.setEnteredBy(user.getName());
 			
+			entity.setAutoCreated(Ticket.AUTO_CREATED_NO);
 			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
 			
 			genericDAO.saveOrUpdate(entity);
