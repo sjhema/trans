@@ -524,15 +524,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							recordErrorMsg.append("Time In, ");
 						} else {
 							currentWMTicket.setTimeIn(reqTimeInStr);
-							
-							Date loadUnloadDate = convertDate(timeInStr, timeInDateFormat, requiredDateFormat);
-							if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, currentWMTicket.getTicketType())) {
-								currentWMTicket.setLoadDate(loadUnloadDate);
-							} else {
-								currentWMTicket.setUnloadDate(loadUnloadDate);
-								Date batchDate = TicketUtils.calculateBatchDate(loadUnloadDate);
-								currentWMTicket.setBillBatch(batchDate);
-							}
 						}
 					} 
 					
@@ -542,18 +533,27 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						recordError = true;
 						recordErrorMsg.append("Time Out, ");
 					} else {
-						String timeOutStr = timeOutObj.toString();
 						SimpleDateFormat timeOutDateFormat = wmDateTimeFormat;
 						if (!(timeOutObj instanceof Date)) {
 							timeOutDateFormat = wmDateTimeStrFormat;
 						}
 						
-						timeOutStr = convertDateFormat(timeOutStr, timeOutDateFormat, requiredTimeFormat);
-						if (StringUtils.isEmpty(timeOutStr)) {
+						String timeOutStr = timeOutObj.toString();
+						String reqTimeOutStr = convertDateFormat(timeOutStr, timeOutDateFormat, requiredTimeFormat);
+						if (StringUtils.isEmpty(reqTimeOutStr)) {
 							recordError = true;
 							recordErrorMsg.append("Time Out, ");
 						} else {
-							currentWMTicket.setTimeOut(timeOutStr);
+							currentWMTicket.setTimeOut(reqTimeOutStr);
+							
+							Date loadUnloadDate = convertDate(timeOutStr, timeOutDateFormat, requiredDateFormat);
+							if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, currentWMTicket.getTicketType())) {
+								currentWMTicket.setLoadDate(loadUnloadDate);
+							} else {
+								currentWMTicket.setUnloadDate(loadUnloadDate);
+								Date batchDate = TicketUtils.calculateBatchDate(loadUnloadDate);
+								currentWMTicket.setBillBatch(batchDate);
+							}
 						}
 					}
 					
@@ -888,6 +888,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			originName = Location.BQE_TRANSFER_STATION;
 		} else if (StringUtils.contains(originName, Location.VARICK_I_TRANSFER_STATION)) { 
 			originName = Location.VARICK_I_TRANSFER_STATION;
+		} else if (StringUtils.contains(originName, Location.YONKERS_TRANSFER_STATION)) { 
+			originName = Location.YONKERS_TRANSFER_STATION;
 		}
 		
 		List<Location> originList = retrieveLocationDataByLongName(1, originName);

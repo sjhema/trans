@@ -91,6 +91,24 @@ ADD COLUMN `paperVerifiedStatus` INT(11) NULL DEFAULT 0 AFTER `driver_payrate`;
 ALTER TABLE `lutransport`.`ticket` 
 ADD COLUMN `autoCreated` INT(11) NULL DEFAULT 0 AFTER `paperVerifiedStatus`;
 ----
+---
+---
+
+ SELECT bill_batch, count(*) FROM `wm_ticket`
+group by bill_batch
+
+SELECT processing_status, count(*) FROM `wm_ticket`
+group by processing_status
+
+SELECT *  FROM `wm_ticket`
+order by id desc;
+
+select bill_batch, destination, entered_by, count(*) from ticket
+where bill_batch = '2017-06-11'
+and entered_by in ('admin', 'Automatic')
+group by destination, entered_by
+
+select distinct ticketStatus from ticket;
 
 update ticket 
 set autoCreated=1
@@ -151,4 +169,17 @@ select entered_by, id, origin_ticket, destination_ticket, origin, destination, a
 where origin = 31 and origin_ticket = 1477662
 
 select * from wm_ticket where ticket=1477662 and origin=31 and origin_ticket=1477662
+
+select created_by, entered_by, id, origin_ticket, destination_ticket, origin, destination, autoCreated as ac, paperVerifiedStatus as pv, ticketStatus as ts, payrollStatus as ps FROM `ticket`
+where paperVerifiedStatus=0
+and autoCreated=1
+and bill_batch = '2017-06-11'
+and entered_by='admin'
+
+update `ticket`
+set autoCreated=0
+where paperVerifiedStatus=0
+and autoCreated=1
+and bill_batch = '2017-06-11'
+and entered_by='admin'
 

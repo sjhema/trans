@@ -57,7 +57,8 @@ public class TicketUtils {
 		if (locationId == 55l // Philadelphia Transfer
 				|| locationId == 13l // BQE Transfer
 				|| locationId == 67l // Varick I Transfer
-				|| locationId == 31l) { // Forge Transfer
+				|| locationId == 31l // Forge Transfer
+				|| locationId == 71l) { // Yonkers
 			recordsToBeSkipped = 12;
 		}
 		
@@ -94,7 +95,8 @@ public class TicketUtils {
 			colMapping.put(WM_COL_TARE, 24);
 			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 67l // Varick I Transfer
-				|| locationId == 31l) { // Forge Transfer
+				|| locationId == 31l // Forge Transfer
+				|| locationId == 71l) { // Yonkers
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
