@@ -42,6 +42,21 @@
 				<input name="ticket" type="text" style="min-width:148px; max-width:148px"
 					value="${sessionScope.searchCriteria.searchMap.ticket}" />
 			</td>
+			<td align="${left}" class="first"><primo:label code="Ticket Type"/></td>
+			<td align="${left}">
+				<select id="ticketType" name="ticketType" style="min-width:154px; max-width:154px">
+				    <option value="">------<primo:label code="Please Select" />------</option>
+					<c:forEach items="${ticketTypes}" var="aTicketType">
+						<c:set var="selected" value="" />
+						<c:if test="${sessionScope.searchCriteria.searchMap['ticketType'] == aTicketType}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aTicketType}"${selected}>${aTicketType}</option>
+					</c:forEach>
+			     </select>
+			</td>
+		</tr>
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Processing Status"/></td>
 			<td align="${left}">
 				<select id="processingStatus" name="processingStatus" style="min-width:154px; max-width:154px">
@@ -84,17 +99,20 @@
 		editable="false" insertable="false" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false"
-		exportPdf="false" exportXls="false" exportCsv="false">
-		<primo:datecolumn headerText="Date" dataField="txnDate" dataFormat="MM-dd-yyyy" width="95px"/>
+		exportPdf="true" exportXls="true" exportCsv="true">
+		<primo:datecolumn headerText="Date" dataField="loadUnloadDate" dataFormat="MM-dd-yyyy" width="95px"/>
+		<primo:textcolumn headerText="Ticket Type" dataField="ticketType" />
 		<primo:textcolumn headerText="Ticket" dataField="ticket" />
 		<primo:textcolumn headerText="Hauling Ticket" dataField="haulingTicket" />
-		<primo:textcolumn headerText="Ticket Type" dataField="ticketType" />
-		<primo:textcolumn headerText="Origin" dataField="origin.name" width="250px"/>
-		<primo:textcolumn headerText="Destination" dataField="destination.name" width="250px"/>
+		<primo:textcolumn headerText="Origin" dataField="originName"/>
+		<primo:textcolumn headerText="Destination" dataField="destinationName"/>
+		<primo:textcolumn headerText="WM Destination" dataField="wmDestination"/>
 		<primo:textcolumn headerText="Time In" dataField="timeIn" />
 		<primo:textcolumn headerText="Time Out" dataField="timeOut" />
 		<primo:textcolumn headerText="Gross" dataField="gross"/>
 		<primo:textcolumn headerText="Tare" dataField="tare"/>
+		<primo:textcolumn headerText="Truck" dataField="wmVehicle"/>
+		<primo:textcolumn headerText="Trailer" dataField="wmTrailer"/>
 		<primo:staticdatacolumn headerText="Processing Status" dataField="processingStatus" dataType="WMTICKET_PROCESSING_STATUS" />
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>

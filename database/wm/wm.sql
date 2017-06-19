@@ -10,6 +10,11 @@ VALUES ('1405', '/admin/wmTicket/list.do?rst=1', 'Manage WM Ticket', '3', 'Manag
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '1405', '1'); -- ADMIN
  
+UPDATE `lutransport`.`business_object` 
+SET `URL`='/admin/wmTicket/list.do,/admin/wmTicket/create.do,/admin/wmTicket/save.do,/admin/wmTicket/ajax.do,/admin/wmTicket/edit.do,/admin/wmTicket/delete.do,/admin/wmTicket/search.do,/admin/wmTicket/export.do' 
+WHERE `ID`='1405';
+
+ 
  ------
  CREATE TABLE `wm_ticket` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
