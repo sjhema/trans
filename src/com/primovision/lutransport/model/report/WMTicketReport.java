@@ -2,25 +2,27 @@ package com.primovision.lutransport.model.report;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.AbstractBaseModel;
 
 public class WMTicketReport extends AbstractBaseModel {
 	private Long ticket;
 	private Long haulingTicket;
 	
-	private String ticketType;
-	private Integer processingStatus;
+	private String ticketType = StringUtils.EMPTY;
+	private String processingStatus = StringUtils.EMPTY;;
 	
 	private Date txnDate;
 	private Date loadUnloadDate;
 	
-	private String timeIn;
-	private String timeOut;
+	private String timeIn = StringUtils.EMPTY;;
+	private String timeOut = StringUtils.EMPTY;;
 	
-	private String wmVehicle;
-	private String wmTrailer;
+	private String wmVehicle = StringUtils.EMPTY;;
+	private String wmTrailer = StringUtils.EMPTY;;
 	
-	private String wmDestination;
+	private String wmDestination = StringUtils.EMPTY;;
 	
 	private Integer vehicle;
 	private Integer trailer;
@@ -31,10 +33,10 @@ public class WMTicketReport extends AbstractBaseModel {
 	private Double tons;
 	
 	private Date loadDate;
-	private String originName;
+	private String originName = StringUtils.EMPTY;;
 	
 	private Date unloadDate;
-	private String destinationName;
+	private String destinationName = StringUtils.EMPTY;;
 	
 	public Integer getVehicle() {
 		return vehicle;
@@ -66,10 +68,11 @@ public class WMTicketReport extends AbstractBaseModel {
 	public void setTicketType(String ticketType) {
 		this.ticketType = ticketType;
 	}
-	public Integer getProcessingStatus() {
+	
+	public String getProcessingStatus() {
 		return processingStatus;
 	}
-	public void setProcessingStatus(Integer processingStatus) {
+	public void setProcessingStatus(String processingStatus) {
 		this.processingStatus = processingStatus;
 	}
 	public Date getTxnDate() {

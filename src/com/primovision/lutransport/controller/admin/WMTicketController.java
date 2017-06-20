@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.CRUDController;
-
+import com.primovision.lutransport.core.tags.StaticDataUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Location;
@@ -175,7 +175,10 @@ public class WMTicketController extends CRUDController<WMTicket> {
 		aWMTicketReport.setHaulingTicket(aWMTicket.getHaulingTicket());
 		aWMTicketReport.setTxnDate(aWMTicket.getTxnDate());
 		aWMTicketReport.setTicketType(aWMTicket.getTicketType());
-		aWMTicketReport.setProcessingStatus(aWMTicket.getProcessingStatus());
+		
+		String processingStatus = StaticDataUtil.getText("WMTICKET_PROCESSING_STATUS", 
+				aWMTicket.getProcessingStatus().toString());
+		aWMTicketReport.setProcessingStatus(processingStatus);
 		
 		aWMTicketReport.setTimeIn(aWMTicket.getTimeIn());
 		aWMTicketReport.setTimeOut(aWMTicket.getTimeOut());
@@ -183,7 +186,7 @@ public class WMTicketController extends CRUDController<WMTicket> {
 		aWMTicketReport.setGross(aWMTicket.getGross());
 		aWMTicketReport.setTare(aWMTicket.getTare());
 		aWMTicketReport.setNet(aWMTicket.getNet());
-		aWMTicketReport.setTare(aWMTicket.getTare());
+		aWMTicketReport.setTons(aWMTicket.getTons());
 		
 		aWMTicketReport.setWmVehicle(aWMTicket.getWmVehicle());
 		aWMTicketReport.setWmTrailer(aWMTicket.getWmTrailer());
@@ -256,13 +259,16 @@ public class WMTicketController extends CRUDController<WMTicket> {
 	public void export(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response, @RequestParam("type") String type,
 			Object objectDAO, Class clazz) {
+		List<WMTicketReport> wmTicketReportList = searchForExport(model, request);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		Map<String, Object> params = new HashMap<String, Object>();
+		setParamsForExport(params, criteria);
+		
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html")) {
 			response.setHeader("Content-Disposition", "attachment;filename=wmTicketReport." + type);
 		}
-		
-		List<WMTicketReport> wmTicketReportList = searchForExport(model, request);
-		Map<String, Object> params = new HashMap<String, Object>();
 		
 		//List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
 		ByteArrayOutputStream out = null;
@@ -286,5 +292,27 @@ public class WMTicketController extends CRUDController<WMTicket> {
 				}
 			}
 		}
+	}
+	
+	private String retrieveLocationName(Long locationId) {
+		Location location = genericDAO.getById(Location.class, locationId);
+		return (location == null) ? StringUtils.EMPTY : location.getName();
+	}
+
+	private void setParamsForExport(Map<String, Object> params, SearchCriteria criteria) {
+		String origin = (String) criteria.getSearchMap().get("origin");
+		String destination = (String) criteria.getSearchMap().get("destination");
+		String dateFrom = (String) criteria.getSearchMap().get("dateFrom");
+		String dateTo = (String) criteria.getSearchMap().get("dateTo");
+		
+		if (StringUtils.isNotEmpty(origin)) {
+			params.put("origin", retrieveLocationName(Long.valueOf(origin)));
+		}
+		if (StringUtils.isNotEmpty(destination)) {
+			params.put("destination", retrieveLocationName(Long.valueOf(destination)));
+		}
+	
+		params.put("dateFrom", dateFrom);
+		params.put("dateTo", dateTo);
 	}
 }
