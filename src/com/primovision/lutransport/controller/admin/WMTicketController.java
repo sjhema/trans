@@ -91,52 +91,77 @@ public class WMTicketController extends CRUDController<WMTicket> {
 		String dateFrom = (String) criteria.getSearchMap().get("dateFrom");
 		String dateTo = (String) criteria.getSearchMap().get("dateTo");
 		
-		boolean originSelected = false;
-		
 		StringBuffer query = new StringBuffer("select obj from WMTicket obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from WMTicket obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
 		
+		boolean originSelected = false;
+		boolean destinationSelected = false;
 		if (StringUtils.isNotEmpty(origin)) {
 			whereClause.append(" and obj.origin=" + origin);
 			originSelected = true;
 		}
+		
 		if (StringUtils.isNotEmpty(destination)) {
 			whereClause.append(" and obj.destination=" + destination);
+			destinationSelected = true;
 		}
-		if (StringUtils.isNotEmpty(ticket)) {
-			whereClause.append(" and obj.ticket=" + ticket);
-		}
+		
 		if (StringUtils.isNotEmpty(ticketType)) {
+			if (StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, ticketType)) {
+				originSelected = true;
+				destinationSelected = false;
+			} else {
+				destinationSelected = true;
+				originSelected = false;
+			}
 			whereClause.append(" and obj.ticketType='" + ticketType + "'");
+		} else {
+			String impliedTicketType = StringUtils.EMPTY;
+			if (originSelected) {
+				impliedTicketType = WMTicket.ORIGIN_TICKET_TYPE;
+			} else if (destinationSelected) {
+				impliedTicketType = WMTicket.DESTINATION_TICKET_TYPE;
+			} 
+			if (StringUtils.isNotEmpty(impliedTicketType)) {
+				whereClause.append(" and obj.ticketType='" + impliedTicketType + "'");
+			}
 		}
-		if (StringUtils.isNotEmpty(processingStatus)) {
-			whereClause.append(" and obj.processingStatus=" + processingStatus);
-		}
-	   if (StringUtils.isNotEmpty(dateFrom)) {
-	   	String searchDate = "obj.loadDate";
-	   	if (!originSelected) {
-	   		searchDate = "obj.unloadDate";
-	   	}
+		
+		String searchDate = StringUtils.EMPTY;
+		if (originSelected) {
+			searchDate = "obj.loadDate";
+		} else if (destinationSelected) {
+			searchDate = "obj.unloadDate";
+		} else {
+   		searchDate = "obj.loadDate";
+   	}
+		if (StringUtils.isNotEmpty(dateFrom)) {
         	try {
         		whereClause.append(" and " + searchDate + " >='"+sdf.format(dateFormat.parse(dateFrom))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-        	
 		}
       if (StringUtils.isNotEmpty(dateTo)){
 	     	try {
-	     		whereClause.append(" and obj.txnDate <='"+sdf.format(dateFormat.parse(dateTo))+"'");
+	     		whereClause.append(" and " + searchDate + " <='"+sdf.format(dateFormat.parse(dateTo))+"'");
 	     	} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
-      
+		
+		if (StringUtils.isNotEmpty(ticket)) {
+			whereClause.append(" and obj.ticket=" + ticket);
+		}
+		if (StringUtils.isNotEmpty(processingStatus)) {
+			whereClause.append(" and obj.processingStatus=" + processingStatus);
+		}
+		
       query.append(whereClause);
       countQuery.append(whereClause);
-      
-      query.append(" order by obj.txnDate desc");
+     
+      query.append(" order by " + searchDate + " desc, obj.createdAt desc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
