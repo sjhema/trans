@@ -20,6 +20,8 @@ public class Location extends AbstractBaseModel {
 	public static String VARICK_I_TRANSFER_STATION = "Varick I Transfer Station";
 	@Transient
 	public static String YONKERS_TRANSFER_STATION = "Yonkers Transfer";
+	@Transient
+	public static String WAVERLY_TRANSFER_STATION = "Atlantic Waste Disposal";
 	
 	@NotEmpty
 	private String name;

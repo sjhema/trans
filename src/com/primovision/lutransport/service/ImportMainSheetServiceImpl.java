@@ -890,6 +890,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			originName = Location.VARICK_I_TRANSFER_STATION;
 		} else if (StringUtils.contains(originName, Location.YONKERS_TRANSFER_STATION)) { 
 			originName = Location.YONKERS_TRANSFER_STATION;
+		} else if (StringUtils.contains(originName, Location.WAVERLY_TRANSFER_STATION)) { 
+			originName = Location.WAVERLY_TRANSFER_STATION;
 		}
 		
 		List<Location> originList = retrieveLocationDataByLongName(1, originName);
