@@ -97,8 +97,7 @@ public class TicketUtils {
 			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 67l // Varick I Transfer
 				|| locationId == 31l // Forge Transfer
-				|| locationId == 71l // Yonkers Transfer
-				|| locationId == 70l) { // Waverly Transfer
+				|| locationId == 71l) { // Yonkers Transfer
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
@@ -107,6 +106,19 @@ public class TicketUtils {
 			colMapping.put(WM_COL_VEHICLE, 8);
 			colMapping.put(WM_COL_TRAILER, 10);
 			colMapping.put(WM_COL_DESTINATION, 12);
+			colMapping.put(WM_COL_TONS, 20);
+			colMapping.put(WM_COL_GROSS, 23);
+			colMapping.put(WM_COL_TARE, 24);
+			colMapping.put(WM_COL_NET, 25);
+		} else if (locationId == 70l) { // Waverly Transfer
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 7);
+			colMapping.put(WM_COL_VEHICLE, 8);
+			colMapping.put(WM_COL_TRAILER, 10);
+			colMapping.put(WM_COL_DESTINATION, 6);
 			colMapping.put(WM_COL_TONS, 20);
 			colMapping.put(WM_COL_GROSS, 23);
 			colMapping.put(WM_COL_TARE, 24);

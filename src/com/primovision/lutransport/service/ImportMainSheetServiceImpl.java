@@ -802,7 +802,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		if (!StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, wmTicket.getTicketType())) {
 			return null;
 		}
-		if (wmTicket.getOrigin().getId().longValue() != 67l) { // Varick I Transfer 
+		long originId = wmTicket.getOrigin().getId().longValue();
+		if (originId != 67l // Varick I Transfer 
+				&& originId != 70l) { // Waverly Transfer 
 			return null;
 		}
 		
@@ -815,7 +817,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		} 
 		Location derivedDestination = derivedDestinationList.get(0);
-		if (derivedDestination.getId() != 230l) { // Varick II Landfill
+		if (derivedDestination.getId() != 230l // Varick II Landfill
+				&& derivedDestination.getId() != 82l // Reco Landfill
+				&& derivedDestination.getId() != 384l) { // Chesapeake Landfill
 			return null;
 		}
 		
