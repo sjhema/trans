@@ -523,7 +523,22 @@ function formatDate3(){
 			</td>
 		</tr>
 		
-		
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
+			<td align="${left}">
+				<select id="subcontractor" name="subcontractor" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select" />------</option>
+					<c:forEach items="${subcontractors}" var="aSubcontractor">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['subcontractor'] == aSubcontractor.id}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aSubcontractor.id}"${selected}>${aSubcontractor.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+		</tr>
 		
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Ticket Status"/></td>
