@@ -3875,6 +3875,11 @@ throw new Exception("origin and destindation is empty");
 			//countQuery.append(" and  obj.firstInState between '" + firstInStateFrom
 			//		+ "' and '" + firstInStateTo + "'");
 		}
+      
+      // Mileage log service model change - 5th Jul 2017
+      String modelServiceTruck = "Service Truck";
+      query.append(" and obj.unit.model != '"+modelServiceTruck+"'");
+		countQuery.append(" and obj.unit.model != '"+modelServiceTruck+"'");
 
       query.append(" order by obj.company.name asc, obj.state.name asc, obj.unitNum asc, obj.period desc");
       countQuery.append(" order by obj.period desc");
