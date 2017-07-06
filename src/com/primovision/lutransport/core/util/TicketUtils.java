@@ -74,14 +74,14 @@ public class TicketUtils {
 			colMapping.put(WM_COL_TIME_IN, 1);
 			colMapping.put(WM_COL_TIME_OUT, 2);
 			colMapping.put(WM_COL_TICKET, 5);
-			colMapping.put(WM_COL_DESTINATION, 6);
 			colMapping.put(WM_COL_COMPANY, 7);
 			colMapping.put(WM_COL_VEHICLE, 8);
-			colMapping.put(WM_COL_TRAILER, 9);
-			colMapping.put(WM_COL_TONS, 17);
-			colMapping.put(WM_COL_GROSS, 20);
-			colMapping.put(WM_COL_TARE, 21);
-			colMapping.put(WM_COL_NET, 22);
+			colMapping.put(WM_COL_TRAILER, 10);
+			colMapping.put(WM_COL_DESTINATION, 12);
+			colMapping.put(WM_COL_TONS, 20);
+			colMapping.put(WM_COL_GROSS, 23);
+			colMapping.put(WM_COL_TARE, 24);
+			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 13l) { // BQE Transfer
 			colMapping.put(WM_COL_TXN_DATE, 0);
 			colMapping.put(WM_COL_TIME_IN, 1);
