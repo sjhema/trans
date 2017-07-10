@@ -17,6 +17,12 @@ public class IFTAReportWrapper {
 	String states = StringUtils.EMPTY;
 	String companies = StringUtils.EMPTY;
 	
+	String firstInStateFrom = StringUtils.EMPTY;
+	String firstInStateTo = StringUtils.EMPTY;
+	
+	String lastInStateFrom = StringUtils.EMPTY;
+	String lastInStateTo = StringUtils.EMPTY;
+	
 	List<IFTAReport> iftaReportList;
 	
 	public double getTotalGallons() {
@@ -81,5 +87,37 @@ public class IFTAReportWrapper {
 
 	public void setIftaReportList(List<IFTAReport> iftaReportList) {
 		this.iftaReportList = iftaReportList;
+	}
+
+	public String getFirstInStateFrom() {
+		return firstInStateFrom;
+	}
+
+	public void setFirstInStateFrom(String firstInStateFrom) {
+		this.firstInStateFrom = firstInStateFrom;
+	}
+
+	public String getFirstInStateTo() {
+		return firstInStateTo;
+	}
+
+	public void setFirstInStateTo(String firstInStateTo) {
+		this.firstInStateTo = firstInStateTo;
+	}
+
+	public String getLastInStateFrom() {
+		return lastInStateFrom;
+	}
+
+	public void setLastInStateFrom(String lastInStateFrom) {
+		this.lastInStateFrom = lastInStateFrom;
+	}
+
+	public String getLastInStateTo() {
+		return lastInStateTo;
+	}
+
+	public void setLastInStateTo(String lastInStateTo) {
+		this.lastInStateTo = lastInStateTo;
 	}
 }

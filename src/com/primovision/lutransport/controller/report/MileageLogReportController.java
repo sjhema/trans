@@ -138,8 +138,10 @@ public class MileageLogReportController extends BaseController {
 		params.put("states", states);
 		
 		String period = "-";
-		if (!StringUtils.isEmpty(wrapper.getPeriodFrom()) && !StringUtils.isEmpty(wrapper.getPeriodTo())) {
+		if (StringUtils.isNotEmpty(wrapper.getPeriodFrom()) && StringUtils.isNotEmpty(wrapper.getPeriodTo())) {
 			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
+		} else if (StringUtils.isNotEmpty(wrapper.getLastInStateFrom()) && StringUtils.isNotEmpty(wrapper.getLastInStateTo())) {
+			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
 		  
@@ -172,8 +174,10 @@ public class MileageLogReportController extends BaseController {
 		params.put("states", states);
 		
 		String period = "-";
-		if (!StringUtils.isEmpty(wrapper.getPeriodFrom()) && !StringUtils.isEmpty(wrapper.getPeriodTo())) {
+		if (StringUtils.isNotEmpty(wrapper.getPeriodFrom()) && StringUtils.isNotEmpty(wrapper.getPeriodTo())) {
 			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
+		} else if (StringUtils.isNotEmpty(wrapper.getLastInStateFrom()) && StringUtils.isNotEmpty(wrapper.getLastInStateTo())) {
+			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
 		  
@@ -419,6 +423,11 @@ public class MileageLogReportController extends BaseController {
 		iftaReportInput.setPeriodTo(mileageLogReportInput.getPeriodTo());
 		
 		iftaReportInput.setReportType(mileageLogReportInput.getReportType());
+		
+		iftaReportInput.setFirstInStateFrom(mileageLogReportInput.getFirstInStateFrom());
+		iftaReportInput.setFirstInStateTo(mileageLogReportInput.getFirstInStateTo());
+		iftaReportInput.setLastInStateFrom(mileageLogReportInput.getLastInStateFrom());
+		iftaReportInput.setLastInStateTo(mileageLogReportInput.getLastInStateTo());
 	}
 
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")

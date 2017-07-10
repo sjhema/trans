@@ -10,6 +10,11 @@ public class IFTAReportInput {
 	private String company;
 	private String unit;
 	
+	private String firstInStateFrom;
+	private String firstInStateTo;
+	private String lastInStateFrom;
+	private String lastInStateTo;
+	
 	private String reportType;
 	
 	public String getReportType() {
@@ -50,5 +55,29 @@ public class IFTAReportInput {
 	}
 	public void setPeriodTo(String periodTo) {
 		this.periodTo = periodTo;
+	}
+	public String getFirstInStateFrom() {
+		return firstInStateFrom;
+	}
+	public void setFirstInStateFrom(String firstInStateFrom) {
+		this.firstInStateFrom = firstInStateFrom;
+	}
+	public String getFirstInStateTo() {
+		return firstInStateTo;
+	}
+	public void setFirstInStateTo(String firstInStateTo) {
+		this.firstInStateTo = firstInStateTo;
+	}
+	public String getLastInStateFrom() {
+		return lastInStateFrom;
+	}
+	public void setLastInStateFrom(String lastInStateFrom) {
+		this.lastInStateFrom = lastInStateFrom;
+	}
+	public String getLastInStateTo() {
+		return lastInStateTo;
+	}
+	public void setLastInStateTo(String lastInStateTo) {
+		this.lastInStateTo = lastInStateTo;
 	}
 }

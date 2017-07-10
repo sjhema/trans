@@ -3642,6 +3642,8 @@ throw new Exception("origin and destindation is empty");
 		anIFTAReportWrapper.setCompanies(mileageLogReportWrapper.getCompanies());
 		anIFTAReportWrapper.setPeriodFrom(mileageLogReportWrapper.getPeriodFrom());
 		anIFTAReportWrapper.setPeriodTo(mileageLogReportWrapper.getPeriodTo());
+		anIFTAReportWrapper.setLastInStateFrom(mileageLogReportWrapper.getLastInStateFrom());
+		anIFTAReportWrapper.setLastInStateTo(mileageLogReportWrapper.getLastInStateTo());
 		anIFTAReportWrapper.setStates(mileageLogReportWrapper.getStates());
 		anIFTAReportWrapper.setTotalMiles(mileageLogReportWrapper.getTotalMiles());
 		anIFTAReportWrapper.setTotalRows(mileageLogReportWrapper.getTotalRows());
@@ -3718,6 +3720,8 @@ throw new Exception("origin and destindation is empty");
 		anIFTAReportWrapper.setCompanies(mileageLogReportWrapper.getCompanies());
 		anIFTAReportWrapper.setPeriodFrom(mileageLogReportWrapper.getPeriodFrom());
 		anIFTAReportWrapper.setPeriodTo(mileageLogReportWrapper.getPeriodTo());
+		anIFTAReportWrapper.setLastInStateFrom(mileageLogReportWrapper.getLastInStateFrom());
+		anIFTAReportWrapper.setLastInStateTo(mileageLogReportWrapper.getLastInStateTo());
 		anIFTAReportWrapper.setStates(mileageLogReportWrapper.getStates());
 		anIFTAReportWrapper.setTotalMiles(mileageLogReportWrapper.getTotalMiles());
 		anIFTAReportWrapper.setTotalRows(mileageLogReportWrapper.getTotalRows());
@@ -3739,26 +3743,32 @@ throw new Exception("origin and destindation is empty");
 		fuelLogReportInput.setState(iftaReportInput.getState());
 		fuelLogReportInput.setUnit(iftaReportInput.getUnit());
 		
-		if (StringUtils.isEmpty(iftaReportInput.getPeriodFrom()) || StringUtils.isEmpty(iftaReportInput.getPeriodTo())) {
-			return;
+		String periodFromStr = StringUtils.EMPTY;
+		String periodToStr = StringUtils.EMPTY;
+		if (StringUtils.isNotEmpty(iftaReportInput.getPeriodFrom()) && StringUtils.isNotEmpty(iftaReportInput.getPeriodTo())) {
+			try {
+				periodFromStr = ReportDateUtil.dateFormatter.format(mileageSearchDateFormat.parse(iftaReportInput.getPeriodFrom()));
+				
+				Date periodTo = mileageSearchDateFormat.parse(iftaReportInput.getPeriodTo());
+				Calendar c = Calendar.getInstance();
+				c.setTime(periodTo);
+				c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+				periodTo = c.getTime();
+				periodToStr = ReportDateUtil.dateFormatter.format(periodTo);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (StringUtils.isNotEmpty(iftaReportInput.getLastInStateFrom()) && StringUtils.isNotEmpty(iftaReportInput.getLastInStateTo())) {
+			periodFromStr = iftaReportInput.getLastInStateFrom();
+			periodToStr = iftaReportInput.getLastInStateTo();
 		}
-		try {
-			String periodFromStr = ReportDateUtil.dateFormatter.format(mileageSearchDateFormat.parse(iftaReportInput.getPeriodFrom()));
-			
-			Date periodTo = mileageSearchDateFormat.parse(iftaReportInput.getPeriodTo());
-			Calendar c = Calendar.getInstance();
-			c.setTime(periodTo);
-			c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			periodTo = c.getTime();
-			String periodToStr = ReportDateUtil.dateFormatter.format(periodTo);
-			
+		
+		if (StringUtils.isNotEmpty(periodFromStr) && StringUtils.isNotEmpty(periodToStr)) {
 			fuelLogReportInput.setTransactionDateFrom(periodFromStr);
 			fuelLogReportInput.setTransactionDateTo(periodToStr);
 			searchCriteria.getSearchMap().put("transactionDateFrom", periodFromStr);
 			searchCriteria.getSearchMap().put("transactionDateTo", periodToStr);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -3769,6 +3779,11 @@ throw new Exception("origin and destindation is empty");
 		
 		mileageLogReportInput.setPeriodFrom(iftaReportInput.getPeriodFrom());
 		mileageLogReportInput.setPeriodTo(iftaReportInput.getPeriodTo());
+		
+		mileageLogReportInput.setFirstInStateFrom(iftaReportInput.getFirstInStateFrom());
+		mileageLogReportInput.setFirstInStateTo(iftaReportInput.getFirstInStateTo());
+		mileageLogReportInput.setLastInStateFrom(iftaReportInput.getLastInStateFrom());
+		mileageLogReportInput.setLastInStateTo(iftaReportInput.getLastInStateTo());
 	}
 
 	private Map<String, FuelLog> aggregateFuelLogByCompanyState(List<FuelLog> srcFuelLogList) {
