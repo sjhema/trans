@@ -169,10 +169,10 @@ $(document).ready(function() {
 		<tr>
 	 	<td class="form-left"><primo:label code="Date" /><span class="errorMessage"></span></td>
 			<td  align="${left}">
-				From:<form:input size="10" path="firstInStateFrom" cssClass="flat" onblur="return formatDate('firstInStateFrom');"/>
+				From:<form:input size="10" path="lastInStateFrom" cssClass="flat" onblur="return formatDate('lastInStateFrom');"/>
 				<script type="text/javascript">
 					$(function() {
-						$("#firstInStateFrom").datepicker({
+						$("#lastInStateFrom").datepicker({
 							dateFormat:'mm-dd-yy',
 			            	changeMonth: true,
 			    			changeYear: true,
@@ -182,10 +182,10 @@ $(document).ready(function() {
 			    		});
 					});
 				</script>
-				To:<form:input size="10" path="firstInStateTo" cssClass="flat" onblur="return formatDate('firstInStateTo');"/>
+				To:<form:input size="10" path="lastInStateTo" cssClass="flat" onblur="return formatDate('lastInStateTo');"/>
 				<script type="text/javascript">
 					$(function() {
-						$("#firstInStateTo").datepicker({
+						$("#lastInStateTo").datepicker({
 							dateFormat:'mm-dd-yy',
 			            	changeMonth: true,
 			    			changeYear: true,

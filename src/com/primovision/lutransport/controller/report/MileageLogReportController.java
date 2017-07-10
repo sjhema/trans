@@ -76,12 +76,7 @@ public class MileageLogReportController extends BaseController {
 		return "reportuser/report/mileageLogReport";
 	}
 	
-	private Map<String,Object> generateData(SearchCriteria searchCriteria,HttpServletRequest request, MileageLogReportInput input) {
-		MileageLogReportWrapper wrapper = generateMileageLogReport(searchCriteria, input);
-		
-		Map<String,Object> data = new HashMap<String,Object>();
-		Map<String,Object> params = new HashMap<String,Object>();
-		 
+	private void populateParams(Map<String,Object> params, MileageLogReportWrapper wrapper) {
 		params.put("totalRows", wrapper.getTotalRows());
 		params.put("totalMiles", wrapper.getTotalMiles());
 		
@@ -98,12 +93,21 @@ public class MileageLogReportController extends BaseController {
 		params.put("states", states);
 		
 		String period = "-";
-		if (!StringUtils.isEmpty(wrapper.getPeriodFrom()) && !StringUtils.isEmpty(wrapper.getPeriodTo())) {
+		if (StringUtils.isNotEmpty(wrapper.getPeriodFrom()) && StringUtils.isNotEmpty(wrapper.getPeriodTo())) {
 			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
-		} else if (!StringUtils.isEmpty(wrapper.getFirstInStateFrom()) && !StringUtils.isEmpty(wrapper.getFirstInStateTo())) {
-			period = wrapper.getFirstInStateFrom() + " - " + wrapper.getFirstInStateTo();
+		} else if (StringUtils.isNotEmpty(wrapper.getLastInStateFrom()) && StringUtils.isNotEmpty(wrapper.getLastInStateTo())) {
+			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
+	}
+	
+	private Map<String,Object> generateData(SearchCriteria searchCriteria, HttpServletRequest request, MileageLogReportInput input) {
+		MileageLogReportWrapper wrapper = generateMileageLogReport(searchCriteria, input);
+		
+		Map<String,Object> data = new HashMap<String,Object>();
+		Map<String,Object> params = new HashMap<String,Object>();
+		 
+		populateParams(params, wrapper);
 		  
 		data.put("data", wrapper.getMileageLogList());
 		data.put("params", params);

@@ -3826,8 +3826,8 @@ throw new Exception("origin and destindation is empty");
 		String truck = input.getUnit();
 		String periodFrom = input.getPeriodFrom();
 		String periodTo = input.getPeriodTo();
-		String firstInStateFrom = ReportDateUtil.getFromDate(input.getFirstInStateFrom());
-		String firstInStateTo = ReportDateUtil.getToDate(input.getFirstInStateTo());
+		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
+		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
 		
 		StringBuffer query = new StringBuffer("select obj from MileageLog obj  where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from MileageLog obj where 1=1");
@@ -3865,15 +3865,19 @@ throw new Exception("origin and destindation is empty");
 			}
       }
       
-      if (!StringUtils.isEmpty(firstInStateFrom) && !StringUtils.isEmpty(firstInStateTo)) {
-        	query.append(" and obj.firstInState >='"+firstInStateFrom+"'");
-			query.append(" and obj.firstInState <='"+firstInStateTo+"'");
-			countQuery.append(" and obj.firstInState >='"+firstInStateFrom+"'");
-			countQuery.append(" and obj.firstInState <='"+firstInStateTo+"'");
-			//query.append(" and  obj.firstInState between '" + firstInStateFrom
-			//		+ "' and '" + firstInStateTo + "'");
-			//countQuery.append(" and  obj.firstInState between '" + firstInStateFrom
-			//		+ "' and '" + firstInStateTo + "'");
+      if (StringUtils.isNotEmpty(lastInStateFrom) && StringUtils.isNotEmpty(lastInStateTo)) {
+      	/*lastInStateFrom += " 00:00:00";
+      	lastInStateTo += " 23:59:59";*/
+        	
+      	query.append(" and obj.lastInState >='"+lastInStateFrom+"'");
+			query.append(" and obj.lastInState <='"+lastInStateTo+"'");
+			countQuery.append(" and obj.lastInState >='"+lastInStateFrom+"'");
+			countQuery.append(" and obj.lastInState <='"+lastInStateTo+"'");
+			
+			/*query.append(" and  obj.lastInState between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");
+			countQuery.append(" and  obj.lastInState between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");*/
 		}
       
       // Mileage log service model change - 5th Jul 2017
@@ -3902,8 +3906,8 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setStates(state);
 		wrapper.setPeriodFrom(periodFrom);
 		wrapper.setPeriodTo(periodTo);
-		wrapper.setFirstInStateFrom(firstInStateFrom);
-		wrapper.setFirstInStateTo(firstInStateTo);
+		wrapper.setLastInStateFrom(lastInStateFrom);
+		wrapper.setLastInStateTo(lastInStateTo);
 		
 		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
 		double totalMiles = 0.0;

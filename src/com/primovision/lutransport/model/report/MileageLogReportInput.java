@@ -11,6 +11,8 @@ public class MileageLogReportInput {
 	private String unit;
 	private String firstInStateFrom;
 	private String firstInStateTo;
+	private String lastInStateFrom;
+	private String lastInStateTo;
 	
 	private String reportType;
 	
@@ -64,5 +66,17 @@ public class MileageLogReportInput {
 	}
 	public void setFirstInStateTo(String firstInStateTo) {
 		this.firstInStateTo = firstInStateTo;
+	}
+	public String getLastInStateFrom() {
+		return lastInStateFrom;
+	}
+	public void setLastInStateFrom(String lastInStateFrom) {
+		this.lastInStateFrom = lastInStateFrom;
+	}
+	public String getLastInStateTo() {
+		return lastInStateTo;
+	}
+	public void setLastInStateTo(String lastInStateTo) {
+		this.lastInStateTo = lastInStateTo;
 	}
 }

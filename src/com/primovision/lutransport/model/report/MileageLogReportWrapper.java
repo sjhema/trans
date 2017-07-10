@@ -16,6 +16,9 @@ public class MileageLogReportWrapper {
 	String firstInStateFrom = StringUtils.EMPTY;
 	String firstInStateTo = StringUtils.EMPTY;
 	
+	String lastInStateFrom = StringUtils.EMPTY;
+	String lastInStateTo = StringUtils.EMPTY;
+	
 	String states = StringUtils.EMPTY;
 	String companies = StringUtils.EMPTY;
 	
@@ -90,5 +93,21 @@ public class MileageLogReportWrapper {
 
 	public void setFirstInStateTo(String firstInStateTo) {
 		this.firstInStateTo = firstInStateTo;
+	}
+
+	public String getLastInStateFrom() {
+		return lastInStateFrom;
+	}
+
+	public void setLastInStateFrom(String lastInStateFrom) {
+		this.lastInStateFrom = lastInStateFrom;
+	}
+
+	public String getLastInStateTo() {
+		return lastInStateTo;
+	}
+
+	public void setLastInStateTo(String lastInStateTo) {
+		this.lastInStateTo = lastInStateTo;
 	}
 }
