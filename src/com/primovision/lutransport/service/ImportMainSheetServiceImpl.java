@@ -70,6 +70,7 @@ import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
 import com.primovision.lutransport.model.VehicleTollTag;
+import com.primovision.lutransport.model.WMInvoice;
 import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.driver.DriverFuelLog;
 import com.primovision.lutransport.model.driver.Odometer;
@@ -390,7 +391,297 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return errorList;
 	}
 	
-	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importWMInvoice(InputStream is, Long createdBy) throws Exception {
+		SimpleDateFormat wmDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+		SimpleDateFormat wmDateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+		// 5/30/2017 4:15:53 AM
+		SimpleDateFormat wmDateTimeStrFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+		SimpleDateFormat wmDateTimeStrFormat2 = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");
+		
+		SimpleDateFormat requiredTimeFormat = new SimpleDateFormat("HH:mm");
+		
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		int successCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Map<String, Integer> colMapping = TicketUtils.getWMInvoiceColMapping();
+			if (colMapping.size() <= 0) {
+				errorList.add("Location not supported");
+				return errorList;
+			}
+			
+			int recordsToBeSkipped = TicketUtils.getWMInvoiceRecordsToBeSkipped();
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount <= recordsToBeSkipped) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				WMInvoice currentWMInvoice = null;
+				try {
+					String endOfData = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", endOfData)) {
+						break;
+					}
+					
+					currentWMInvoice = new WMInvoice();
+					
+					Integer ticketCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TICKET);
+					String ticketStr = ((String) getCellValue(row.getCell(ticketCol)));
+					if (StringUtils.isEmpty(ticketStr)) {
+						recordError = true;
+						recordErrorMsg.append("Ticket, ");
+					} else {
+						Long ticket = Long.parseLong(ticketStr);
+						currentWMInvoice.setTicket(ticket);
+					}
+					
+					Integer txnDateCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TXN_DATE);
+					Object txnDateObj = getCellValue(row.getCell(txnDateCol), true);
+					if (txnDateObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Date, ");
+					} else if (txnDateObj instanceof Date) {
+						currentWMInvoice.setTxnDate((Date)txnDateObj);
+					} else {
+						String txnDateStr = txnDateObj.toString();
+						Date txnDate = wmDateFormat.parse(txnDateStr);
+						currentWMInvoice.setTxnDate(txnDate);
+					}
+					
+					Integer timeInCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TIME_IN);
+					Object timeInObj = getCellValue(row.getCell(timeInCol), true);
+					if (timeInObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Time In, ");
+					} else {
+						SimpleDateFormat timeInDateFormat = wmDateTimeFormat;
+						if (!(timeInObj instanceof Date)) {
+							timeInDateFormat = wmDateTimeStrFormat2;
+						}
+						
+						String timeInStr = timeInObj.toString();
+						timeInStr = StringUtils.replace(timeInStr, ".", StringUtils.EMPTY);
+						String reqTimeInStr = convertDateFormat(timeInStr, timeInDateFormat, requiredTimeFormat);
+						if (StringUtils.isEmpty(reqTimeInStr)) {
+							recordError = true;
+							recordErrorMsg.append("Time In, ");
+						} else {
+							currentWMInvoice.setTimeIn(reqTimeInStr);
+						}
+					} 
+					
+					Integer timeOutCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TIME_OUT);
+					Object timeOutObj = getCellValue(row.getCell(timeOutCol), true);
+					if (timeOutObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Time Out, ");
+					} else {
+						SimpleDateFormat timeOutDateFormat = wmDateTimeFormat;
+						if (!(timeOutObj instanceof Date)) {
+							timeOutDateFormat = wmDateTimeStrFormat;
+						}
+						
+						String timeOutStr = timeOutObj.toString();
+						timeOutStr = StringUtils.replace(timeOutStr, ".", StringUtils.EMPTY);
+						String reqTimeOutStr = convertDateFormat(timeOutStr, timeOutDateFormat, requiredTimeFormat);
+						if (StringUtils.isEmpty(reqTimeOutStr)) {
+							recordError = true;
+							recordErrorMsg.append("Time Out, ");
+						} else {
+							currentWMInvoice.setTimeOut(reqTimeOutStr);
+						}
+					}
+					
+					Integer wmOriginCol = colMapping.get(TicketUtils.WM_INVOICE_COL_ORIGIN);
+					String wmOriginStr = ((String) getCellValue(row.getCell(wmOriginCol)));
+					if (StringUtils.isEmpty(wmOriginStr)) {
+						recordError = true;
+						recordErrorMsg.append("Origin, ");
+					} else {
+						currentWMInvoice.setWmOrigin(wmOriginStr);
+						
+						List<Location> originList = retrieveLocationDataByLongName(1, wmOriginStr);
+						if (originList == null || originList.isEmpty()) {
+							recordError = true;
+							recordErrorMsg.append("Origin, ");
+						} else {
+							currentWMInvoice.setOrigin(originList.get(0));
+						}
+					}
+					
+					Integer wmDestinationCol = colMapping.get(TicketUtils.WM_INVOICE_COL_DESTINATION);
+					String wmDestinationStr = ((String) getCellValue(row.getCell(wmDestinationCol)));
+					if (StringUtils.isEmpty(wmDestinationStr)) {
+						recordError = true;
+						recordErrorMsg.append("Destination, ");
+					} else {
+						currentWMInvoice.setWmDestination(wmDestinationStr);
+						
+						List<Location> destinationList = retrieveLocationDataByLongName(2, wmDestinationStr);
+						if (destinationList == null || destinationList.isEmpty()) {
+							recordError = true;
+							recordErrorMsg.append("Destination, ");
+						} else {
+							currentWMInvoice.setDestination(destinationList.get(0));
+						}
+					}
+					
+					Integer wmVehicleCol = colMapping.get(TicketUtils.WM_INVOICE_COL_VEHICLE);
+					if (wmVehicleCol != null) {
+						String wmVehicleStr = ((String) getCellValue(row.getCell(wmVehicleCol)));
+						if (StringUtils.isNotEmpty(wmVehicleStr)) {
+							currentWMInvoice.setWmVehicle(wmVehicleStr);
+						} 
+					}
+					Integer wmTrailerCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TRAILER);
+					if (wmTrailerCol != null) {
+						String wmTrailerStr = ((String) getCellValue(row.getCell(wmTrailerCol)));
+						if (StringUtils.isNotEmpty(wmTrailerStr)) {
+							currentWMInvoice.setWmTrailer(wmTrailerStr);
+						} 
+					}
+					
+					Integer grossCol = colMapping.get(TicketUtils.WM_INVOICE_COL_GROSS);
+					Object grossObj = getCellValue(row.getCell(grossCol), true);
+					Double grossWeight = null;
+					if (grossObj instanceof Double) {
+						grossWeight = (Double) grossObj;
+					} else {
+						String grossObjStr = (String) grossObj;
+						grossObjStr = StringUtils.replace(grossObjStr, ",", StringUtils.EMPTY);
+						grossWeight = Double.valueOf(grossObjStr);
+					}
+					currentWMInvoice.setGross(grossWeight);
+					
+					Integer tareCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TARE);
+					Object tareObj = getCellValue(row.getCell(tareCol), true);
+					Double tareWeight = null;
+					if (tareObj instanceof Double) {
+						tareWeight = (Double) tareObj;
+					} else {
+						String tareObjStr = (String) tareObj;
+						tareObjStr = StringUtils.replace(tareObjStr, ",", StringUtils.EMPTY);
+						tareWeight = Double.valueOf(tareObjStr);
+					}
+					currentWMInvoice.setTare(tareWeight);
+					
+					Integer netCol = colMapping.get(TicketUtils.WM_INVOICE_COL_NET);
+					Object netObj = getCellValue(row.getCell(netCol), true);
+					Double netWeight = null;
+					if (netObj instanceof Double) {
+						netWeight = (Double) netObj;
+					} else {
+						String netObjStr = (String) netObj;
+						netObjStr = StringUtils.replace(netObjStr, ",", StringUtils.EMPTY);
+						netWeight = Double.valueOf(netObjStr);
+					}
+					currentWMInvoice.setNet(netWeight);
+					
+					Integer amountCol = colMapping.get(TicketUtils.WM_INVOICE_COL_AMOUNT);
+					Object amountObj = getCellValue(row.getCell(amountCol), true);
+					Double amount = null;
+					if (amountObj instanceof Double) {
+						amount = (Double) amountObj;
+					} else {
+						amount = Double.valueOf((String) amountObj);
+					}
+					currentWMInvoice.setAmount(amount);
+					
+					Integer fscCol = colMapping.get(TicketUtils.WM_INVOICE_COL_FSC);
+					Object fscObj = getCellValue(row.getCell(fscCol), true);
+					Double fsc = null;
+					if (fscObj instanceof Double) {
+						fsc = (Double) fscObj;
+					} else {
+						fsc = Double.valueOf((String) fscObj);
+					}
+					currentWMInvoice.setFsc(fsc);
+					
+					Integer totalAmountCol = colMapping.get(TicketUtils.WM_INVOICE_COL_TOTAL_AMOUNT);
+					Object totalAmountObj = getCellValue(row.getCell(totalAmountCol), true);
+					Double totalAmount = null;
+					if (totalAmountObj instanceof Double) {
+						totalAmount = (Double) totalAmountObj;
+					} else {
+						totalAmount = Double.valueOf((String) totalAmountObj);
+					}
+					currentWMInvoice.setTotalAmount(totalAmount);
+				
+					Integer wmStatusCol = colMapping.get(TicketUtils.WM_INVOICE_COL_STATUS);
+					if (wmStatusCol != null) {
+						String wmStatusStr = ((String) getCellValue(row.getCell(wmStatusCol)));
+						if (StringUtils.isNotEmpty(wmStatusStr)) {
+							currentWMInvoice.setWmStatus(wmStatusStr);
+						} 
+					}
+					
+					Integer wmStatusCodeCol = colMapping.get(TicketUtils.WM_INVOICE_COL_STATUS_CODE);
+					if (wmStatusCodeCol != null) {
+						String wmStatusCodeStr = ((String) getCellValue(row.getCell(wmStatusCodeCol)));
+						if (StringUtils.isNotEmpty(wmStatusCodeStr)) {
+							currentWMInvoice.setWmStatusCode(wmStatusCodeStr);
+						} 
+					}
+					
+					Integer wmTicketCol = colMapping.get(TicketUtils.WM_INVOICE_COL_WM_TICKET);
+					if (wmTicketCol != null) {
+						String wmTicketStr = ((String) getCellValue(row.getCell(wmTicketCol)));
+						if (StringUtils.isNotEmpty(wmTicketStr)) {
+							currentWMInvoice.setWmTicket(wmTicketStr);
+						} 
+					}
+					
+					if (checkDuplicateWMInvoice(currentWMInvoice)) {
+						recordError = true;
+						recordErrorMsg.append("Duplicate WM Invoice, ");
+					}
+					
+					if (recordError) {
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					currentWMInvoice.setStatus(1);
+					currentWMInvoice.setCreatedBy(createdBy);
+					currentWMInvoice.setCreatedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(currentWMInvoice);
+					
+					successCount++;
+				} catch (Exception ex) {
+					recordError = true;
+					errorCount++;
+					recordErrorMsg.append("Error while processing record: " + recordCount + ", ");
+					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records loaded: " + successCount);
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing WM Invoice: " + ex);
+		}
+		
+		return errorList;
+	}
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -433,13 +724,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				return errorList;
 			}
 			
-			Map<String, Integer> colMapping = TicketUtils.getColMapping(locationPtr.getId());
+			Map<String, Integer> colMapping = TicketUtils.getWMTicketColMapping(locationPtr.getId());
 			if (colMapping.size() <= 0) {
 				errorList.add("Location not supported");
 				return errorList;
 			}
 			
-			int recordsToBeSkipped = TicketUtils.getRecordsToBeSkipped(locationPtr.getId());
+			int recordsToBeSkipped = TicketUtils.getWMTicketRecordsToBeSkipped(locationPtr.getId());
 			
 			Iterator rows = sheet.rowIterator();
 			while (rows.hasNext()) {
@@ -1474,6 +1765,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		List<WMTicket> wmTicketList = genericDAO.executeSimpleQuery(query);
 		return !wmTicketList.isEmpty();
+	}
+	
+	private boolean checkDuplicateWMInvoice(WMInvoice wmInvoice) {
+		if (wmInvoice == null || wmInvoice.getTicket() == null
+				|| wmInvoice.getOrigin() == null || wmInvoice.getDestination() == null) {
+			return false;
+		}
+		
+		String baseQuery = "select obj from WMInvoice obj where obj.ticket=" + wmInvoice.getTicket();
+		String originQuery = baseQuery + " and obj.origin=" + wmInvoice.getOrigin().getId();
+		String destinationQuery = baseQuery + " and obj.destination=" + wmInvoice.getDestination().getId();
+		
+		List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(originQuery);
+		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
+			wmInvoiceList = genericDAO.executeSimpleQuery(destinationQuery);
+		}
+		return !wmInvoiceList.isEmpty();
 	}
 	
 	private boolean checkDuplicate(SubcontractorRate aSubcontractorRate) {

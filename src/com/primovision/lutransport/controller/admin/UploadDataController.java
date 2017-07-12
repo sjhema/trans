@@ -99,6 +99,11 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/employee";
 	}
 	
+	@RequestMapping("/wmInvoice.do")
+	public String wmInvoice(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/wmInvoice";
+	}
+	
 	@RequestMapping("/wmTicket.do")
 	public String wmTicket(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 		return "admin/uploaddata/wmTicket";
@@ -407,6 +412,48 @@ public class UploadDataController extends BaseController {
 		}
 		
 		return "admin/uploaddata/wmTicket";
+	}
+	
+	@RequestMapping("/wmInvoice/upload.do")
+	public String saveWMInvoice(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFile") MultipartFile file) {
+		model.addAttribute("errorList", new ArrayList<String>());
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/wmInvoice";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/wmInvoice";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importWMInvoice(is)\n");
+			List<String> errorList = importMainSheetService.importWMInvoice(is, createdBy);
+			if (errorList.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all WM Invoices");
+			} else {
+				model.addAttribute("errorList", errorList);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+		}
+		
+		return "admin/uploaddata/wmInvoice";
 	}
 	
 	@RequestMapping("/employee/upload.do")

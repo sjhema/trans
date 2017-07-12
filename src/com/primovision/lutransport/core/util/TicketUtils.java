@@ -51,7 +51,27 @@ public class TicketUtils {
 	public static final String WM_COL_RATE = "Rate";
 	public static final String WM_COL_AMOUNT = "Amount";
 	
-	public static int getRecordsToBeSkipped(Long locationId) {
+	public static final String WM_INVOICE_COL_TICKET = "Ticket No";
+	public static final String WM_INVOICE_COL_REISSUED_TICKET = "Reissued Ticket No";
+	public static final String WM_INVOICE_COL_WM_TICKET = "Ticket Id";
+	public static final String WM_INVOICE_COL_TXN_DATE = "Date";
+	public static final String WM_INVOICE_COL_TIME_IN = "Time In";
+	public static final String WM_INVOICE_COL_TIME_OUT = "Time Out";
+	public static final String WM_INVOICE_COL_ORIGIN = "Origin";
+	public static final String WM_INVOICE_COL_DESTINATION = "Destination";
+	public static final String WM_INVOICE_COL_VEHICLE = "Vehicle No";
+	public static final String WM_INVOICE_COL_TRAILER = "Trailer Description";
+	public static final String WM_INVOICE_COL_STATUS = "Status";
+	public static final String WM_INVOICE_COL_STATUS_CODE = "Status Code";
+	public static final String WM_INVOICE_COL_GROSS = "Gross Weight";
+	public static final String WM_INVOICE_COL_TARE = "Tare Weight";
+	public static final String WM_INVOICE_COL_NET = "Net Weight";
+	public static final String WM_INVOICE_COL_RATE = "Rate";
+	public static final String WM_INVOICE_COL_FSC = "FSC";
+	public static final String WM_INVOICE_COL_AMOUNT = "Amount";
+	public static final String WM_INVOICE_COL_TOTAL_AMOUNT = "Total";
+	
+	public static int getWMTicketRecordsToBeSkipped(Long locationId) {
 		int recordsToBeSkipped = 1; // Fairless Landfill
 		
 		if (locationId == 55l // Philadelphia Transfer
@@ -66,7 +86,7 @@ public class TicketUtils {
 		return recordsToBeSkipped;
 	}
 	
-	public static Map<String, Integer> getColMapping(Long locationId) {
+	public static Map<String, Integer> getWMTicketColMapping(Long locationId) {
 		Map<String, Integer> colMapping = new HashMap<String, Integer>();
 		
 		if (locationId == 55l) { // Philadelphia Transfer
@@ -1263,5 +1283,34 @@ public class TicketUtils {
 		LocalDate now = new LocalDate(unloadDateStr);			
 		LocalDate sunday = now.withDayOfWeek(DateTimeConstants.SUNDAY);
 		return sunday.toDate();
+	}
+	
+	public static int getWMInvoiceRecordsToBeSkipped() {
+		return 5;
+	}
+	
+	public static Map<String, Integer> getWMInvoiceColMapping() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(WM_INVOICE_COL_TICKET, 0);
+		colMapping.put(WM_INVOICE_COL_REISSUED_TICKET, 1);
+		colMapping.put(WM_INVOICE_COL_VEHICLE, 3);
+		colMapping.put(WM_INVOICE_COL_TRAILER, 4);
+		colMapping.put(WM_INVOICE_COL_TXN_DATE, 6);
+		colMapping.put(WM_INVOICE_COL_TIME_IN, 7);
+		colMapping.put(WM_INVOICE_COL_TIME_OUT, 8);
+		colMapping.put(WM_INVOICE_COL_ORIGIN, 9);
+		colMapping.put(WM_INVOICE_COL_DESTINATION, 10);
+		colMapping.put(WM_INVOICE_COL_STATUS, 11);
+		colMapping.put(WM_INVOICE_COL_GROSS, 12);
+		colMapping.put(WM_INVOICE_COL_TARE, 13);
+		colMapping.put(WM_INVOICE_COL_NET, 14);
+		//colMapping.put(WM_INVOICE_COL_RATE, 16);
+		colMapping.put(WM_INVOICE_COL_AMOUNT, 16);
+		colMapping.put(WM_INVOICE_COL_FSC, 17);
+		colMapping.put(WM_INVOICE_COL_TOTAL_AMOUNT, 22);
+		colMapping.put(WM_INVOICE_COL_WM_TICKET, 24);
+		colMapping.put(WM_INVOICE_COL_STATUS_CODE, 25);
+		
+		return colMapping;
 	}
 }

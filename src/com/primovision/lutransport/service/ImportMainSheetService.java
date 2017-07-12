@@ -22,5 +22,6 @@ public interface ImportMainSheetService {
 	public List<String> importSubcontractorRateMainSheet(InputStream is, Date validFrom, Date validTo, Long createdBy) throws Exception;
 	public List<String> importEmployeeMainSheet(InputStream is, Long createdBy) throws Exception;
 	public List<String> importWMTickets(InputStream is, String locationType, Long createdBy) throws Exception;
+	public List<String> importWMInvoice(InputStream is, Long createdBy) throws Exception;
 }
 
