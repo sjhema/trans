@@ -144,19 +144,16 @@ public class TicketUtils {
 			colMapping.put(WM_COL_TARE, 24);
 			colMapping.put(WM_COL_NET, 25);
 		} else if (locationId == 392l) { // Fairless Landfill
-			colMapping.put(WM_COL_HAULING_COMPANY, 1);
-			colMapping.put(WM_COL_COMPANY, 3);
-			colMapping.put(WM_COL_VEHICLE, 4);
-			colMapping.put(WM_COL_TICKET, 6);
-			colMapping.put(WM_COL_TONS, 8);
-			colMapping.put(WM_COL_HAULING_TICKET, 9);
-			colMapping.put(WM_COL_TXN_DATE, 10);
-			colMapping.put(WM_COL_TIME_IN, 10);
-			colMapping.put(WM_COL_TIME_OUT, 11);
-			colMapping.put(WM_COL_TARE, 12);
-			colMapping.put(WM_COL_AMOUNT, 13);
-			colMapping.put(WM_COL_RATE, 14);
-			colMapping.put(WM_COL_GROSS, 15);
+			colMapping.put(WM_COL_TICKET, 1);
+			colMapping.put(WM_COL_HAULING_COMPANY, 2);
+			colMapping.put(WM_COL_TXN_DATE, 4);
+			colMapping.put(WM_COL_TIME_IN, 4);
+			colMapping.put(WM_COL_TIME_OUT, 5);
+			colMapping.put(WM_COL_GROSS, 7);
+			colMapping.put(WM_COL_TARE, 8);
+			colMapping.put(WM_COL_TONS, 9);
+			colMapping.put(WM_COL_COMPANY, 12);
+			colMapping.put(WM_COL_HAULING_TICKET, 13);
 		}
 		
 		return colMapping;
