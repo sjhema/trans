@@ -8,6 +8,11 @@ VALUES ('1407', '/admin/wmInvoice/list.do?rst=1', 'Manage WM Invoice', '3', 'Man
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '1407', '1'); -- ADMIN
  
+INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`)
+VALUES ('1408', '/admin/wmInvoiceVerification/start.do', 'Verify WM Invoice Tickets', '3', 'Verify WM Invoice Tickets', '/admin/wmInvoiceVerification/start.do,/admin/wmInvoiceVerification/search.do,/admin/wmInvoiceVerification/save.do,/admin/wmInvoiceVerification/ajax.do,/admin/wmInvoiceVerification/export.do', '1', '10', '0', '140', '/1/140/1408/');
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
+ VALUES (now(), '1', '1408', '1'); -- ADMIN
+ 
  ------
  CREATE TABLE `wm_invoice` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
