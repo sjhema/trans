@@ -42,7 +42,7 @@
 		var origin = selectedtransfer.options[selectedtransfer.selectedIndex].value;
 		var selectedlandfill = document.getElementById('destination');
 		var destination = selectedlandfill.options[selectedlandfill.selectedIndex].value;
-
+		
 		if (origin != "" && destination == "") {
 			populateDestinations();
 		}
@@ -56,7 +56,7 @@
 		var origin = selectedtransfer.options[selectedtransfer.selectedIndex].value;
 		jQuery
 				.ajax({
-					url : '${ctx}/admin/wmInvoiveVerification/ajax.do?action=findDestinations&origin='
+					url : '${ctx}/admin/wmInvoiceVerification/ajax.do?action=findDestinations&origin='
 							+ origin,
 					success : function(data) {
 						var listData = jQuery.parseJSON(data);
@@ -76,7 +76,7 @@
 		var destination = selectedlandfill.options[selectedlandfill.selectedIndex].value;
 		jQuery
 				.ajax({
-					url : '${ctx}/admin/wmInvoiveVerification/ajax.do?action=findOrigins&destination='
+					url : '${ctx}/admin/wmInvoiceVerification/ajax.do?action=findOrigins&destination='
 							+ destination,
 					success : function(data) {
 						var listData = jQuery.parseJSON(data);

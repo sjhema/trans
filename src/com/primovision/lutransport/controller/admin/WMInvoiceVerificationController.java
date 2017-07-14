@@ -113,11 +113,13 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		}
 	}
 	
-	private List<Ticket> determineMissingTickets(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+	private List<Ticket> detetermineTicketsMissingInWM(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<Ticket> missingTickets = new ArrayList<Ticket>();
-		if (tickets == null || tickets.isEmpty()
-				|| wmInvoiceList == null || wmInvoiceList.isEmpty()) {
+		if (tickets == null || tickets.isEmpty()) {
 			return missingTickets;
+		}
+		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
+			return tickets;
 		}
 		
 		String searchKey = StringUtils.EMPTY;
@@ -149,6 +151,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		for (Ticket aTicket : tickets) {
 			WMInvoiceVerification aWMInvoiceVerification = new WMInvoiceVerification();
 			map(aWMInvoiceVerification, aTicket);
+			wmInvoiceVerificationList.add(aWMInvoiceVerification);
 		}
 	}
 	
@@ -159,10 +162,13 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		aWMInvoiceVerification.setOriginTicket(aTticket.getOriginTicket());
 		aWMInvoiceVerification.setDestinationTicket(aTticket.getDestinationTicket());
-		aWMInvoiceVerification.setOrigin(aTticket.getOrigin().getName());
-		aWMInvoiceVerification.setDestination(aTticket.getDestination().getName());
-		aWMInvoiceVerification.setWmOrigin(aTticket.getOrigin().getLongName());
-		aWMInvoiceVerification.setWmDestination(aTticket.getDestination().getLongName());
+		
+		aWMInvoiceVerification.setOrigin(aTticket.getOrigin() == null ? StringUtils.EMPTY : aTticket.getOrigin().getName());
+		aWMInvoiceVerification.setDestination(aTticket.getDestination() == null ? StringUtils.EMPTY : aTticket.getDestination().getName());
+		
+		aWMInvoiceVerification.setWmOrigin(aTticket.getOrigin() == null ? StringUtils.EMPTY : aTticket.getOrigin().getLongName());
+		aWMInvoiceVerification.setWmDestination(aTticket.getDestination() == null ? StringUtils.EMPTY : aTticket.getDestination().getLongName());
+		
 		aWMInvoiceVerification.setLoadDate(aTticket.getLoadDate());
 		aWMInvoiceVerification.setUnloadDate(aTticket.getUnloadDate());
 	}
@@ -245,14 +251,14 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery.toString());
       List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(wmInvoiceQuery.toString());
       
-      List<Ticket> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
+      List<Ticket> missingTickets = detetermineTicketsMissingInWM(tickets, wmInvoiceList);
       List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
       map(wmInvoiceVerificationList, missingTickets);
       
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("origin", (StringUtils.isNotEmpty(origin) ? retrieveLocationName(origin) : StringUtils.EMPTY));
       params.put("destination", (StringUtils.isNotEmpty(destination) ? retrieveLocationName(destination) : StringUtils.EMPTY));
-      params.put("dateRane", dateRange);
+      params.put("dateRange", dateRange);
       
       Map<String, Object> dataMap = new HashMap<String, Object>();
       dataMap.put("params", params);
