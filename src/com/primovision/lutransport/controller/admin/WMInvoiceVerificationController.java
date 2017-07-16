@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
 
 import org.springframework.stereotype.Controller;
@@ -145,6 +148,106 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		return missingTickets;
 	}
 	
+	private void sortWMInvoiceMissingTicketsInWM(List<WMInvoiceVerification> wmInvoiceVerificationList) {
+		Comparator<WMInvoiceVerification> originComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (StringUtils.isEmpty(o1.getOrigin()) || StringUtils.isEmpty(o2.getOrigin())) {
+					return 0;
+				}
+				return o1.getOrigin().compareTo(o2.getOrigin());
+			}
+		};
+			
+		Comparator<WMInvoiceVerification> destinationComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (StringUtils.isEmpty(o1.getDestination()) || StringUtils.isEmpty(o2.getDestination())) {
+					return 0;
+				}
+				return o1.getDestination().compareTo(o2.getDestination());
+			}
+		};
+	        
+		Comparator<WMInvoiceVerification> loadDateComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (o1.getLoadDate() == null || o2.getLoadDate() == null) {
+					return 0;
+				}
+				return o1.getLoadDate().compareTo(o2.getLoadDate());
+			}
+		};  
+			
+		Comparator<WMInvoiceVerification> originTicketComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (o1.getOriginTicket() == null || o2.getOriginTicket() == null) {
+					return 0;
+				}
+				return o1.getOriginTicket().compareTo(o2.getOriginTicket());
+			}
+		};   
+			
+		ComparatorChain chain = new ComparatorChain(); 
+		chain.addComparator(originComparator);
+		chain.addComparator(destinationComparator);			
+		chain.addComparator(loadDateComparator);
+		chain.addComparator(originTicketComparator);
+		
+		Collections.sort(wmInvoiceVerificationList, chain);
+	}
+	
+	private void sortWMInvoiceMissingTickets(List<WMInvoiceVerification> wmInvoiceVerificationList) {
+		Comparator<WMInvoiceVerification> originComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (StringUtils.isEmpty(o1.getOrigin()) || StringUtils.isEmpty(o2.getOrigin())) {
+					return 0;
+				}
+				return o1.getOrigin().compareTo(o2.getOrigin());
+			}
+		};
+			
+		Comparator<WMInvoiceVerification> destinationComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (StringUtils.isEmpty(o1.getDestination()) || StringUtils.isEmpty(o2.getDestination())) {
+					return 0;
+				}
+				return o1.getDestination().compareTo(o2.getDestination());
+			}
+		};
+	        
+		Comparator<WMInvoiceVerification> txnDateComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (o1.getTxnDate() == null || o2.getTxnDate() == null) {
+					return 0;
+				}
+				return o1.getTxnDate().compareTo(o2.getTxnDate());
+			}
+		};  
+			
+		Comparator<WMInvoiceVerification> ticketComparator = new Comparator<WMInvoiceVerification>() {
+			@Override
+			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
+				if (o1.getTicket() == null || o2.getTicket() == null) {
+					return 0;
+				}
+				return o1.getTicket().compareTo(o2.getTicket());
+			}
+		};   
+			
+		ComparatorChain chain = new ComparatorChain(); 
+		chain.addComparator(originComparator);
+		chain.addComparator(destinationComparator);			
+		chain.addComparator(txnDateComparator);
+		chain.addComparator(ticketComparator);
+		
+		Collections.sort(wmInvoiceVerificationList, chain);
+	}
+	
 	private List<WMInvoice> detetermineMissingTickets(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<WMInvoice> missingTickets = new ArrayList<WMInvoice>();
 		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
@@ -272,8 +375,11 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       String origin = (String) searchCriteria.getSearchMap().get("origin");
       String destination = (String) searchCriteria.getSearchMap().get("destination");
 
-      StringBuffer ticketQuery = new StringBuffer("select obj from Ticket obj where obj.status=1 and obj.ticketStatus=1");
+      StringBuffer ticketQuery = new StringBuffer("select obj from Ticket obj where obj.status=1");
       StringBuffer wmInvoiceQuery = new StringBuffer("select obj from WMInvoice obj where 1=1");
+      
+      String statusCondition = " and obj.ticketStatus=1";
+      ticketQuery.append(statusCondition);
       
       if (StringUtils.isNotEmpty(fromBatchDate)) {
       	ticketQuery.append(" and obj.billBatch>='").append(fromBatchDate + "'");				
@@ -367,12 +473,14 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<Ticket> missingTickets = detetermineMissingTicketsInWM(tickets, wmInvoiceList);
       map(wmInvoiceVerificationList, missingTickets);
+      sortWMInvoiceMissingTicketsInWM(wmInvoiceVerificationList);
 	}
 	
 	private void generateWMInvoiceMissingTicketsData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<WMInvoice> missingTickets = detetermineMissingTickets(tickets, wmInvoiceList);
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
+		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/save.do")
@@ -389,11 +497,13 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		   	return blankReturn;
 		   }
 		   
+		   String successMsg = StringUtils.EMPTY;
 			if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_HOLD_TICKETS_ACTION, action)) {
 		   	processHoldTickets(wmInvoiceVerificationList, modifieddBy);
+		   	successMsg = "Missing Tickets successfully put on HOLD";
 		   }
 		   
-			request.getSession().setAttribute("msg", "Missing Tickets successfully put on HOLD");
+			request.getSession().setAttribute("msg", successMsg);
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.getSession().setAttribute("errors", e.getMessage());
