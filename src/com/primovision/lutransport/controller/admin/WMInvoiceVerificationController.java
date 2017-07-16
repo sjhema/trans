@@ -118,7 +118,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		}
 	}
 	
-	private List<Ticket> detetermineMissingTicketsInWM(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+	private List<Ticket> determineMissingTicketsInWM(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<Ticket> missingTickets = new ArrayList<Ticket>();
 		if (tickets == null || tickets.isEmpty()) {
 			return missingTickets;
@@ -248,7 +248,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		Collections.sort(wmInvoiceVerificationList, chain);
 	}
 	
-	private List<WMInvoice> detetermineMissingTickets(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+	private List<WMInvoice> determineMissingTickets(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<WMInvoice> missingTickets = new ArrayList<WMInvoice>();
 		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
 			return missingTickets;
@@ -471,14 +471,14 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 	
 	private void generateWMInvoiceMissingTicketsInWMData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
-		List<Ticket> missingTickets = detetermineMissingTicketsInWM(tickets, wmInvoiceList);
+		List<Ticket> missingTickets = determineMissingTicketsInWM(tickets, wmInvoiceList);
       map(wmInvoiceVerificationList, missingTickets);
       sortWMInvoiceMissingTicketsInWM(wmInvoiceVerificationList);
 	}
 	
 	private void generateWMInvoiceMissingTicketsData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
-		List<WMInvoice> missingTickets = detetermineMissingTickets(tickets, wmInvoiceList);
+		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
 		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
 	}
