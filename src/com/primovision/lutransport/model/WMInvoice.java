@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Table(name = "wm_invoice")
@@ -76,7 +75,7 @@ public class WMInvoice extends AbstractBaseModel {
 	
 	@Column(name="wm_ticket")
 	private String wmTicket;
-
+	
 	public Long getTicket() {
 		return ticket;
 	}

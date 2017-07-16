@@ -5,8 +5,16 @@ import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
 public class WMInvoiceVerification implements ReportModel {
+	public static String WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT = "wmInvoiceMissingTicketsInWM";
+	public static String WM_INVOICE_MISSING_TICKETS_REPORT = "wmInvoiceMissingTickets";
+	
+	public static String WM_INVOICE_HOLD_TICKETS_ACTION = "HOLD_TICKETS";
+	
 	Long originTicket;
 	Long destinationTicket;
+	
+	Long originId;
+	Long destinationId;
 	
 	String origin = StringUtils.EMPTY;
 	String destination = StringUtils.EMPTY;
@@ -16,6 +24,9 @@ public class WMInvoiceVerification implements ReportModel {
 	
 	Date loadDate;
 	Date unloadDate;
+	
+	Long ticket;
+	Date txnDate;
 	
 	public Long getOriginTicket() {
 		return originTicket;
@@ -64,5 +75,29 @@ public class WMInvoiceVerification implements ReportModel {
 	}
 	public void setUnloadDate(Date unloadDate) {
 		this.unloadDate = unloadDate;
+	}
+	public Long getOriginId() {
+		return originId;
+	}
+	public void setOriginId(Long originId) {
+		this.originId = originId;
+	}
+	public Long getDestinationId() {
+		return destinationId;
+	}
+	public void setDestinationId(Long destinationId) {
+		this.destinationId = destinationId;
+	}
+	public Long getTicket() {
+		return ticket;
+	}
+	public void setTicket(Long ticket) {
+		this.ticket = ticket;
+	}
+	public Date getTxnDate() {
+		return txnDate;
+	}
+	public void setTxnDate(Date txnDate) {
+		this.txnDate = txnDate;
 	}
 }

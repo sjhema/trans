@@ -1,47 +1,140 @@
 <%@ include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
-	var submitting = false;
-</script>
-<script language="javascript">
-	function searchMissingWMInvoiceTickets() {
-		var d1 = document.getElementById('fromBatchDate').value;
-		if (d1 != null && d1 != '' && !isValidDate(d1)) {
+	var controllerPath = "${ctx}/admin/wmInvoiceVerification";
+	
+	function submitForm() {
+		var form = document.getElementById('verificationForm');
+		
+		form.target = "reportData";
+		form.submit();
+	}
+	
+	function processExport(elem, type) {
+		var reportCtx = $('#reportCtx').val();
+		if (reportCtx == '') {
+			return false;
+		}
+		
+		var href = controllerPath + "/export.do";
+		var hrefParams = "?type=" + type + "&reportCtx=" + reportCtx;
+		href += hrefParams;
+		elem.href = href;
+	}
+	
+	function processHoldTickets(elem) {
+		return processSave(elem, 'HOLD_TICKETS');
+	}
+	
+	function processSave(elem, action) {
+		var reportCtx = $('#reportCtx').val();
+		if (reportCtx != 'wmInvoiceMissingTicketsInWM') {
+			alert("No missing tickets available to put on hold");
+			return false;
+		}
+		
+		var response = confirm("Do you wnat to put the missing tickets on HOLD?")
+		if (response == false) {
+			return false;
+		}
+		
+		var href = controllerPath + "/save.do";
+		var hrefParams = "?action=" + action + "&reportCtx=" + reportCtx;
+		href += hrefParams;
+		elem.href = href;
+	}
+	
+	function generateWMInvoiceMissingTicketsInWMReport() {
+		return generateWMInvoiceTicketsReport('wmInvoiceMissingTicketsInWM');
+	}
+	
+	function generateWMInvoiceMissingTicketsReport() {
+		return generateWMInvoiceTicketsReport('wmInvoiceMissingTickets');
+	}
+	
+	function generateWMInvoiceTicketsReport(reportCtx) {
+		if (!validate()) {
+			return false;
+		}
+		
+		$('#reportCtx').val(reportCtx);
+		$('#wmInvoiceTicketsToolbar').show();
+		
+		submitForm();
+	}
+	
+	function validate() {
+		var valid = true;
+		
+		var fromBatchDate = document.getElementById('fromBatchDate').value;
+		if (fromBatchDate != null && fromBatchDate != '' && !isValidDate(fromBatchDate)) {
+			valid = false;
 			alert("Invalid from bill batch date");
 		}
-		var d6 = document.getElementById('toBatchDate').value;
-		if (d6 != null && d6 != '' && !isValidDate(d6)) {
+		var toBatchDate = document.getElementById('toBatchDate').value;
+		if (toBatchDate != null && toBatchDate != '' && !isValidDate(toBatchDate)) {
+			valid = false;
 			alert("Invalid to bill batch date");
 		}
-		var d2 = document.getElementById('fromLoadDate').value;
-		if (d2 != null && d2 != '' && !isValidDate(d2)) {
+		var fromLoadDate = document.getElementById('fromLoadDate').value;
+		if (fromLoadDate != null && fromLoadDate != '' && !isValidDate(fromLoadDate)) {
+			valid = false;
 			alert("Invalid from load date");
 		}
-		var d3 = document.getElementById('toLoadDate').value;
-		if (d3 != null && d3 != '' && !isValidDate(d3)) {
+		var toLoadDate = document.getElementById('toLoadDate').value;
+		if (toLoadDate != null && toLoadDate != '' && !isValidDate(toLoadDate)) {
+			valid = false;
 			alert("Invalid to load date");
 		}
-		var d4 = document.getElementById('fromUnloadDate').value;
-		if (d4 != null && d4 != '' && !isValidDate(d4)) {
+		var fromUnloadDate = document.getElementById('fromUnloadDate').value;
+		if (fromUnloadDate != null && fromUnloadDate != '' && !isValidDate(fromUnloadDate)) {
+			valid = false;
 			alert("Invalid from unload date");
 		}
-		var d5 = document.getElementById('toUnloadDate').value;
-		if (d5 != null && d5 != '' && !isValidDate(d5)) {
+		var toUnloadDate = document.getElementById('toUnloadDate').value;
+		if (toUnloadDate != null && toUnloadDate != '' && !isValidDate(toUnloadDate)) {
+			valid = false;
 			alert("Invalid to unload date");
 		}
-		var d7 = document.getElementById('invoiceDate').value;
-		if (d7 != null && d7 != '' && !isValidDate(d7)) {
+		var invoiceDate = document.getElementById('invoiceDate').value;
+		if (invoiceDate != null && invoiceDate != '' && !isValidDate(invoiceDate)) {
+			valid = false;
 			alert("Invalid invoice date");
 		}
 		
-		document.forms[0].target = "reportData";
-		document.forms[0].submit();
+		if (fromUnloadDate == null || fromUnloadDate == ''
+				|| toUnloadDate == null || toUnloadDate == '') {
+			valid = false;
+			alert("Please enter dates");
+		}
+		
+		/*if (!validateLocations()) {
+			valid = false;
+			alert("Please choose origin and destination");
+		}*/
+		
+		return valid;
+	}
+	
+	function validateLocations() {
+		var valid = true;
+		
+		var selectedTransfer = document.getElementById('origin');
+		var origin = selectedTransfer.options[selectedTransfer.selectedIndex].value;
+		var selectedLandfill = document.getElementById('destination');
+		var destination = selectedLandfill.options[selectedLandfill.selectedIndex].value;
+		
+		if (origin == "" || destination == "") {
+			valid = false;
+		}
+		
+		return valid;
 	}
 
 	function populateLocations() {
-		var selectedtransfer = document.getElementById('origin');
-		var origin = selectedtransfer.options[selectedtransfer.selectedIndex].value;
-		var selectedlandfill = document.getElementById('destination');
-		var destination = selectedlandfill.options[selectedlandfill.selectedIndex].value;
+		var selectedTransfer = document.getElementById('origin');
+		var origin = selectedTransfer.options[selectedTransfer.selectedIndex].value;
+		var selectedLandfill = document.getElementById('destination');
+		var destination = selectedLandfill.options[selectedLandfill.selectedIndex].value;
 		
 		if (origin != "" && destination == "") {
 			populateDestinations();
@@ -92,7 +185,8 @@
 	}
 </script>
 <br/>
-<form:form action="search.do" method="post" name="verificationForm">
+<form:form action="search.do" method="post" name="verificationForm" id="verificationForm">
+	<input id="reportCtx" name="reportCtx" type="hidden" value=""/>
 	<table id="form-table" width="100%" cellspacing="0" cellpadding="5">
 		<tr class="table-heading">
 			<td align="${left}" colspan="9"><b>WM Invoice Ticket Verification</b>
@@ -241,30 +335,40 @@
 		</tr>
 		<tr>
 			<td align="${left}"></td>
-			<td align="${left}" colspan="3">
-				<input type="button" onclick="javascript:searchMissingWMInvoiceTickets()" value="Search Missing WM Invoice Tickets" />
+			<td align="${left}" colspan="6">
+				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsInWMReport();" value="Missing WM Invoice Tickets Report" />
+				&nbsp;&nbsp;&nbsp;
+				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsReport();" value="Missing Tickets Report" />
+				&nbsp;&nbsp;&nbsp;
+				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
+				&nbsp;&nbsp;&nbsp;
+				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsMatchingReport();" value="Matching Report" />
 			</td>
 		</tr>
 	</table>
 </form:form>
 <table width="100%">
 	<tr>
-		<td align="${left}" width="100%" align="right">
-			<a href="${ctx}/admin/wmInvoiceVerification/export.do?type=pdf" target="reportData">
-				<img src="${ctx}/images/pdf.png" border="0" class="toolbarButton" />
-			</a> 
-			<a href="${ctx}/admin/wmInvoiceVerification/export.do?type=xls" target="reportData">
-				<img src="${ctx}/images/excel.png" border="0" class="toolbarButton" />
-			</a> 
-			<a href="${ctx}/admin/wmInvoiceVerification/export.do?type=csv" target="reportData">
-				<img src="${ctx}/images/csv.png" border="0" class="toolbarButton" />
-			</a> 
-			<a href="${ctx}/admin/wmInvoiceVerification/save.do" target="reportData" onclick="">
-				<img src="${ctx}/images/save.png" border="0" class="toolbarButton" />
-			</a> 
-			<a href="${ctx}/admin/wmInvoiceVerification/export.do?type=print" target="reportData">
-				<img src="${ctx}/images/print.png" border="0" class="toolbarButton" />
-			</a>
+		<td align="${left}" width="100%">
+			<div id="wmInvoiceTicketsToolbar" style="display:none;">
+				<a href="" onclick="return processExport(this, 'pdf');" target="reportData">
+					<img src="${ctx}/images/pdf.png" border="0" class="toolbarButton" />
+				</a> 
+				<a href="" onclick="return processExport(this, 'xls');" target="reportData">
+					<img src="${ctx}/images/excel.png" border="0" class="toolbarButton" />
+				</a> 
+				<a href="" onclick="return processExport(this, 'csv');" target="reportData">
+					<img src="${ctx}/images/csv.png" border="0" class="toolbarButton" />
+				</a> 
+				<a href="" onclick="return processExport(this, 'print');" target="reportData">
+					<img src="${ctx}/images/print.png" border="0" class="toolbarButton" />
+				</a>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="" onclick="return processHoldTickets(this);" target="reportData"
+					style="vertical-align: top; font-size: 15px">
+					HOLD
+				</a>
+			</div>
 		</td>
 	</tr>
 	<tr>
