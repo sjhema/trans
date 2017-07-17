@@ -358,7 +358,11 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 	
 	@Override
 	protected Map<String, Object> generateData(SearchCriteria searchCriteria, HttpServletRequest request) {
-		Map searchMap = searchCriteria.getSearchMap();		String fromBatchDate = (String) searchMap.get("fromBatchDate");
+		Map searchMap = searchCriteria.getSearchMap();
+		
+		String reportCtx = (String) searchMap.get("reportCtx");
+		
+		String fromBatchDate = (String) searchMap.get("fromBatchDate");
       String toBatchDate = (String) searchMap.get("toBatchDate");
       String fromLoadDate = (String) searchMap.get("fromLoadDate");
       String toLoadDate = (String) searchMap.get("toLoadDate");
@@ -378,8 +382,9 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       StringBuffer ticketQuery = new StringBuffer("select obj from Ticket obj where obj.status=1");
       StringBuffer wmInvoiceQuery = new StringBuffer("select obj from WMInvoice obj where 1=1");
       
-      String statusCondition = " and obj.ticketStatus=1";
-      ticketQuery.append(statusCondition);
+      if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)) {
+      	ticketQuery.append(" and obj.ticketStatus=1");
+      } 
       
       if (StringUtils.isNotEmpty(fromBatchDate)) {
       	ticketQuery.append(" and obj.billBatch>='").append(fromBatchDate + "'");				
@@ -429,7 +434,6 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(wmInvoiceQuery.toString());
       
       List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
-      String reportCtx = (String) searchMap.get("reportCtx");
       if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT);
       	generateWMInvoiceMissingTicketsInWMData(wmInvoiceVerificationList, tickets, wmInvoiceList);
