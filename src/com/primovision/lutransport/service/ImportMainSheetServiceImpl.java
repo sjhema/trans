@@ -398,7 +398,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		SimpleDateFormat wmDateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
 		// 5/30/2017 4:15:53 AM
 		SimpleDateFormat wmDateTimeStrFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
-		SimpleDateFormat wmDateTimeStrFormat2 = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");
 		
 		SimpleDateFormat requiredTimeFormat = new SimpleDateFormat("HH:mm");
 		
@@ -472,7 +471,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					} else {
 						SimpleDateFormat timeInDateFormat = wmDateTimeFormat;
 						if (!(timeInObj instanceof Date)) {
-							timeInDateFormat = wmDateTimeStrFormat2;
+							timeInDateFormat = wmDateTimeStrFormat;
 						}
 						
 						String timeInStr = timeInObj.toString();
