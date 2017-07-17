@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import org.springframework.ui.Model;
@@ -43,9 +43,18 @@ import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.WMInvoice;
 import com.primovision.lutransport.model.WMInvoiceVerification;
 
+import com.primovision.lutransport.service.ReportService;
+
 @Controller
 @RequestMapping("/admin/wmInvoiceVerification")
 public class WMInvoiceVerificationController extends ReportController<WMInvoiceVerification> {
+	@Autowired
+	private ReportService reportService;
+	
+	public void setReportService(ReportService reportService) {
+		this.reportService = reportService;
+	}
+	
 	public WMInvoiceVerificationController() {
 		setUrlContext("admin/wmInvoiceVerification");
 		setReportName(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT);
@@ -396,11 +405,14 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       if (StringUtils.isNotEmpty(toBatchDate)) {
       	ticketQuery.append(" and obj.billBatch<='").append(toBatchDate + "'");				
       }
-      if (StringUtils.isNotEmpty(fromLoadDate) && StringUtils.isNotEmpty(toLoadDate)) {
-      	ticketQuery.append(" and obj.loadDate between '" + fromLoadDate + "' and '" + toLoadDate + "'");
-      }
       
       String dateRange = StringUtils.EMPTY;
+      if (StringUtils.isNotEmpty(fromLoadDate) && StringUtils.isNotEmpty(toLoadDate)) {
+      	dateRange = determineDateRangeDisplay(fromLoadDate, toLoadDate);
+      	
+      	ticketQuery.append(" and obj.loadDate between '" + fromLoadDate + "' and '" + toLoadDate + "'");
+      	wmInvoiceQuery.append(" and obj.txnDate between '" + fromLoadDate + "' and '" + toLoadDate + "'");
+      }
       if (StringUtils.isNotEmpty(fromUnloadDate) && StringUtils.isNotEmpty(toUnloadDate)) {
       	dateRange = determineDateRangeDisplay(fromUnloadDate, toUnloadDate);
       	
@@ -444,6 +456,12 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_REPORT);
       	generateWMInvoiceMissingTicketsData(wmInvoiceVerificationList, tickets, wmInvoiceList);
+      } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MATCHING_REPORT, reportCtx)) {
+      	setReportName(WMInvoiceVerification.WM_INVOICE_MATCHING_REPORT);
+      	generateWMInvoiceMatchingData(wmInvoiceVerificationList, tickets, wmInvoiceList, origin, destination);
+      } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT, reportCtx)) {
+      	setReportName(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT);
+      	generateWMInvoiceDiscrepancyData(wmInvoiceVerificationList, tickets, wmInvoiceList, origin, destination);
       }
       
       Map<String, Object> params = new HashMap<String, Object>();
@@ -486,6 +504,38 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 	
 	private void generateWMInvoiceMissingTicketsData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
+		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
+		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
+	}
+	
+	private void generateWMInvoiceMatchingData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
+			List<Ticket> tickets, List<WMInvoice> wmInvoiceList, String origin, String destination) {
+		Map<String, Object> rsSearchMap = new HashMap<String, Object>();
+		String ticketIds = "12345, 23456";
+		rsSearchMap.put("ticketIds", ticketIds);
+		rsSearchMap.put("origin", origin);
+		rsSearchMap.put("destination", destination);
+		
+		SearchCriteria rsSearchCriteria = new SearchCriteria();
+		rsSearchCriteria.setSearchMap(rsSearchMap);
+		
+		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
+		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
+		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
+	}
+	
+	private void generateWMInvoiceDiscrepancyData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
+			List<Ticket> tickets, List<WMInvoice> wmInvoiceList, String origin, String destination) {
+		Map<String, Object> rsSearchMap = new HashMap<String, Object>();
+		String ticketIds = "12345, 23456";
+		rsSearchMap.put("ticketIds", ticketIds);
+		rsSearchMap.put("origin", origin);
+		rsSearchMap.put("destination", destination);
+		
+		SearchCriteria rsSearchCriteria = new SearchCriteria();
+		rsSearchCriteria.setSearchMap(rsSearchMap);
+		
 		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
 		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);

@@ -7,6 +7,8 @@ import org.apache.commons.lang.StringUtils;
 public class WMInvoiceVerification implements ReportModel {
 	public static String WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT = "wmInvoiceMissingTicketsInWM";
 	public static String WM_INVOICE_MISSING_TICKETS_REPORT = "wmInvoiceMissingTickets";
+	public static String WM_INVOICE_MATCHING_REPORT = "wmInvoiceMatching";
+	public static String WM_INVOICE_DISCREPANCY_REPORT = "wmInvoiceDiscrepancy";
 	
 	public static String WM_INVOICE_HOLD_TICKETS_ACTION = "HOLD_TICKETS";
 	

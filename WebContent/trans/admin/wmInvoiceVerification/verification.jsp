@@ -51,6 +51,14 @@
 		return generateWMInvoiceTicketsReport('wmInvoiceMissingTickets');
 	}
 	
+	function generateWMInvoiceTicketsDiscrepancyReport() {
+		return generateWMInvoiceTicketsReport('wmInvoiceDiscrepancy');
+	}
+	
+	function generateWMInvoiceTicketsMatchingReport() {
+		return generateWMInvoiceTicketsReport('wmInvoiceMatching');
+	}
+	
 	function generateWMInvoiceTicketsReport(reportCtx) {
 		if (!validate()) {
 			return false;
@@ -95,16 +103,11 @@
 			valid = false;
 			alert("Invalid to unload date");
 		}
+		
 		var invoiceDate = document.getElementById('invoiceDate').value;
 		if (invoiceDate != null && invoiceDate != '' && !isValidDate(invoiceDate)) {
 			valid = false;
 			alert("Invalid invoice date");
-		}
-		
-		if (fromUnloadDate == null || fromUnloadDate == ''
-				|| toUnloadDate == null || toUnloadDate == '') {
-			valid = false;
-			alert("Please enter dates");
 		}
 		
 		/*if (!validateLocations()) {
@@ -265,7 +268,7 @@
 			</td>
 			<td align="${left}" class="first"><label>From Load Date</label></td>
 			<td align="${left}">
-				<input name="fromLoadDate" type="text" id="fromLoadDate" size="15" disabled
+				<input name="fromLoadDate" type="text" id="fromLoadDate" size="15" 
 					value="${sessionScope.searchCriteria.searchMap.fromLoadDate}"
 					onblur="javascript:formatReportDate('fromLoadDate');" /> 
 					<script
@@ -281,7 +284,7 @@
 			</td>
 			<td align="${left}" class="first"><label>To Load Date</label></td>
 			<td align="${left}">
-				<input name="toLoadDate" type="text" id="toLoadDate" disabled
+				<input name="toLoadDate" type="text" id="toLoadDate" 
 					value="${sessionScope.searchCriteria.searchMap.toLoadDate}"
 					onblur="javascript:formatReportDate('toLoadDate');" /> 
 					<script
@@ -336,13 +339,13 @@
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}" colspan="6">
-				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsInWMReport();" value="Missing WM Invoice Tickets Report" />
+				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsInWMReport();" value="Tickets missing in WM invoicing " />
 				&nbsp;&nbsp;&nbsp;
-				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsReport();" value="Missing Tickets Report" />
-				&nbsp;&nbsp;&nbsp;
-				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
+				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsReport();" value="Tickets missing in our system" />
 				&nbsp;&nbsp;&nbsp;
 				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsMatchingReport();" value="Matching Report" />
+				&nbsp;&nbsp;&nbsp;
+				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
 			</td>
 		</tr>
 	</table>
