@@ -159,6 +159,15 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 	@Transient
 	private String invoiceDate;
 	
+	@Transient
+	private Double wmAmount;
+	
+	@Transient
+	private Double wmFSC;
+	
+	@Transient
+	private Double wmTotalAmount;
+	
 	/*@Transient
 	private Double gallon;*/
 	@Column(name="gallon")
@@ -482,6 +491,36 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 	
 	public String getInvoice_Date() {
 		return invoice_Date;
+	}
+
+	@Transient
+	public Double getWmAmount() {
+		return wmAmount;
+	}
+
+	@Transient
+	public void setWmAmount(Double wmAmount) {
+		this.wmAmount = wmAmount;
+	}
+
+	@Transient
+	public Double getWmFSC() {
+		return wmFSC;
+	}
+
+	@Transient
+	public void setWmFSC(Double wmFSC) {
+		this.wmFSC = wmFSC;
+	}
+
+	@Transient
+	public Double getWmTotalAmount() {
+		return wmTotalAmount;
+	}
+
+	@Transient
+	public void setWmTotalAmount(Double wmTotalAmount) {
+		this.wmTotalAmount = wmTotalAmount;
 	}
 	
 	

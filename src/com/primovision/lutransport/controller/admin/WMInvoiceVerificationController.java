@@ -42,7 +42,8 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.WMInvoice;
 import com.primovision.lutransport.model.WMInvoiceVerification;
-
+import com.primovision.lutransport.model.report.Billing;
+import com.primovision.lutransport.model.report.BillingWrapper;
 import com.primovision.lutransport.service.ReportService;
 
 @Controller
@@ -97,7 +98,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 	   
 	   Map<String, Object> dataMap = generateData(searchCriteria, request);
 	   Map<String, Object> params = (Map<String, Object>) dataMap.get("params");
-	   List<WMInvoiceVerification> wmInvoiceVerificationList = (List<WMInvoiceVerification>) dataMap.get("data");
+	   List dataList = (List) dataMap.get("data");
       
       ByteArrayOutputStream out = null;
       try {
@@ -110,7 +111,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 				response.setHeader("Content-Disposition", "attachment;filename=" + getReportName() + "." + type);
 			}
 			
-			out = dynamicReportService.generateStaticReport(getReportName(), wmInvoiceVerificationList, params, 
+			out = dynamicReportService.generateStaticReport(getReportName(), dataList, params, 
 						type, request);
 			out.writeTo(response.getOutputStream());
 			
@@ -395,7 +396,8 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       StringBuffer ticketQuery = new StringBuffer("select obj from Ticket obj where obj.status=1");
       StringBuffer wmInvoiceQuery = new StringBuffer("select obj from WMInvoice obj where 1=1");
       
-      if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)) {
+      if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)
+      		|| StringUtils.equals(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT, reportCtx)) {
       	ticketQuery.append(" and obj.ticketStatus=1");
       } 
       
@@ -449,19 +451,22 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery.toString());
       List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(wmInvoiceQuery.toString());
       
-      List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
+      List<WMInvoiceVerification> wmInvoiceVerificationList = null;
+      BillingWrapper billingWrapper = null;
+      boolean billingData = false;
       if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT);
-      	generateWMInvoiceMissingTicketsInWMData(wmInvoiceVerificationList, tickets, wmInvoiceList);
+      	wmInvoiceVerificationList = generateWMInvoiceMissingTicketsInWMData(tickets, wmInvoiceList);
       } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_REPORT);
-      	generateWMInvoiceMissingTicketsData(wmInvoiceVerificationList, tickets, wmInvoiceList);
+      	wmInvoiceVerificationList = generateWMInvoiceMissingTicketsData(tickets, wmInvoiceList);
       } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MATCHING_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_MATCHING_REPORT);
-      	generateWMInvoiceMatchingData(wmInvoiceVerificationList, tickets, wmInvoiceList, origin, destination);
+      	wmInvoiceVerificationList = generateWMInvoiceMatchingData(tickets, wmInvoiceList, origin, destination);
       } else if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT, reportCtx)) {
       	setReportName(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT);
-      	generateWMInvoiceDiscrepancyData(wmInvoiceVerificationList, tickets, wmInvoiceList, origin, destination);
+      	billingWrapper = generateWMInvoiceDiscrepancyData(tickets, wmInvoiceList, origin, destination);
+      	billingData = true;
       }
       
       Map<String, Object> params = new HashMap<String, Object>();
@@ -470,8 +475,27 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       params.put("dateRange", dateRange);
       
       Map<String, Object> dataMap = new HashMap<String, Object>();
+      
+      if (billingData) {
+      	params.put("sumBillableTon", billingWrapper.getSumBillableTon());
+   		params.put("totalRowCount",billingWrapper.getTotalRowCount());
+   		params.put("sumOriginTon", billingWrapper.getSumOriginTon());
+   		params.put("sumDestinationTon", billingWrapper.getSumDestinationTon());
+   		params.put("sumTonnage", billingWrapper.getSumTonnage());
+   		params.put("sumTotal", billingWrapper.getSumTotal());
+   		params.put("sumDemurrage", billingWrapper.getSumDemmurage());
+   		params.put("sumNet", billingWrapper.getSumNet());
+   		params.put("sumAmount", billingWrapper.getSumAmount());
+   		params.put("sumFuelSurcharge", billingWrapper.getSumFuelSurcharge());
+   		params.put("sumGallon", billingWrapper.getSumGallon());
+   		
+      	List<Billing> billingList = billingWrapper.getBilling();
+      	dataMap.put("data", billingList);
+      } else {
+      	dataMap.put("data", wmInvoiceVerificationList);
+      }
+      
       dataMap.put("params", params);
-      dataMap.put("data", wmInvoiceVerificationList);
       
       return dataMap;
 	}
@@ -495,41 +519,115 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		}
 	}
 	
-	private void generateWMInvoiceMissingTicketsInWMData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
-			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+	private List<WMInvoiceVerification> generateWMInvoiceMissingTicketsInWMData(List<Ticket> tickets, 
+			List<WMInvoice> wmInvoiceList) {
+		List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
+		
 		List<Ticket> missingTickets = determineMissingTicketsInWM(tickets, wmInvoiceList);
+		if (missingTickets == null || missingTickets.isEmpty()) {
+			return wmInvoiceVerificationList;
+		}
+		
       map(wmInvoiceVerificationList, missingTickets);
       sort(wmInvoiceVerificationList, false);
+      return wmInvoiceVerificationList;
 	}
 	
-	private void generateWMInvoiceMissingTicketsData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
-			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+	private List<WMInvoiceVerification> generateWMInvoiceMissingTicketsData(List<Ticket> tickets, 
+			 List<WMInvoice> wmInvoiceList) {
+		List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
+		
 		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
+		if (missingTickets == null || missingTickets.isEmpty()) {
+			return wmInvoiceVerificationList;
+		}
+		
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
 		sort(wmInvoiceVerificationList, true);
+		return wmInvoiceVerificationList;
 	}
 	
-	private void generateWMInvoiceMatchingData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
-			List<Ticket> tickets, List<WMInvoice> wmInvoiceList, String origin, String destination) {
+	private List<WMInvoiceVerification> generateWMInvoiceMatchingData(List<Ticket> tickets, 
+			List<WMInvoice> wmInvoiceList, String origin, String destination) {
+		List<WMInvoiceVerification> wmInvoiceVerificationList = new ArrayList<WMInvoiceVerification>();
+		
 		List<Ticket> matchingTickets = determineMatchingTickets(tickets, wmInvoiceList);
+		if (matchingTickets == null || matchingTickets.isEmpty()) {
+			return wmInvoiceVerificationList;
+		}
+		
       map(wmInvoiceVerificationList, matchingTickets);
       sort(wmInvoiceVerificationList, false);
+      return wmInvoiceVerificationList;
 	}
 	
-	private void generateWMInvoiceDiscrepancyData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
-			List<Ticket> tickets, List<WMInvoice> wmInvoiceList, String origin, String destination) {
-		Map<String, Object> rsSearchMap = new HashMap<String, Object>();
-		String ticketIds = "12345, 23456";
-		rsSearchMap.put("ticketIds", ticketIds);
-		rsSearchMap.put("origin", origin);
-		rsSearchMap.put("destination", destination);
+	private BillingWrapper generateWMInvoiceDiscrepancyData(List<Ticket> tickets, List<WMInvoice> wmInvoiceList, 
+			String origin, String destination) {
+		List<Billing> emptyBillingList = new ArrayList<Billing>();
+		BillingWrapper emptyBillingWrapper = new BillingWrapper();
+		emptyBillingWrapper.setBilling(emptyBillingList);
 		
-		SearchCriteria rsSearchCriteria = new SearchCriteria();
-		rsSearchCriteria.setSearchMap(rsSearchMap);
+		if (tickets == null || tickets.isEmpty()) {
+			return emptyBillingWrapper;
+		}
+		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
+			return emptyBillingWrapper;
+		}
 		
-		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
-		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
-		sort(wmInvoiceVerificationList, false);
+		List<Ticket> matchingTickets = determineMatchingTickets(tickets, wmInvoiceList);
+		if (matchingTickets == null || matchingTickets.isEmpty()) {
+			return emptyBillingWrapper;
+		}
+		
+		StringBuffer ticketIdBuff = new StringBuffer();
+		for (Ticket aMatchingTicket : matchingTickets) {
+			ticketIdBuff.append(aMatchingTicket.getId()).append(",");
+		}
+		String ticketIds = ticketIdBuff.toString();
+		ticketIds = ticketIds.substring(0, ticketIds.length()-1);
+		
+		Map<String, Object> billingSearchMap = new HashMap<String, Object>();
+		billingSearchMap.put("ticketIds", ticketIds);
+		billingSearchMap.put("origin", origin);
+		billingSearchMap.put("destination", destination);
+		
+		SearchCriteria billingSearchCriteria = new SearchCriteria();
+		billingSearchCriteria.setSearchMap(billingSearchMap);
+		
+		BillingWrapper billingWrapper = reportService.generateBillingData(billingSearchCriteria);
+		List<Billing> billingList = billingWrapper.getBilling();
+		if (billingList == null || billingList.isEmpty()) {
+			return billingWrapper;
+		}
+		
+		String searchKey = StringUtils.EMPTY;
+		
+		Map<String, WMInvoice> wmInvoiceMap = new HashMap<String, WMInvoice>();
+		for (WMInvoice anWMInvoice : wmInvoiceList) {
+			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
+			wmInvoiceMap.put(searchKey, anWMInvoice);
+		}
+		
+		for (Billing aBilling : billingList) {
+			searchKey = aBilling.getDestinationTicket() + "|" + aBilling.getOrigin() + "|" + aBilling.getDestination();
+			WMInvoice aWMInvoice = wmInvoiceMap.get(searchKey);
+			if (aWMInvoice == null) {
+				searchKey = aBilling.getOriginTicket() + "|" + aBilling.getOrigin() + "|" + aBilling.getDestination();
+				aWMInvoice = wmInvoiceMap.get(searchKey);
+				if (aWMInvoice == null) {
+					continue;
+				}
+				
+				if ((aBilling.getTotAmt() == null || aWMInvoice.getTotalAmount() == null)
+						|| (aBilling.getTotAmt().doubleValue() != aWMInvoice.getTotalAmount().doubleValue())) {
+					aBilling.setWmAmount(aWMInvoice.getAmount());
+					aBilling.setWmFSC(aWMInvoice.getFsc());
+					aBilling.setWmTotalAmount(aWMInvoice.getTotalAmount());
+				}
+			} 
+		}
+		
+		return billingWrapper;
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/save.do")

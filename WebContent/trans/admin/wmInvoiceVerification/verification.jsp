@@ -36,7 +36,7 @@
 			return false;
 		}
 		
-		var response = confirm("Do you wnat to put the missing tickets on HOLD?")
+		var response = confirm("Do you want to put the missing tickets on HOLD?")
 		if (response == false) {
 			return false;
 		}
@@ -363,7 +363,7 @@
 				&nbsp;&nbsp;&nbsp;
 				<input type="button" onclick="javascript:generateWMInvoiceTicketsMatchingReport();" value="Matching tickets" />
 				&nbsp;&nbsp;&nbsp;
-				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
+				<input type="button" onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
 			</td>
 		</tr>
 	</table>

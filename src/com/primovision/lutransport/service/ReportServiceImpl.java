@@ -134,6 +134,9 @@ public class ReportServiceImpl implements ReportService {
 		String origin = (String) searchCriteria.getSearchMap().get("origin");
 		String destination = (String) searchCriteria.getSearchMap().get(
 				"destination");
+		
+		// WM Invoice - 17th Jul 2017
+		String ticketIds = (String) searchCriteria.getSearchMap().get("ticketIds");
 
 		StringBuffer query = new StringBuffer("");
 		/*
@@ -196,6 +199,12 @@ public class ReportServiceImpl implements ReportService {
 				query.append("and  obj.destination=").append(destination);
 			}
 		}
+		
+		// WM Invoice - 17th Jul 2017
+		if (StringUtils.isNotEmpty(ticketIds)) {
+			query.append(" and obj.id in (").append(ticketIds).append(")");
+		}
+		
 		if (!StringUtils.isEmpty(origin) && !StringUtils.isEmpty(destination)) {
 			String rateQuery = "select obj from BillingRate obj where obj.transferStation="
 					+ origin + " and obj.landfill=" + destination;
@@ -216,6 +225,7 @@ public class ReportServiceImpl implements ReportService {
 		} else {
 			query.append(" order by obj.billBatch desc");
 		}
+		
 		System.out.println(query);
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(query.toString());
 		return processTickets(tickets, new HashMap());
