@@ -131,6 +131,38 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		}
 	}
 	
+	private List<Ticket> determineMatchingTickets(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
+		List<Ticket> matchingTickets = new ArrayList<Ticket>();
+		if (tickets == null || tickets.isEmpty()) {
+			return matchingTickets;
+		}
+		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
+			return matchingTickets;
+		}
+		
+		String searchKey = StringUtils.EMPTY;
+		
+		Map<String, WMInvoice> wmInvoiceMap = new HashMap<String, WMInvoice>();
+		for (WMInvoice anWMInvoice : wmInvoiceList) {
+			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
+			wmInvoiceMap.put(searchKey, anWMInvoice);
+		}
+		
+		for (Ticket aTicket : tickets) {
+			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
+			if (wmInvoiceMap.containsKey(searchKey)) {
+				matchingTickets.add(aTicket);
+			} else {
+				searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
+				if (wmInvoiceMap.containsKey(searchKey)) {
+					matchingTickets.add(aTicket);
+				}
+			}
+		}
+		
+		return matchingTickets;
+	}
+	
 	private List<Ticket> determineMissingTicketsInWM(List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<Ticket> missingTickets = new ArrayList<Ticket>();
 		if (tickets == null || tickets.isEmpty()) {
@@ -144,14 +176,14 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		Map<String, WMInvoice> wmInvoiceMap = new HashMap<String, WMInvoice>();
 		for (WMInvoice anWMInvoice : wmInvoiceList) {
-			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin() + "|" + anWMInvoice.getDestination();
+			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
 			wmInvoiceMap.put(searchKey, anWMInvoice);
 		}
 		
 		for (Ticket aTicket : tickets) {
-			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin() + "|" + aTicket.getDestination();
+			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
 			if (!wmInvoiceMap.containsKey(searchKey)) {
-				searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin() + "|" + aTicket.getDestination();
+				searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
 				if (!wmInvoiceMap.containsKey(searchKey)) {
 					missingTickets.add(aTicket);
 				}
@@ -161,57 +193,11 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		return missingTickets;
 	}
 	
-	private void sortWMInvoiceMissingTicketsInWM(List<WMInvoiceVerification> wmInvoiceVerificationList) {
-		Comparator<WMInvoiceVerification> originComparator = new Comparator<WMInvoiceVerification>() {
-			@Override
-			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (StringUtils.isEmpty(o1.getOrigin()) || StringUtils.isEmpty(o2.getOrigin())) {
-					return 0;
-				}
-				return o1.getOrigin().compareTo(o2.getOrigin());
-			}
-		};
-			
-		Comparator<WMInvoiceVerification> destinationComparator = new Comparator<WMInvoiceVerification>() {
-			@Override
-			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (StringUtils.isEmpty(o1.getDestination()) || StringUtils.isEmpty(o2.getDestination())) {
-					return 0;
-				}
-				return o1.getDestination().compareTo(o2.getDestination());
-			}
-		};
-	        
-		Comparator<WMInvoiceVerification> loadDateComparator = new Comparator<WMInvoiceVerification>() {
-			@Override
-			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (o1.getLoadDate() == null || o2.getLoadDate() == null) {
-					return 0;
-				}
-				return o1.getLoadDate().compareTo(o2.getLoadDate());
-			}
-		};  
-			
-		Comparator<WMInvoiceVerification> originTicketComparator = new Comparator<WMInvoiceVerification>() {
-			@Override
-			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (o1.getOriginTicket() == null || o2.getOriginTicket() == null) {
-					return 0;
-				}
-				return o1.getOriginTicket().compareTo(o2.getOriginTicket());
-			}
-		};   
-			
-		ComparatorChain chain = new ComparatorChain(); 
-		chain.addComparator(originComparator);
-		chain.addComparator(destinationComparator);			
-		chain.addComparator(loadDateComparator);
-		chain.addComparator(originTicketComparator);
+	private void sort(List<WMInvoiceVerification> wmInvoiceVerificationList, final boolean useWMAtrrib) {
+		if (wmInvoiceVerificationList == null || wmInvoiceVerificationList.isEmpty()) {
+			return;
+		}
 		
-		Collections.sort(wmInvoiceVerificationList, chain);
-	}
-	
-	private void sortWMInvoiceMissingTickets(List<WMInvoiceVerification> wmInvoiceVerificationList) {
 		Comparator<WMInvoiceVerification> originComparator = new Comparator<WMInvoiceVerification>() {
 			@Override
 			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
@@ -232,30 +218,44 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 			}
 		};
 	        
-		Comparator<WMInvoiceVerification> txnDateComparator = new Comparator<WMInvoiceVerification>() {
+		Comparator<WMInvoiceVerification> dateComparator = new Comparator<WMInvoiceVerification>() {
 			@Override
 			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (o1.getTxnDate() == null || o2.getTxnDate() == null) {
-					return 0;
+				if (useWMAtrrib) {
+					if (o1.getTxnDate() == null || o2.getTxnDate() == null) {
+						return 0;
+					}
+					return o1.getTxnDate().compareTo(o2.getTxnDate());
+				} else {
+					if (o1.getLoadDate() == null || o2.getLoadDate() == null) {
+						return 0;
+					}
+					return o1.getLoadDate().compareTo(o2.getLoadDate());
 				}
-				return o1.getTxnDate().compareTo(o2.getTxnDate());
 			}
 		};  
 			
 		Comparator<WMInvoiceVerification> ticketComparator = new Comparator<WMInvoiceVerification>() {
 			@Override
 			public int compare(WMInvoiceVerification o1, WMInvoiceVerification o2) {
-				if (o1.getTicket() == null || o2.getTicket() == null) {
-					return 0;
+				if (useWMAtrrib) {
+					if (o1.getTicket() == null || o2.getTicket() == null) {
+						return 0;
+					}
+					return o1.getTicket().compareTo(o2.getTicket());
+				} else {
+					if (o1.getOriginTicket() == null || o2.getOriginTicket() == null) {
+						return 0;
+					}
+					return o1.getOriginTicket().compareTo(o2.getOriginTicket());
 				}
-				return o1.getTicket().compareTo(o2.getTicket());
 			}
-		};   
-			
+		};
+		
 		ComparatorChain chain = new ComparatorChain(); 
 		chain.addComparator(originComparator);
 		chain.addComparator(destinationComparator);			
-		chain.addComparator(txnDateComparator);
+		chain.addComparator(dateComparator);
 		chain.addComparator(ticketComparator);
 		
 		Collections.sort(wmInvoiceVerificationList, chain);
@@ -274,18 +274,18 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		Map<String, Ticket> wmTicketByOriginMap = new HashMap<String, Ticket>();
 		for (Ticket aTicket : tickets) {
-			searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin() + "|" + aTicket.getDestination();
+			searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
 			wmTicketByOriginMap.put(searchKey, aTicket);
 		}
 		
 		Map<String, Ticket> wmTicketByDestinationMap = new HashMap<String, Ticket>();
 		for (Ticket aTicket : tickets) {
-			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin() + "|" + aTicket.getDestination();
-			wmTicketByOriginMap.put(searchKey, aTicket);
+			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
+			wmTicketByDestinationMap.put(searchKey, aTicket);
 		}
 		
 		for (WMInvoice anWMInvoice : wmInvoiceList) {
-			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin() + "|" + anWMInvoice.getDestination();
+			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
 			if (!wmTicketByDestinationMap.containsKey(searchKey)) {
 				if (!wmTicketByOriginMap.containsKey(searchKey)) {
 					missingTickets.add(anWMInvoice);
@@ -499,30 +499,21 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<Ticket> missingTickets = determineMissingTicketsInWM(tickets, wmInvoiceList);
       map(wmInvoiceVerificationList, missingTickets);
-      sortWMInvoiceMissingTicketsInWM(wmInvoiceVerificationList);
+      sort(wmInvoiceVerificationList, false);
 	}
 	
 	private void generateWMInvoiceMissingTicketsData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList) {
 		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
-		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
+		sort(wmInvoiceVerificationList, true);
 	}
 	
 	private void generateWMInvoiceMatchingData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
 			List<Ticket> tickets, List<WMInvoice> wmInvoiceList, String origin, String destination) {
-		Map<String, Object> rsSearchMap = new HashMap<String, Object>();
-		String ticketIds = "12345, 23456";
-		rsSearchMap.put("ticketIds", ticketIds);
-		rsSearchMap.put("origin", origin);
-		rsSearchMap.put("destination", destination);
-		
-		SearchCriteria rsSearchCriteria = new SearchCriteria();
-		rsSearchCriteria.setSearchMap(rsSearchMap);
-		
-		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
-		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
-		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
+		List<Ticket> matchingTickets = determineMatchingTickets(tickets, wmInvoiceList);
+      map(wmInvoiceVerificationList, matchingTickets);
+      sort(wmInvoiceVerificationList, false);
 	}
 	
 	private void generateWMInvoiceDiscrepancyData(List<WMInvoiceVerification> wmInvoiceVerificationList, 
@@ -538,7 +529,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		List<WMInvoice> missingTickets = determineMissingTickets(tickets, wmInvoiceList);
 		mapWMInvoice(wmInvoiceVerificationList, missingTickets);
-		sortWMInvoiceMissingTickets(wmInvoiceVerificationList);
+		sort(wmInvoiceVerificationList, false);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/save.do")

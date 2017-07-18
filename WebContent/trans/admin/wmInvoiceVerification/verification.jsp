@@ -32,6 +32,10 @@
 			return false;
 		}
 		
+		if (!validate()) {
+			return false;
+		}
+		
 		var response = confirm("Do you wnat to put the missing tickets on HOLD?")
 		if (response == false) {
 			return false;
@@ -52,11 +56,11 @@
 	}
 	
 	function generateWMInvoiceTicketsDiscrepancyReport() {
-		return generateWMInvoiceTicketsReport('wmInvoiceDiscrepancy');
+		return generateWMInvoiceTicketsReport('wmInvoiceTicketsDiscrepancy');
 	}
 	
 	function generateWMInvoiceTicketsMatchingReport() {
-		return generateWMInvoiceTicketsReport('wmInvoiceMatching');
+		return generateWMInvoiceTicketsReport('wmInvoiceMatchingTickets');
 	}
 	
 	function generateWMInvoiceTicketsReport(reportCtx) {
@@ -73,6 +77,12 @@
 	function validate() {
 		var valid = true;
 		
+		var invoiceDate = document.getElementById('invoiceDate').value;
+		if (invoiceDate != null && invoiceDate != '' && !isValidDate(invoiceDate)) {
+			valid = false;
+			alert("Invalid invoice date");
+		}
+		
 		var fromBatchDate = document.getElementById('fromBatchDate').value;
 		if (fromBatchDate != null && fromBatchDate != '' && !isValidDate(fromBatchDate)) {
 			valid = false;
@@ -83,6 +93,7 @@
 			valid = false;
 			alert("Invalid to bill batch date");
 		}
+		
 		var fromLoadDate = document.getElementById('fromLoadDate').value;
 		if (fromLoadDate != null && fromLoadDate != '' && !isValidDate(fromLoadDate)) {
 			valid = false;
@@ -93,6 +104,7 @@
 			valid = false;
 			alert("Invalid to load date");
 		}
+		
 		var fromUnloadDate = document.getElementById('fromUnloadDate').value;
 		if (fromUnloadDate != null && fromUnloadDate != '' && !isValidDate(fromUnloadDate)) {
 			valid = false;
@@ -104,10 +116,16 @@
 			alert("Invalid to unload date");
 		}
 		
-		var invoiceDate = document.getElementById('invoiceDate').value;
-		if (invoiceDate != null && invoiceDate != '' && !isValidDate(invoiceDate)) {
+		if (((fromLoadDate != null && fromLoadDate != '') || (toLoadDate != null && toLoadDate != ''))
+			&& ((fromUnloadDate != null && fromUnloadDate != '') || (toUnloadDate != null && toUnloadDate != ''))) {
 			valid = false;
-			alert("Invalid invoice date");
+			alert("Enter only one of either load date range OR unload date range");
+		}
+		
+		if ((fromLoadDate == null || fromLoadDate == '' || toLoadDate == null || toLoadDate == '')
+			&& (fromUnloadDate == null || fromUnloadDate == '' || toUnloadDate == null || toUnloadDate == '')) {
+			valid = false;
+			alert("Enter load date range OR unload date range");
 		}
 		
 		/*if (!validateLocations()) {
@@ -343,7 +361,7 @@
 				&nbsp;&nbsp;&nbsp;
 				<input type="button" onclick="javascript:generateWMInvoiceMissingTicketsReport();" value="Tickets missing in our system" />
 				&nbsp;&nbsp;&nbsp;
-				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsMatchingReport();" value="Matching Report" />
+				<input type="button" onclick="javascript:generateWMInvoiceTicketsMatchingReport();" value="Matching tickets" />
 				&nbsp;&nbsp;&nbsp;
 				<input type="button" disabled onclick="javascript:generateWMInvoiceTicketsDiscrepancyReport();" value="Discrepancy Report" />
 			</td>

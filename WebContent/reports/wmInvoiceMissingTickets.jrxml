@@ -42,7 +42,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[MISSING TICKETS]]></text>
+				<text><![CDATA[MISSING TICKETS IN OUR SYSTEM]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
 				<reportElement x="290" y="60" width="143" height="20"/>
