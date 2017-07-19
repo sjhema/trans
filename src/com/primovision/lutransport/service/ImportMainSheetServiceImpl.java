@@ -854,6 +854,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setWmCompany(wmCompanyStr);
 						} 
 					}
+					
+					if (checkCompanyToBeSkipped(currentWMTicket)) {
+						continue;
+					}
+					
 					Integer wmHaulingCompanyCol = colMapping.get(TicketUtils.WM_COL_HAULING_COMPANY);
 					if (wmHaulingCompanyCol != null) {
 						String wmHaulingCompanyStr = ((String) getCellValue(row.getCell(wmHaulingCompanyCol)));
@@ -1117,6 +1122,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		copyAsDestination(destinationWMTicket, wmTicket, derivedDestination);
 		
 		return destinationWMTicket;
+	}
+	
+	private boolean checkCompanyToBeSkipped(WMTicket wmTicket) {
+		if (!StringUtils.equals(WMTicket.DESTINATION_TICKET_TYPE, wmTicket.getTicketType())) {
+			return false;
+		}
+		if (wmTicket.getDestination().getId().longValue() != 392l) { // Fairless Landfill
+			return false;
+		}
+		if (StringUtils.isEmpty(wmTicket.getWmCompany())) {
+			return true;
+		}
+		if (StringUtils.equals("LU", wmTicket.getWmCompany()) 
+				|| StringUtils.equals("WB", wmTicket.getWmCompany())) {
+			return false;
+		}
+		return true;
 	}
 	
 	private void copyAsDestination(WMTicket copy, WMTicket orig, Location destination) {
