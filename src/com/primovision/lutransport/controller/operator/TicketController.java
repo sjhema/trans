@@ -124,6 +124,8 @@ public class TicketController extends CRUDController<Ticket> {
 			}
 		}
 		
+		checkAndRemoveSubContractorCriteria(criteria);
+		
 		dateupdateService.updateDate(request, "billBatchDate", "billBatch");
 		dateupdateService.updateDate(request, "lDate","loadDate");
 		dateupdateService.updateDate(request, "uDate","unloadDate");
@@ -1756,7 +1758,12 @@ public class TicketController extends CRUDController<Ticket> {
 			return "redirect:list.do";		
 	}
 	
-	
+	private void checkAndRemoveSubContractorCriteria(SearchCriteria criteria) {
+		String subcontractorId = (String) criteria.getSearchMap().get("subcontractor");
+		if (StringUtils.isEmpty(subcontractorId)) {
+			criteria.getSearchMap().remove("subcontractor");
+		}
+	}
 	
 	
 	
@@ -1770,6 +1777,8 @@ public class TicketController extends CRUDController<Ticket> {
 		if(criteria.getSearchMap().get("contnd")!=null){
 			criteria.getSearchMap().remove("contnd");
 		}
+		
+		checkAndRemoveSubContractorCriteria(criteria);
 		
 		// Allow duplicate tickets for Maria Navarro - 17th Oct 2016
 		criteria.getSearchMap().remove("showDuplicateTicketOverrideMsg");
