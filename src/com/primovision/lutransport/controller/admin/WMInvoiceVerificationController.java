@@ -2,7 +2,7 @@ package com.primovision.lutransport.controller.admin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
+import java.text.DecimalFormat;
 import java.text.ParseException;
 
 import java.util.Date;
@@ -477,17 +477,7 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       Map<String, Object> dataMap = new HashMap<String, Object>();
       
       if (billingData) {
-      	params.put("sumBillableTon", billingWrapper.getSumBillableTon());
-   		params.put("totalRowCount",billingWrapper.getTotalRowCount());
-   		params.put("sumOriginTon", billingWrapper.getSumOriginTon());
-   		params.put("sumDestinationTon", billingWrapper.getSumDestinationTon());
-   		params.put("sumTonnage", billingWrapper.getSumTonnage());
-   		params.put("sumTotal", billingWrapper.getSumTotal());
-   		params.put("sumDemurrage", billingWrapper.getSumDemmurage());
-   		params.put("sumNet", billingWrapper.getSumNet());
-   		params.put("sumAmount", billingWrapper.getSumAmount());
-   		params.put("sumFuelSurcharge", billingWrapper.getSumFuelSurcharge());
-   		params.put("sumGallon", billingWrapper.getSumGallon());
+      	map(params, billingWrapper);
    		
       	List<Billing> billingList = billingWrapper.getBilling();
       	dataMap.put("data", billingList);
@@ -498,6 +488,20 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       dataMap.put("params", params);
       
       return dataMap;
+	}
+	
+	private void map(Map<String, Object> params, BillingWrapper billingWrapper) {
+		params.put("sumBillableTon", billingWrapper.getSumBillableTon());
+		params.put("totalRowCount",billingWrapper.getTotalRowCount());
+		params.put("sumOriginTon", billingWrapper.getSumOriginTon());
+		params.put("sumDestinationTon", billingWrapper.getSumDestinationTon());
+		params.put("sumTonnage", billingWrapper.getSumTonnage());
+		params.put("sumTotal", billingWrapper.getSumTotal());
+		params.put("sumDemurrage", billingWrapper.getSumDemmurage());
+		params.put("sumNet", billingWrapper.getSumNet());
+		params.put("sumAmount", billingWrapper.getSumAmount());
+		params.put("sumFuelSurcharge", billingWrapper.getSumFuelSurcharge());
+		params.put("sumGallon", billingWrapper.getSumGallon());
 	}
 	
 	private String determineDateRangeDisplay(String fromDateStr, String toDateStr) {
@@ -608,25 +612,43 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 			wmInvoiceMap.put(searchKey, anWMInvoice);
 		}
 		
+		List<Billing> resultBillingList = new ArrayList<Billing>();
 		for (Billing aBilling : billingList) {
 			searchKey = aBilling.getDestinationTicket() + "|" + aBilling.getOrigin() + "|" + aBilling.getDestination();
 			WMInvoice aWMInvoice = wmInvoiceMap.get(searchKey);
 			if (aWMInvoice == null) {
 				searchKey = aBilling.getOriginTicket() + "|" + aBilling.getOrigin() + "|" + aBilling.getDestination();
 				aWMInvoice = wmInvoiceMap.get(searchKey);
-				if (aWMInvoice == null) {
-					continue;
-				}
-				
-				if ((aBilling.getTotAmt() == null || aWMInvoice.getTotalAmount() == null)
-						|| (aBilling.getTotAmt().doubleValue() != aWMInvoice.getTotalAmount().doubleValue())) {
-					aBilling.setWmAmount(aWMInvoice.getAmount());
-					aBilling.setWmFSC(aWMInvoice.getFsc());
-					aBilling.setWmTotalAmount(aWMInvoice.getTotalAmount());
-				}
 			} 
+			if (aWMInvoice == null) {
+				continue;
+			}
+			
+			boolean matching = true;
+			if (aBilling.getTotAmt() == null || aWMInvoice.getTotalAmount() == null) {
+				matching = false;
+			} else {
+				if (aBilling.getTotAmt().compareTo(aWMInvoice.getTotalAmount()) != 0) {
+					DecimalFormat df = new DecimalFormat("###0.00");
+					
+					String billingTotalAmountStr = df.format(aBilling.getTotAmt().doubleValue());
+					String wmInvoiceTotalAmountStr = df.format(aWMInvoice.getTotalAmount().doubleValue());
+					if (!StringUtils.equals(billingTotalAmountStr, wmInvoiceTotalAmountStr)) {
+						matching = false;
+					}
+				}
+			}
+			
+			if (!matching) {
+				aBilling.setWmAmount(aWMInvoice.getAmount());
+				aBilling.setWmFSC(aWMInvoice.getFsc());
+				aBilling.setWmTotalAmount(aWMInvoice.getTotalAmount());
+				
+				resultBillingList.add(aBilling);
+			}
 		}
 		
+		billingWrapper.setBilling(resultBillingList);
 		return billingWrapper;
 	}
 	

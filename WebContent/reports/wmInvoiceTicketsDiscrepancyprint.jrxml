@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancyprint" pageWidth="1850" pageHeight="600" orientation="Landscape" columnWidth="1810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancyprint" pageWidth="1850" pageHeight="1055" orientation="Landscape" columnWidth="1810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="928"/>
+	<property name="ireport.x" value="926"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="origin" class="java.lang.String"/>
 	<parameter name="destination" class="java.lang.String"/>
@@ -70,6 +70,15 @@
 	</variable>
 	<variable name="sumDestinationTons" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{destinationTonsWt}]]></variableExpression>
+	</variable>
+	<variable name="sumWMAmount" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{wmAmount}]]></variableExpression>
+	</variable>
+	<variable name="sumWMFsc" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{wmFSC}]]></variableExpression>
+	</variable>
+	<variable name="sumWMTotalAmount" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{wmTotalAmount}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -977,7 +986,7 @@ Surcharge]]></text>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format(new Double(String.valueOf($P{sumAmount})))]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumAmounts})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1260" y="0" width="77" height="20"/>
@@ -991,7 +1000,7 @@ Surcharge]]></text>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format(new Double(String.valueOf($P{sumFuelSurcharge})))]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumFuels})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1482" y="0" width="82" height="20"/>
@@ -1005,7 +1014,7 @@ Surcharge]]></text>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format(new Double(String.valueOf($P{sumTotal})))]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumTotal})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1337" y="0" width="71" height="20"/>
@@ -1057,40 +1066,46 @@ Surcharge]]></text>
 				<textFieldExpression class="java.lang.Long"><![CDATA[$V{countLoad}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="580" y="0" width="71" height="20"/>
-				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+				<reportElement x="1564" y="0" width="77" height="20"/>
+				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
 					<leftPen lineWidth="1.0"/>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.Double"><![CDATA[Double.parseDouble(new java.text.DecimalFormat("###0.00").format($P{sumOriginTon}))]]></textFieldExpression>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumWMAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1052" y="0" width="71" height="21"/>
-				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+				<reportElement x="1641" y="0" width="77" height="20"/>
+				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
 					<leftPen lineWidth="1.0"/>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.Double"><![CDATA[Double.parseDouble(new java.text.DecimalFormat("###0.00").format($P{sumBillableTon}))]]></textFieldExpression>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumWMFsc})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="816" y="0" width="71" height="20"/>
-				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+				<reportElement x="1718" y="0" width="82" height="20"/>
+				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
 					<leftPen lineWidth="1.0"/>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.Double"><![CDATA[Double.parseDouble(new java.text.DecimalFormat("###0.00").format($P{sumDestinationTon}))]]></textFieldExpression>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumWMTotalAmount})]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>
