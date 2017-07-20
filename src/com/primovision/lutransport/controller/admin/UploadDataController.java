@@ -106,6 +106,7 @@ public class UploadDataController extends BaseController {
 	
 	@RequestMapping("/wmTicket.do")
 	public String wmTicket(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		setupWMTicketUpload(model);
 		return "admin/uploaddata/wmTicket";
 	}
 	
@@ -371,7 +372,10 @@ public class UploadDataController extends BaseController {
 	public String saveWMTicket(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("locationType") String locationType,
+			@RequestParam(required = false, value = "destinationLocation") String destinationLocation,
 			@RequestParam("dataFile") MultipartFile file) {
+		setupWMTicketUpload(model);
+		
 		model.addAttribute("errorList", new ArrayList<String>());
 		//model.addAttribute("error", StringUtils.EMPTY);
 		//request.getSession().setAttribute("error", StringUtils.EMPTY);
@@ -395,7 +399,7 @@ public class UploadDataController extends BaseController {
 			InputStream is = file.getInputStream();
 			Long createdBy = getUser(request).getId();
 			System.out.println("\nimportMainSheetService.importWMTicket(is)\n");
-			List<String> errorList = importMainSheetService.importWMTickets(is, locationType, createdBy);
+			List<String> errorList = importMainSheetService.importWMTickets(is, locationType, destinationLocation, createdBy);
 			if (errorList.isEmpty()) {
 				model.addAttribute("msg", "Successfully uploaded all WM tickets");
 			} else {
@@ -620,7 +624,14 @@ public class UploadDataController extends BaseController {
 		}
 		return "admin/uploaddata/ticket";
 	}
-
+	
+	private void setupWMTicketUpload(ModelMap model) {
+		Location location = genericDAO.getById(Location.class, 392l); // Fairless landfill
+		List<Location> locationList = new ArrayList<Location>();
+		locationList.add(location);
+		model.addAttribute("destinationLocations", locationList);
+	}
+	
 	private Driver getDriverByName(String string) {
 		// TODO Auto-generated method stub
 		return null;

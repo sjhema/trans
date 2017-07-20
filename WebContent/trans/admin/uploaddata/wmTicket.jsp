@@ -13,10 +13,20 @@
 	}
 	
 	function submitUploadform() {	
-		var dataFile = document.getElementById("dataFile");
+		var dataFile = document.getElementById("dataFile").value;
+		var locationType = document.getElementById("locationType").value;
+		var destinationLocation = document.getElementById("destinationLocation").value;
 		
-		if (dataFile.value == "") {
-			document.getElementById("wmTicketUploadErrorDiv").innerHTML="Please choose a file to upload!";
+		var errorDiv = document.getElementById("wmTicketUploadErrorDiv");
+		
+		if (locationType == "") {
+			errorDiv.innerHTML="Please choose origin or destination location type";
+		} else if (locationType == "DESTN" && destinationLocation == '') {
+			errorDiv.innerHTML="Please choose a destination";
+		} else if (locationType == "ORIGN" && destinationLocation != '') {
+			errorDiv.innerHTML="Destination location cannot be selected when location type selected is Origin";
+		} else if (dataFile == "") {
+			errorDiv.innerHTML="Please choose a file to upload!";
 		} else {
 			document.forms["wmTicketUploadForm"].submit();
 		}
@@ -35,6 +45,21 @@
 				<option value="">------<primo:label code="Please Select"/>------</option>
 				<option value="ORIGN">Origin</option>
 				<option value="DESTN">Destination</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="${left}" class="first"><primo:label code="Destination Location"/></td>
+		<td align="${left}">
+			<select id="destinationLocation" name="destinationLocation" style="min-width:154px; max-width:154px">
+				<option value="">------<primo:label code="Please Select"/>------</option>
+				<c:forEach items="${destinationLocations}" var="aDestinationLocation">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['destinationLocation'] == aDestinationLocation.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${aDestinationLocation.id}" ${selected}>${aDestinationLocation.name}</option>
+				</c:forEach>
 			</select>
 		</td>
 	</tr>

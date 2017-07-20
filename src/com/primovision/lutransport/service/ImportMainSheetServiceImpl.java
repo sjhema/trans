@@ -217,6 +217,18 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return genericDAO.findByCriteria(StaticData.class, criterias);
 	}
 	
+	private Location retrieveLocationById(String locationIdStr) {
+		if (StringUtils.isEmpty(locationIdStr)) {
+			return null;
+		}
+		return retrieveLocationById(Long.valueOf(locationIdStr));
+	}
+	
+	private Location retrieveLocationById(Long locationId) {
+		Location location = genericDAO.getById(Location.class, locationId);
+		return location;
+	}
+	
 	private List<Location> retrieveLocationDataByQualifier(int locationType, String qualifierType, 
 			String qualifier) {
 		Map<String, Object> criterias = new HashMap<String, Object>();
@@ -684,7 +696,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public List<String> importWMTickets(InputStream is, String locationType, Long createdBy) throws Exception {
+	public List<String> importWMTickets(InputStream is, String locationType, String destinationLocation, 
+			Long createdBy) throws Exception {
 		SimpleDateFormat wmDateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
 		// 5/30/2017 4:15:53 AM
 		SimpleDateFormat wmDateTimeStrFormat = new SimpleDateFormat("M/dd/yyyy h:mm:ss a");
@@ -712,7 +725,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					errorList.add("Origin could not be determined");
 				}
 			} else {
-				destination = retrieveDestinationForWM(sheet);
+				//destination = retrieveDestinationForWM(sheet);
+				destination = retrieveDestinationForWM(destinationLocation);
 				locationPtr = destination;
 				if (destination == null) {
 					errorList.add("Destination could not be determined");
@@ -1232,6 +1246,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		} else {
 			return destinationList.get(0);
 		}
+	}
+	
+	private Location retrieveDestinationForWM(String destinationLocation) {
+		if (StringUtils.isEmpty(destinationLocation)) {
+			return null;
+		}
+		
+		return retrieveLocationById(destinationLocation);
 	}
 	
 	private void mapBasedOnTicketType(WMTicket wmTicket) {
