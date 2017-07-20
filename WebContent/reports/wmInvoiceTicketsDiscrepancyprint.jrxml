@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancyprint" pageWidth="1850" pageHeight="1055" orientation="Landscape" columnWidth="1810" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancyprint" pageWidth="1930" pageHeight="1055" orientation="Landscape" columnWidth="1890" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="926"/>
+	<property name="ireport.x" value="976"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="origin" class="java.lang.String"/>
 	<parameter name="destination" class="java.lang.String"/>
@@ -80,6 +80,9 @@
 	<variable name="sumWMTotalAmount" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{wmTotalAmount}]]></variableExpression>
 	</variable>
+	<variable name="sumTotalAmtDiff" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totAmt}-$F{wmTotalAmount}]]></variableExpression>
+	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -89,7 +92,7 @@
 	<pageHeader>
 		<band height="73">
 			<staticText>
-				<reportElement mode="Opaque" x="817" y="26" width="130" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="857" y="26" width="130" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -103,7 +106,7 @@
 				<text><![CDATA[DESTINATION]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="674" y="26" width="143" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="714" y="26" width="143" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -117,7 +120,7 @@
 				<text><![CDATA[ORIGIN]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="947" y="26" width="188" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="987" y="26" width="188" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -131,14 +134,14 @@
 				<text><![CDATA[DATE RANGE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="675" y="0" width="461" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="715" y="0" width="461" height="20" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[DISCREPANCY REPORT]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="674" y="46" width="143" height="20"/>
+				<reportElement x="714" y="46" width="143" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -150,7 +153,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{origin}]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="817" y="46" width="130" height="20"/>
+				<reportElement x="857" y="46" width="130" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -162,7 +165,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{destination}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="947" y="46" width="188" height="20"/>
+				<reportElement x="987" y="46" width="188" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -588,6 +591,21 @@ Surcharge]]></text>
 				<text><![CDATA[WM Total Amount
 ]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1800" y="24" width="82" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Amount Difference
+]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -956,6 +974,20 @@ Surcharge]]></text>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{fuelSurcharge})]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="1800" y="0" width="82" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totAmt}-$F{wmTotalAmount})]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<summary>
@@ -1106,6 +1138,20 @@ Surcharge]]></text>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumWMTotalAmount})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1800" y="0" width="82" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumTotalAmtDiff})]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>
