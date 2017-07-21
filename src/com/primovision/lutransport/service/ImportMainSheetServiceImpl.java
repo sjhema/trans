@@ -792,7 +792,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Integer haulingTicketCol = colMapping.get(TicketUtils.WM_COL_HAULING_TICKET);
 					if (haulingTicketCol != null) {
 						String haulingTicketStr = ((String) getCellValue(row.getCell(haulingTicketCol)));
-						if (StringUtils.isNotEmpty(haulingTicketStr)) {
+						if (StringUtils.isNotEmpty(haulingTicketStr)
+								&& StringUtils.isNumeric(haulingTicketStr)) {
 							currentWMTicket.setHaulingTicket(Long.parseLong(haulingTicketStr));
 						} 
 					}
