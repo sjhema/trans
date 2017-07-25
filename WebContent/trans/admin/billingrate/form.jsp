@@ -274,6 +274,13 @@ function formatDate1(){
 
 		</tr>
 		<tr>
+			<td class="form-left">Minimum Billable Tons</td>
+			<td align="${left}">
+				<form:input path="minBillableTons" style="min-width:150px; max-width:150px"/>
+				<br><form:errors path="minBillableTons" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left">Valid From<span class="errorMessage">*</span>
 			</td>
 			<td align="${left}"><form:input id="datepicker" path="validFrom"

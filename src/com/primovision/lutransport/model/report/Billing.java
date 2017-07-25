@@ -48,6 +48,9 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 	@Column(name="minimum_billablewt")
 	Double minimumbillablegrossweight=0.0;
 	
+	@Column(name="min_billable_tons")
+	Double minimumBillableTons = 0.0;
+	
 	@Column(name="origin_gross")
 	Double originGrossWt = 0.0;
 	
@@ -174,6 +177,15 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 	private Double gallon=0.0;
 		
 	
+	public Double getMinimumBillableTons() {
+		return minimumBillableTons;
+	}
+	
+	public void setMinimumBillableTons(Double minimumBillableTons) {
+		this.minimumBillableTons = minimumBillableTons;
+	}
+
+
 	public Location getDriverCompany() {
 		return driverCompany;
 	}

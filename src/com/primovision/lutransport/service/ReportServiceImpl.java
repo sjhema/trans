@@ -1398,8 +1398,7 @@ public class ReportServiceImpl implements ReportService {
 				}
 				if (billUsing == 1) {
 					if (rateType == 2 || rateType == 3) {
-						Double minbilgrosswt = billingRate
-								.getMinbillablegrossWeight();
+						Double minbilgrosswt = billingRate.getMinbillablegrossWeight();
 						if (minbilgrosswt != null
 								&& ticket.getTransferGross() < minbilgrosswt) {
 							billing.setEffectiveGrossWt(minbilgrosswt);
@@ -1416,6 +1415,20 @@ public class ReportServiceImpl implements ReportService {
 							billing.setEffectiveTareWt(ticket.getTransferTare());
 							billing.setEffectiveNetWt(ticket.getTransferNet());
 							billing.setEffectiveTonsWt(ticket.getTransferTons());
+						}
+						
+						// Min billable tons - 25th Jul 2017
+						Double minBillableTons = billingRate.getMinBillableTons();
+						billing.setMinimumBillableTons(minBillableTons);
+						if (minBillableTons != null) {
+							billing.setEffectiveGrossWt(ticket.getTransferGross());
+							billing.setEffectiveTareWt(ticket.getTransferTare());
+							billing.setEffectiveNetWt(ticket.getTransferNet());
+							if (ticket.getTransferTons() < minBillableTons) {
+								billing.setEffectiveTonsWt(minBillableTons);
+							} else {
+								billing.setEffectiveTonsWt(ticket.getTransferTons());
+							}
 						}
 					}
 				} else {
@@ -1439,6 +1452,20 @@ public class ReportServiceImpl implements ReportService {
 							billing.setEffectiveTareWt(ticket.getLandfillTare());
 							billing.setEffectiveNetWt(ticket.getLandfillNet());
 							billing.setEffectiveTonsWt(ticket.getLandfillTons());
+						}
+						
+						// Min billable tons - 25th Jul 2017
+						Double minBillableTons = billingRate.getMinBillableTons();
+						billing.setMinimumBillableTons(minBillableTons);
+						if (minBillableTons != null) {
+							billing.setEffectiveGrossWt(ticket.getLandfillGross());
+							billing.setEffectiveTareWt(ticket.getLandfillTare());
+							billing.setEffectiveNetWt(ticket.getLandfillNet());
+							if (ticket.getLandfillTons() < minBillableTons) {
+								billing.setEffectiveTonsWt(minBillableTons);
+							} else {
+								billing.setEffectiveTonsWt(ticket.getLandfillTons());
+							}
 						}
 					}
 				}

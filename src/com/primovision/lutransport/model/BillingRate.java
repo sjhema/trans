@@ -94,6 +94,9 @@ public class BillingRate extends AbstractBaseModel {
 	@Column(name="min_billable_gross_weight")
 	private Double minbillablegrossWeight;
 	
+	@Column(name="min_billable_tons")
+	private Double minBillableTons;
+	
 	@Column(name="padd_using")
 	private Integer  paddUsing;
 	
@@ -116,6 +119,15 @@ public class BillingRate extends AbstractBaseModel {
 	@Transient
 	private Date validToTemp;
 
+	
+
+public Double getMinBillableTons() {
+		return minBillableTons;
+	}
+
+	public void setMinBillableTons(Double minBillableTons) {
+		this.minBillableTons = minBillableTons;
+	}
 
 public Date getValidFrom() {
 		setValidFromTemp(validFrom);
