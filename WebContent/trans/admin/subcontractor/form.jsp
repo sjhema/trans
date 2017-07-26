@@ -41,6 +41,46 @@ function formatFax(){
 		}
 	}	
 }
+
+function submitForm() {
+	var company1 = document.getElementById("company1").value;
+	var terminal1 = document.getElementById("terminal1").value;
+	var company2 = document.getElementById("company2").value;
+	var terminal2 = document.getElementById("terminal2").value;
+	var company3 = document.getElementById("company3").value;
+	var terminal3 = document.getElementById("terminal3").value;
+	
+	var valid = true;
+	if (company1 != '' && terminal1 == '') {
+		alert("Please select Terminal1");
+		valid = false;
+	}
+	if (company1 == '' && terminal1 != '') {
+		alert("Please select Company1");
+		valid = false;
+	}
+	if (company2 != '' && terminal2 == '') {
+		alert("Please select Terminal2");
+		valid = false;
+	}
+	if (company2 == '' && terminal2 != '') {
+		alert("Please select Company2");
+		valid = false;
+	}
+	if (company3 != '' && terminal3 == '') {
+		alert("Please select Terminal3");
+		valid = false;
+	}
+	if (company3 == '' && terminal3 != '') {
+		alert("Please select Company3");
+		valid = false;
+	}
+	if (!valid) {
+		return false;
+	}
+    
+	document.forms["subcontractorForm"].submit();
+}
 </script>
 
 <script type="text/javascript">
@@ -188,7 +228,7 @@ function formatDate1(){
 }
 </script>
 <br/>
-<form:form action="save.do" name="typeForm" commandName="modelObject"
+<form:form action="save.do" name="subcontractorForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
@@ -298,12 +338,68 @@ function formatDate1(){
 				</form:select> <br> <form:errors path="status" cssClass="errorMessage" />
 			</td>
 		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Company1" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="company1">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="company1" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Terminal1" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="terminal1">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="terminal1" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Company2" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="company2">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="company2" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Terminal2" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="terminal2">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="terminal2" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Company3" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="company3">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="company3" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Terminal3" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="terminal3">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> 
+				<br> <form:errors path="terminal3" cssClass="errorMessage" />
+			</td>
+		</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td align="${left}" colspan="2"><input type="submit"
-				name="create" id="create" onclick=""
-				value="<primo:label code="Save"/>" class="flat" /> <input
+			<td align="${left}" colspan="2">
+				<input type="button"
+					name="create" id="create" onclick="javascript:submitForm();"
+					value="<primo:label code="Save"/>" class="flat" />
+				<input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"
 				value="<primo:label code="Cancel"/>" class="flat"

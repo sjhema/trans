@@ -12,6 +12,15 @@ function submitform(type){
     }
     else{
          submitting = true;
+         
+         var company = document.getElementById("companyId").value;
+         if (company == '149') {
+        	 alert("Please select Company and verify Terminal is right");
+        	 
+        	 submitting = false
+        	 return false;
+         }
+         
 		document.forms["tripsheetTicketForm"].submit();
         }
 }
@@ -551,7 +560,9 @@ function populateFromTicketDataForYesTripSheet(listData) {
 	$("#createdBy").val(listData[33]);
 	$("#ticketStatus").val(listData[34]);
 	$("#payRollStatus").val(listData[35]);
-	//$("#subcontractor").val(listData[36]);
+	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	$("#subcontractor").val(listData[36]);
 }
 
 function populateFromTicketDataForNoTripSheet(listData) {
@@ -623,6 +634,11 @@ function populateFromTicketDataForNoTripSheet(listData) {
 	$("#createdBy").val(listData[22]);
 	$("#ticketStatus").val(listData[23]);
 	$("#payRollStatus").val(listData[24]);
+	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	if (listData[25] != '') {
+		$("#subcontractor").val(listData[25]);
+	}
 }
 
 function checkTransferTicketNew() {	

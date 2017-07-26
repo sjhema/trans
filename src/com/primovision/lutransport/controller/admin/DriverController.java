@@ -37,6 +37,7 @@ import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.ProbationType;
@@ -107,6 +108,10 @@ public class DriverController extends CRUDController<Driver>{
 		criterias.clear();
 		model.addAttribute("roles", genericDAO.findAll(Role.class));
 		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		criterias.clear();
+		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class,	criterias, "name", false));
 	}
 	
 	@Override
@@ -183,6 +188,9 @@ public class DriverController extends CRUDController<Driver>{
 		
 		binder.registerCustomEditor(Role.class, new AbstractModelEditor(Role.class));
 		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		binder.registerCustomEditor(SubContractor.class, new AbstractModelEditor(SubContractor.class));
 	}
 	
 	@Override

@@ -790,7 +790,16 @@ function processFirstNameChange(){
     		}
     	}*/
     	
+    	// Driver subcontractor change 2 - 21st Jul 2017
+    	var companyElem = $("#company");
+    	var company = companyElem.val();
     	var subCompanyElem = $("#subcontractorCompany");
+    	var subCompany = subCompanyElem.val();
+   	    if (company == "149" && subCompany == "") { // Subcontractor
+   	    	alert("Please select subcontractor company");
+   	    	return false;
+   	    } 
+   	    
     	subCompanyElem.attr("disabled", false); 
     	
     	document.forms["employeeForm"].submit();
@@ -1117,7 +1126,7 @@ function processFirstNameChange(){
 					</c:if>
 				<form:select disabled="${disabled}" cssClass="flat" path="subcontractorCompany" id="subcontractorCompany" style="min-width:154px; max-width:154px">
 					<form:option value="">------<primo:label code="Please Select" />------</form:option>
-					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+					<form:options items="${subcontractors}" itemValue="id" itemLabel="name" />
 				</form:select>
 				<br> <form:errors path="subcontractorCompany" cssClass="errorMessage" />
 			</td>
@@ -1141,7 +1150,7 @@ function processFirstNameChange(){
 		<tr>
 			<td>&nbsp;</td>
 			<td align="${left}"><input type="submit"
-				name="create" id="create" onclick="javascript:processSave();"
+				name="create" id="create" onclick="return processSave();"
 				value="<primo:label code="Save"/>" class="flat" /> <input
 				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
 				class="flat" /> <input type="button" id="cancelBtn"

@@ -66,9 +66,10 @@ public class Driver extends AbstractBaseModel{
 	@JoinColumn(name="company_id")
 	private Location company;
 	
+	// Driver subcontractor change 2 - 21st Jul 2017
 	@ManyToOne
 	@JoinColumn(name="subcontractor_comp")
-	private Location subcontractorCompany;
+	private SubContractor subcontractorCompany;
 	
 	@ManyToOne
 	@JoinColumn(name="terminal")
@@ -206,11 +207,13 @@ public class Driver extends AbstractBaseModel{
 	}
 
 	
-	public Location getSubcontractorCompany() {
+	
+
+	public SubContractor getSubcontractorCompany() {
 		return subcontractorCompany;
 	}
 
-	public void setSubcontractorCompany(Location subcontractorCompany) {
+	public void setSubcontractorCompany(SubContractor subcontractorCompany) {
 		this.subcontractorCompany = subcontractorCompany;
 	}
 

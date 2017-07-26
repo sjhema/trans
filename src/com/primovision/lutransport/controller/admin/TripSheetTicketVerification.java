@@ -562,6 +562,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tripsheet.setOriginTicket(entity.getOriginTicket());					
 					tripsheet.setUnloadDate(entity.getUnloadDate());
 					tripsheet.setVerificationStatus("Verified");
+					
+					// Driver subcontractor change 2 - 21st Jul 2017
+					tripsheet.setSubcontractor(entity.getSubcontractor());
+					
 					genericDAO.saveOrUpdate(tripsheet);
 				}
 			}
@@ -589,6 +593,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				tripsheet.setUnloadDate(entity.getUnloadDate());
 				tripsheet.setVerificationStatus("Verified");
 				tripsheet.setEnteredBy("system");
+				
+				// Driver subcontractor change 2 - 21st Jul 2017
+				tripsheet.setSubcontractor(entity.getSubcontractor());
+				
 				genericDAO.saveOrUpdate(tripsheet);			
 			}
 			
@@ -738,6 +746,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 					tripsheet.setOriginTicket(entity.getOriginTicket());					
 					tripsheet.setUnloadDate(entity.getUnloadDate());
 					tripsheet.setVerificationStatus("Verified");
+					
+					// Driver subcontractor change 2 - 21st Jul 2017
+					tripsheet.setSubcontractor(entity.getSubcontractor());
+					
 					genericDAO.saveOrUpdate(tripsheet);
 				}
 			}
@@ -785,6 +797,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 				tripsheet.setUnloadDate(entity.getUnloadDate());
 				tripsheet.setVerificationStatus("Verified");
 				tripsheet.setEnteredBy("system");
+				
+				// Driver subcontractor change 2 - 21st Jul 2017
+				tripsheet.setSubcontractor(entity.getSubcontractor());
+				
 				genericDAO.saveOrUpdate(tripsheet);
 			
 			}
@@ -903,7 +919,11 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			ticket.setOriginTicket(tripSheet.getOriginTicket());
 			ticket.setDestinationTicket(tripSheet.getDestinationTicket());
 			ticket.setLoadDate(tripSheet.getLoadDate());
-			ticket.setUnloadDate(tripSheet.getUnloadDate());			
+			ticket.setUnloadDate(tripSheet.getUnloadDate());	
+			
+			// Driver subcontractor change 2 - 21st Jul 2017
+			ticket.setSubcontractor(tripSheet.getSubcontractor());
+			
 			return ticket;
 		}
 	}
@@ -1409,6 +1429,10 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			ticketDataList.add(userId);
 			ticketDataList.add("1");
 			ticketDataList.add("1");
+			
+			// Driver subcontractor change 2 - 21st Jul 2017
+			ticketDataList.add(StringUtils.EMPTY); // For subcontractor
+			
 			return;
 		}
 		
@@ -1424,6 +1448,9 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
 		ticketDataList.add("1");
+		
+		// Driver subcontractor change 2 - 21st Jul 2017	
+		ticketDataList.add(StringUtils.EMPTY); // For subcontractor
 	}
 	
 	private void addEmptyTicketData(List ticketDataList, int noOfTimes) {
@@ -1457,6 +1484,13 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
 		ticketDataList.add("1");
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		if (tripsheet.getSubcontractor() != null) {
+			ticketDataList.add(tripsheet.getSubcontractor().getId());
+		} else {
+			ticketDataList.add(StringUtils.EMPTY);
+		}
 	}
 	
 	// WM Ticket change - 23rd May 2017
@@ -1493,6 +1527,9 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		ticketDataList.add(userId);
 		ticketDataList.add("1");
 		ticketDataList.add("1");
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		ticketDataList.add(StringUtils.EMPTY); // For subcontractor
 	}
 	
 	// WM Ticket change - 23rd May 2017
@@ -1660,11 +1697,12 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		ticketDataList.add(ticket.getTicketStatus());
 		ticketDataList.add(ticket.getPayRollStatus());
 		
-		/*if (ticket.getSubcontractor() != null) {
+		// Driver subcontractor change 2 - 21st Jul 2017
+		if (ticket.getSubcontractor() != null) {
 			ticketDataList.add(ticket.getSubcontractor().getId());
 		} else {
 			ticketDataList.add(StringUtils.EMPTY);
-		}*/
+		}
 	}
 }
 

@@ -24,6 +24,7 @@ import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
+import com.primovision.lutransport.model.TripSheetLocation;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.WMTicket;
@@ -1013,6 +1014,9 @@ public class TicketUtils {
 		
 		ticket.setLoadDate(tripSheet.getLoadDate());
 		ticket.setUnloadDate(tripSheet.getUnloadDate());
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		ticket.setSubcontractor(tripSheet.getSubcontractor());
 	}
 	
 	public static void map(WMTicket wmTicket, TripSheet tripSheet) {
@@ -1047,6 +1051,9 @@ public class TicketUtils {
 		if (wmTicket.getUnloadDate() == null) {
 			wmTicket.setUnloadDate(tripSheet.getUnloadDate());
 		}
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		wmTicket.setSubcontractor(tripSheet.getSubcontractor());
 	}
 	
 	public static WMTicket retrieveWMTicket(String locationTicketNo, String location, boolean byOrigin,
@@ -1239,6 +1246,11 @@ public class TicketUtils {
 			return null;
 		}
 		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		if (!canCreateTicket(tripSheet)) {
+			return null;
+		}
+		
 		ticket = new Ticket();
 		
 		ticket.setTransferTimeIn(wmOriginTicket.getTransferTimeIn());
@@ -1262,10 +1274,26 @@ public class TicketUtils {
 		
 		save(ticket, "complete", errorMsgBuff, genericDAO);
 		
-		save(wmOriginTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
-		save(wmDestinationTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
+		if (errorMsgBuff.length() == 0) {
+			save(wmOriginTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
+			save(wmDestinationTicket, WMTicket.PROCESSING_STATUS_DONE, tripSheet.getCreatedBy(), genericDAO);
+		}
 		
 		return ticket;
+	}
+	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	public static boolean canCreateTicket(TripSheet tripSheet) {
+		SubContractor subContractor = tripSheet.getSubcontractor();
+		if (subContractor == null) {
+			return true;
+		}
+		List<Location> subContractorCompanies = subContractor.getCompanies();
+		if (subContractorCompanies != null && subContractorCompanies.size() > 1) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	public static Date calculateBatchDate(Date unloadDate) {
@@ -1309,5 +1337,55 @@ public class TicketUtils {
 		colMapping.put(WM_INVOICE_COL_STATUS_CODE, 25);
 		
 		return colMapping;
+	}
+	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	public static String retrieveTripSheetLocationNames(SubContractor subContractor, int type, GenericDAO genericDAO) {
+		List<Location> subContractorCompanies = subContractor.getCompanies();
+		List<Location> subContractorTerminals = subContractor.getTerminals();
+		if (subContractorCompanies == null || subContractorCompanies.isEmpty()
+				|| subContractorTerminals == null || subContractorTerminals.isEmpty()
+				|| subContractorCompanies.size() != subContractorTerminals.size()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String locNames = StringUtils.EMPTY;
+		for (int i = 0; i < subContractorCompanies.size(); i++) {
+			String currLocNames = retrieveTripSheetLocationNames(subContractorCompanies.get(i), 
+					subContractorTerminals.get(i), type, genericDAO);
+			if (StringUtils.isEmpty(currLocNames)) {
+				continue;
+			}
+			
+			if (StringUtils.isEmpty(locNames)) {
+				locNames = currLocNames; 
+			} else {
+				locNames += ("," + currLocNames); 
+			}
+		}
+		return locNames;
+	}
+	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	public static String retrieveTripSheetLocationNames(Location company, Location terminal, int type, GenericDAO genericDAO) {
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("driverCompany", company);
+		criterias.put("terminal", terminal);
+		criterias.put("type", type);
+		
+		List<TripSheetLocation> locList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
+		String locNames = StringUtils.EMPTY;
+		if (locList == null || locList.isEmpty()) {
+			return locNames;
+		}
+		
+		for (TripSheetLocation obj : locList) {
+			if (locNames.equals(StringUtils.EMPTY)){
+				locNames = obj.getName();
+			} else {
+				locNames =  locNames + "," + obj.getName();
+			}
+		}
+		return locNames;
 	}
 }

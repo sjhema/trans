@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
 
 @Entity
@@ -105,6 +106,10 @@ public class TripSheet extends AbstractBaseModel{
 	@JoinColumn(name="driver_company")
 	protected Location driverCompany;
 	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	@ManyToOne
+	@JoinColumn(name = "subcontractor")
+	protected SubContractor subcontractor;
 	
 	@ManyToOne
 	@JoinColumn(name="terminal")
@@ -114,6 +119,14 @@ public class TripSheet extends AbstractBaseModel{
 	
 	String terminalName;
 	
+
+	public SubContractor getSubcontractor() {
+		return subcontractor;
+	}
+
+	public void setSubcontractor(SubContractor subcontractor) {
+		this.subcontractor = subcontractor;
+	}
 
 	public Date getLoadDate() {
 		return loadDate;

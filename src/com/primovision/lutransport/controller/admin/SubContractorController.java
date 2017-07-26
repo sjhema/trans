@@ -67,6 +67,13 @@ public class SubContractorController extends CRUDController<SubContractor> {
 		criterias.put("dataType", "STATUS");
 		criterias.put("dataValue", "0,1");
 		model.addAttribute("subcontstatus", genericDAO.findByCriteria(StaticData.class, criterias,"dataText",false));
+	
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		criterias.clear();
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 	}
 	
 	

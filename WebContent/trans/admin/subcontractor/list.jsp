@@ -78,6 +78,12 @@
 		<primo:textcolumn headerText="Fax" dataField="fax" />
 		<primo:datecolumn headerText="Date Terminated" dataField="subdateTerminated" dataFormat="MM-dd-yyyy"/>
 		<primo:staticdatacolumn headerText="Complete Status" dataField="status" dataType="STATUS" />
+		<%--<primo:textcolumn headerText="Comp1" dataField="company1.name" />
+		<primo:textcolumn headerText="Term1" dataField="terminal1.name" />
+		<primo:textcolumn headerText="Comp2" dataField="company2.name" />
+		<primo:textcolumn headerText="Term2" dataField="terminal2.name" />
+		<primo:textcolumn headerText="Comp3" dataField="company3.name" />
+		<primo:textcolumn headerText="Term3" dataField="terminal3.name" />-->
 	   <%-- <primo:textcolumn headerText="Transfer Station" dataField="transferStation.name" />
 		<primo:textcolumn headerText="Landfill Station" dataField="landfill.name" /> --%>
 	</primo:datatable>

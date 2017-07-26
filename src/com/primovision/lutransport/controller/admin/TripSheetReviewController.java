@@ -40,6 +40,7 @@ import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
@@ -476,15 +477,41 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
    	  	criterias.put("id", entity.getDriver().getId());
    	  	Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
 		
-		entity.setDriverCompany(driver.getCompany());
+   	// Driver subcontractor change 2 - 21st Jul 2017
+		/*
+   	  entity.setDriverCompany(driver.getCompany());
    	  	
    	  	entity.setTerminal(driver.getTerminal());
    	  	
    	    entity.setTerminalName(driver.getTerminal().getName());
 	  	
 	  	entity.setCompanyName(driver.getCompany().getName());
+	  	*/
 	  	
-	  	
+   	  	// Driver trip sheet subcontractor company - 29th May 2017
+			Location company = driver.getCompany();
+			Location terminal = driver.getTerminal();
+			SubContractor subContractor = driver.getSubcontractorCompany();
+			if (subContractor != null) {
+				// Driver subcontractor change 2 - 21st Jul 2017
+				entity.setSubcontractor(subContractor);
+				
+				List<Location> subContractorCompanies = subContractor.getCompanies();
+				List<Location> subContractorTermials = subContractor.getTerminals();
+				if (subContractorCompanies != null && subContractorCompanies.size() == 1
+						&& subContractorTermials != null && subContractorTermials.size() == 1) {
+					company = subContractorCompanies.get(0);
+					terminal = subContractorTermials.get(0);
+				}
+			}
+			
+			entity.setDriverCompany(company);
+	   	  	
+	   	  	entity.setTerminal(terminal);
+	   	  	
+	   	     entity.setTerminalName(terminal.getName());
+	   	     
+	   	     entity.setCompanyName(company.getName());
 	  	
 	 	////////////////// NEW Code //////////////////////////////////////
 		  

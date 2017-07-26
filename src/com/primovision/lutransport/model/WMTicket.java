@@ -159,6 +159,20 @@ public class WMTicket extends AbstractBaseModel {
 	@Column(name = "landfill_ton")
 	private Double landfillTons;
 	
+	// Driver subcontractor change 2 - 21st Jul 2017
+	@Transient
+	private SubContractor subcontractor;
+	
+	@Transient
+	public SubContractor getSubcontractor() {
+		return subcontractor;
+	}
+	
+	@Transient
+	public void setSubcontractor(SubContractor subcontractor) {
+		this.subcontractor = subcontractor;
+	}
+
 	public String getWmDestination() {
 		return wmDestination;
 	}

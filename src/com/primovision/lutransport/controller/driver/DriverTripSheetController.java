@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
+import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
@@ -40,10 +43,12 @@ import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.TripSheetLocation;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.WMInvoiceVerification;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.service.DateUpdateService;
@@ -90,55 +95,71 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
 		User userObj = (User) request.getSession().getAttribute("userInfo");
 		Map criterias = new HashMap();
+		
+		criterias.clear();
+		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
+		model.addAttribute("trailers", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=2 group by obj.unit"));
+	
 		criterias.clear();
 		criterias.put("status",1);
 		criterias.put("firstName",userObj.getFirstName());
 		criterias.put("lastName", userObj.getLastName());
 		Driver driver = genericDAO.getByCriteria(Driver.class, criterias);
 		
-		criterias.clear();
-		
 		// Driver trip sheet subcontractor company - 29th May 2017
 		Location company = driver.getCompany();
+		// Driver subcontractor change 2 - 21st Jul 2017
+		/*
 		if (driver.getSubcontractorCompany() != null) {
 			company = driver.getSubcontractorCompany();
-		}
+		}*/
 		
-		// Driver trip sheet subcontractor company - 29th May 2017
-		criterias.put("driverCompany", company);
-		criterias.put("terminal",driver.getTerminal());
-		criterias.put("type",1);
-		List<TripSheetLocation> locList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
-		String locNames = "";
-		if(locList!=null  && locList.size()>0){
+		// Driver subcontractor change 2 - 21st Jul 2017
+		String locNames = StringUtils.EMPTY;
+		String destLocNames = StringUtils.EMPTY;
+		if (driver.getSubcontractorCompany() != null) {
+			SubContractor subcontractor = driver.getSubcontractorCompany();
+			locNames = TicketUtils.retrieveTripSheetLocationNames(subcontractor, 1, genericDAO);
+			destLocNames = TicketUtils.retrieveTripSheetLocationNames(subcontractor, 2, genericDAO);
+			if (StringUtils.isEmpty(locNames) || StringUtils.isEmpty(destLocNames)) {
+				return;
+			}
+		} else {
+			// Driver subcontractor change 2 - 21st Jul 2017
 			
-			for(TripSheetLocation obj : locList){
-				if(locNames.equals("")){
-					locNames = obj.getName();
-				}
-				else{
-					locNames =  locNames + ","+obj.getName();
+			criterias.clear();
+			// Driver trip sheet subcontractor company - 29th May 2017
+			criterias.put("driverCompany", company);
+			criterias.put("terminal",driver.getTerminal());
+			criterias.put("type",1);
+			List<TripSheetLocation> locList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
+			if(locList!=null  && locList.size()>0){
+				for(TripSheetLocation obj : locList){
+					if(locNames.equals("")){
+						locNames = obj.getName();
+					}
+					else{
+						locNames =  locNames + ","+obj.getName();
+					}
 				}
 			}
-		}
 		
-		criterias.clear();
-		// Driver trip sheet subcontractor company - 29th May 2017
-		criterias.put("driverCompany", company);
-		criterias.put("terminal",driver.getTerminal());
-		criterias.put("type",2);
-		List<TripSheetLocation> destLocList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
-		String destLocNames = "";
-		if(destLocList!=null  && destLocList.size()>0){
-			
-			for(TripSheetLocation destObj : destLocList){
-				if(destLocNames.equals("")){
-					destLocNames = destObj.getName();
-				}
-				else{
-					destLocNames =  destLocNames + ","+destObj.getName();
-				}
-			}	
+			criterias.clear();
+			// Driver trip sheet subcontractor company - 29th May 2017
+			criterias.put("driverCompany", company);
+			criterias.put("terminal",driver.getTerminal());
+			criterias.put("type",2);
+			List<TripSheetLocation> destLocList = genericDAO.findByCriteria(TripSheetLocation.class, criterias, "name", false);	
+			if(destLocList!=null  && destLocList.size()>0){
+				for(TripSheetLocation destObj : destLocList){
+					if(destLocNames.equals("")){
+						destLocNames = destObj.getName();
+					}
+					else{
+						destLocNames =  destLocNames + ","+destObj.getName();
+					}
+				}	
+			}
 		}
 		
 		if(request.getParameter("id")!=null){
@@ -167,10 +188,6 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 			criterias.put("id!",91l);
 			model.addAttribute("destinations", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 		}
-		criterias.clear();
-		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
-		model.addAttribute("trailers", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=2 group by obj.unit"));
-		
 	}
 	
 	@Override
@@ -178,7 +195,6 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		populateSearchCriteria(request, request.getParameterMap());
 		setupCreate(model, request);
 	}
-	
 
 	@Override
 	public String list(ModelMap model, HttpServletRequest request) {
@@ -417,15 +433,27 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		
 		// Driver trip sheet subcontractor company - 29th May 2017
 		Location company = driver.getCompany();
-		if (driver.getSubcontractorCompany() != null) {
-			company = driver.getSubcontractorCompany();
+		Location terminal = driver.getTerminal();
+		SubContractor subContractor = driver.getSubcontractorCompany();
+		if (subContractor != null) {
+			// Driver subcontractor change 2 - 21st Jul 2017
+			//company = driver.getSubcontractorCompany();
+			entity.setSubcontractor(subContractor);
+			
+			List<Location> subContractorCompanies = subContractor.getCompanies();
+			List<Location> subContractorTermials = subContractor.getTerminals();
+			if (subContractorCompanies != null && subContractorCompanies.size() == 1
+					&& subContractorTermials != null && subContractorTermials.size() == 1) {
+				company = subContractorCompanies.get(0);
+				terminal = subContractorTermials.get(0);
+			}
 		}
 		//entity.setDriverCompany(driver.getCompany());
 		entity.setDriverCompany(company);
    	  	
-   	  	entity.setTerminal(driver.getTerminal());
+   	  	entity.setTerminal(terminal);
    	  	
-   	     entity.setTerminalName(driver.getTerminal().getName());
+   	     entity.setTerminalName(terminal.getName());
 	  	
    	// Driver trip sheet subcontractor company - 29th May 2017
 	  	//entity.setCompanyName(driver.getCompany().getName());

@@ -1031,6 +1031,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						destinationTicketCopy.setProcessingStatus(WMTicket.PROCESSING_STATUS_PROCESSING);
 						genericDAO.saveOrUpdate(destinationTicketCopy);
 					}
+					
+					// Driver subcontractor change 2 - 21st Jul 2017
+					if (!TicketUtils.canCreateTicket(tripSheet)) {
+						currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_PROCESSING);
+						genericDAO.saveOrUpdate(currentWMTicket);
+						continue;
+					}
 						
 					WMTicket wmOriginTicket = null;
 					WMTicket wmDestinationTicket = null;
@@ -1320,6 +1327,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		ticket.setLandfillGross(wmTicket.getLandfillGross());
 		ticket.setLandfillTare(wmTicket.getLandfillTare());
+		
+		// Driver subcontractor change 2 - 21st Jul 2017
+		ticket.setSubcontractor(wmTicket.getSubcontractor());
 	}
 	
 	private Ticket retrieveMatchingTicket(WMTicket wmTicket) {
