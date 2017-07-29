@@ -1012,20 +1012,20 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		
 		if ("findDriver".equalsIgnoreCase(action)) {
-
 			List<Driver> dlst=null;
 			String terminalId = request.getParameter("terminal");
 			String companyId = request.getParameter("company");
+			String subcontractorId = request.getParameter("subcontractor");
+			String ticketId = request.getParameter("tickId");
 			
-			if (!StringUtils.isEmpty(terminalId))
-			{		
-				if(!StringUtils.isEmpty(request.getParameter("tickId"))){				
-				String query="select obj from Driver obj where obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC";
-				dlst=genericDAO.executeSimpleQuery(query);
-				}
-				else{
+			if (StringUtils.isNotEmpty(subcontractorId)) {
+				dlst = retrieveDriversForSubcontractor(subcontractorId, ticketId);
+			} else if (!StringUtils.isEmpty(terminalId)) {		
+				if(!StringUtils.isEmpty(ticketId)){				
+					String query="select obj from Driver obj where obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC";
+					dlst=genericDAO.executeSimpleQuery(query);
+				} else {
 					String query="select obj from Driver obj where obj.status=1 and obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC";
-					
 					dlst=genericDAO.executeSimpleQuery(query);
 				}
 			}
@@ -1381,6 +1381,17 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 		
 		List<Ticket> ticketList = genericDAO.executeSimpleQuery(query);
 		return (ticketList == null || ticketList.isEmpty()) ? null : ticketList.get(0);
+	}
+	
+	private List<Driver> retrieveDriversForSubcontractor(String subcontractorId, String ticketId) {
+		String query = "select obj from Driver obj where obj.subcontractorCompany="+subcontractorId;
+		if (StringUtils.isEmpty(ticketId)) {	
+			query += " and obj.status=1";
+		}
+		query += " order by fullName ASC";
+		
+		return genericDAO.executeSimpleQuery(query);
+		
 	}
 	
 	// WM Ticket change - 23rd May 2017

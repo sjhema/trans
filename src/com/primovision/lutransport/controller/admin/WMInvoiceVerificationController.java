@@ -397,8 +397,9 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
       StringBuffer wmInvoiceQuery = new StringBuffer("select obj from WMInvoice obj where 1=1");
       
       if (StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MISSING_TICKETS_IN_WM_REPORT, reportCtx)
-      		|| StringUtils.equals(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT, reportCtx)) {
-      	ticketQuery.append(" and obj.ticketStatus=1");
+      		|| StringUtils.equals(WMInvoiceVerification.WM_INVOICE_DISCREPANCY_REPORT, reportCtx)
+      		|| StringUtils.equals(WMInvoiceVerification.WM_INVOICE_MATCHING_REPORT, reportCtx)) {
+      	ticketQuery.append(" and obj.ticketStatus=1"); // Available
       } 
       
       if (StringUtils.isNotEmpty(fromBatchDate)) {

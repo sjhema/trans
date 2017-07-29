@@ -143,11 +143,13 @@ function getDriver()
 	var terminalId=selectedterminal.options[selectedterminal.selectedIndex].value;
 	var ticId=document.getElementById('id').value;
 	
+	var subcontractorId = document.getElementById('subcontractor').value;
+	
 	if(terminalId!='')
 	{
 		jQuery.ajax({
 			
-			url:'${ctx}/admin/tripsheetticketverification/ajax.do?action=findDriver&terminal='+terminalId+'&tickId='+ticId+'&company='+companyid, 
+			url:'${ctx}/admin/tripsheetticketverification/ajax.do?action=findDriver&terminal='+terminalId+'&tickId='+ticId+'&company='+companyid+'&subcontractor='+subcontractorId, 
 			
 				success: function( data ) 
 				{
@@ -1052,7 +1054,8 @@ function formatDate1(){
 			
 			
 			<td class="form-left"><primo:label code="Subcontractor" /></td>
-			<td><form:select cssClass="flat" path="subcontractor" style="min-width:154px; max-width:154px">
+			<td><form:select cssClass="flat" path="subcontractor" style="min-width:154px; max-width:154px"
+					onchange="javascript:getDriver();">
 					<form:option value="">------<primo:label code="Please Select" />------</form:option>
 					<form:options items="${subcontractors}" itemValue="id"	itemLabel="name" />
 				</form:select> <br> <form:errors path="subcontractor" cssClass="errorMessage" />
