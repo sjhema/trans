@@ -23,7 +23,8 @@ if (menuTree!=null) {
 			   || businessObject.getId()==306 || businessObject.getId()==20012 || businessObject.getId()==1005
 			   || businessObject.getId()==600110
 			   || businessObject.getId()==30012
-			   || businessObject.getId()==30013){ 
+			   || businessObject.getId()==30013
+			   || businessObject.getId()==40012){ // Invoicing
 			
 				if (hierarchy.contains("/"+businessObject.getId()+"/")) {
 				cssClass="selected";
