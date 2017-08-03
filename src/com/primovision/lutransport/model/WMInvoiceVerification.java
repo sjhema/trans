@@ -30,6 +30,16 @@ public class WMInvoiceVerification implements ReportModel {
 	Long ticket;
 	Date txnDate;
 	
+	private String ticketStatus = StringUtils.EMPTY;
+	
+	public String getTicketStatus() {
+		return ticketStatus;
+	}
+
+	public void setTicketStatus(String ticketStatus) {
+		this.ticketStatus = ticketStatus;
+	}
+	
 	public Long getOriginTicket() {
 		return originTicket;
 	}

@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
 
 @Entity
 @Table(name = "wm_invoice")
@@ -76,6 +79,19 @@ public class WMInvoice extends AbstractBaseModel {
 	@Column(name="wm_ticket")
 	private String wmTicket;
 	
+	@Transient
+	private String ticketStatus = StringUtils.EMPTY;
+	
+	@Transient
+	public String getTicketStatus() {
+		return ticketStatus;
+	}
+
+	@Transient
+	public void setTicketStatus(String ticketStatus) {
+		this.ticketStatus = ticketStatus;
+	}
+
 	public Long getTicket() {
 		return ticket;
 	}

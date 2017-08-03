@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancy" pageWidth="1930" pageHeight="600" orientation="Landscape" columnWidth="1890" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceTicketsDiscrepancy" pageWidth="2100" pageHeight="600" orientation="Landscape" columnWidth="2060" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="454"/>
+	<property name="ireport.x" value="1162"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="origin" class="java.lang.String"/>
 	<parameter name="destination" class="java.lang.String"/>
@@ -41,6 +41,7 @@
 	<field name="wmAmount" class="java.lang.Double"/>
 	<field name="wmFSC" class="java.lang.Double"/>
 	<field name="wmTotalAmount" class="java.lang.Double"/>
+	<field name="processStatus" class="java.lang.String"/>
 	<variable name="sumTons" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{effectiveTonsWt}]]></variableExpression>
 	</variable>
@@ -92,7 +93,7 @@
 	<pageHeader>
 		<band height="73">
 			<staticText>
-				<reportElement mode="Opaque" x="857" y="26" width="130" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="944" y="26" width="130" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -106,7 +107,7 @@
 				<text><![CDATA[DESTINATION]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="714" y="26" width="143" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="801" y="26" width="143" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -120,7 +121,7 @@
 				<text><![CDATA[ORIGIN]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="987" y="26" width="188" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1074" y="26" width="188" height="20" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -134,14 +135,14 @@
 				<text><![CDATA[DATE RANGE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="715" y="0" width="461" height="20" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="800" y="0" width="461" height="20" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[DISCREPANCY REPORT]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="714" y="46" width="143" height="20"/>
+				<reportElement x="801" y="46" width="143" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -153,7 +154,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{origin}]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="857" y="46" width="130" height="20"/>
+				<reportElement x="944" y="46" width="130" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -165,7 +166,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{destination}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="987" y="46" width="188" height="20"/>
+				<reportElement x="1074" y="46" width="188" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -606,6 +607,20 @@ Surcharge]]></text>
 				<text><![CDATA[Total Amount Difference
 ]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1882" y="24" width="151" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status In Our System]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -987,6 +1002,20 @@ Surcharge]]></text>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totAmt}-$F{wmTotalAmount})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1882" y="0" width="151" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{processStatus}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

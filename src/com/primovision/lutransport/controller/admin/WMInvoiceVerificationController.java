@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.gson.Gson;
 
 import com.primovision.lutransport.controller.report.ReportController;
-
+import com.primovision.lutransport.core.tags.StaticDataUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 
@@ -287,14 +287,34 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		for (WMInvoice anWMInvoice : wmInvoiceList) {
 			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
-			if (!wmTicketByDestinationMap.containsKey(searchKey)) {
+			
+			Ticket matchingTicket = wmTicketByDestinationMap.get(searchKey);
+			if (matchingTicket == null) {
+				matchingTicket = wmTicketByOriginMap.get(searchKey);
+			} 
+			
+			if (matchingTicket == null) {
+				missingTickets.add(anWMInvoice);
+			} else if (matchingTicket.getTicketStatus() == 0) { // HOLD
+				anWMInvoice.setTicketStatus(getTicketStatusText(matchingTicket.getTicketStatus()));
+				missingTickets.add(anWMInvoice);
+			}
+			
+			/*if (!wmTicketByDestinationMap.containsKey(searchKey)) {
 				if (!wmTicketByOriginMap.containsKey(searchKey)) {
 					missingTickets.add(anWMInvoice);
 				}
-			}
+			}*/
 		}
 		
 		return missingTickets;
+	}
+	
+	private String getTicketStatusText(Integer ticketStatus) {
+		if (ticketStatus == null) {
+			return StringUtils.EMPTY;
+		}
+		return StaticDataUtil.getText("TICKET_STATUS", String.valueOf(ticketStatus));
 	}
 	
 	private void map(List<WMInvoiceVerification> wmInvoiceVerificationList, List<Ticket> tickets) {
@@ -328,6 +348,8 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		aWMInvoiceVerification.setLoadDate(aTicket.getLoadDate());
 		aWMInvoiceVerification.setUnloadDate(aTicket.getUnloadDate());
+		
+		aWMInvoiceVerification.setTicketStatus(getTicketStatusText(aTicket.getTicketStatus()));
 	}
 	
 	private void mapWMInvoice(List<WMInvoiceVerification> wmInvoiceVerificationList, List<WMInvoice> wmInvoiceList) {
@@ -359,6 +381,8 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		aWMInvoiceVerification.setWmDestination(anWMInvoice.getDestination() == null ? StringUtils.EMPTY : anWMInvoice.getDestination().getLongName());
 		
 		aWMInvoiceVerification.setTxnDate(anWMInvoice.getTxnDate());
+		
+		aWMInvoiceVerification.setTicketStatus(anWMInvoice.getTicketStatus());
 	}
 	
 	private String retrieveLocationName(String locationIdStr) {

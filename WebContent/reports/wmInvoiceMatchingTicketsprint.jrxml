@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceMatchingTicketsPrint" pageWidth="1290" pageHeight="1055" orientation="Landscape" columnWidth="1250" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="wmInvoiceMatchingTicketsPrint" pageWidth="1450" pageHeight="1055" orientation="Landscape" columnWidth="1410" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="368"/>
+	<property name="ireport.x" value="528"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="origin" class="java.lang.String"/>
 	<parameter name="dateRange" class="java.lang.String"/>
@@ -14,6 +14,7 @@
 	<field name="destinationTicket" class="java.lang.Long"/>
 	<field name="wmOrigin" class="java.lang.String"/>
 	<field name="wmDestination" class="java.lang.String"/>
+	<field name="ticketStatus" class="java.lang.String"/>
 	<variable name="totalCount" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[$F{origin}]]></variableExpression>
 	</variable>
@@ -26,7 +27,7 @@
 	<pageHeader>
 		<band height="92">
 			<staticText>
-				<reportElement mode="Opaque" x="412" y="39" width="143" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="475" y="38" width="143" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -40,14 +41,14 @@
 				<text><![CDATA[ORIGIN]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="412" y="1" width="461" height="24" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="475" y="1" width="461" height="24" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[MATCHING TICKETS]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="412" y="65" width="143" height="20"/>
+				<reportElement x="475" y="64" width="143" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -59,7 +60,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{origin}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="685" y="39" width="188" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="748" y="38" width="188" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -73,7 +74,7 @@
 				<text><![CDATA[DATE RANGE]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="685" y="65" width="188" height="20"/>
+				<reportElement x="748" y="64" width="188" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -85,7 +86,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{dateRange}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="555" y="39" width="130" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="618" y="38" width="130" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -99,7 +100,7 @@
 				<text><![CDATA[DESTINATION]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement x="555" y="65" width="130" height="20"/>
+				<reportElement x="618" y="64" width="130" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -226,6 +227,20 @@
 				</textElement>
 				<text><![CDATA[WM Destination]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1239" y="25" width="151" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status In Our System]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -339,6 +354,20 @@
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{wmDestination}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1239" y="0" width="151" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ticketStatus}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
