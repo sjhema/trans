@@ -299,6 +299,20 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.000").format(new Double(String.valueOf($P{totalGallons})))]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="644" y="0" width="182" height="24"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.0").format(new Double(String.valueOf($P{totalMiles}/$P{totalGallons})))]]></textFieldExpression>
+			</textField>
 		</band>
 	</summary>
 </jasperReport>
