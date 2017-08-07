@@ -20,6 +20,13 @@ function submitform(type){
         	 submitting = false
         	 return false;
          }
+         var terminal = document.getElementById("terminalId").value;
+         if (terminal == '150') {
+        	 alert("Please select Terminal");
+        	 
+        	 submitting = false
+        	 return false;
+         }
          
 		document.forms["tripsheetTicketForm"].submit();
         }

@@ -8316,7 +8316,9 @@ public class HrReportServiceImpl implements HrReportService {
 								detail2.setLastName(employee.getLastName());
 								detail2.setFirstName(employee.getFirstName());
 								// Bereavement change - salary
-								if (sequenceNumber.get(i) == 7) {
+								// Bereavement vacation fix - 7th Aug 2017
+								//if (sequenceNumber.get(i) == 7) {
+								if (ptodapplication.getLeavetype().getId() == 8) {
 									detail2.setBereavementAmount(sequenceAmount.get(i));
 									detail2.setVacationAmount(0.0);
 								} else {
@@ -9063,7 +9065,9 @@ public class HrReportServiceImpl implements HrReportService {
 										detail2.setOvRate(0.0);
 										detail2.setTransportDriverAmount(0.0);
 										// Bereavement change
-										if (sequenceNumber.get(i) == 7) {
+										// Bereavement vacation fix - 7th Aug 2017
+										//if (sequenceNumber.get(i) == 7) {
+										if (ptodapplication.getLeavetype().getId()==8) {
 											detail2.setBereavementAmount(sequenceAmount.get(i));
 											detail2.setVacationAmount(0.0);
 										} else {
