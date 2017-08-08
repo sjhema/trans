@@ -1527,8 +1527,10 @@ public class ReportServiceImpl implements ReportService {
 				sumOriginTon += billing.getOriginTonsWt();
 				sumDestinationTon += billing.getDestinationTonsWt();
 				sumNet += billing.getEffectiveNetWt();
-				sumAmount += billing.getAmount();
+				// Sum amount rounding fix - 8th Aug 2017
+				//sumAmount += billing.getAmount();
 				billing.setAmount(MathUtil.roundUp(billing.getAmount(), 2));
+				sumAmount += billing.getAmount();
 				String fuelSurchargeType = billingRate.getFuelSurchargeType();
 				Double fuelSurcharge = 0.0;
 				if ("N".equalsIgnoreCase(fuelSurchargeType)) {
