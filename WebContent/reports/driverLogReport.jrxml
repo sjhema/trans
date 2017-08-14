@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="driverLogReport" pageWidth="2075" pageHeight="500" orientation="Landscape" columnWidth="2035" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="943"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="transactionDateRange" class="java.lang.String"/>
 	<parameter name="company" class="java.lang.String"/>
@@ -889,7 +889,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($V{totalOfAmount})))]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$V{totalOfAmount} == null ? "" : "$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($V{totalOfAmount})))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="1504" y="0" width="88" height="24"/>
@@ -901,7 +901,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($V{totalOfTotalAmount})))]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$V{totalOfTotalAmount} == null ? "" : "$"+new java.text.DecimalFormat("###0.00").format(new Double(String.valueOf($V{totalOfTotalAmount})))]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

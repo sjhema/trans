@@ -463,7 +463,7 @@ public class DriverLogReportController extends BaseController {
 			transactionDateFrom = ReportDateUtil.getFromDate(transactionDateFrom);
 			transactionDateTo = ReportDateUtil.getToDate(transactionDateTo);
 			queryBuff.append(" and obj.unloadDate >= '" + transactionDateFrom 
-			+ "' and obj.unloadDate <='" + transactionDateTo + "'");
+					+ "' and obj.unloadDate <='" + transactionDateTo + "'");
 		}
 		
 		List<Billing_New> invoiceDetailsList = genericDAO.executeSimpleQuery(queryBuff.toString());
