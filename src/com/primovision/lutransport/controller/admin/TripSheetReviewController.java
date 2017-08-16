@@ -379,6 +379,7 @@ public class TripSheetReviewController extends CRUDController<TripSheet>{
 		else{
 			criterias.clear();
 			criterias.put("unit", Integer.parseInt(entity.getTempTrailer()));
+			criterias.put("type", 2);
 			Vehicle trailer = genericDAO.getByCriteria(Vehicle.class, criterias);
 			if(trailer==null){
 				bindingResult.rejectValue("tempTrailer", "error.invalid.trailer",

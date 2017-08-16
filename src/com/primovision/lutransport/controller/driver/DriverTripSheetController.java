@@ -318,6 +318,7 @@ public class DriverTripSheetController extends CRUDController<TripSheet>{
 		}
 		else{
 			criterias.clear();
+			criterias.put("type", 2);
 			criterias.put("unit", Integer.parseInt(entity.getTempTrailer()));
 			Vehicle trailer = genericDAO.getByCriteria(Vehicle.class, criterias);
 			if(trailer==null){
