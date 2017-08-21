@@ -143,12 +143,13 @@ public class DriverLogReportController extends BaseController {
 		List<Billing_New> invoiceDetailsList = retrieveInvoiceDetails(input);
 		map(driverLogReportWrapper, invoiceDetailsList);
 		
-		sort(driverLogReportWrapper.getDriverLogs());
+		sort(driverLogReportWrapper);
 		
 		return driverLogReportWrapper;
 	}
 	
-	private void sort(List<DriverLogReport> driverLogList) {
+	private void sort(DriverLogReportWrapper driverLogReportWrapper) {
+		List<DriverLogReport> driverLogList = driverLogReportWrapper.getDriverLogs();
 		if (driverLogList == null || driverLogList.isEmpty()) {
 			return;
 		}
@@ -347,6 +348,7 @@ public class DriverLogReportController extends BaseController {
 		aDriverLogReport.setUnit(anEZToll.getUnits());
 		aDriverLogReport.setTollTagNumber(anEZToll.getTollTagNumbers());
 		
+		aDriverLogReport.setTransactionDate(anEZToll.getTransactiondate());
 		aDriverLogReport.setTransactionDateStr(anEZToll.getTransfersDate());
 		aDriverLogReport.setTransactionTime(anEZToll.getTransactiontime());
 		
@@ -363,6 +365,7 @@ public class DriverLogReportController extends BaseController {
 		
 		aDriverLogReport.setUnit(aFuelLog.getUnits());
 		
+		aDriverLogReport.setTransactionDate(aFuelLog.getTransactiondate());
 		aDriverLogReport.setTransactionDateStr(aFuelLog.getTransactionsDate());
 		aDriverLogReport.setTransactionTime(aFuelLog.getTransactiontime());
 		

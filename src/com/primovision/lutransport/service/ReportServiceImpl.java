@@ -4461,6 +4461,7 @@ throw new Exception("origin and destindation is empty");
 						.getTransactiontime() : "");
 				output.setTransactionsDate((fuelog.getTransactiondate() != null) ? sdf
 						.format(fuelog.getTransactiondate()) : "");
+				output.setTransactiondate(fuelog.getTransactiondate());
 				output.setGallons((fuelog.getGallons() != null) ? fuelog
 						.getGallons() : 0.0);
 				// output.setGallons(fuelog.getGallons());
@@ -5068,6 +5069,7 @@ throw new Exception("origin and destindation is empty");
 				output.setTransfersDate(sdf.format(eztol.getTransactiondate()));
 				output.setTransactiontime((eztol.getTransactiontime() != null) ? eztol
 						.getTransactiontime() : "");
+				output.setTransactiondate(eztol.getTransactiondate());
 				output.setAgency(eztol.getAgency());
 				output.setAmount(eztol.getAmount());
 				output.setDrivername(eztol.getDriver()!=null?eztol.getDriver().getFullName():"");

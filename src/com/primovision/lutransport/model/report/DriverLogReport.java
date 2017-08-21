@@ -35,15 +35,13 @@ public class DriverLogReport {
 	private Double discount;
 	private Double totalAmount;
 	
-	String origin;
-	String destination;
+	private String origin;
+	private String destination;
 	
-	String originTicket;
-	String destinationTicket;
+	private String originTicket;
+	private String destinationTicket;
 	
-	String loadDateStr;
-	String unloadDateStr;
-	Date unloadDate;
+	private String loadDateStr;
 	
 	private Double tonsGallons;
 	
@@ -266,23 +264,6 @@ public class DriverLogReport {
 	public void setLoadDateStr(String loadDateStr) {
 		this.loadDateStr = loadDateStr;
 	}
-
-	public String getUnloadDateStr() {
-		return unloadDateStr;
-	}
-
-	public void setUnloadDateStr(String unloadDateStr) {
-		this.unloadDateStr = unloadDateStr;
-	}
-
-	public Date getUnloadDate() {
-		return unloadDate;
-	}
-
-	public void setUnloadDate(Date unloadDate) {
-		this.unloadDate = unloadDate;
-	}
-
 	public Double getTonsGallons() {
 		return tonsGallons;
 	}
