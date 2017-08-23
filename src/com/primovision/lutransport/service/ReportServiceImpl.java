@@ -54,6 +54,7 @@ import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
+import com.primovision.lutransport.model.WMInvoice;
 import com.primovision.lutransport.model.driver.DriverFuelLog;
 import com.primovision.lutransport.model.report.Billing;
 import com.primovision.lutransport.model.report.BillingHistoryInput;
@@ -1527,10 +1528,18 @@ public class ReportServiceImpl implements ReportService {
 				sumOriginTon += billing.getOriginTonsWt();
 				sumDestinationTon += billing.getDestinationTonsWt();
 				sumNet += billing.getEffectiveNetWt();
+				
 				// Sum amount rounding fix - 8th Aug 2017
 				//sumAmount += billing.getAmount();
+				// Sum amount rounding fix changes - 23rd aug 2017
+				if (isWMTicket(ticket)) {
+					sumAmount += MathUtil.roundUp(billing.getAmount(), 2);
+				} else {
+					sumAmount += billing.getAmount();
+				}
+				
 				billing.setAmount(MathUtil.roundUp(billing.getAmount(), 2));
-				sumAmount += billing.getAmount();
+				
 				String fuelSurchargeType = billingRate.getFuelSurchargeType();
 				Double fuelSurcharge = 0.0;
 				if ("N".equalsIgnoreCase(fuelSurchargeType)) {
@@ -1807,6 +1816,15 @@ public class ReportServiceImpl implements ReportService {
 		wrapper.setSumGallon(sumGallon);
 		wrapper.setTotalRowCount(tickets.size());
 		return wrapper;
+	}
+	
+	private boolean isWMTicket(Ticket ticket) {
+		String countQuery = "select count(obj) from WMInvoice obj where 1=1";
+		countQuery += " and obj.origin=" + ticket.getOrigin().getId();
+		countQuery += " and obj.destination=" + ticket.getDestination().getId();
+		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
+		
+		return (recordCount > 0) ? true : false;
 	}
 	
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
