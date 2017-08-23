@@ -62,9 +62,15 @@ public class Vehicle extends AbstractBaseModel {
 	@Column(name="valid_to")
 	private Date validTo;
 	
+	@Column(name="feature")
+	private String feature;
 	
+	@Column(name="active_status")
+	private Integer activeStatus;
 	
-
+	@Column(name="inactive_date")
+	private Date inactiveDate;
+	
 	public Location getOwner() {
 		return owner;
 	}
@@ -161,8 +167,28 @@ public class Vehicle extends AbstractBaseModel {
 	public void setValidTo(Date validTo) {
 		this.validTo = validTo;
 	}
-	
-	
-	
-	
+
+	public String getFeature() {
+		return feature;
+	}
+
+	public void setFeature(String feature) {
+		this.feature = feature;
+	}
+
+	public Integer getActiveStatus() {
+		return activeStatus;
+	}
+
+	public void setActiveStatus(Integer activeStatus) {
+		this.activeStatus = activeStatus;
+	}
+
+	public Date getInactiveDate() {
+		return inactiveDate;
+	}
+
+	public void setInactiveDate(Date inactiveDate) {
+		this.inactiveDate = inactiveDate;
+	}
 }

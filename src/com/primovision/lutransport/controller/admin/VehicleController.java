@@ -76,6 +76,9 @@ public class VehicleController extends CRUDController<Vehicle>{
 		//model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
 		model.addAttribute("vehicleTypes", listStaticData("VEHICLE_TYPE"));
 		model.addAttribute("models", listStaticData("MODEL_TYPE"));
+		
+		model.addAttribute("features", listStaticData("VEHICLE_FEATURE"));
+		model.addAttribute("activeStauses", listStaticData("VEHICLE_STATUS"));
 	}
 	
 	@Override

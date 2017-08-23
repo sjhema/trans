@@ -397,7 +397,7 @@ public class DriverLogReportController extends BaseController {
 	}
 	
 	private void map(DriverLogReport aDriverLogReport, Billing_New anInvoice) {
-		aDriverLogReport.setCompany(anInvoice.getCompany());
+		aDriverLogReport.setCompany(anInvoice.getDriverCompanyName());
 		aDriverLogReport.setTerminal(anInvoice.getTerminal());
 		
 		aDriverLogReport.setDriver(anInvoice.getDriver());
@@ -451,7 +451,7 @@ public class DriverLogReportController extends BaseController {
 		
 		StringBuffer queryBuff = new StringBuffer("select obj from Billing_New obj where 1=1 ");
 		if (StringUtils.isNotEmpty(company)) {
-			queryBuff.append(" and obj.company in (" + constructLocationNames(company, true) + ")");
+			queryBuff.append(" and obj.driverCompanyId in (" + company + ")");
 		}
 		if (StringUtils.isNotEmpty(terminal)) {
 			queryBuff.append(" and obj.terminal in (" + constructLocationNames(terminal, true) + ")");

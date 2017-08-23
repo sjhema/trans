@@ -142,6 +142,77 @@ function formatDate1(){
 	 }
    }
 }
+function formatDate(dateElemId) {
+	var dateElem = document.getElementById(dateElemId);
+	var date = dateElem.value;
+	
+	if (date != "") {
+		if (date.length < 8) {
+			alert("Invalidte date format");
+			dateElem.value = "";
+			return true;
+		} else {
+			var str = new String(date);
+			if (!str.match("-")) {
+				var mm = str.substring(0,2);
+				var dd = str.substring(2,4);
+				var yy = str.substring(4,8);
+				var enddigit = str.substring(6,8);
+				if (!enddigit == 00 && enddigit%4 == 0 ) {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value="";
+							return true;
+						}
+					} if (mm == 02 && dd > 29) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					}
+				} if (enddigit == 00 && yy%400 == 0) {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value="";
+							return true;
+						}
+					} if (mm == 02 && dd > 29) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					}					
+				} else {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value = "";
+							return true;
+						}
+					} if (mm == 02 && dd > 28) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					}
+				}
+				date = mm+"-"+dd+"-"+yy;
+				dateElem.value = date;
+			}
+	 	}
+	}
+}
 </script>
 <h3>
 	<primo:label code="Manage Vehicle" />
@@ -252,7 +323,33 @@ function formatDate1(){
 </tr>
 		
 		
-		
+		<tr>
+			<td class="form-left"><primo:label code="Feature" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="feature" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${features}" itemValue="dataValue" itemLabel="dataText" />
+				</form:select>
+				<br> <form:errors path="feature" cssClass="errorMessage" /></td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Inactive Date" /><span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input id="datepicker2" style="min-width:150px; max-width:150px"
+					path="inactiveDate" cssClass="flat" onblur="return formatDate('datepicker2');"/> 
+				<br> <form:errors path="inactiveDate" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Status" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="activeStatus" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${activeStauses}" itemValue="dataValue" itemLabel="dataText" />
+				</form:select>
+				<br> <form:errors path="activeStatus" cssClass="errorMessage" />
+			</td>
+		</tr>	
 		
 		<tr><td colspan="2"></td></tr>
 		<tr>

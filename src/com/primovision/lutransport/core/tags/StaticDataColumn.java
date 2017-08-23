@@ -2,6 +2,8 @@ package com.primovision.lutransport.core.tags;
 
 import javax.servlet.jsp.JspException;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * This class provides functionality to display string columns.
  * @author Prasad P. Khandekar
@@ -109,11 +111,11 @@ public final class StaticDataColumn extends AbstractColumnTag
 	 @Override
 	 protected String renderColumnDetail(Object value) {
 		 StringBuffer objBuf = new StringBuffer();
-		 if (this.dataType !=null) {
+		 if (this.dataType !=null && value != null) {
 			 objBuf.append(StaticDataUtil.getText(dataType, value.toString()));
 		 }
 		 else {
-			 objBuf.append(value);
+			objBuf.append((value == null) ? StringUtils.EMPTY : value);
 		 }
 		 return objBuf.toString();
 	 }

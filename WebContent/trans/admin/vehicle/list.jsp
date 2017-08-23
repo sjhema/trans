@@ -253,7 +253,36 @@ function formatDate1(){
 						<option value="${vehicletype.dataValue}"${selected}>${vehicletype.dataText}</option>
 					</c:forEach>
 			</select></td>
-		
+			<td align="${left}" class="first"><primo:label code="Feature" /></td>
+			<td align="${left}">
+				<select id="feature" name="feature" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select" />------</option>
+					<c:forEach items="${features}" var="aFeature">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['feature'] == aFeature.dataValue}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aFeature.dataValue}"${selected}>${aFeature.dataText}</option>
+					</c:forEach>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Status" /></td>
+			<td align="${left}">
+				<select id="activeStatus" name="activeStatus" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select" />------</option>
+					<c:forEach items="${activeStauses}" var="aStatus">
+						<c:set var="selected" value="" />
+						<c:if
+							test="${sessionScope.searchCriteria.searchMap['activeStatus'] == aStatus.dataValue}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aStatus.dataValue}"${selected}>${aStatus.dataText}</option>
+					</c:forEach>
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td align="${left}"></td>
@@ -282,6 +311,9 @@ function formatDate1(){
 			<primo:staticdatacolumn headerText="Type" dataField="type" dataType="VEHICLE_TYPE" />
 			<primo:textcolumn headerText="Valid From" dataField="validFrom" dataFormat="MM-dd-yyyy"/>
         <primo:textcolumn headerText="Valid To" dataField="validTo" dataFormat="MM-dd-yyyy"/>
+        	<primo:staticdatacolumn headerText="Feature" dataField="feature" dataType="VEHICLE_FEATURE" />
+        	<primo:textcolumn headerText="Inactive Date" dataField="inactiveDate" dataFormat="MM-dd-yyyy"/>
+        	<primo:staticdatacolumn headerText="Status" dataField="activeStatus" dataType="VEHICLE_STATUS" />
 		</primo:datatable>
 	</form:form>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
