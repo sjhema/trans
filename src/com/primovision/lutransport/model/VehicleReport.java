@@ -9,12 +9,14 @@ public class VehicleReport implements ReportModel {
 	
 	private String feature;
 	
-	private String status;
+	private String activeStatus;
 	
-	private String vin;
 	private String year;
 	private String make;
 	private String model;
+	private String vin;
+	
+	private String inactiveDate;
 
 	public String getVehicle() {
 		return vehicle;
@@ -39,21 +41,13 @@ public class VehicleReport implements ReportModel {
 	public void setFeature(String feature) {
 		this.feature = feature;
 	}
-
-	public String getStatus() {
-		return status;
+	
+	public String getActiveStatus() {
+		return activeStatus;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getVin() {
-		return vin;
-	}
-
-	public void setVin(String vin) {
-		this.vin = vin;
+	public void setActiveStatus(String activeStatus) {
+		this.activeStatus = activeStatus;
 	}
 
 	public String getYear() {
@@ -78,5 +72,21 @@ public class VehicleReport implements ReportModel {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public String getInactiveDate() {
+		return inactiveDate;
+	}
+
+	public void setInactiveDate(String inactiveDate) {
+		this.inactiveDate = inactiveDate;
+	}
+
+	public String getVin() {
+		return vin;
+	}
+
+	public void setVin(String vin) {
+		this.vin = vin;
 	}
 }

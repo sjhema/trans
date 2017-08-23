@@ -6,7 +6,7 @@
 			<td colspan="4"><b><primo:label code="Search Vehicle Report" /></b></td>
 		</tr>
 		<tr>
-	   		<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
+	   		<td align="${left}" class="first"><primo:label code="Unit#"/></td>
 			<td align="${left}">
 				<select id="vehicle" name="vehicle" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>

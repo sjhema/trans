@@ -29,17 +29,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.BaseController;
-
+import com.primovision.lutransport.core.tags.StaticDataUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehicleReport;
-import com.primovision.lutransport.model.equipment.EquipmentBuyer;
-import com.primovision.lutransport.model.equipment.EquipmentLender;
-import com.primovision.lutransport.model.equipment.EquipmentReportInput;
-import com.primovision.lutransport.model.equipment.EquipmentReportOutput;
 
 import com.primovision.lutransport.service.DynamicReportService;
 
@@ -81,11 +77,11 @@ public class VehicleReportController extends BaseController {
 		populateSearchCriteria(request, request.getParameterMap());
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(1000);
+		criteria.setPageSize(2500);
 		criteria.setPage(0);
 		
 		Map<String, Object> datas = generateData(criteria, request, input);
-		List<EquipmentReportOutput> equipmentReportOutputList = (List<EquipmentReportOutput>) datas.get("data");
+		List<VehicleReport> vehicleReportList = (List<VehicleReport>) datas.get("data");
 		Map<String, Object> params = (Map<String, Object>) datas.get("params");
 		
 		String type = "html";
@@ -94,7 +90,7 @@ public class VehicleReportController extends BaseController {
 		String reportName = "vehicleReport";
 		try {
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportName,
-					equipmentReportOutputList, params, request);
+					vehicleReportList, params, request);
 			request.setAttribute("jasperPrint", jasperPrint);
 			
 			return "admin/vehicle/report/vehiclereport/"+type;
@@ -119,7 +115,7 @@ public class VehicleReportController extends BaseController {
 		
 		VehicleReport input = (VehicleReport) request.getSession().getAttribute("input");
 		Map<String, Object> datas = generateData(criteria, request, input);
-		List<EquipmentReportOutput> equipmentReportOutputList = (List<EquipmentReportOutput>) datas.get("data");
+		List<VehicleReport> vehicleReportList = (List<VehicleReport>) datas.get("data");
 		Map<String, Object> params = (Map<String, Object>) datas.get("params");
 		
 		String reportName = "vehicleReport";
@@ -131,7 +127,7 @@ public class VehicleReportController extends BaseController {
 		ByteArrayOutputStream out = null;
 		try {
 			out = dynamicReportService.generateStaticReport(reportName,
-					equipmentReportOutputList, params, type, request);
+					vehicleReportList, params, type, request);
 			out.writeTo(response.getOutputStream());
 			
 			return null;
@@ -154,7 +150,7 @@ public class VehicleReportController extends BaseController {
 	
 	private Map<String, Object> generateData(SearchCriteria searchCriteria, 
 			HttpServletRequest request, VehicleReport input) {
-		List<VehicleReport> equipmentReportOutputList = performSearch(searchCriteria, input); 
+		List<VehicleReport> vehicleReportList = performSearch(searchCriteria, input); 
 		
 		Map<String, Object> params = new HashMap<String, Object>();
 		
@@ -163,7 +159,7 @@ public class VehicleReportController extends BaseController {
 		params.put("company", companyName);
 		
 		Map<String,Object> data = new HashMap<String,Object>();
-		data.put("data", equipmentReportOutputList);
+		data.put("data", vehicleReportList);
 		data.put("params", params);
 		     
 		return data;
@@ -177,25 +173,11 @@ public class VehicleReportController extends BaseController {
 		return genericDAO.getById(Location.class, Long.valueOf(id));
 	}
 	
-	private EquipmentLender retrieveLender(String id) {
-		if (StringUtils.isEmpty(id)) {
-			return null;
-		}
-		
-		return genericDAO.getById(EquipmentLender.class, Long.valueOf(id));
-	}
-	
-	private EquipmentBuyer retrieveBuyer(String id) {
-		if (StringUtils.isEmpty(id)) {
-			return null;
-		}
-		
-		return genericDAO.getById(EquipmentBuyer.class, Long.valueOf(id));
-	}
-	
 	private List<VehicleReport> performSearch(SearchCriteria criteria, VehicleReport input) {
 		String company = input.getCompany();
 		String vehicle = input.getVehicle();
+		String feature = input.getFeature();
+		String activeStatus = input.getActiveStatus();
 		
 		StringBuffer query = new StringBuffer("select obj from Vehicle obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Vehicle obj where 1=1");
@@ -208,11 +190,20 @@ public class VehicleReportController extends BaseController {
 		if (StringUtils.isNotEmpty(vehicle)) {
 			whereClause.append(" and obj.unit=" + vehicle);
 		}
+		
+		if (StringUtils.isNotEmpty(feature)) {
+			whereClause.append(" and obj.feature='" + feature + "'");
+		}
+		
+		if (StringUtils.isEmpty(activeStatus)) {
+			activeStatus = "1";
+		}
+		whereClause.append(" and obj.activeStatus=" + activeStatus);
       
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.unit asc");
+      query.append(" order by obj.unit asc, id desc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
@@ -234,22 +225,49 @@ public class VehicleReportController extends BaseController {
 			return;
 		}
 		
+		Map<String, String> vehicleMap = new HashMap<String, String>();
 		for (Vehicle aVehicle : vehicleList) {
-			VehicleReport aVehicleReport = new VehicleReport();
-			map(aVehicleReport, aVehicle);
-			
-			vehicleReportList.add(aVehicleReport);
+			String key = aVehicle.getUnit() + "_" + aVehicle.getVinNumber();
+			if (vehicleMap.containsKey(key)) {
+				continue;
+			} else {
+				vehicleMap.put(key, key);
+				
+				VehicleReport aVehicleReport = new VehicleReport();
+				map(aVehicleReport, aVehicle);
+				
+				vehicleReportList.add(aVehicleReport);
+			}
 		}
 	}
 	
 	private void map(VehicleReport aVehicleReport, Vehicle vehicle) {
 		aVehicleReport.setVehicle(
 				vehicle.getUnit() == null ? StringUtils.EMPTY : String.valueOf(vehicle.getUnit()));
-		aVehicleReport.setCompany(vehicle.getOwner().getName());
+		aVehicleReport.setCompany(vehicle.getOwner() == null ? StringUtils.EMPTY : vehicle.getOwner().getName());
+		
 		aVehicleReport.setVin(vehicle.getVinNumber());
 		aVehicleReport.setYear(vehicle.getYear());
 		aVehicleReport.setMake(vehicle.getMake());
 		aVehicleReport.setModel(vehicle.getModel());
+		
+		String feature = StringUtils.EMPTY;
+		if (StringUtils.isNotEmpty(vehicle.getFeature())) {
+			feature = StaticDataUtil.getText("VEHICLE_FEATURE", vehicle.getFeature());
+		}
+		aVehicleReport.setFeature(feature);
+		
+		String activeStatus = StringUtils.EMPTY;
+		if (vehicle.getActiveStatus() != null) {
+			activeStatus = StaticDataUtil.getText("VEHICLE_STATUS", String.valueOf(vehicle.getActiveStatus()));
+		}
+		aVehicleReport.setActiveStatus(activeStatus);
+		
+		String inactiveDate = StringUtils.EMPTY;
+		if (vehicle.getInactiveDate() != null) {
+			inactiveDate = dateFormat.format(vehicle.getInactiveDate());
+		}
+		aVehicleReport.setInactiveDate(inactiveDate); 
 	}
 	
 	public void setupList(ModelMap model, HttpServletRequest request) {
