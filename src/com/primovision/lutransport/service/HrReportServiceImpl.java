@@ -4287,9 +4287,6 @@ public class HrReportServiceImpl implements HrReportService {
 	    }
 		 
 		 
-		 
-		 
-		 
 		 StringBuffer query=new StringBuffer("update Ticket t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1" );
 		 StringBuffer ptodquery=new StringBuffer("update Ptodapplication t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1 and t.category=2");
 		 StringBuffer holidayquery=new StringBuffer("update HolidayType t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1 and t.leaveType=3" );
@@ -4364,20 +4361,28 @@ public class HrReportServiceImpl implements HrReportService {
 		 
 		  // Double pay fix - 30th Aug 2017
 		  //genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
-		  int recordsUpdated = 0;
-		  int attempts = 0;
-		  while (recordsUpdated <= 0) {
-			  attempts++;
-			  if (attempts > 1) {
-				  System.out.println("Re-trying ticket status update as part of paystub save; attempt no.: " + attempts);
-			  }
-			  
-			  try {
-				  recordsUpdated = genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
-			  } catch (Throwable t) {
-				  recordsUpdated = 0;
-				  System.out.println("Exception occured while ticket status update as part of paystub save; attempt no.: " + attempts);
-				  t.printStackTrace();
+		  List<DriverPay> driverPayList = wrapper.getDriverPays();
+		  int totalLoads = 0;
+		  for (DriverPay aDriverPay : driverPayList) {
+			  totalLoads += aDriverPay.getNoOfLoad();
+		  }
+				 
+		  if (totalLoads > 0) {
+			  int recordsUpdated = 0;
+			  int attempts = 0;
+			  while (recordsUpdated <= 0) {
+				  attempts++;
+				  if (attempts > 1) {
+					  System.out.println("Re-trying ticket status update as part of paystub save; attempt no.: " + attempts);
+				  }
+				  
+				  try {
+					  recordsUpdated = genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
+				  } catch (Throwable t) {
+					  recordsUpdated = 0;
+					  System.out.println("Exception occured while ticket status update as part of paystub save; attempt no.: " + attempts);
+					  t.printStackTrace();
+				  }
 			  }
 		  }
 		  
