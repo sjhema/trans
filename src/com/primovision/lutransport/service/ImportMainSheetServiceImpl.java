@@ -431,7 +431,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			
 			int recordsToBeSkipped = TicketUtils.getWMInvoiceRecordsToBeSkipped();
 			
-			Iterator rows = sheet.rowIterator();
+			Iterator<Row> rows = sheet.rowIterator();
 			while (rows.hasNext()) {
 				HSSFRow row = (HSSFRow) rows.next();
 				
@@ -658,9 +658,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						} 
 					}
 					
-					if (checkDuplicateWMInvoice(currentWMInvoice)) {
-						recordError = true;
-						recordErrorMsg.append("Duplicate WM Invoice, ");
+					WMInvoice existingWMInvoice = checkDuplicateWMInvoice(currentWMInvoice);
+					if (existingWMInvoice != null) {
+						if (StringUtils.equals(currentWMInvoice.getWmStatusCode(), existingWMInvoice.getWmStatusCode())) {
+							recordError = true;
+							recordErrorMsg.append("Duplicate WM Invoice, ");
+						} else {
+							existingWMInvoice.setWmStatusCode(currentWMInvoice.getWmStatusCode());
+							existingWMInvoice.setWmStatus(currentWMInvoice.getWmStatus());
+							existingWMInvoice.setModifiedBy(createdBy);
+							existingWMInvoice.setModifiedAt(Calendar.getInstance().getTime());
+							genericDAO.saveOrUpdate(existingWMInvoice);
+							
+							successCount++;
+							continue;
+						}
 					}
 					
 					if (recordError) {
@@ -1821,10 +1833,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return !wmTicketList.isEmpty();
 	}
 	
-	private boolean checkDuplicateWMInvoice(WMInvoice wmInvoice) {
+	private WMInvoice checkDuplicateWMInvoice(WMInvoice wmInvoice) {
 		if (wmInvoice == null || wmInvoice.getTicket() == null
 				|| wmInvoice.getOrigin() == null || wmInvoice.getDestination() == null) {
-			return false;
+			return null;
 		}
 		
 		String baseQuery = "select obj from WMInvoice obj where obj.ticket=" + wmInvoice.getTicket();
@@ -1835,7 +1847,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
 			wmInvoiceList = genericDAO.executeSimpleQuery(destinationQuery);
 		}
-		return !wmInvoiceList.isEmpty();
+		return ((wmInvoiceList == null || wmInvoiceList.isEmpty()) ? null : wmInvoiceList.get(0));
 	}
 	
 	private boolean checkDuplicate(SubcontractorRate aSubcontractorRate) {

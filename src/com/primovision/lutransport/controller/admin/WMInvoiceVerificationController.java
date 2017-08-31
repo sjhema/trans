@@ -273,24 +273,28 @@ public class WMInvoiceVerificationController extends ReportController<WMInvoiceV
 		
 		String searchKey = StringUtils.EMPTY;
 		
-		Map<String, Ticket> wmTicketByOriginMap = new HashMap<String, Ticket>();
+		Map<String, Ticket> ticketByOriginMap = new HashMap<String, Ticket>();
 		for (Ticket aTicket : tickets) {
 			searchKey = aTicket.getOriginTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
-			wmTicketByOriginMap.put(searchKey, aTicket);
+			ticketByOriginMap.put(searchKey, aTicket);
 		}
 		
-		Map<String, Ticket> wmTicketByDestinationMap = new HashMap<String, Ticket>();
+		Map<String, Ticket> ticketByDestinationMap = new HashMap<String, Ticket>();
 		for (Ticket aTicket : tickets) {
 			searchKey = aTicket.getDestinationTicket() + "|" + aTicket.getOrigin().getName() + "|" + aTicket.getDestination().getName();
-			wmTicketByDestinationMap.put(searchKey, aTicket);
+			ticketByDestinationMap.put(searchKey, aTicket);
 		}
 		
 		for (WMInvoice anWMInvoice : wmInvoiceList) {
+			if (StringUtils.equalsIgnoreCase("VOID", anWMInvoice.getWmStatusCode())) {
+				continue;
+			}
+			
 			searchKey = anWMInvoice.getTicket() + "|" + anWMInvoice.getOrigin().getName() + "|" + anWMInvoice.getDestination().getName();
 			
-			Ticket matchingTicket = wmTicketByDestinationMap.get(searchKey);
+			Ticket matchingTicket = ticketByDestinationMap.get(searchKey);
 			if (matchingTicket == null) {
-				matchingTicket = wmTicketByOriginMap.get(searchKey);
+				matchingTicket = ticketByOriginMap.get(searchKey);
 			} 
 			
 			if (matchingTicket == null) {
