@@ -4362,7 +4362,25 @@ public class HrReportServiceImpl implements HrReportService {
         	 quarterBonusquery.append(" and t.driver not in ("+driversmul+")");
          }
 		 
-		  genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
+		  // Double pay fix - 30th Aug 2017
+		  //genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
+		  int recordsUpdated = 0;
+		  int attempts = 0;
+		  while (recordsUpdated <= 0) {
+			  attempts++;
+			  if (attempts > 1) {
+				  System.out.println("Re-trying ticket status update as part of paystub save; attempt no.: " + attempts);
+			  }
+			  
+			  try {
+				  recordsUpdated = genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
+			  } catch (Throwable t) {
+				  recordsUpdated = 0;
+				  System.out.println("Exception occured while ticket status update as part of paystub save; attempt no.: " + attempts);
+				  t.printStackTrace();
+			  }
+		  }
+		  
 		  genericDAO.getEntityManager().createQuery(ptodquery.toString()).executeUpdate();
 		  genericDAO.getEntityManager().createQuery(holidayquery.toString()).executeUpdate();
 		  genericDAO.getEntityManager().createQuery(empbonusquery.toString()).executeUpdate();

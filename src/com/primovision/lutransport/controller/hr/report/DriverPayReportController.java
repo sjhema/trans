@@ -1803,8 +1803,10 @@ public class DriverPayReportController extends BaseController{
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.warn("Unable to create file :" + e);
-			request.getSession().setAttribute("errors", e.getMessage());
+			log.warn("Exception while saving paystub, possibly while updating tickets :" + e);
+			// Double pay fix - 30th Aug 2017
+			//request.getSession().setAttribute("errors", e.getMessage());
+			request.getSession().setAttribute("error", "Error occured while saving paystub");
 		}
 		return "blank/blank";
 	}
