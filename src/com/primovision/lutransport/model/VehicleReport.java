@@ -14,8 +14,13 @@ public class VehicleReport implements ReportModel {
 	private String year;
 	private String make;
 	private String model;
-	private String vin;
+	private String type;
 	
+	private String vin;
+	private String plate;
+	
+	private String validFrom;
+	private String validTo;
 	private String inactiveDate;
 
 	public String getVehicle() {
@@ -88,5 +93,37 @@ public class VehicleReport implements ReportModel {
 
 	public void setVin(String vin) {
 		this.vin = vin;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getPlate() {
+		return plate;
+	}
+
+	public void setPlate(String plate) {
+		this.plate = plate;
+	}
+
+	public String getValidFrom() {
+		return validFrom;
+	}
+
+	public void setValidFrom(String validFrom) {
+		this.validFrom = validFrom;
+	}
+
+	public String getValidTo() {
+		return validTo;
+	}
+
+	public void setValidTo(String validTo) {
+		this.validTo = validTo;
 	}
 }

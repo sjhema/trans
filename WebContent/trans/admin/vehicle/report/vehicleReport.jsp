@@ -36,6 +36,19 @@
 			</td>
 	   	</tr>
 	   	<tr>
+	   		<td align="${left}" class="first"><primo:label code="Type" /></td>
+			<td align="${left}">
+				<select id="type" name="type" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${vehicleTypes}" var="aVehicleType">
+						<c:set var="selected" value="" />
+						<c:if test="${sessionScope.searchCriteria.searchMap['type'] == aVehicleType.dataValue}">
+							<c:set var="selected" value="selected" />
+						</c:if>
+						<option value="${aVehicleType.dataValue}"${selected}>${aVehicleType.dataText}</option>
+					</c:forEach>
+				</select>
+			</td>
 	   		<td align="${left}" class="first"><primo:label code="Feature" /></td>
 			<td align="${left}">
 				<select id="feature" name="feature" style="min-width:154px; max-width:154px">
@@ -50,6 +63,8 @@
 					</c:forEach>
 				</select>
 			</td>
+		</tr>
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Status" /></td>
 			<td align="${left}">
 				<select id="activeStatus" name="activeStatus" style="min-width:154px; max-width:154px">

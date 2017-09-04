@@ -178,6 +178,7 @@ public class VehicleReportController extends BaseController {
 		String vehicle = input.getVehicle();
 		String feature = input.getFeature();
 		String activeStatus = input.getActiveStatus();
+		String type = input.getType();
 		
 		StringBuffer query = new StringBuffer("select obj from Vehicle obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Vehicle obj where 1=1");
@@ -199,6 +200,10 @@ public class VehicleReportController extends BaseController {
 			activeStatus = "1";
 		}
 		whereClause.append(" and obj.activeStatus=" + activeStatus);
+		
+		if (StringUtils.isNotEmpty(type)) {
+			whereClause.append(" and obj.type=" + type);
+		}
       
       query.append(whereClause);
       countQuery.append(whereClause);
@@ -247,9 +252,17 @@ public class VehicleReportController extends BaseController {
 		aVehicleReport.setCompany(vehicle.getOwner() == null ? StringUtils.EMPTY : vehicle.getOwner().getName());
 		
 		aVehicleReport.setVin(vehicle.getVinNumber());
+		aVehicleReport.setPlate(vehicle.getPlate());
+		
 		aVehicleReport.setYear(vehicle.getYear());
 		aVehicleReport.setMake(vehicle.getMake());
 		aVehicleReport.setModel(vehicle.getModel());
+		
+		String type = StringUtils.EMPTY;
+		if (vehicle.getType() != null) {
+			type = StaticDataUtil.getText("VEHICLE_TYPE", String.valueOf(vehicle.getType()));
+		}
+		aVehicleReport.setType(type);
 		
 		String feature = StringUtils.EMPTY;
 		if (StringUtils.isNotEmpty(vehicle.getFeature())) {
@@ -268,6 +281,18 @@ public class VehicleReportController extends BaseController {
 			inactiveDate = dateFormat.format(vehicle.getInactiveDate());
 		}
 		aVehicleReport.setInactiveDate(inactiveDate); 
+		
+		String validFrom = StringUtils.EMPTY;
+		if (vehicle.getValidFrom() != null) {
+			validFrom = dateFormat.format(vehicle.getValidFrom());
+		}
+		aVehicleReport.setValidFrom(validFrom); 
+		
+		String validTo = StringUtils.EMPTY;
+		if (vehicle.getValidTo() != null) {
+			validTo = dateFormat.format(vehicle.getValidTo());
+		}
+		aVehicleReport.setValidTo(validTo); 
 	}
 	
 	public void setupList(ModelMap model, HttpServletRequest request) {
@@ -281,6 +306,7 @@ public class VehicleReportController extends BaseController {
 		
 		model.addAttribute("features", listStaticData("VEHICLE_FEATURE"));
 		model.addAttribute("activeStauses", listStaticData("VEHICLE_STATUS"));
+		model.addAttribute("vehicleTypes", listStaticData("VEHICLE_TYPE"));
 	}
 	
 	@ModelAttribute("modelObject")
