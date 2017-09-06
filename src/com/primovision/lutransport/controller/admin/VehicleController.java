@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,9 +22,12 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.Location;
@@ -259,6 +265,7 @@ public class VehicleController extends CRUDController<Vehicle>{
 		setupList(model, request);
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
+		
 		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"unit",null,null));
 		return urlContext + "/list";
 	}
@@ -302,6 +309,7 @@ public class VehicleController extends CRUDController<Vehicle>{
 			criteria.getSearchMap().put("unit.id",truckIds);		   
 		 }
 		 }
+		 
 		
 		dateupdateService.updateDate(request, "validFromDate", "validFrom");
 		dateupdateService.updateDate(request, "validToDate", "validTo");
@@ -309,5 +317,42 @@ public class VehicleController extends CRUDController<Vehicle>{
 		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"unit",null,null));		
 		 return urlContext + "/list";
 	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		List columnPropertyList = (List) request.getSession().getAttribute(
+				"columnPropertyList");
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
 
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html"))
+			response.setHeader("Content-Disposition", "attachment;filename="
+					+ urlContext + "Report." + type);
+		try {
+			int origPageSize = criteria.getPageSize();
+			int origPage = criteria.getPage();
+			criteria.setPageSize(5000);
+			criteria.setPage(0);
+			
+			String label = getCriteriaAsString(criteria);
+			List<Vehicle> vehicleList = genericDAO.search(getEntityClass(), criteria,"unit",null,null);
+			ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(), vehicleList,
+					columnPropertyList, request);
+			out.writeTo(response.getOutputStream());
+			if (type.equals("html"))
+				response.getOutputStream()
+						.println(
+								"<script language=\"javascript\">window.print()</script>");
+			criteria.setPageSize(origPageSize);
+			criteria.setPage(origPage);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		}
+	}
 }

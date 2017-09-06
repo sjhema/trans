@@ -296,8 +296,8 @@ function formatDate1(){
 <div style="width: 100%; margin: 0px auto;">
 	<form:form name="delete.do" id="customerForm">
 		<primo:datatable urlContext="admin/vehicle" deletable="true"
-			editable="true" insertable="true" exportPdf="false" exportXls="false"
-			exportCsv="false" baseObjects="${list}"
+			editable="true" insertable="true" exportPdf="true" exportXls="true"
+			exportCsv="true" baseObjects="${list}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false">			
 			<primo:textcolumn headerText="Unit#" dataField="unit" />
