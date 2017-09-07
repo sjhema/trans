@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +89,7 @@ public class EquipmentReportController extends BaseController {
 		populateSearchCriteria(request, request.getParameterMap());
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(1000);
+		criteria.setPageSize(5000);
 		criteria.setPage(0);
 		
 		Map<String, Object> datas = generateData(criteria, request, input);
@@ -224,6 +225,7 @@ public class EquipmentReportController extends BaseController {
 	private List<EquipmentReportOutput> performSearch(SearchCriteria criteria, EquipmentReportInput input) {
 		String company = input.getCompany();
 		String vehicle = input.getVehicle();
+		String includeSoldVehiclesStr = input.getIncludeSoldVehicle();
 		
 		StringBuffer query = new StringBuffer("select obj from Vehicle obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Vehicle obj where 1=1");
@@ -235,6 +237,11 @@ public class EquipmentReportController extends BaseController {
 		
 		if (StringUtils.isNotEmpty(vehicle)) {
 			whereClause.append(" and obj.unit=" + vehicle);
+		}
+		
+		boolean includeSoldVehicles = true;
+		if (StringUtils.isNotEmpty(includeSoldVehiclesStr)) {
+			includeSoldVehicles = BooleanUtils.toBoolean(includeSoldVehiclesStr);
 		}
       
       query.append(whereClause);
@@ -252,7 +259,7 @@ public class EquipmentReportController extends BaseController {
 					.getResultList();
 		
 		List<EquipmentReportOutput> equipmentReportOutputList = new ArrayList<EquipmentReportOutput>();
-		map(equipmentReportOutputList, vehicleList);
+		map(equipmentReportOutputList, vehicleList, includeSoldVehicles);
 		sort(equipmentReportOutputList);
 		
 		return equipmentReportOutputList;
@@ -283,7 +290,8 @@ public class EquipmentReportController extends BaseController {
 		});
 	}
 	
-	private void map(List<EquipmentReportOutput> equipmentReportOutputList, List<Vehicle> vehicleList) {
+	private void map(List<EquipmentReportOutput> equipmentReportOutputList, List<Vehicle> vehicleList,
+			boolean includeSoldVehicles) {
 		if (vehicleList == null || vehicleList.isEmpty()) {
 			return;
 		}
@@ -293,6 +301,9 @@ public class EquipmentReportController extends BaseController {
 			VehicleTitle aVehicleTitle = retrieveVehicleTitle(aVehicle.getId());
 			VehicleSale aVehicleSale = retrieveVehicleSale(aVehicle.getId());
 			
+			if (!includeSoldVehicles && aVehicleSale != null) {
+				continue;
+			}
 			if (aVehicleLoan == null && aVehicleTitle == null && aVehicleSale == null) {
 				continue;
 			}

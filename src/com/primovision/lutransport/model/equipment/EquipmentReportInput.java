@@ -20,6 +20,8 @@ public class EquipmentReportInput implements ReportModel {
 	private String holdsTitle;
 	
 	private String buyer;
+	
+	private String includeSoldVehicle;
 
 	public String getLoanNo() {
 		return loanNo;
@@ -86,5 +88,11 @@ public class EquipmentReportInput implements ReportModel {
 	}
 	public void setBuyer(String buyer) {
 		this.buyer = buyer;
+	}
+	public String getIncludeSoldVehicle() {
+		return includeSoldVehicle;
+	}
+	public void setIncludeSoldVehicle(String includeSoldVehicle) {
+		this.includeSoldVehicle = includeSoldVehicle;
 	}
 }

@@ -21,7 +21,7 @@
 			</td>
 	   	</tr>
 	   	<tr>
-	   		<td align="${left}" class="first"><primo:label code="Vehicle"/></td>
+	   		<td align="${left}" class="first"><primo:label code="Unit#"/></td>
 			<td align="${left}">
 				<select id="vehicle" name="vehicle" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
@@ -34,6 +34,16 @@
 						</c:if>
 						<option value="${item.unit}"${selected}>${item.unit}</option>
 					</c:forEach>
+				</select>
+			</td>
+	   	</tr>
+	   	<tr>
+	   		<td align="${left}" class="first"><primo:label code="Include Sold Vehicles"/></td>
+			<td align="${left}">
+				<select id="includeSoldVehicle" name="includeSoldVehicle" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<option value="Yes">Yes</option>
+					<option value="No">No</option>
 				</select>
 			</td>
 	   	</tr>
