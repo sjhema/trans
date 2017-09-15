@@ -9,10 +9,13 @@
 	<parameter name="period" class="java.lang.String"/>
 	<parameter name="states" class="java.lang.String"/>
 	<parameter name="totalGallons" class="java.lang.Double"/>
+	<parameter name="mileageLogDetailsDrillDownReportUrl" class="java.lang.String"/>
 	<field name="miles" class="java.lang.Double"/>
 	<field name="state.name" class="java.lang.String"/>
 	<field name="company.name" class="java.lang.String"/>
 	<field name="gallons" class="java.lang.Double"/>
+	<field name="company.id" class="java.lang.Long"/>
+	<field name="state.id" class="java.lang.Long"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -170,7 +173,7 @@
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
-			<textField>
+			<textField hyperlinkType="Reference">
 				<reportElement x="280" y="0" width="182" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -183,6 +186,9 @@
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.0").format($F{miles})]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA[$P{mileageLogDetailsDrillDownReportUrl} + "?type=csv"
++ "&company=" + java.net.URLEncoder.encode(String.valueOf($F{company.id}))
++ "&state=" + java.net.URLEncoder.encode(String.valueOf($F{state.id}))]]></hyperlinkReferenceExpression>
 			</textField>
 			<textField>
 				<reportElement x="174" y="0" width="106" height="20"/>

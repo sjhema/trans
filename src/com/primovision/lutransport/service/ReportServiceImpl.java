@@ -3894,7 +3894,17 @@ throw new Exception("origin and destindation is empty");
 	@Override
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
 		String company = input.getCompany();
+		String drillDownCompany = input.getDrillDownCompany();
+		if (StringUtils.isNotEmpty(drillDownCompany)) {
+			company = drillDownCompany;
+		}
+		
 		String state = input.getState();
+		String drillDownState = input.getDrillDownState();
+		if (StringUtils.isNotEmpty(drillDownState)) {
+			state = drillDownState;
+		}
+		
 		String truck = input.getUnit();
 		String periodFrom = input.getPeriodFrom();
 		String periodTo = input.getPeriodTo();

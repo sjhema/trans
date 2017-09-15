@@ -3,6 +3,7 @@ package com.primovision.lutransport.model.report;
 public class MileageLogReportInput {
 	public static final String REPORT_TYPE_TOTALS = "TOTALS";
 	public static final String REPORT_TYPE_DETAILS = "DETAILS";
+	public static final String REPORT_TYPE_IFTA = "IFTA";
 	
 	private String periodFrom;
 	private String periodTo;
@@ -13,6 +14,9 @@ public class MileageLogReportInput {
 	private String firstInStateTo;
 	private String lastInStateFrom;
 	private String lastInStateTo;
+	
+	private String drillDownState;
+	private String drillDownCompany;
 	
 	private String reportType;
 	
@@ -78,5 +82,17 @@ public class MileageLogReportInput {
 	}
 	public void setLastInStateTo(String lastInStateTo) {
 		this.lastInStateTo = lastInStateTo;
+	}
+	public String getDrillDownState() {
+		return drillDownState;
+	}
+	public void setDrillDownState(String drillDownState) {
+		this.drillDownState = drillDownState;
+	}
+	public String getDrillDownCompany() {
+		return drillDownCompany;
+	}
+	public void setDrillDownCompany(String drillDownCompany) {
+		this.drillDownCompany = drillDownCompany;
 	}
 }

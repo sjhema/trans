@@ -1,7 +1,7 @@
 package com.primovision.lutransport.controller.report;
 
 import java.io.ByteArrayOutputStream;
-
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,15 @@ import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
+import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.report.IFTAReportInput;
 import com.primovision.lutransport.model.report.IFTAReportWrapper;
 import com.primovision.lutransport.model.report.MileageLogReportInput;
 import com.primovision.lutransport.model.report.MileageLogReportWrapper;
-
+import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.ReportService;
 
@@ -76,7 +78,8 @@ public class MileageLogReportController extends BaseController {
 		return "reportuser/report/mileageLogReport";
 	}
 	
-	private void populateParams(Map<String,Object> params, MileageLogReportWrapper wrapper) {
+	private void populateParams(Map<String,Object> params, HttpServletRequest request, 
+			MileageLogReportWrapper wrapper) {
 		params.put("totalRows", wrapper.getTotalRows());
 		params.put("totalMiles", wrapper.getTotalMiles());
 		
@@ -99,6 +102,16 @@ public class MileageLogReportController extends BaseController {
 			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
+		
+		populateDrillDownReportParams(params, request);
+	}
+	
+	private void populateDrillDownReportParams(Map<String,Object> params, HttpServletRequest request) {
+		String requestUrl = request.getRequestURL().toString();
+		String searchAction = StringUtils.substringAfterLast(requestUrl, "/");
+		
+		String mileageLogDetailsDrillDownReportUrl = StringUtils.replace(requestUrl, searchAction, "mileageLogDetailsDrillDownReport.do");
+		params.put("mileageLogDetailsDrillDownReportUrl", mileageLogDetailsDrillDownReportUrl);
 	}
 	
 	private Map<String,Object> generateData(SearchCriteria searchCriteria, HttpServletRequest request, MileageLogReportInput input) {
@@ -107,7 +120,7 @@ public class MileageLogReportController extends BaseController {
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		 
-		populateParams(params, wrapper);
+		populateParams(params, request, wrapper);
 		  
 		data.put("data", wrapper.getMileageLogList());
 		data.put("params", params);
@@ -144,6 +157,8 @@ public class MileageLogReportController extends BaseController {
 			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
+		
+		populateDrillDownReportParams(params, request);
 		  
 		data.put("data", wrapper.getIftaReportList());
 		data.put("params", params);
@@ -286,7 +301,7 @@ public class MileageLogReportController extends BaseController {
 			String reportType = "mileageLogTotalsReport";
 			if (MileageLogReportInput.REPORT_TYPE_DETAILS.equals(input.getReportType())) {
 				reportType = "mileageLogDetailsReport";
-			}
+			} 
 			
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
 					(List)datas.get("data"), params, request);
@@ -298,6 +313,81 @@ public class MileageLogReportController extends BaseController {
 			request.getSession().setAttribute("errors", e.getMessage());
 			return "error";
 		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET}, value = "/mileageLogDetailsDrillDownReport.do")
+	public String processMileageLogDetailsDrilldownReport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = true) String company,
+			@RequestParam(required = true) String state) throws IOException {
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPageSize = criteria.getPageSize();
+		int origPage = criteria.getPage();
+		
+		criteria.setPageSize(1000);
+		criteria.setPage(0);
+		
+		MileageLogReportInput input = (MileageLogReportInput) request.getSession().getAttribute("input");
+		String origReportType = input.getReportType();
+		input.setReportType(MileageLogReportInput.REPORT_TYPE_DETAILS);
+		
+		input.setDrillDownCompany(company);
+		input.setDrillDownState(state);
+		
+		if (StringUtils.isEmpty(type)) {
+			type = "csv";
+		}
+     	
+		String reportName = "mileageLogDetailsDrilldownReport";
+		ByteArrayOutputStream out = null;
+		try {
+			Map<String, Object> datas = generateData(criteria, request, input);
+			List<MileageLog> mileageLogList = (List<MileageLog>) datas.get("data");
+			Map<String, Object> params = (Map<String, Object>) datas.get("params");
+			
+			response.setContentType(MimeUtil.getContentType(type));
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename=" + reportName + "." + type);
+			}
+			
+			if (type.equals("pdf")) {
+				reportName += "pdf";
+			}
+			
+			out = dynamicReportService.generateStaticReport(reportName,
+					mileageLogList, params, type, request);
+			out.writeTo(response.getOutputStream());
+			
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create mileage log drilldown report :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			
+			return "error";
+		} finally {
+			criteria.setPageSize(origPageSize);
+			criteria.setPage(origPage);
+			
+			resetDrillDownCriteria(input, origReportType);
+			
+			if (out != null) {
+				out.flush();
+				out.close();
+				out = null;
+			}
+		}
+	}
+	
+	private void resetDrillDownCriteria(MileageLogReportInput input, String origReportType) {
+		input.setReportType(origReportType);
+		input.setDrillDownCompany(StringUtils.EMPTY);
+		input.setDrillDownState(StringUtils.EMPTY);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/iftaSearch.do")
@@ -342,8 +432,8 @@ public class MileageLogReportController extends BaseController {
 				response.setHeader("Content-Disposition", "attachment;filename="+reportType+"." + type);
 			}
 			
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Map params = (Map)datas.get("params");
+			
 			
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
 					(List)datas.get("data"), params, request);
