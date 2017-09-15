@@ -17,6 +17,7 @@ public class MileageLogReportInput {
 	
 	private String drillDownState;
 	private String drillDownCompany;
+	private String drillDownUnit;
 	
 	private String reportType;
 	
@@ -94,5 +95,11 @@ public class MileageLogReportInput {
 	}
 	public void setDrillDownCompany(String drillDownCompany) {
 		this.drillDownCompany = drillDownCompany;
+	}
+	public String getDrillDownUnit() {
+		return drillDownUnit;
+	}
+	public void setDrillDownUnit(String drillDownUnit) {
+		this.drillDownUnit = drillDownUnit;
 	}
 }

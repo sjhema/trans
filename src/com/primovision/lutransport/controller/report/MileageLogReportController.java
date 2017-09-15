@@ -195,6 +195,8 @@ public class MileageLogReportController extends BaseController {
 			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
 		}
 		params.put("period", period);
+		
+		populateDrillDownReportParams(params, request);
 		  
 		data.put("data", wrapper.getIftaReportList());
 		data.put("params", params);
@@ -319,8 +321,9 @@ public class MileageLogReportController extends BaseController {
 	public String processMileageLogDetailsDrilldownReport(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response,
 			@RequestParam(required = false, value = "type") String type,
-			@RequestParam(required = true) String company,
-			@RequestParam(required = true) String state) throws IOException {
+			@RequestParam(required = false) String company,
+			@RequestParam(required = false) String state,
+			@RequestParam(required = false) String unit) throws IOException {
 		Map imagesMap = new HashMap();
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
@@ -337,6 +340,7 @@ public class MileageLogReportController extends BaseController {
 		
 		input.setDrillDownCompany(company);
 		input.setDrillDownState(state);
+		input.setDrillDownUnit(unit);
 		
 		if (StringUtils.isEmpty(type)) {
 			type = "csv";
@@ -388,6 +392,7 @@ public class MileageLogReportController extends BaseController {
 		input.setReportType(origReportType);
 		input.setDrillDownCompany(StringUtils.EMPTY);
 		input.setDrillDownState(StringUtils.EMPTY);
+		input.setDrillDownUnit(StringUtils.EMPTY);
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/iftaSearch.do")
@@ -433,7 +438,6 @@ public class MileageLogReportController extends BaseController {
 			}
 			
 			Map params = (Map)datas.get("params");
-			
 			
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
 					(List)datas.get("data"), params, request);

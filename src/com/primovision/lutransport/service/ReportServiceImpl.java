@@ -3906,6 +3906,11 @@ throw new Exception("origin and destindation is empty");
 		}
 		
 		String truck = input.getUnit();
+		String drillDownTruck = input.getDrillDownUnit();
+		if (StringUtils.isNotEmpty(drillDownTruck)) {
+			truck = drillDownTruck;
+		}
+		
 		String periodFrom = input.getPeriodFrom();
 		String periodTo = input.getPeriodTo();
 		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
