@@ -6996,7 +6996,30 @@ throw new Exception("origin and destindation is empty");
 		return wrapper;
 	}
 
-	
+	// Filtering inactive trucks in net report - 15th Sep 2017
+	private boolean filterInactiveTruck(NetReportWrapper anNetReportWrapper) {
+		if (anNetReportWrapper.getSumTotal() != 0.0
+				|| anNetReportWrapper.getFuellogCharge() != 0.0
+				|| anNetReportWrapper.getTollTagAmount() != 0.0
+				|| anNetReportWrapper.getTransportationAmount() != 0.0
+				|| anNetReportWrapper.getNetAmount() != 0.0) {
+			return false;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("unit", Integer.valueOf(anNetReportWrapper.getUnit()));
+		List<Vehicle> truckList = genericDAO.findByCriteria(Vehicle.class, criterias);
+		if (truckList == null || truckList.isEmpty()) {
+			return false;
+		}
+		
+		Vehicle truck = truckList.get(0);
+		if (truck.getActiveStatus() == 1) { // Active
+			return false;
+		} else {
+			return true;
+		}	
+	}
 	
 	
 	
@@ -7525,7 +7548,11 @@ throw new Exception("origin and destindation is empty");
 				wrapper.setTransportationAmount(Double.parseDouble(objarry[4].toString()));				
 				wrapper.setNetAmount(Double.parseDouble(objarry[5].toString()));
 				wrapper.setUnit(objarry[6].toString());
-				wrapperlist.add(wrapper);
+				
+				// Filtering inactive trucks in net report - 15th Sep 2017
+				if (!filterInactiveTruck(wrapper)) {
+					wrapperlist.add(wrapper);
+				}
 			}
 		}
 		
