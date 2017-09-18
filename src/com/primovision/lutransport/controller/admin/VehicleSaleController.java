@@ -164,6 +164,7 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		String buyer = (String) criteria.getSearchMap().get("buyer");
 		String soldDateFrom = (String) criteria.getSearchMap().get("soldDateFrom");
 		String soldDateTo = (String) criteria.getSearchMap().get("soldDateTo");
+		String scrapped = (String) criteria.getSearchMap().get("scrapped");
 		
 		StringBuffer query = new StringBuffer("select obj from VehicleSale obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from VehicleSale obj where 1=1");
@@ -190,6 +191,14 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 	     	} catch (ParseException e) {
 				e.printStackTrace();
 			}
+		}
+      
+      if (StringUtils.isNotEmpty(scrapped)) {
+      	String scrappedCondn = scrapped;
+      	if (StringUtils.equals("2", scrapped)) {
+      		scrappedCondn += " or obj.scrapped is null";
+      	}
+			whereClause.append(" and (obj.scrapped=" + scrappedCondn + ")");
 		}
       
       query.append(whereClause);

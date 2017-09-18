@@ -34,6 +34,7 @@ public class EquipmentReportOutput implements ReportModel {
 	private String saleDate = StringUtils.EMPTY;
 	private String buyer = StringUtils.EMPTY;
 	private Double salePrice;
+	private String scrapped = StringUtils.EMPTY;
 	
 	public Integer getUnit() {
 		return unit;
@@ -169,6 +170,10 @@ public class EquipmentReportOutput implements ReportModel {
 	public void setSalePrice(Double salePrice) {
 		this.salePrice = salePrice;
 	}
-	
-	
+	public String getScrapped() {
+		return scrapped;
+	}
+	public void setScrapped(String scrapped) {
+		this.scrapped = scrapped;
+	}
 }

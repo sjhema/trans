@@ -47,6 +47,24 @@
 				</select>
 			</td>
 	   	</tr>
+	   	<tr>
+			<td align="${left}" class="first"><primo:label code="Scrapped"/></td>
+			<td align="${left}">
+				<select id="scrapped" name="scrapped" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:set var="yesSelected" value="" />
+					<c:set var="noSelected" value="" />
+					<c:if test="${sessionScope.searchCriteria.searchMap['scrapped'] == '1'}">
+						<c:set var="yesSelected" value="selected" />
+					</c:if>
+					<c:if test="${sessionScope.searchCriteria.searchMap['scrapped'] == '2'}">
+						<c:set var="noSelected" value="selected" />
+					</c:if>
+					<option value="1" ${yesSelected}>Yes</option>
+					<option value="2" ${noSelected}>No</option>
+				</select>
+			</td>
+		</tr>
 		<!--
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Loan No"/></td>

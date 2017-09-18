@@ -22,6 +22,7 @@ public class EquipmentReportInput implements ReportModel {
 	private String buyer;
 	
 	private String includeSoldVehicle;
+	private String scrapped;
 
 	public String getLoanNo() {
 		return loanNo;
@@ -94,5 +95,11 @@ public class EquipmentReportInput implements ReportModel {
 	}
 	public void setIncludeSoldVehicle(String includeSoldVehicle) {
 		this.includeSoldVehicle = includeSoldVehicle;
+	}
+	public String getScrapped() {
+		return scrapped;
+	}
+	public void setScrapped(String scrapped) {
+		this.scrapped = scrapped;
 	}
 }

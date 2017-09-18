@@ -198,6 +198,17 @@ function populateVehicleDetails() {
 				<br> <form:errors path="salePrice" cssClass="errorMessage" />
 			</td>
 		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Scrapped" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="scrapped" style="min-width:162px; max-width:162px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:option value="1">Yes</form:option>
+					<form:option value="2">No</form:option>
+				</form:select>
+				<br><form:errors path="scrapped" cssClass="errorMessage" />
+			</td>
+		</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>&nbsp;</td>

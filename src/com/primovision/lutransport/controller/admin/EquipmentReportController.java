@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.BaseController;
-
+import com.primovision.lutransport.core.tags.StaticDataUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.PaymentUtil;
 
@@ -226,6 +226,7 @@ public class EquipmentReportController extends BaseController {
 		String company = input.getCompany();
 		String vehicle = input.getVehicle();
 		String includeSoldVehiclesStr = input.getIncludeSoldVehicle();
+		String scrappedStr = input.getScrapped();
 		
 		StringBuffer query = new StringBuffer("select obj from Vehicle obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Vehicle obj where 1=1");
@@ -243,6 +244,10 @@ public class EquipmentReportController extends BaseController {
 		if (StringUtils.isNotEmpty(includeSoldVehiclesStr)) {
 			includeSoldVehicles = BooleanUtils.toBoolean(includeSoldVehiclesStr);
 		}
+		
+		if (StringUtils.isNotEmpty(scrappedStr)) {
+			includeSoldVehicles = true;
+		}
       
       query.append(whereClause);
       countQuery.append(whereClause);
@@ -259,7 +264,7 @@ public class EquipmentReportController extends BaseController {
 					.getResultList();
 		
 		List<EquipmentReportOutput> equipmentReportOutputList = new ArrayList<EquipmentReportOutput>();
-		map(equipmentReportOutputList, vehicleList, includeSoldVehicles);
+		map(equipmentReportOutputList, vehicleList, includeSoldVehicles, scrappedStr);
 		sort(equipmentReportOutputList);
 		
 		return equipmentReportOutputList;
@@ -290,8 +295,17 @@ public class EquipmentReportController extends BaseController {
 		});
 	}
 	
+	private boolean isScrappedSale(VehicleSale aVehicleSale) {
+		Integer scrapped = aVehicleSale.getScrapped();
+		if (scrapped == null || scrapped == 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	private void map(List<EquipmentReportOutput> equipmentReportOutputList, List<Vehicle> vehicleList,
-			boolean includeSoldVehicles) {
+			boolean includeSoldVehicles, String includeScrappedStr) {
 		if (vehicleList == null || vehicleList.isEmpty()) {
 			return;
 		}
@@ -304,6 +318,24 @@ public class EquipmentReportController extends BaseController {
 			if (!includeSoldVehicles && aVehicleSale != null) {
 				continue;
 			}
+			
+			if (StringUtils.isNotEmpty(includeScrappedStr)) {
+				if (aVehicleSale == null) {
+					continue;
+				} else {
+					boolean scrappedSale = isScrappedSale(aVehicleSale);
+					if (StringUtils.equals("1", includeScrappedStr)) {
+						if (!scrappedSale) {
+							continue;
+						}
+					} else if (StringUtils.equals("2", includeScrappedStr)) {
+						if (scrappedSale) {
+							continue;
+						}
+					}
+				}
+			}
+			
 			if (aVehicleLoan == null && aVehicleTitle == null && aVehicleSale == null) {
 				continue;
 			}
@@ -371,6 +403,13 @@ public class EquipmentReportController extends BaseController {
 		equipmentReportOutput.setBuyer(vehicleSale.getBuyer().getName());
 		equipmentReportOutput.setSaleDate(dateFormat.format(vehicleSale.getSaleDate()));
 		equipmentReportOutput.setSalePrice(vehicleSale.getSalePrice());
+		
+		String scrapped = StringUtils.EMPTY;
+		Integer scrappedInt = vehicleSale.getScrapped();
+		if (scrappedInt != null) {
+			scrapped = StaticDataUtil.getText("VEHICLE_SCRAPPED", String.valueOf(scrappedInt));
+		}
+		equipmentReportOutput.setScrapped(scrapped);
 	}
 	
 	private VehicleLoan retrieveVehicleLoan(Long vehicleId) {

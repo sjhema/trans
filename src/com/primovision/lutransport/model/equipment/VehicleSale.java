@@ -29,6 +29,9 @@ public class VehicleSale extends AbstractBaseModel {
 	@Column(name="sale_price")
 	private Double salePrice;
 	
+	@Column(name="scrapped")
+	private Integer scrapped;
+	
 	@Transient
 	private String buyerName;
 	
@@ -72,5 +75,13 @@ public class VehicleSale extends AbstractBaseModel {
 	@Transient
 	public void setBuyerName(String buyerName) {
 		this.buyerName = buyerName;
+	}
+
+	public Integer getScrapped() {
+		return scrapped;
+	}
+
+	public void setScrapped(Integer scrapped) {
+		this.scrapped = scrapped;
 	}
 }
