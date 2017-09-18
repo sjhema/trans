@@ -194,11 +194,13 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		}
       
       if (StringUtils.isNotEmpty(scrapped)) {
-      	String scrappedCondn = scrapped;
-      	if (StringUtils.equals("2", scrapped)) {
-      		scrappedCondn += " or obj.scrapped is null";
+      	String scrappedCondn = StringUtils.EMPTY;;
+      	if (StringUtils.equals("1", scrapped)) {
+      		scrappedCondn = " and obj.scrapped=1";
+      	} else {
+      		scrappedCondn = " and obj.scrapped is null";
       	}
-			whereClause.append(" and (obj.scrapped=" + scrappedCondn + ")");
+			whereClause.append(scrappedCondn);
 		}
       
       query.append(whereClause);

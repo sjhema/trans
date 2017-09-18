@@ -204,7 +204,7 @@ function populateVehicleDetails() {
 				<form:select cssClass="flat" path="scrapped" style="min-width:162px; max-width:162px">
 					<form:option value="">------<primo:label code="Please Select" />------</form:option>
 					<form:option value="1">Yes</form:option>
-					<form:option value="2">No</form:option>
+					<!--<form:option value="2">No</form:option>-->
 				</form:select>
 				<br><form:errors path="scrapped" cssClass="errorMessage" />
 			</td>

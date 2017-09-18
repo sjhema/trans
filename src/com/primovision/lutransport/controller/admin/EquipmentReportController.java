@@ -297,10 +297,10 @@ public class EquipmentReportController extends BaseController {
 	
 	private boolean isScrappedSale(VehicleSale aVehicleSale) {
 		Integer scrapped = aVehicleSale.getScrapped();
-		if (scrapped == null || scrapped == 2) {
-			return true;
-		} else {
+		if (scrapped == null) {
 			return false;
+		} else {
+			return true;
 		}
 	}
 	
