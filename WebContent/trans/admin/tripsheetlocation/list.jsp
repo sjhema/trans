@@ -9,18 +9,18 @@
 		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Name" /></td>
-			<td align="${left}"><select id="location" name="id" style="min-width:154px; max-width:154px">
+			<td align="${left}"><select id="location" name="name" style="min-width:154px; max-width:154px">
 					<option value="">------
 					<primo:label code="Please Select" />
 					------
 					</option>
-					<c:forEach items="${locations}" var="location">
+					<c:forEach items="${locations}" var="aLocation">
 						<c:set var="selected" value="" />
 						<c:if
-							test="${sessionScope.searchCriteria.searchMap['name'] ==location.name}">
+							test="${sessionScope.searchCriteria.searchMap['name'] == aLocation}">
 							<c:set var="selected" value="selected" />
 						</c:if>
-						<option value="${location.id}"${selected}>${location.name}</option>
+						<option value="${aLocation}"${selected}>${aLocation}</option>
 					</c:forEach>
 			</select></td>
 			

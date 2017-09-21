@@ -43,8 +43,7 @@
 			<td><form:select cssClass="flat" path="name"
 					style="min-width:154px; max-width:154px" id="nameId">
 					<form:option value="">-----Please Select----</form:option>
-					<form:options items="${locationNames}" itemValue="name"
-						itemLabel="name" />
+					<form:options items="${locationNames}" />
 				</form:select> <br> <form:errors path="name" cssClass="errorMessage" />
 			</td>
 		</tr>

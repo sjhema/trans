@@ -274,6 +274,8 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		
 		// Delete vehicle title - 29th May 2017
 		deleteVehicleTitle(entity);
+		// Inactivate vehicle - 21st Sep 2017
+		inactivateVehicle(entity);
 		
 		request.getSession().setAttribute("msg", "Vehicle sale details saved successfully");
 		
@@ -308,6 +310,26 @@ public class VehicleSaleController extends CRUDController<VehicleSale> {
 		}
 	}
 	
+	// Inactivate vehicle - 21st Sep 2017
+	private void inactivateVehicle(VehicleSale vehicleSale) {
+		/*if (vehicleSale.getModifiedBy() != null) {
+			return;
+		}*/
+		
+		String query = "select obj from Vehicle obj where obj.id=" + vehicleSale.getVehicle().getId();
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(query);
+		if (vehicleList == null || vehicleList.isEmpty()) {
+			return;
+		}
+		
+		for (Vehicle aVehicle : vehicleList) {
+			aVehicle.setActiveStatus(2); // Inactive
+			aVehicle.setInactiveDate(vehicleSale.getSaleDate());
+			aVehicle.setModifiedAt(vehicleSale.getCreatedAt());
+			aVehicle.setModifiedBy(vehicleSale.getCreatedBy());
+			genericDAO.saveOrUpdate(aVehicle);
+		}
+	}
 	
 	private void populateBuyer(VehicleSale entity) {
 		String buyerName = StringUtils.replace(entity.getBuyerName(), "'", "''", -1);

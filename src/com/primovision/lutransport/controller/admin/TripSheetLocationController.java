@@ -62,14 +62,18 @@ public class TripSheetLocationController extends CRUDController<TripSheetLocatio
 		criterias.put("type", 4);
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 		criterias.clear();
-		model.addAttribute("locations", genericDAO.findByCriteria(TripSheetLocation.class, criterias,"name",false));
+		
+		String query = "select distinct(obj.name) from TripSheetLocation obj order by obj.name asc";
+		model.addAttribute("locations", genericDAO.executeSimpleQuery(query));
+		//model.addAttribute("locations", genericDAO.findByCriteria(TripSheetLocation.class, criterias,"name",false));
+		
 		if(request.getParameter("id")!=null){
 			criterias.clear();		
-			model.addAttribute("locationNames", genericDAO.executeSimpleQuery("select obj from Location obj where 1=1 and obj.type in (1,2) order by obj.name"));
+			model.addAttribute("locationNames", genericDAO.executeSimpleQuery("select distinct(obj.name) from Location obj where 1=1 and obj.type in (1,2) order by obj.name"));
 		}
 		else{
 			criterias.clear();		
-			model.addAttribute("locationNames", genericDAO.executeSimpleQuery("select obj from Location obj where 1=1 and obj.status=1 and obj.type in (1,2) order by obj.name"));
+			model.addAttribute("locationNames", genericDAO.executeSimpleQuery("select distinct(obj.name) from Location obj where 1=1 and obj.status=1 and obj.type in (1,2) order by obj.name"));
 		}
 		
 	}
@@ -119,7 +123,7 @@ public class TripSheetLocationController extends CRUDController<TripSheetLocatio
 	public String search2(ModelMap model, HttpServletRequest request) {
 		setupList(model, request);
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"name",null,null));
+		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"name, driverCompany,name, terminal.name",null,null));
 		return urlContext + "/list";
 	}
 
