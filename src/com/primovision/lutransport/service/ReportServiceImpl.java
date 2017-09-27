@@ -1532,7 +1532,7 @@ public class ReportServiceImpl implements ReportService {
 				// Sum amount rounding fix - 8th Aug 2017
 				//sumAmount += billing.getAmount();
 				// Sum amount rounding fix changes - 23rd aug 2017
-				if (isWMTicket(ticket)) {
+				if (isWMTicket(ticket, billingRate)) {
 					sumAmount += MathUtil.roundUp(billing.getAmount(), 2);
 				} else {
 					sumAmount += billing.getAmount();
@@ -1818,7 +1818,18 @@ public class ReportServiceImpl implements ReportService {
 		return wrapper;
 	}
 	
-	private boolean isWMTicket(Ticket ticket) {
+	private boolean isWMTicket(Ticket ticket, BillingRate billingRate) {
+		if (billingRate != null) {
+			Customer customer = billingRate.getCustomername();
+			if (customer != null) {
+				if (customer.getId() == 55l // Waste Management The Forge
+						|| customer.getId() == 24l // WM Philadelphia Transfer Station
+						|| customer.getId() == 26l) { // Hunterdon Transfer Station
+					return true;
+				}
+			}
+		}
+		
 		String countQuery = "select count(obj) from WMInvoice obj where 1=1";
 		countQuery += " and obj.origin=" + ticket.getOrigin().getId();
 		countQuery += " and obj.destination=" + ticket.getDestination().getId();
