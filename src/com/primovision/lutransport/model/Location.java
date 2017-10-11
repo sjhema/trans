@@ -36,7 +36,18 @@ public class Location extends AbstractBaseModel {
 	@Column(name = "hauling_name")
 	private String haulingName;
 	
+	@Transient
+	private String typeDescription;
 	
+	
+	@Transient
+	public String getTypeDescription() {
+		return typeDescription;
+	}
+	@Transient
+	public void setTypeDescription(String typeDescription) {
+		this.typeDescription = typeDescription;
+	}
 
 	public String getHaulingName() {
 		return haulingName;

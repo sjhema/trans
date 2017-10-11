@@ -24,7 +24,8 @@ if (menuTree!=null) {
 			   || businessObject.getId()==600110
 			   || businessObject.getId()==30012
 			   || businessObject.getId()==30013
-			   || businessObject.getId()==40012){ // Invoicing
+			   || businessObject.getId()==40012 // Invoicing
+			   || businessObject.getId()==30014) { // Injury
 			
 				if (hierarchy.contains("/"+businessObject.getId()+"/")) {
 				cssClass="selected";
