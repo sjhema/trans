@@ -497,12 +497,18 @@ function formatTime(timeElemId) {
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Location" /><span class="errorMessage"></span></td>
+			<!--  
 			<td>
 				<form:select cssClass="flat" path="location" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${locations}" itemValue="id" itemLabel="typeDescription" />
 				</form:select> 
 				<br><form:errors path="location" cssClass="errorMessage" />
+			</td>
+			-->
+			<td align="${left}">
+				<form:input path="location" style="min-width:162px; max-width:162px" cssClass="flat" />
+				<br><form:errors path="location" cssClass="errorMessage" /> 
 			</td>
 			<td class="form-left"><primo:label code="Injury To" /><span class="errorMessage"></span></td>
 			<td>
@@ -608,14 +614,18 @@ function formatTime(timeElemId) {
 		<tr>
 			<td class="form-left"><primo:label code="Total Paid" /><span class="errorMessage"></span></td>
 			<td>
+				<!-- 
 				<form:input path="totalPaid" style="background-color: #eee; min-width:164px; max-width:164px" cssClass="flat" 
 					readonly="true" />
+				 -->
+				<form:input path="totalPaid" style="min-width:162px; max-width:162px" cssClass="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" />
 				<br><form:errors path="totalPaid" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Total Claimed" /><span class="errorMessage"></span></td>
 			<td>
-				<form:input path="totalClaimed" style="background-color: #eee; min-width:164px; max-width:164px" cssClass="flat" 
-					readonly="true" />
+				<form:input path="totalClaimed" style="min-width:162px; max-width:162px" cssClass="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" />
 				<br><form:errors path="totalClaimed" cssClass="errorMessage" />
 			</td>
 		</tr>

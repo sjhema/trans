@@ -19,7 +19,7 @@ CREATE TABLE `insurance_company` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `lutransport`.`insurance_company` 
-ADD UNIQUE INDEX `insufance_company_name_UNIQUE` (`name` ASC);
+ADD UNIQUE INDEX `insurance_company_name_UNIQUE` (`name` ASC);
 
 CREATE TABLE `insurance_company_rep` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -50,6 +50,9 @@ CREATE TABLE `injury_incident_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ALTER TABLE `lutransport`.`injury_incident_type` 
+ADD UNIQUE INDEX `injury_incident_type_incident_type_UNIQUE` (`incident_type` ASC);
+
 CREATE TABLE `injury_to_type` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL,
@@ -61,6 +64,9 @@ CREATE TABLE `injury_to_type` (
   `description` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+ALTER TABLE `lutransport`.`injury_to_type` 
+ADD UNIQUE INDEX `injury_to_injury_to_UNIQUE` (`injury_to` ASC);
 
 CREATE TABLE `injury` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -77,12 +83,14 @@ CREATE TABLE `injury` (
   `driver_company` bigint(20) NOT NULL,
   `driver_terminal` bigint(20) NOT NULL,
   `driver_category` bigint(20) NOT NULL,
+  `driver_age` int(11) DEFAULT NULL,
+  `driver_months_of_service` int(11) DEFAULT NULL,
   `incident_date` datetime NOT NULL,
   `incident_time` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
   `incident_time_ampm` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
   `incident_day_of_week` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
   `return_to_work` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `location` bigint(20) DEFAULT NULL,
+  `location` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `notes` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
   `injury_to` bigint(20) DEFAULT NULL,
   `return_to_work_date` datetime DEFAULT NULL,
@@ -102,7 +110,6 @@ CREATE TABLE `injury` (
   KEY `injury_insurance_comp_fk_idx` (`insurance_company`),
   KEY `injury_insurance_comp_rep_fk_idx` (`claim_rep`),
   KEY `injury_driver_fk_idx` (`driver`),
-  KEY `injury_location_fk_idx` (`location`),
   KEY `injury_driver_comp_location_fk_idx` (`driver_company`),
   KEY `injury_driver_terminal_location_fk_idx` (`driver_terminal`),
   KEY `injury_incident_type_fk_idx` (`incident_type`),
@@ -111,7 +118,6 @@ CREATE TABLE `injury` (
   CONSTRAINT `injury_insurance_comp_fk` FOREIGN KEY (`insurance_company`) REFERENCES `insurance_company` (`id`),
   CONSTRAINT `injury_insurance_comp_rep_fk` FOREIGN KEY (`claim_rep`) REFERENCES `insurance_company_rep` (`id`),
   CONSTRAINT `injury_driver_fk` FOREIGN KEY (`driver`) REFERENCES `driver` (`id`),
-  CONSTRAINT `injury_location_fk` FOREIGN KEY (`location`) REFERENCES `location` (`id`),
   CONSTRAINT `injury_driver_comp_location_fk` FOREIGN KEY (`driver_company`) REFERENCES `location` (`id`),
   CONSTRAINT `injury_driver_terminal_location_fk` FOREIGN KEY (`driver_terminal`) REFERENCES `location` (`id`),
   CONSTRAINT `injury_incident_type_fk` FOREIGN KEY (`incident_type`) REFERENCES `injury_incident_type` (`id`),
@@ -142,3 +148,12 @@ VALUES ('300142', '/admin/injury/reports/start.do?rst=1', 'Injury Reports', '3',
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300142', '1'); -- ADMIN
+
+INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
+VALUES ('300143', '/uploadData/injury.do', 'Upload Injury', '3', 'Upload Injury', 
+'/uploadData/injury.do,/uploadData/injury/uploadMain.do,/uploadData/injury/uploadReported.do,/uploadData/injury/uploadNotReported.do', '1', '3', '0', '30014', '/1/30014/300143/');
+
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '300143', '1'); -- ADMIN
+
+

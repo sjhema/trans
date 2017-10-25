@@ -72,7 +72,7 @@ public class InjuryReportController extends BaseController {
 		criterias.put("dataType", "INJURY_STATUS");
 		model.addAttribute("statuses", genericDAO.findByCriteria(StaticData.class, criterias, "dataText", false));
 		criterias.clear();
-		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "id desc", false));
+		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "claimNumber asc", false));
 		
 		String query = "select distinct(obj.fullName) from Driver obj order by obj.fullName";
 		model.addAttribute("driverNames", genericDAO.executeSimpleQuery(query));
@@ -142,7 +142,7 @@ public class InjuryReportController extends BaseController {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.driverCompany.name asc, obj.driverTerminal.name asc, obj.driver.fullName asc");
+      query.append(" order by obj.driverCompany.name asc, obj.driverTerminal.name asc, obj.driver.fullName asc, obj.incidentDate asc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	

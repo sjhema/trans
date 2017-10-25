@@ -366,7 +366,7 @@
 				<textElement textAlignment="Center">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{injuryStatus} == 1 ? "Open" : ($F{injuryStatus} == 2 ? "Not Reported" : "Closed")]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{injuryStatus} == 1 ? "Open" : ($F{injuryStatus} == 2 ? "Closed" : "Not Reported")]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="728" y="0" width="84" height="20"/>

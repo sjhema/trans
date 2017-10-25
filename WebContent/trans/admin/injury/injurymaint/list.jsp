@@ -117,13 +117,11 @@
         <primo:textcolumn headerText="Emp. Comp." dataField="driverCompany.name" width="75px"/>
         <primo:textcolumn headerText="Emp. Term." dataField="driverTerminal.name" width="45px"/>
         <primo:textcolumn headerText="Position" dataField="driverCategory.name" width="45px"/>
-        <primo:textcolumn headerText="Location" dataField="location.name" />
+        <primo:textcolumn headerText="Location" dataField="location" />
         <primo:textcolumn headerText="Incident Type" dataField="incidentType.incidentType" />
         <primo:staticdatacolumn headerText="Status" dataField="injuryStatus" dataType="INJURY_STATUS"/>
-        <primo:textcolumn headerText="Notes" dataField="notes" width="450px"/>
         <primo:textcolumn headerText="Injury To" dataField="injuryTo.injuryTo" width="75px"/>
         <primo:textcolumn headerText="Tarp Related Injury" dataField="tarpRelatedInjury" width="75px"/>
-       	<primo:textcolumn headerText="Claim Rep" dataField="claimRep.name" width="75px" />
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

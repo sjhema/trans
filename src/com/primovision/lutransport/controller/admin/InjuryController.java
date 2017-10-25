@@ -38,6 +38,7 @@ import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
 import com.primovision.lutransport.core.tags.StaticDataUtil;
+import com.primovision.lutransport.core.util.InjuryUtils;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Driver;
@@ -59,7 +60,6 @@ public class InjuryController extends CRUDController<Injury> {
 	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	private static SimpleDateFormat dayOfWeekSDF = new SimpleDateFormat("E");
 
 	@Override
 	@InitBinder
@@ -150,7 +150,7 @@ public class InjuryController extends CRUDController<Injury> {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by id desc");
+      query.append(" order by obj.incidentDate desc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
@@ -209,7 +209,7 @@ public class InjuryController extends CRUDController<Injury> {
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		model.addAttribute("claimReps", claimReps);
 	
-		String query = "select obj from Location obj "
+		/*String query = "select obj from Location obj "
 				+ " where type in (1, 2)"
 				+ " order by obj.name asc, obj.type asc";
 		List<Location> locations = genericDAO.executeSimpleQuery(query);
@@ -218,7 +218,7 @@ public class InjuryController extends CRUDController<Injury> {
 			typeDescription += StaticDataUtil.getText("LOCATION_TYPE", String.valueOf(aLocation.getType()));
 			aLocation.setTypeDescription(typeDescription);
 		}
-		model.addAttribute("locations", locations);
+		model.addAttribute("locations", locations);*/
 	}
 	
 	public void setupCommon(ModelMap model, HttpServletRequest request) {
@@ -241,7 +241,7 @@ public class InjuryController extends CRUDController<Injury> {
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "id desc", false));
+		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "claimNumber asc", false));
 		
 		String query = "select distinct(obj.fullName) from Driver obj order by obj.fullName";
 		model.addAttribute("driverNames", genericDAO.executeSimpleQuery(query));
@@ -294,12 +294,7 @@ public class InjuryController extends CRUDController<Injury> {
 	}
 	
 	private void setDayOfWeek(Injury entity) {
-		Date incidentDate = entity.getIncidentDate();
-		if (incidentDate == null) {
-			return;
-		}
-		
-		String dayOfWeek = dayOfWeekSDF.format(incidentDate);
+		String dayOfWeek = InjuryUtils.deriveDayOfWeek(entity.getIncidentDate());
 		entity.setIncidentDayOfWeek(dayOfWeek);
 	}
 	

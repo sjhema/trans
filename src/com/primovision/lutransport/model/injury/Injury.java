@@ -41,9 +41,9 @@ public class Injury extends AbstractBaseModel {
 	@Column(name = "incident_day_of_week")
 	private String incidentDayOfWeek;
 	
-	@ManyToOne
-	@JoinColumn(name="location")
-	private Location location;
+	/*@ManyToOne
+	@JoinColumn(name="location")*/
+	private String location;
 	
 	@ManyToOne
 	@JoinColumn(name="driver")
@@ -68,6 +68,12 @@ public class Injury extends AbstractBaseModel {
    @ManyToOne
 	@JoinColumn(name="driver_category")
 	private EmployeeCatagory driverCategory;
+   
+   @Column(name="driver_age")
+	private Integer driverAge;
+   
+   @Column(name="driver_months_of_service")
+  	private Integer driverMonthsOfService;
    
 	@Column(name="injury_status")
 	private Integer injuryStatus;
@@ -164,11 +170,11 @@ public class Injury extends AbstractBaseModel {
 		this.incidentTime = incidentTime;
 	}
 
-	public Location getLocation() {
+	public String getLocation() {
 		return location;
 	}
 
-	public void setLocation(Location location) {
+	public void setLocation(String location) {
 		this.location = location;
 	}
 
@@ -378,5 +384,21 @@ public class Injury extends AbstractBaseModel {
 
 	public void setDriverCategory(EmployeeCatagory driverCategory) {
 		this.driverCategory = driverCategory;
+	}
+
+	public Integer getDriverAge() {
+		return driverAge;
+	}
+
+	public void setDriverAge(Integer driverAge) {
+		this.driverAge = driverAge;
+	}
+
+	public Integer getDriverMonthsOfService() {
+		return driverMonthsOfService;
+	}
+
+	public void setDriverMonthsOfService(Integer driverMonthsOfService) {
+		this.driverMonthsOfService = driverMonthsOfService;
 	}
 }

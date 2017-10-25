@@ -52,8 +52,8 @@
 	<variable name="sumOfreimburseAmounts" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{reimburseAmount}]]></variableExpression>
 	</variable>
-	<variable name="grandTotal" class="java.lang.Double">
-		<variableExpression><![CDATA[$V{sumtotalamt}+$V{vacationSum}+$V{quarterSumAmount}+$V{sumOfBereavementAmounts}]]></variableExpression>
+	<variable name="grandTotal" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalAmount}+$F{vacationAmount}+$F{quarterAmount}+$F{bereavementAmount}]]></variableExpression>
 	</variable>
 	<variable name="probationDeductionSum" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{probationDetection}]]></variableExpression>

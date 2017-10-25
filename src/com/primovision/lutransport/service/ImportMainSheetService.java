@@ -23,5 +23,8 @@ public interface ImportMainSheetService {
 	public List<String> importEmployeeMainSheet(InputStream is, Long createdBy) throws Exception;
 	public List<String> importWMTickets(InputStream is, String locationType, String destinationLocation, Long createdBy) throws Exception;
 	public List<String> importWMInvoice(InputStream is, Long createdBy) throws Exception;
+	public List<String> importInjuryMainData(InputStream is, Long createdBy) throws Exception;
+	public List<String> importInjuryReportedData(InputStream is, Long createdBy) throws Exception;
+	public List<String> importInjuryNotReportedData(InputStream is, Long createdBy) throws Exception;
 }
 

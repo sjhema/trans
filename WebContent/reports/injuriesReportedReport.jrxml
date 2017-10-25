@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="injuriesReportedtReport" pageWidth="1750" pageHeight="600" orientation="Landscape" columnWidth="1710" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="825"/>
+	<property name="ireport.x" value="346"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="driver" class="java.lang.String"/>
 	<parameter name="incidentDateRange" class="java.lang.String"/>
@@ -41,7 +41,7 @@
 				<text><![CDATA[REPORTED INJURIIES]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="699" y="37" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="674" y="38" width="153" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -55,7 +55,7 @@
 				<text><![CDATA[Employee]]></text>
 			</staticText>
 			<textField pattern="">
-				<reportElement x="699" y="63" width="153" height="20"/>
+				<reportElement x="674" y="64" width="153" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -67,7 +67,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{driver}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="852" y="37" width="153" height="26" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="827" y="38" width="212" height="26" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -81,7 +81,7 @@
 				<text><![CDATA[Incident Date Range]]></text>
 			</staticText>
 			<textField pattern="">
-				<reportElement x="852" y="63" width="153" height="20"/>
+				<reportElement x="827" y="64" width="212" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -420,7 +420,7 @@
 				<textElement textAlignment="Center">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{injuryStatus} == 1 ? "Open" : ($F{injuryStatus} == 2 ? "Not Reported" : "Closed")]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{injuryStatus} == 1 ? "Open" : ($F{injuryStatus} == 2 ? "Closed" : "Not Reported")]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="728" y="0" width="84" height="20"/>
