@@ -107,6 +107,12 @@ public class Injury extends AbstractBaseModel {
 	@Column(name="osha_recordable")
 	private String oshaRecordable;
 	
+	@Column(name="employed")
+	private String employed;
+	
+	@Column(name="working")
+	private String working;
+	
 	@Column(name="medical_cost")
 	private Double medicalCost;
 	
@@ -127,29 +133,19 @@ public class Injury extends AbstractBaseModel {
 	
 	@Column(name="attorney")
 	private String attorney;
-	
-	@Transient
-	private String employed;
-	
-	@Transient
-	private String working;
 
-	@Transient
 	public String getEmployed() {
 		return employed;
 	}
 
-	@Transient
 	public void setEmployed(String employed) {
 		this.employed = employed;
 	}
 
-	@Transient
 	public String getWorking() {
 		return working;
 	}
 
-	@Transient
 	public void setWorking(String working) {
 		this.working = working;
 	}

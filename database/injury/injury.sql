@@ -128,6 +128,10 @@ CREATE TABLE `injury` (
 ALTER TABLE `lutransport`.`injury` 
 ADD UNIQUE INDEX `injury_claim_no_UNIQUE` (`claim_no` ASC);
 
+ALTER TABLE `lutransport`.`injury` 
+ADD COLUMN `employed` VARCHAR(50) NULL DEFAULT NULL AFTER `attorney`,
+ADD COLUMN `working` VARCHAR(50) NULL DEFAULT NULL AFTER `employed`;
+
 INSERT INTO `lutransport`.`business_object` 
 (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('30014', '/admin/injury/injurymaint/list.do?rst=1', 'Injury', '2', 'Injury', '/admin/injury/injurymaint/list.do?rst=1,/admin/injury/injurymaint/create.do,/admin/injury/injurymaint/edit.do,/admin/injury/injurymaint/delete.do,/admin/injury/injurymaint/save.do,/admin/injury/injurymaint/search.do,/admin/injury/injurymaint/export.do,/admin/injury/injurymaint/ajax.do,/admin/injury/injurymaint/copy.do,/admin/injury/injurymaint/print.do', '1', '9', '0', '1', '/1/30014/');

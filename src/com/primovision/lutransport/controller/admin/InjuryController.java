@@ -161,7 +161,7 @@ public class InjuryController extends CRUDController<Injury> {
 						.setFirstResult(criteria.getPage() * criteria.getPageSize())
 						.getResultList();
 		
-		populateDriverDetails(injuryList);
+		//populateDriverDetails(injuryList);
 		
 		return injuryList;
 	}

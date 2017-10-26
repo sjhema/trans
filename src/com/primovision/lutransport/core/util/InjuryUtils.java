@@ -56,6 +56,8 @@ public class InjuryUtils {
 	
 	public static final String INJURY_REPORTED_COL_INUSRANCE_COMPANY = "Insurance";
 	public static final String INJURY_REPORTED_COL_EMPLOYEE = "Employee";
+	public static final String INJURY_REPORTED_COL_EMPLOYED = "Employed";
+	public static final String INJURY_REPORTED_COL_WORKING = "Working";
 	public static final String INJURY_REPORTED_COL_INCIDENT_DATE = "Date";
 	public static final String INJURY_REPORTED_COL_STATUS = "Status";
 	public static final String INJURY_REPORTED_COL_MEDICAL = "Medical";
@@ -93,6 +95,8 @@ public class InjuryUtils {
 		Map<String, Integer> colMapping = new HashMap<String, Integer>();
 		colMapping.put(INJURY_REPORTED_COL_INUSRANCE_COMPANY, 1);
 		colMapping.put(INJURY_REPORTED_COL_EMPLOYEE, 2);
+		colMapping.put(INJURY_REPORTED_COL_EMPLOYED, 3);
+		colMapping.put(INJURY_REPORTED_COL_WORKING, 4);
 		colMapping.put(INJURY_REPORTED_COL_INCIDENT_DATE, 5);
 		colMapping.put(INJURY_REPORTED_COL_STATUS, 6);
 		colMapping.put(INJURY_REPORTED_COL_MEDICAL, 7);

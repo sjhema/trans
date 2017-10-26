@@ -1064,6 +1064,18 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					} 
 					
+					Integer employedCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_EMPLOYED);
+					String employedStr = ((String) getCellValue(row.getCell(employedCol)));
+					if (StringUtils.equals(employedStr, "Yes") || StringUtils.equals(employedStr, "No")) {
+						existingInjury.setEmployed(employedStr);
+					}
+					
+					Integer workingCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_WORKING);
+					String workingStr = ((String) getCellValue(row.getCell(workingCol)));
+					if (StringUtils.equals(workingStr, "Yes") || StringUtils.equals(workingStr, "No")) {
+						existingInjury.setWorking(workingStr);
+					}
+					
 					Integer statusCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_STATUS);
 					String statusStr = ((String) getCellValue(row.getCell(statusCol)));
 					StaticData status = InjuryUtils.retrieveInjuryStatus(statusStr, genericDAO);

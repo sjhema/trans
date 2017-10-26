@@ -584,16 +584,36 @@ function formatTime(timeElemId) {
 			</td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Employed" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="employed" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:option value="Yes">Yes</form:option>
+					<form:option value="No">No</form:option>
+				</form:select> 
+				<br><form:errors path="employed" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Working" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="working" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:option value="Yes">Yes</form:option>
+					<form:option value="No">No</form:option>
+				</form:select> 
+				<br><form:errors path="working" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Medical Cost" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="medicalCost" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
 				<br><form:errors path="medicalCost" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Indemnity" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="indemnityCost" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
 				<br><form:errors path="indemnityCost" cssClass="errorMessage" />
 			</td>
 		</tr>
@@ -601,13 +621,13 @@ function formatTime(timeElemId) {
 			<td class="form-left"><primo:label code="Expense" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="expense" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
 				<br><form:errors path="expense" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Reserve" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="reserve" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
 				<br><form:errors path="reserve" cssClass="errorMessage" />
 			</td>
 		</tr>
