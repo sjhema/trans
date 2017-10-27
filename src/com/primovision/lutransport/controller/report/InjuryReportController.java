@@ -153,7 +153,7 @@ public class InjuryReportController extends BaseController {
 						.setFirstResult(criteria.getPage() * criteria.getPageSize())
 						.getResultList();
 		
-		populateDriverDetails(injuryList);
+		//populateDriverDetails(injuryList);
 		
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("driver", driver);
