@@ -81,7 +81,7 @@ public class InjuryReportController extends BaseController {
 	}
 	
 	private Map<String, Object> performSearch(SearchCriteria criteria, String overrideInjuryStatus,
-			boolean searchNotInInjuryStatus) {
+			Boolean searchNotInInjuryStatus) {
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
 		
@@ -98,6 +98,9 @@ public class InjuryReportController extends BaseController {
 		
 		String incidentDateFrom = (String) criteria.getSearchMap().get("incidentDateFrom");
 		String incidentDateTo = (String) criteria.getSearchMap().get("incidentDateTo");
+		
+		String totalPaidFrom = (String) criteria.getSearchMap().get("totalPaidFrom");
+		String totalPaidTo = (String) criteria.getSearchMap().get("totalPaidTo");
 		
 		StringBuffer query = new StringBuffer("select obj from Injury obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Injury obj where 1=1");
@@ -137,6 +140,13 @@ public class InjuryReportController extends BaseController {
       	}
       	injuryStatusClause += " in (";
 			whereClause.append(injuryStatusClause + injuryStatus + ")");
+		}
+      
+      if (StringUtils.isNotEmpty(totalPaidFrom)) {
+			whereClause.append(" and obj.totalPaid >=" + totalPaidFrom);
+		}
+      if (StringUtils.isNotEmpty(totalPaidTo)) {
+			whereClause.append(" and obj.totalPaid <=" + totalPaidTo);
 		}
       
       query.append(whereClause);
@@ -199,6 +209,11 @@ public class InjuryReportController extends BaseController {
 	
 	private Map<String, Object> generateReportedData(SearchCriteria searchCriteria, HttpServletRequest request) {
 		Map<String, Object> datas = performSearch(searchCriteria, String.valueOf(Injury.INJURY_STATUS_NOT_REPORTED), true); 
+		return datas;
+	}
+	
+	private Map<String, Object> generateAllData(SearchCriteria searchCriteria, HttpServletRequest request) {
+		Map<String, Object> datas = performSearch(searchCriteria, null, null); 
 		return datas;
 	}
 	
@@ -280,6 +295,39 @@ public class InjuryReportController extends BaseController {
 		}
 	}
 	
+	@RequestMapping(method = {RequestMethod.GET, RequestMethod.POST }, value = "/allSearch.do")
+	public String allSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, Object> imagesMap = new HashMap<String, Object>();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		populateSearchCriteria(request, request.getParameterMap());
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(1000);
+		criteria.setPage(0);
+		
+		Map<String, Object> datas = generateAllData(criteria, request);
+		List<Injury> injuryList = (List<Injury>) datas.get("data");
+		Map<String, Object> params = (Map<String, Object>) datas.get("params");
+		
+		String type = "html";
+		response.setContentType(MimeUtil.getContentType(type));
+		
+		String reportName = "injuriesAllReport";
+		try {
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportName,
+					injuryList, params, request);
+			request.setAttribute("jasperPrint", jasperPrint);
+			
+			return getUrlContext() + "/allReport/"+type;
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errors", e.getMessage());
+			
+			return "error";
+		}
+	}
+	
 	@RequestMapping(method = {RequestMethod.GET, RequestMethod.POST }, value = "/reportedSearch.do")
 	public String reportedSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> imagesMap = new HashMap<String, Object>();
@@ -329,6 +377,51 @@ public class InjuryReportController extends BaseController {
 		Map<String, Object> params = (Map<String, Object>) datas.get("params");
 		
 		String reportName = "injuriesReportedReport";
+		if (!StringUtils.equals("html", type) && !StringUtils.equals("print", type)) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
+		}
+		response.setContentType(MimeUtil.getContentType(type));
+		
+		ByteArrayOutputStream out = null;
+		try {
+			out = dynamicReportService.generateStaticReport(reportName,
+					injuryList, params, type, request);
+			out.writeTo(response.getOutputStream());
+			
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@RequestMapping(method = {RequestMethod.GET, RequestMethod.POST }, value = "/allExport.do")
+	public String allExport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = true, value = "type") String type) {
+		Map<String, Object> imagesMap = new HashMap<String, Object>();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+		
+		Map<String, Object> datas = generateAllData(criteria, request);
+		List<Injury> injuryList = (List<Injury>) datas.get("data");
+		Map<String, Object> params = (Map<String, Object>) datas.get("params");
+		
+		String reportName = "injuriesAllReport";
 		if (!StringUtils.equals("html", type) && !StringUtils.equals("print", type)) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
 		}

@@ -148,7 +148,7 @@ VALUES (now(), '1', '300141', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300142', '/admin/injury/reports/start.do?rst=1', 'Injury Reports', '3', 'Injury Reports', 
-'/admin/injury/reports/start.do?rst=1,/admin/injury/reports/notReportedSearch.do,/admin/injury/reports/notReportedExport.do,/admin/injury/reports/reportedSearch.do,/admin/injury/reports/reportedExport.do,/admin/injury/reports/ajax.do', '1', '2', '0', '30014', '/1/30014/300142/');
+'/admin/injury/reports/start.do?rst=1,/admin/injury/reports/notReportedSearch.do,/admin/injury/reports/notReportedExport.do,/admin/injury/reports/reportedSearch.do,/admin/injury/reports/reportedExport.do,/admin/injury/reports/allSearch.do,/admin/injury/reports/allExport.do,/admin/injury/reports/ajax.do', '1', '2', '0', '30014', '/1/30014/300142/');
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300142', '1'); -- ADMIN

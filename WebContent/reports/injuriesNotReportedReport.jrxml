@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="injuriesNotReportedtReport" pageWidth="1270" pageHeight="600" orientation="Landscape" columnWidth="1230" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="337"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="driver" class="java.lang.String"/>
 	<parameter name="incidentDateRange" class="java.lang.String"/>
@@ -18,6 +18,15 @@
 	<field name="totalPaid" class="java.lang.Double"/>
 	<variable name="recordCount" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[$F{driver.fullName}]]></variableExpression>
+	</variable>
+	<variable name="medicalSum" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{medicalCost}]]></variableExpression>
+	</variable>
+	<variable name="indemnitySum" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{indemnityCost}]]></variableExpression>
+	</variable>
+	<variable name="totalPaidSum" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalPaid}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -426,6 +435,48 @@
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$V{recordCount}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="652" y="0" width="84" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###,##0.00").format($V{medicalSum})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="736" y="0" width="84" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###,##0.00").format($V{indemnitySum})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="820" y="0" width="84" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###,##0.00").format($V{totalPaidSum})]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

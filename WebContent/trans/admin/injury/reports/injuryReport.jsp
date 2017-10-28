@@ -13,6 +13,12 @@ function processReportedReport() {
 	form.submit();
 }
 
+function processAllReport() {
+	var form = $('#injuryReportSearchForm');
+	form.attr('action', 'allSearch.do');
+	form.submit();
+}
+
 function formatDate(dateElemId) {
 	var dateElem = document.getElementById(dateElemId);
 	var date = dateElem.value;
@@ -165,10 +171,27 @@ function formatDate(dateElemId) {
 				</select>
 			</td>
 	   	</tr>
+	   	<tr>
+			<td class="form-left"><primo:label code="Total Paid From" /></td>
+			<td>
+				<input id="totalPaidFrom" name="totalPaidFrom" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.totalPaidFrom}"/>
+			</td>
+			<td class="form-left"><primo:label code="Total Paid To" /></td>
+			<td>
+				<input id="totalPaidTo" name="totalPaidTo" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.totalPaidTo}"/>
+			</td>
+		</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}" colspan="3">
+				<input type="button"
+					onclick="javascript:processAllReport()" value="All" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processNotReportedReport()" value="Not Reported" />
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

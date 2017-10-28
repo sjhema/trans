@@ -334,9 +334,9 @@ public class InjuryController extends CRUDController<Injury> {
 				if (entity.getInsuranceCompany() == null) {
 					bindingResult.rejectValue("insuranceCompany", "error.select.option", null, null);
 				}
-				if (StringUtils.isEmpty(entity.getClaimNumber())) {
+				/*if (StringUtils.isEmpty(entity.getClaimNumber())) {
 					bindingResult.rejectValue("claimNumber", "NotNull.java.lang.String", null, null);
-				}
+				}*/
 			}
 		}
 	}
