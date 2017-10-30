@@ -145,18 +145,6 @@ function formatDate(dateElemId) {
 			</td>
 		</tr>
 		<tr>
-			<td align="${left}" class="first"><primo:label code="Incident Date From"/></td>
-			<td align="${left}">
-				<input id="datepicker" name="incidentDateFrom" style="min-width:148px; max-width:148px" class="flat" 
-					 value="${sessionScope.searchCriteria.searchMap.incidentDateFrom}" /> 
-			</td>
-			<td align="${left}" class="first"><primo:label code="Incident Date To"/></td>
-			<td align="${left}">
-				<input id="datepicker1" name="incidentDateTo" style="min-width:148px; max-width:148px" class="flat" 
-					 value="${sessionScope.searchCriteria.searchMap.incidentDateTo}" /> 
-			</td>
-		</tr>
-		<tr>
 			<td align="${left}" class="first"><primo:label code="Incident Type"/></td>
 			<td align="${left}">
 				<select id="incidentType" name="incidentType" style="min-width:154px; max-width:154px">
@@ -171,14 +159,26 @@ function formatDate(dateElemId) {
 				</select>
 			</td>
 	   	</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Incident Date From"/></td>
+			<td align="${left}">
+				<input id="datepicker" name="incidentDateFrom" style="min-width:148px; max-width:148px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.incidentDateFrom}" /> 
+			</td>
+			<td align="${left}" class="first"><primo:label code="Incident Date To"/></td>
+			<td align="${left}">
+				<input id="datepicker1" name="incidentDateTo" style="min-width:148px; max-width:148px" class="flat" 
+					 value="${sessionScope.searchCriteria.searchMap.incidentDateTo}" /> 
+			</td>
+		</tr>
 	   	<tr>
-			<td class="form-left"><primo:label code="Total Paid From" /></td>
+			<td align="${left}" class="first"><primo:label code="Total Paid From" /></td>
 			<td>
 				<input id="totalPaidFrom" name="totalPaidFrom" style="min-width:148px; max-width:148px" class="flat" 
 					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
 					 value="${sessionScope.searchCriteria.searchMap.totalPaidFrom}"/>
 			</td>
-			<td class="form-left"><primo:label code="Total Paid To" /></td>
+			<td align="${left}" class="first"><primo:label code="Total Paid To" /></td>
 			<td>
 				<input id="totalPaidTo" name="totalPaidTo" style="min-width:148px; max-width:148px" class="flat" 
 					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
@@ -190,13 +190,13 @@ function formatDate(dateElemId) {
 			<td align="${left}"></td>
 			<td align="${left}" colspan="3">
 				<input type="button"
-					onclick="javascript:processAllReport()" value="All" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="button"
-					onclick="javascript:processNotReportedReport()" value="Not Reported" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					onclick="javascript:processAllReport()" value="     All     " />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processReportedReport()" value="Reported" />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processNotReportedReport()" value="Not Reported" />
 			</td>
 		</tr>
 	</table>
