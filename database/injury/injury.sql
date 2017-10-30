@@ -161,3 +161,9 @@ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_ob
 VALUES (now(), '1', '300143', '1'); -- ADMIN
 
 
+---
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Worker Comp.', 
+`OBJECT_NAME`='Worker Comp.', `display_order`='6' WHERE `ID`='30014';
+
+
+
