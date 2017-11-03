@@ -37,25 +37,28 @@ import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
-import com.primovision.lutransport.core.tags.StaticDataUtil;
 import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
-import com.primovision.lutransport.model.injury.Injury;
-import com.primovision.lutransport.model.injury.InjuryIncidentType;
-import com.primovision.lutransport.model.injury.InjuryToType;
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.accident.Accident;
+import com.primovision.lutransport.model.accident.AccidentCause;
+import com.primovision.lutransport.model.accident.AccidentRoadCondition;
+import com.primovision.lutransport.model.accident.AccidentType;
+import com.primovision.lutransport.model.accident.AccidentWeather;
 import com.primovision.lutransport.model.insurance.InsuranceCompany;
 import com.primovision.lutransport.model.insurance.InsuranceCompanyRep;
 
 @Controller
-@RequestMapping("/admin/injury/injurymaint")
-public class InjuryController extends CRUDController<Injury> {
-	public InjuryController() {
-		setUrlContext("admin/injury/injurymaint");
+@RequestMapping("/admin/accident/accidentmaint")
+public class AccidentController extends CRUDController<Accident> {
+	public AccidentController() {
+		setUrlContext("admin/accident/accidentmaint");
 	}
 	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
@@ -68,11 +71,15 @@ public class InjuryController extends CRUDController<Injury> {
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		
 		binder.registerCustomEditor(Driver.class, new AbstractModelEditor(Driver.class));
+		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(Vehicle.class));
+		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
 		binder.registerCustomEditor(InsuranceCompany.class, new AbstractModelEditor(InsuranceCompany.class));
 		binder.registerCustomEditor(InsuranceCompanyRep.class, new AbstractModelEditor(InsuranceCompanyRep.class));
-		binder.registerCustomEditor(InjuryIncidentType.class, new AbstractModelEditor(InjuryIncidentType.class));
-		binder.registerCustomEditor(InjuryToType.class, new AbstractModelEditor(InjuryToType.class));
+		binder.registerCustomEditor(AccidentType.class, new AbstractModelEditor(AccidentType.class));
+		binder.registerCustomEditor(AccidentCause.class, new AbstractModelEditor(AccidentCause.class));
+		binder.registerCustomEditor(AccidentWeather.class, new AbstractModelEditor(AccidentWeather.class));
+		binder.registerCustomEditor(AccidentRoadCondition.class, new AbstractModelEditor(AccidentRoadCondition.class));
 	}
 	
 	@Override
@@ -81,8 +88,8 @@ public class InjuryController extends CRUDController<Injury> {
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		
-		List<Injury> injuryList = performSearch(criteria);
-		model.addAttribute("list", injuryList);
+		List<Accident> accidentList = performSearch(criteria);
+		model.addAttribute("list", accidentList);
 		
 		return urlContext + "/list";
 	}
@@ -94,26 +101,26 @@ public class InjuryController extends CRUDController<Injury> {
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(25);
 		
-		List<Injury> injuryList = performSearch(criteria);
-		model.addAttribute("list", injuryList);
+		List<Accident> accidentList = performSearch(criteria);
+		model.addAttribute("list", accidentList);
 		
 		return urlContext + "/list";
 	}
 	
-	private List<Injury> performSearch(SearchCriteria criteria) {
+	private List<Accident> performSearch(SearchCriteria criteria) {
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
 		
 		String claimNumber = (String) criteria.getSearchMap().get("claimNumber");
 		
-		String incidentType = (String) criteria.getSearchMap().get("incidentType");
-		String injuryStatus = (String) criteria.getSearchMap().get("injuryStatus");
+		String accidentType = (String) criteria.getSearchMap().get("accidentType");
+		String accidentStatus = (String) criteria.getSearchMap().get("accidentStatus");
 		
 		String incidentDateFrom = (String) criteria.getSearchMap().get("incidentDateFrom");
 		String incidentDateTo = (String) criteria.getSearchMap().get("incidentDateTo");
 		
-		StringBuffer query = new StringBuffer("select obj from Injury obj where 1=1");
-		StringBuffer countQuery = new StringBuffer("select count(obj) from Injury obj where 1=1");
+		StringBuffer query = new StringBuffer("select obj from Accident obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from Accident obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
 		
 		if (StringUtils.isNotEmpty(insuranceCompany)) {
@@ -140,11 +147,11 @@ public class InjuryController extends CRUDController<Injury> {
 				e.printStackTrace();
 			}
 		}
-      if (StringUtils.isNotEmpty(incidentType)) {
-			whereClause.append(" and obj.incidentType.id=" + incidentType);
+      if (StringUtils.isNotEmpty(accidentType)) {
+			whereClause.append(" and obj.accidentType.id=" + accidentType);
 		}
-      if (StringUtils.isNotEmpty(injuryStatus)) {
-			whereClause.append(" and obj.injuryStatus=" + injuryStatus);
+      if (StringUtils.isNotEmpty(accidentStatus)) {
+			whereClause.append(" and obj.accidentStatus=" + accidentStatus);
 		}
       
       query.append(whereClause);
@@ -155,82 +162,53 @@ public class InjuryController extends CRUDController<Injury> {
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
 		
-		List<Injury> injuryList = 
+		List<Accident> accidentList = 
 				genericDAO.getEntityManager().createQuery(query.toString())
 						.setMaxResults(criteria.getPageSize())
 						.setFirstResult(criteria.getPage() * criteria.getPageSize())
 						.getResultList();
 		
-		//populateDriverDetails(injuryList);
-		
-		return injuryList;
+		return accidentList;
 	}
 	
-	private void populateDriverDetails(List<Injury> injuryList) {
-		if (injuryList == null || injuryList.isEmpty()) {
-			return;
-		}
-		
-		for (Injury anInjury : injuryList) {
-			if (anInjury.getReturnToWorkDate() != null) {
-				anInjury.setWorking("Yes");
-			} else {
-				anInjury.setWorking("No");
-			}
-			
-			Driver driver = anInjury.getDriver();
-			if (driver.getStatus() == 1) {
-				anInjury.setEmployed("Yes");
-			} else {
-				anInjury.setEmployed("No");
-			}
-		}
-	}
-
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
 		setupCommon(model, request);
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		model.addAttribute("injuryToTypes", genericDAO.findByCriteria(InjuryToType.class, criterias, "injuryTo asc", false));
-
 		List<InsuranceCompanyRep> claimReps = null;
 		criterias.clear();
 		if (request.getParameter("id") == null) {
 			claimReps = genericDAO.findByCriteria(InsuranceCompanyRep.class, criterias, "name", false);
 			criterias.put("status", 1);
 		} else {
-			Injury entity = (Injury) model.get("modelObject");
+			Accident entity = (Accident) model.get("modelObject");
 			if (entity != null && entity.getInsuranceCompany() != null) {
 				claimReps = retrieveClaimReps(entity.getInsuranceCompany().getId());
 			}
 		}
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		model.addAttribute("claimReps", claimReps);
-	
-		/*String query = "select obj from Location obj "
-				+ " where type in (1, 2)"
-				+ " order by obj.name asc, obj.type asc";
-		List<Location> locations = genericDAO.executeSimpleQuery(query);
-		for (Location aLocation : locations) {
-			String typeDescription = aLocation.getName() + " - ";
-			typeDescription += StaticDataUtil.getText("LOCATION_TYPE", String.valueOf(aLocation.getType()));
-			aLocation.setTypeDescription(typeDescription);
-		}
-		model.addAttribute("locations", locations);*/
 	}
 	
 	public void setupCommon(ModelMap model, HttpServletRequest request) {
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
 		model.addAttribute("insuranceCompanies", genericDAO.findByCriteria(InsuranceCompany.class, criterias, "name", false));
-		model.addAttribute("incidentTypes", genericDAO.findByCriteria(InjuryIncidentType.class, criterias, "incidentType asc", false));
+		model.addAttribute("accidentTypes", genericDAO.findByCriteria(AccidentType.class, criterias, "accidentType asc", false));
+		model.addAttribute("accidentCauses", genericDAO.findByCriteria(AccidentCause.class, criterias, "cause asc", false));
+		model.addAttribute("roadConditions", genericDAO.findByCriteria(AccidentRoadCondition.class, criterias, "roadCondition asc", false));
+		model.addAttribute("allWeather", genericDAO.findByCriteria(AccidentWeather.class, criterias, "weather asc", false));
+		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
 		
 		criterias.clear();
-		criterias.put("dataType", "INJURY_STATUS");
+		criterias.put("dataType", "ACCIDENT_STATUS");
 		model.addAttribute("statuses", genericDAO.findByCriteria(StaticData.class, criterias, "dataText", false));
 		
+		// select obj from Vehicle obj where obj.type=1 group by obj.unit
+		String vehicleQuery = "select obj from Vehicle obj group by obj.unit, obj.type";
+		model.addAttribute("vehicles", genericDAO.executeSimpleQuery(vehicleQuery));
 	}
 
 
@@ -241,7 +219,7 @@ public class InjuryController extends CRUDController<Injury> {
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "claimNumber asc", false));
+		model.addAttribute("accidents", genericDAO.findByCriteria(Accident.class, criterias, "claimNumber asc", false));
 		
 		String query = "select distinct(obj.fullName) from Driver obj order by obj.fullName";
 		model.addAttribute("driverNames", genericDAO.executeSimpleQuery(query));
@@ -249,9 +227,9 @@ public class InjuryController extends CRUDController<Injury> {
 	
 	@Override
 	public String save(HttpServletRequest request,
-			@ModelAttribute("modelObject") Injury entity,
+			@ModelAttribute("modelObject") Accident entity,
 			BindingResult bindingResult, ModelMap model) {
-		validateSave(entity, bindingResult);
+		validateSave(entity, bindingResult, request);
 		if(bindingResult.hasErrors()) {
         	setupCreate(model, request);
         	return getUrlContext() + "/form";
@@ -266,7 +244,7 @@ public class InjuryController extends CRUDController<Injury> {
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		request.getSession().setAttribute("msg", "Injury details saved successfully");
+		request.getSession().setAttribute("msg", "Accident details saved successfully");
 		
 		setupCreate(model, request);
 		
@@ -277,84 +255,75 @@ public class InjuryController extends CRUDController<Injury> {
 		return genericDAO.getById(Driver.class, driverId);
 	}
 	
-	private void setMoreDetails(Injury entity) {
+	private void setMoreDetails(Accident entity) {
 		setDriverDetails(entity);
 		
 		setDayOfWeek(entity);
-		setIncidentTimeAMPM(entity);
 	}
 	
-	private void setDriverDetails(Injury entity) {
+	private void setDriverDetails(Accident entity) {
 		Long driverId = entity.getDriver().getId();
 		Driver driver = retrieveDriver(driverId);
 		
 		entity.setDriverCompany(driver.getCompany());
 		entity.setDriverTerminal(driver.getTerminal());
-		entity.setDriverCategory(driver.getCatagory());
+		entity.setDriverHiredDate(driver.getDateHired());
 	}
 	
-	private void setDayOfWeek(Injury entity) {
+	private void setDayOfWeek(Accident entity) {
 		String dayOfWeek = WorkerCompUtils.deriveDayOfWeek(entity.getIncidentDate());
 		entity.setIncidentDayOfWeek(dayOfWeek);
 	}
 	
-	private void setIncidentTimeAMPM(Injury entity) {
-		String incidentTime = entity.getIncidentTime();
-		if (StringUtils.isEmpty(incidentTime)) {
-			return;
-		}
-		
-		String amPm = StringUtils.EMPTY;
-		String hourStr = StringUtils.substringBefore(incidentTime, ":");
-		int hour = Integer.valueOf(hourStr).intValue();
-		if (hour >= 12) {
-			amPm = "PM";
-		} else {
-			amPm = "AM";
-		}
-		entity.setIncidentTimeAMPM(amPm);
-	}
-	
-	private void validateSave(Injury entity, BindingResult bindingResult) {
+	private void validateSave(Accident entity, BindingResult bindingResult, HttpServletRequest request) {
 		if (entity.getIncidentDate() == null) {
 			bindingResult.rejectValue("incidentDate", "NotNull.java.util.Date", null, null);
 		}
 		if (entity.getDriver() == null) {
 			bindingResult.rejectValue("driver", "error.select.option", null, null);
 		}
-		if (entity.getIncidentType() == null) {
-			bindingResult.rejectValue("incidentType", "error.select.option", null, null);
+		if (entity.getVehicle() == null) {
+			bindingResult.rejectValue("vehicle", "error.select.option", null, null);
 		}
 		
-		Integer injuryStatus = entity.getInjuryStatus();
-		if (injuryStatus == null) {
-			bindingResult.rejectValue("injuryStatus", "error.select.option", null, null);
+		if (entity.getVehicle() != null && entity.getIncidentDate() != null) {
+			Vehicle matchingVehicle = WorkerCompUtils.retrieveVehicleForUnit(entity.getVehicle().getUnitNum(), 
+					entity.getIncidentDate(), genericDAO);
+			if (matchingVehicle == null) {
+				bindingResult.rejectValue("vehicle", "error.select.option", null, null);
+				request.getSession().setAttribute("error",
+						"No Matching Vehicle Entries Found for Selected Vehicle and Incident Date.");
+			} else {
+				entity.setVehicle(matchingVehicle);
+			}
+		}
+		
+		Integer accidentStatus = entity.getAccidentStatus();
+		if (accidentStatus == null) {
+			bindingResult.rejectValue("accidentStatus", "error.select.option", null, null);
 		} else {
-			if (injuryStatus.intValue() != Injury.INJURY_STATUS_NOT_REPORTED.intValue()) {
+			if (accidentStatus.intValue() != Accident.ACCIDENT_STATUS_NOT_REPORTED.intValue()) {
 				if (entity.getInsuranceCompany() == null) {
 					bindingResult.rejectValue("insuranceCompany", "error.select.option", null, null);
 				}
-				/*if (StringUtils.isEmpty(entity.getClaimNumber())) {
-					bindingResult.rejectValue("claimNumber", "NotNull.java.lang.String", null, null);
-				}*/
 			}
 		}
 	}
 	
 	@Override
-	public String delete(@ModelAttribute("modelObject") Injury entity,
+	public String delete(@ModelAttribute("modelObject") Accident entity,
 			BindingResult bindingResult, HttpServletRequest request) {
 		String errorMsg = StringUtils.EMPTY;
 		try {
 			genericDAO.delete(entity);
 		} catch (Exception ex) {
-			errorMsg = String.format("Error while deleting Injury Details with id: %d", entity.getId());
+			errorMsg = String.format("Error while deleting Accident Details with id: %d", entity.getId());
 			request.getSession().setAttribute("error", errorMsg);
 			log.warn(errorMsg, ex);
 		}
 		
 		if (StringUtils.isEmpty(errorMsg)) {
-			request.getSession().setAttribute("msg", "Injury details deleted successfully");
+			request.getSession().setAttribute("msg", "Accident details deleted successfully");
 		}
 		
 		return "redirect:/" + urlContext + "/list.do";
@@ -367,7 +336,7 @@ public class InjuryController extends CRUDController<Injury> {
 		return urlContext + "/form";
 	}
 	
-	private List<Injury> searchForExport(ModelMap model, HttpServletRequest request) {
+	private List<Accident> searchForExport(ModelMap model, HttpServletRequest request) {
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		int origPage = criteria.getPage();
 		int origPageSize = criteria.getPageSize();
@@ -375,25 +344,25 @@ public class InjuryController extends CRUDController<Injury> {
 		criteria.setPage(0);
 		criteria.setPageSize(15000);
 		
-		List<Injury> injuryList = performSearch(criteria);
+		List<Accident> accidentList = performSearch(criteria);
 		
 		criteria.setPage(origPage);
 		criteria.setPageSize(origPageSize);
 		
-		return injuryList;
+		return accidentList;
 	}
 	
 	@Override
 	public void export(ModelMap model, HttpServletRequest request,
 			HttpServletResponse response, @RequestParam("type") String type,
 			Object objectDAO, Class clazz) {
-		String reportName = "injuriesReport";
+		String reportName = "accidentsReport";
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html")) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
 		}
 		
-		List<Injury> injuryList = searchForExport(model, request);
+		List<Accident> accidentList = searchForExport(model, request);
 		Map<String, Object> params = new HashMap<String, Object>();
 		
 		//List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
@@ -403,7 +372,7 @@ public class InjuryController extends CRUDController<Injury> {
 						urlContext + "Report", type, getEntityClass(), injuryList,
 						columnPropertyList, request);*/
 			out = dynamicReportService.generateStaticReport(reportName,
-					injuryList, params, type, request);
+					accidentList, params, type, request);
 			out.writeTo(response.getOutputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -434,38 +403,70 @@ public class InjuryController extends CRUDController<Injury> {
 		} else if (StringUtils.equalsIgnoreCase("saveInsuranceCompanyRep", action)) {
 			InsuranceCompanyRep insuranceCompanyRep = saveInsuranceCompanyRep(request);
 			return "Insurance Company Rep saved successfully:" + insuranceCompanyRep.getId();
-		} else if (StringUtils.equalsIgnoreCase("saveIncidentType", action)) {
-			InjuryIncidentType injuryIncidentType = saveIncidentType(request);
-			return "Incident Type saved successfully:" + injuryIncidentType.getId();
-		} else if (StringUtils.equalsIgnoreCase("saveInjuryTo", action)) {
-			InjuryToType injuryToType = saveInjuryTo(request);
-			return "Injury To details saved successfully:" + injuryToType.getId();
+		} else if (StringUtils.equalsIgnoreCase("saveAccidentCause", action)) {
+			AccidentCause accidentCause = saveAccidentCause(request);
+			return "Accident Cause saved successfully:" + accidentCause.getId();
+		} else if (StringUtils.equalsIgnoreCase("saveAccidentType", action)) {
+			AccidentType accidentType = saveAccidentType(request);
+			return "Accident Type saved successfully:" + accidentType.getId();
+		} else if (StringUtils.equalsIgnoreCase("saveAccidentWeather", action)) {
+			AccidentWeather accidentWeather = saveAccidentWeather(request);
+			return "Accident Weather details saved successfully:" + accidentWeather.getId();
+		} else if (StringUtils.equalsIgnoreCase("saveAccidentRoadCondition", action)) {
+			AccidentRoadCondition accidentRoadCondition = saveAccidentRoadCondition(request);
+			return "Accident Road Condition details saved successfully:" + accidentRoadCondition.getId();
 		} 
 		
 		return StringUtils.EMPTY;
 	}
 	
-	private InjuryIncidentType saveIncidentType(HttpServletRequest request) {
-		String incidentType = request.getParameter("incidentType");
+	private AccidentType saveAccidentType(HttpServletRequest request) {
+		String accidentType = request.getParameter("accidentType");
 		
-		InjuryIncidentType entity = new InjuryIncidentType();
+		AccidentType entity = new AccidentType();
 		entity.setCreatedAt(Calendar.getInstance().getTime());
 		entity.setCreatedBy(getUser(request).getId());
 		
-		entity.setIncidentType(incidentType);
+		entity.setAccidentType(accidentType);
 		
 		genericDAO.saveOrUpdate(entity);
 		return entity;
 	}
 	
-	private InjuryToType saveInjuryTo(HttpServletRequest request) {
-		String injuryTo = request.getParameter("injuryTo");
+	private AccidentRoadCondition saveAccidentRoadCondition(HttpServletRequest request) {
+		String accidentRoadCondition = request.getParameter("accidentRoadCondition");
 		
-		InjuryToType entity = new InjuryToType();
+		AccidentRoadCondition entity = new AccidentRoadCondition();
 		entity.setCreatedAt(Calendar.getInstance().getTime());
 		entity.setCreatedBy(getUser(request).getId());
 		
-		entity.setInjuryTo(injuryTo);
+		entity.setRoadCondition(accidentRoadCondition);
+		
+		genericDAO.saveOrUpdate(entity);
+		return entity;
+	}
+	
+	private AccidentWeather saveAccidentWeather(HttpServletRequest request) {
+		String accidentWeather = request.getParameter("accidentWeather");
+		
+		AccidentWeather entity = new AccidentWeather();
+		entity.setCreatedAt(Calendar.getInstance().getTime());
+		entity.setCreatedBy(getUser(request).getId());
+		
+		entity.setWeather(accidentWeather);
+		
+		genericDAO.saveOrUpdate(entity);
+		return entity;
+	}
+	
+	private AccidentCause saveAccidentCause(HttpServletRequest request) {
+		String accidentCause = request.getParameter("accidentCause");
+		
+		AccidentCause entity = new AccidentCause();
+		entity.setCreatedAt(Calendar.getInstance().getTime());
+		entity.setCreatedBy(getUser(request).getId());
+		
+		entity.setCause(accidentCause);
 		
 		genericDAO.saveOrUpdate(entity);
 		return entity;

@@ -26,5 +26,8 @@ public interface ImportMainSheetService {
 	public List<String> importInjuryMainData(InputStream is, Long createdBy) throws Exception;
 	public List<String> importInjuryReportedData(InputStream is, Long createdBy) throws Exception;
 	public List<String> importInjuryNotReportedData(InputStream is, Long createdBy) throws Exception;
+	public List<String> importAccidentMainData(InputStream is, Long createdBy) throws Exception;
+	public List<String> importAccidentReportedData(InputStream is, Long createdBy) throws Exception;
+	public List<String> importAccidentNotReportedData(InputStream is, Long createdBy) throws Exception;
 }
 

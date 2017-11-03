@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
-import com.primovision.lutransport.core.util.InjuryUtils;
+import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.core.util.MathUtil;
 import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.BillingRate;
@@ -73,6 +73,10 @@ import com.primovision.lutransport.model.VehiclePermit;
 import com.primovision.lutransport.model.VehicleTollTag;
 import com.primovision.lutransport.model.WMInvoice;
 import com.primovision.lutransport.model.WMTicket;
+import com.primovision.lutransport.model.accident.Accident;
+import com.primovision.lutransport.model.accident.AccidentCause;
+import com.primovision.lutransport.model.accident.AccidentRoadCondition;
+import com.primovision.lutransport.model.accident.AccidentWeather;
 import com.primovision.lutransport.model.driver.DriverFuelLog;
 import com.primovision.lutransport.model.driver.Odometer;
 import com.primovision.lutransport.model.driver.TripSheet;
@@ -715,6 +719,652 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importAccidentNotReportedData(InputStream is, Long createdBy) throws Exception {
+		SimpleDateFormat accidentDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		int successCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Map<String, Integer> colMapping = WorkerCompUtils.getAccidentNotReportedColMapping();
+			
+			Iterator<Row> rows = sheet.rowIterator();
+			int recordsToBeSkipped = 1;
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount <= recordsToBeSkipped) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				Accident currentAccident = null;
+				try {
+					String endOfData = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", endOfData)) {
+						break;
+					}
+					
+					currentAccident = new Accident();
+					
+					Integer driverNameCol = colMapping.get(WorkerCompUtils.ACCIDENT_NOT_REPORTED_COL_NAME);
+					String driverName = ((String) getCellValue(row.getCell(driverNameCol)));
+					driverName = StringUtils.trimToEmpty(driverName);
+					Driver driver = null;
+					if (StringUtils.contains(driverName, ",")) {
+						driver = WorkerCompUtils.retrieveDriverByCommaSep(driverName, genericDAO);
+					} else {
+						driver = WorkerCompUtils.retrieveDriver(driverName, genericDAO, true);
+					}
+					if (driver == null) {
+						recordError = true;
+						recordErrorMsg.append("Employee Name, ");
+					} else {
+						currentAccident.setDriver(driver);
+					}
+					
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.ACCIDENT_NOT_REPORTED_COL_INCIDENT_DATE);
+					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
+					if (incidentDateObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Incident Date, ");
+					} else if (incidentDateObj instanceof Date) {
+						currentAccident.setIncidentDate((Date)incidentDateObj);
+					} else {
+						String incidentDateStr = incidentDateObj.toString();
+						incidentDateStr = StringUtils.trimToEmpty(incidentDateStr);
+						Date incidentDate = accidentDateFormat.parse(incidentDateStr);
+						currentAccident.setIncidentDate(incidentDate);
+					}
+					
+					Accident existingAccident = WorkerCompUtils.retrieveMatchingAccident(currentAccident, genericDAO);
+					if (existingAccident == null) {
+						recordError = true;
+						recordErrorMsg.append("No matching existing Accident record found to update costs, ");
+						
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					Integer totalCostCol = colMapping.get(WorkerCompUtils.ACCIDENT_NOT_REPORTED_COL_TOTAL_COST);
+					Object totalCostObj = getCellValue(row.getCell(totalCostCol), true);
+					Double totalCost = null;
+					if (totalCostObj != null) {
+						if (totalCostObj instanceof Double) {
+							totalCost = (Double) totalCostObj;
+						} else {
+							String totalCostStr = (String) totalCostObj;
+							if (StringUtils.isNotEmpty(totalCostStr)) {
+								totalCost = Double.valueOf(totalCostStr);
+							}
+						}
+						existingAccident.setTotalCost(totalCost);
+					}
+					
+					if (recordError) {
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					existingAccident.setModifiedBy(createdBy);
+					existingAccident.setModifiedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(existingAccident);
+					
+					successCount++;
+				} catch (Exception ex) {
+					log.warn("Error while processing Accident Not Reported record: " + recordCount + ". " + ex);
+					
+					recordError = true;
+					errorCount++;
+					recordErrorMsg.append("Error while processing record: " + recordCount + ", ");
+					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+				}
+			}
+			
+			System.out.println("Done processing accidents not reported...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records loaded: " + successCount);
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Accident Not Reported data: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importAccidentReportedData(InputStream is, Long createdBy) throws Exception {
+		SimpleDateFormat accidentDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		int successCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Map<String, Integer> colMapping = WorkerCompUtils.getAccidentReportedColMapping();
+			
+			Iterator<Row> rows = sheet.rowIterator();
+			int recordsToBeSkipped = 1;
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount <= recordsToBeSkipped) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				Accident currentAccident = null;
+				try {
+					String endOfData = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", endOfData)) {
+						break;
+					}
+					
+					currentAccident = new Accident();
+					
+					Integer insuranceCompanyCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_INUSRANCE_COMPANY);
+					String inuranceCompanyStr = ((String) getCellValue(row.getCell(insuranceCompanyCol)));
+					inuranceCompanyStr = StringUtils.trimToEmpty(inuranceCompanyStr);
+					InsuranceCompany insuranceCompany = WorkerCompUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
+					if (insuranceCompany == null) {
+						recordError = true;
+						recordErrorMsg.append("Inurance Company, ");
+					} else {
+						currentAccident.setInsuranceCompany(insuranceCompany);
+					}
+					
+					Integer insuranceClaimNoCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_CLAIM);
+					String claimNo = ((String) getCellValue(row.getCell(insuranceClaimNoCol)));
+					claimNo = StringUtils.trimToEmpty(claimNo);
+					if (StringUtils.isEmpty(claimNo)) {
+						recordError = true;
+						recordErrorMsg.append("Claim No, ");
+					} else {
+						currentAccident.setClaimNumber(claimNo);
+					}
+					
+					Integer driverNameCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_EMPLOYEE);
+					String driverName = ((String) getCellValue(row.getCell(driverNameCol)));
+					driverName = StringUtils.trimToEmpty(driverName);
+					Driver driver = WorkerCompUtils.retrieveDriver(driverName, genericDAO, true);
+					if (driver == null) {
+						recordError = true;
+						recordErrorMsg.append("Employee Name, ");
+					} else {
+						currentAccident.setDriver(driver);
+					}
+					
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_INCIDENT_DATE);
+					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
+					if (incidentDateObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Incident Date, ");
+					} else if (incidentDateObj instanceof Date) {
+						currentAccident.setIncidentDate((Date)incidentDateObj);
+					} else {
+						String incidentDateStr = incidentDateObj.toString();
+						incidentDateStr = StringUtils.trimToEmpty(incidentDateStr);
+						Date incidentDate = accidentDateFormat.parse(incidentDateStr);
+						currentAccident.setIncidentDate(incidentDate);
+					}
+					
+					Accident existingAccident = WorkerCompUtils.retrieveMatchingAccident(currentAccident, genericDAO);
+					if (existingAccident == null) {
+						recordError = true;
+						recordErrorMsg.append("No matching existing Accident record found to update costs, ");
+						
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					Integer statusCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_STATUS);
+					String statusStr = ((String) getCellValue(row.getCell(statusCol)));
+					statusStr = StringUtils.trimToEmpty(statusStr);
+					StaticData status = WorkerCompUtils.retrieveAccidentStatus(statusStr, genericDAO);
+					if (status == null) {
+						recordError = true;
+						recordErrorMsg.append("Status, ");
+					} else {
+						existingAccident.setAccidentStatus(Integer.valueOf(status.getDataValue()));
+					}
+					
+					Integer deductibleCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_DEDUCTIBLE);
+					Object deductibleObj = getCellValue(row.getCell(deductibleCol), true);
+					Double deductible = null;
+					if (deductibleObj != null) {
+						if (deductibleObj instanceof Double) {
+							deductible = (Double) deductibleObj;
+						} else {
+							String deductibleStr = (String) deductibleObj;
+							if (StringUtils.isNotEmpty(deductibleStr)) {
+								deductible = Double.valueOf(deductibleStr);
+							}
+						}
+						existingAccident.setDeductible(deductible);
+					}
+					
+					Integer expenseCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_EXPENSE);
+					Object expenseObj = getCellValue(row.getCell(expenseCol), true);
+					Double expense = null;
+					if (expenseObj != null) {
+						if (expenseObj instanceof Double) {
+							expense = (Double) expenseObj;
+						} else {
+							String expenseStr = (String) expenseObj;
+							if (StringUtils.isNotEmpty(expenseStr)) {
+								expense = Double.valueOf(expenseStr);
+							}
+						}
+						existingAccident.setExpense(expense);
+					}
+					
+					Integer reserveCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_RESERVE);
+					Object reserveObj = getCellValue(row.getCell(reserveCol), true);
+					Double reserve = null;
+					if (reserveObj != null) {
+						if (reserveObj instanceof Double) {
+							reserve = (Double) reserveObj;
+						} else {
+							String reserveStr = (String) reserveObj;
+							if (StringUtils.isNotEmpty(reserveStr)) {
+								reserve = Double.valueOf(reserveStr);
+							}
+						}
+						existingAccident.setReserve(reserve);
+					}
+					
+					Integer paidCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_PAID);
+					Object paidObj = getCellValue(row.getCell(paidCol), true);
+					Double paid = null;
+					if (paidObj != null) {
+						if (paidObj instanceof Double) {
+							paid = (Double) paidObj;
+						} else {
+							String paidStr = (String) paidObj;
+							if (StringUtils.isNotEmpty(paidStr)) {
+								paid = Double.valueOf(paidStr);
+							}
+						}
+						existingAccident.setPaid(paid);
+					}
+					
+					Integer totalCostCol = colMapping.get(WorkerCompUtils.ACCIDENT_REPORTED_COL_TOTAL_COST);
+					Object totalCostObj = getCellValue(row.getCell(totalCostCol), true);
+					Double totalCost = null;
+					if (totalCostObj != null) {
+						if (totalCostObj instanceof Double) {
+							totalCost = (Double) totalCostObj;
+						} else {
+							String totalCostStr = (String) totalCostObj;
+							if (StringUtils.isNotEmpty(totalCostStr)) {
+								totalCost = Double.valueOf(totalCostStr);
+							}
+						}
+						existingAccident.setTotalCost(totalCost);
+					}
+					
+					if (recordError) {
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					existingAccident.setModifiedBy(createdBy);
+					existingAccident.setModifiedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(existingAccident);
+					
+					successCount++;
+				} catch (Exception ex) {
+					log.warn("Error while processing Accident Reported record: " + recordCount + ". " + ex);
+					
+					recordError = true;
+					errorCount++;
+					recordErrorMsg.append("Error while processing record: " + recordCount + ", ");
+					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+				}
+			}
+			
+			System.out.println("Done processing accidents reported...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records loaded: " + successCount);
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Accident Reported data: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importAccidentMainData(InputStream is, Long createdBy) throws Exception {
+		SimpleDateFormat accidentDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		int successCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Map<String, Integer> colMapping = WorkerCompUtils.getAccidentMainColMapping();
+			
+			Iterator<Row> rows = sheet.rowIterator();
+			int recordsToBeSkipped = 1;
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount <= recordsToBeSkipped) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				Accident currentAccident = null;
+				try {
+					String endOfData = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", endOfData)) {
+						break;
+					}
+					
+					currentAccident = new Accident();
+					
+					Integer insuranceCompanyCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_INUSRANCE_COMPANY);
+					String inuranceCompanyStr = ((String) getCellValue(row.getCell(insuranceCompanyCol)));
+					inuranceCompanyStr = StringUtils.trimToEmpty(inuranceCompanyStr);
+					InsuranceCompany insuranceCompany = null;
+					if (!StringUtils.equalsIgnoreCase(inuranceCompanyStr, "Not Reported")) {
+						insuranceCompany = WorkerCompUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
+						if (insuranceCompany == null) {
+							recordError = true;
+							recordErrorMsg.append("Inurance Company, ");
+						} else {
+							currentAccident.setInsuranceCompany(insuranceCompany);
+						}
+					}
+					
+					Integer insuranceClaimNoCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_CLAIM_NO);
+					String claimNo = ((String) getCellValue(row.getCell(insuranceClaimNoCol)));
+					claimNo = StringUtils.trimToEmpty(claimNo);
+					if (StringUtils.isEmpty(claimNo)) {
+						claimNo = null;
+					}
+					currentAccident.setClaimNumber(claimNo);
+					
+					Integer driverNameCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_DRIVER_NAME);
+					String driverName = ((String) getCellValue(row.getCell(driverNameCol)));
+					driverName = StringUtils.trimToEmpty(driverName);
+					Driver driver = WorkerCompUtils.retrieveDriverByCommaSep(driverName, genericDAO);
+					if (driver == null) {
+						recordError = true;
+						recordErrorMsg.append("Employee Name, ");
+					} else {
+						currentAccident.setDriver(driver);
+					}
+					
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_INCIDENT_DATE);
+					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
+					if (incidentDateObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Incident Date, ");
+					} else if (incidentDateObj instanceof Date) {
+						currentAccident.setIncidentDate((Date)incidentDateObj);
+					} else {
+						String incidentDateStr = incidentDateObj.toString();
+						incidentDateStr = StringUtils.trimToEmpty(incidentDateStr);
+						Date incidentDate = accidentDateFormat.parse(incidentDateStr);
+						currentAccident.setIncidentDate(incidentDate);
+					}
+					String dayOfWeek = WorkerCompUtils.deriveDayOfWeek(currentAccident.getIncidentDate());
+					currentAccident.setIncidentDayOfWeek(dayOfWeek);
+					
+					Integer vehicleCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_UNIT);
+					String unit = ((String) getCellValue(row.getCell(vehicleCol)));
+					unit = StringUtils.trimToEmpty(unit);
+					Vehicle vehicle = WorkerCompUtils.retrieveVehicleForUnit(unit, currentAccident.getIncidentDate(), 
+									genericDAO);
+					if (vehicle == null) {
+						recordError = true;
+						recordErrorMsg.append("Vehicle (either unit is invalid or not valid for incident date), ");
+					} else {
+						currentAccident.setVehicle(vehicle);
+					}
+					
+					Integer monthsOfServiceCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_MONTHS_OF_SERVICE);
+					String monthsOfServiceStr = ((String) getCellValue(row.getCell(monthsOfServiceCol), true));
+					monthsOfServiceStr = StringUtils.trimToEmpty(monthsOfServiceStr);
+					if (StringUtils.isNotEmpty(monthsOfServiceStr)) {
+						//if (!StringUtils.isNumeric(monthsOfServiceStr)) {
+							monthsOfServiceStr = StringUtils.substringBefore(monthsOfServiceStr, ".");
+							Integer monthsOfService = Integer.valueOf(monthsOfServiceStr);
+							currentAccident.setDriverMonthsOfService(monthsOfService);
+						//}
+					}
+					
+					Integer hireDateCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_HIRE_DATE);
+					Object hireDateObj = getCellValue(row.getCell(hireDateCol), true);
+					if (hireDateObj == null) {
+						recordError = true;
+						recordErrorMsg.append("Hire Date, ");
+					} else if (hireDateObj instanceof Date) {
+						currentAccident.setDriverHiredDate((Date)hireDateObj);
+					} else {
+						String hireDateStr = hireDateObj.toString();
+						hireDateStr = StringUtils.trimToEmpty(hireDateStr);
+						Date hireDate = accidentDateFormat.parse(hireDateStr);
+						currentAccident.setDriverHiredDate(hireDate);
+					}
+					
+					Integer loationCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_LOCATION);
+					String locationStr = ((String) getCellValue(row.getCell(loationCol)));
+					locationStr = StringUtils.trimToEmpty(locationStr);
+					currentAccident.setLocation(locationStr);
+					
+					Integer companyCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_COMPANY);
+					String companyStr = ((String) getCellValue(row.getCell(companyCol)));
+					companyStr = StringUtils.trimToEmpty(companyStr);
+					List<Location> locationList = WorkerCompUtils.retrieveCompanyTerminal(companyStr, genericDAO);
+					if (locationList == null || locationList.isEmpty()) {
+						recordError = true;
+						recordErrorMsg.append("Company, ");
+					} else {
+						currentAccident.setDriverCompany(locationList.get(0));
+						currentAccident.setDriverTerminal(locationList.get(1));
+					}
+						
+					Integer stateCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_STATE);
+					String stateStr = ((String) getCellValue(row.getCell(stateCol)));
+					stateStr = StringUtils.trimToEmpty(stateStr);
+					State state = WorkerCompUtils.retrieveState(stateStr, genericDAO);
+					if (state == null) {
+						recordError = true;
+						recordErrorMsg.append("State, ");
+					} else {
+						currentAccident.setState(state);
+					}
+					
+					Integer accidentCauseCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_CAUSE);
+					String accidentCauseStr = ((String) getCellValue(row.getCell(accidentCauseCol)));
+					accidentCauseStr = StringUtils.trimToEmpty(accidentCauseStr);
+					AccidentCause accidentCause = WorkerCompUtils.retrieveAccidentCause(accidentCauseStr, genericDAO);
+					if (accidentCause == null) {
+						recordError = true;
+						recordErrorMsg.append("Accident Cause, ");
+					} else {
+						currentAccident.setAccidentCause(accidentCause);
+					}
+					
+					Integer accidentRoadConditionCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_ROAD);
+					String accidentRoadConditionStr = ((String) getCellValue(row.getCell(accidentRoadConditionCol)));
+					accidentRoadConditionStr = StringUtils.trimToEmpty(accidentRoadConditionStr);
+					if (StringUtils.isNotEmpty(accidentRoadConditionStr)) {
+						AccidentRoadCondition accidentRoadCondition = WorkerCompUtils.retrieveAccidentRoadCondition(accidentRoadConditionStr, genericDAO);
+						if (accidentRoadCondition == null) {
+							recordError = true;
+							recordErrorMsg.append("Road Condition, ");
+						} else {
+							currentAccident.setRoadCondition(accidentRoadCondition);
+						}
+					}
+					
+					Integer accidentWeatherCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_WEATHER);
+					String accidentWeatherStr = ((String) getCellValue(row.getCell(accidentWeatherCol)));
+					accidentWeatherStr = StringUtils.trimToEmpty(accidentWeatherStr);
+					if (StringUtils.isNotEmpty(accidentWeatherStr)) {
+						AccidentWeather accidentWeather = WorkerCompUtils.retrieveAccidentWeather(accidentWeatherStr, genericDAO);
+						if (accidentWeather == null) {
+							recordError = true;
+							recordErrorMsg.append("Weather, ");
+						} else {
+							currentAccident.setWeather(accidentWeather);
+						}
+					}
+					
+					Integer commentsCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_ACCIDENT_COMMENTS);
+					String commentsStr = ((String) getCellValue(row.getCell(commentsCol)));
+					commentsStr = StringUtils.trimToEmpty(commentsStr);
+					currentAccident.setNotes(commentsStr);
+					
+					Integer vehicleDamageCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_VEHICLE_DAMAGE);
+					String vehicleDamageStr = ((String) getCellValue(row.getCell(vehicleDamageCol)));
+					vehicleDamageStr = StringUtils.trimToEmpty(vehicleDamageStr);
+					if (StringUtils.equalsIgnoreCase(vehicleDamageStr, "Yes")) {
+						currentAccident.setVehicleDamage("Yes");
+					} else if (StringUtils.equalsIgnoreCase(vehicleDamageStr, "No")) {
+						currentAccident.setVehicleDamage("No");
+					}
+					
+					Integer towedCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_TOWED);
+					String towedStr = ((String) getCellValue(row.getCell(towedCol)));
+					towedStr = StringUtils.trimToEmpty(towedStr);
+					if (StringUtils.equalsIgnoreCase(towedStr, "Yes")) {
+						currentAccident.setTowed("Yes");
+					} else if (StringUtils.equalsIgnoreCase(towedStr, "No")) {
+						currentAccident.setTowed("No");
+					}
+					
+					Integer noInjuredCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_NO_INJURED);
+					String noInjuredStr = ((String) getCellValue(row.getCell(noInjuredCol)));
+					noInjuredStr = StringUtils.trimToEmpty(noInjuredStr);
+					currentAccident.setNoInjured(noInjuredStr);
+					
+					Integer citationCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_CITATION);
+					String citationStr = ((String) getCellValue(row.getCell(citationCol)));
+					citationStr = StringUtils.trimToEmpty(citationStr);
+					if (StringUtils.equalsIgnoreCase(citationStr, "Yes")) {
+						currentAccident.setCitation("Yes");
+					} else if (StringUtils.equalsIgnoreCase(citationStr, "No")) {
+						currentAccident.setCitation("No");
+					}
+					
+					Integer recordableCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_RECORDABLE);
+					String recordableStr = ((String) getCellValue(row.getCell(recordableCol)));
+					recordableStr = StringUtils.trimToEmpty(recordableStr);
+					if (StringUtils.equalsIgnoreCase(recordableStr, "Yes")) {
+						currentAccident.setRecordable("Yes");
+					} else if (StringUtils.equalsIgnoreCase(recordableStr, "No")) {
+						currentAccident.setRecordable("No");
+					}
+					
+					Integer hmRelaseCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_HM_RELEASE);
+					String hmReleaseStr = ((String) getCellValue(row.getCell(hmRelaseCol)));
+					hmReleaseStr = StringUtils.trimToEmpty(hmReleaseStr);
+					if (StringUtils.equalsIgnoreCase(hmReleaseStr, "Yes")) {
+						currentAccident.setHmRelease("Yes");
+					} else if (StringUtils.equalsIgnoreCase(hmReleaseStr, "No")) {
+						currentAccident.setHmRelease("No");
+					}
+					
+					Integer claimRepCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_CLAIM_REP);
+					String claimRepStr = ((String) getCellValue(row.getCell(claimRepCol)));
+					claimRepStr = StringUtils.trimToEmpty(claimRepStr);
+					if (StringUtils.isNotEmpty(claimRepStr) && insuranceCompany != null) { 
+						InsuranceCompanyRep claimRep = WorkerCompUtils.retrieveClaimRep(claimRepStr, insuranceCompany, genericDAO);
+						/*if (claimRep == null) {
+							recordError = true;
+							recordErrorMsg.append("Claim Rep, ");
+						} else {*/
+							currentAccident.setClaimRep(claimRep);
+						//}
+					}
+					
+					Integer statusCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_STATUS);
+					String statusStr = ((String) getCellValue(row.getCell(statusCol)));
+					statusStr = StringUtils.trimToEmpty(statusStr);
+					StaticData status = WorkerCompUtils.retrieveAccidentStatus(statusStr, genericDAO);
+					if (status == null) {
+						recordError = true;
+						recordErrorMsg.append("Status, ");
+					} else {
+						currentAccident.setAccidentStatus(Integer.valueOf(status.getDataValue()));
+					}
+					
+					if (WorkerCompUtils.checkDuplicateAccident(currentAccident, genericDAO)) {
+						recordError = true;
+						recordErrorMsg.append("Duplicate Accident, ");
+					}
+					
+					if (recordError) {
+						errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+						errorCount++;
+						continue;
+					} 
+					
+					currentAccident.setStatus(1);
+					currentAccident.setCreatedBy(createdBy);
+					currentAccident.setCreatedAt(Calendar.getInstance().getTime());
+					genericDAO.saveOrUpdate(currentAccident);
+					
+					successCount++;
+				} catch (Exception ex) {
+					log.warn("Error while processing Accident Main record: " + recordCount + ". " + ex);
+					
+					recordError = true;
+					errorCount++;
+					recordErrorMsg.append("Error while processing record: " + recordCount + ", ");
+					errorList.add("Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+				}
+			}
+			
+			System.out.println("Done processing injuries...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records loaded: " + successCount);
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Injury Main: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<String> importInjuryMainData(InputStream is, Long createdBy) throws Exception {
 		SimpleDateFormat injuryDateFormat = new SimpleDateFormat("MM-dd-yyyy");
 		
@@ -728,7 +1378,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFWorkbook wb = new HSSFWorkbook(fs);
 			HSSFSheet sheet = wb.getSheetAt(0);
 			
-			Map<String, Integer> colMapping = InjuryUtils.getInjuryMainColMapping();
+			Map<String, Integer> colMapping = WorkerCompUtils.getInjuryMainColMapping();
 			
 			Iterator<Row> rows = sheet.rowIterator();
 			int recordsToBeSkipped = 1;
@@ -752,11 +1402,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					currentInjury = new Injury();
 					
-					Integer insuranceCompanyCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_INUSRANCE_COMPANY);
+					Integer insuranceCompanyCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_INUSRANCE_COMPANY);
 					String inuranceCompanyStr = ((String) getCellValue(row.getCell(insuranceCompanyCol)));
 					InsuranceCompany insuranceCompany = null;
 					if (!StringUtils.equalsIgnoreCase(inuranceCompanyStr, "Not Reported")) {
-						insuranceCompany = InjuryUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
+						insuranceCompany = WorkerCompUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
 						if (insuranceCompany == null) {
 							recordError = true;
 							recordErrorMsg.append("Inurance Company, ");
@@ -765,18 +1415,18 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					Integer insuranceClaimNoCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_CLAIM_NO);
+					Integer insuranceClaimNoCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_CLAIM_NO);
 					String claimNo = ((String) getCellValue(row.getCell(insuranceClaimNoCol)));
 					if (StringUtils.isEmpty(claimNo)) {
 						claimNo = null;
 					}
 					currentInjury.setClaimNumber(claimNo);
 					
-					Integer driverLastNameCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_LAST_NAME);
+					Integer driverLastNameCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_LAST_NAME);
 					String driverLastName = ((String) getCellValue(row.getCell(driverLastNameCol)));
-					Integer driverFirstNameCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_FIRST_NAME);
+					Integer driverFirstNameCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_FIRST_NAME);
 					String driverFirstName = ((String) getCellValue(row.getCell(driverFirstNameCol)));
-					Driver driver = InjuryUtils.retrieveDriver(driverFirstName, driverLastName, genericDAO);
+					Driver driver = WorkerCompUtils.retrieveDriver(driverFirstName, driverLastName, genericDAO);
 					if (driver == null) {
 						recordError = true;
 						recordErrorMsg.append("Employee Name, ");
@@ -784,7 +1434,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setDriver(driver);
 					}
 					
-					Integer driverAgeCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_AGE);
+					Integer driverAgeCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_AGE);
 					String driverAgeStr = ((String) getCellValue(row.getCell(driverAgeCol), true));
 					if (StringUtils.isNotEmpty(driverAgeStr)) {
 						//if (!StringUtils.isNumeric(driverAgeStr)) {
@@ -794,7 +1444,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						//}
 					}
 					
-					Integer monthsOfServiceCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_MONTHS_OF_SERVICE);
+					Integer monthsOfServiceCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_MONTHS_OF_SERVICE);
 					String monthsOfServiceStr = ((String) getCellValue(row.getCell(monthsOfServiceCol), true));
 					if (StringUtils.isNotEmpty(monthsOfServiceStr)) {
 						//if (!StringUtils.isNumeric(monthsOfServiceStr)) {
@@ -804,9 +1454,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						//}
 					}
 					
-					Integer companyCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_COMPANY);
+					Integer companyCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_COMPANY);
 					String companyStr = ((String) getCellValue(row.getCell(companyCol)));
-					List<Location> locationList = InjuryUtils.retrieveCompanyTerminal(companyStr, genericDAO);
+					List<Location> locationList = WorkerCompUtils.retrieveCompanyTerminal(companyStr, genericDAO);
 					if (locationList == null || locationList.isEmpty()) {
 						recordError = true;
 						recordErrorMsg.append("Company, ");
@@ -815,9 +1465,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setDriverTerminal(locationList.get(1));
 					}
 						
-					Integer positionCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_POSITION);
+					Integer positionCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_POSITION);
 					String positionStr = ((String) getCellValue(row.getCell(positionCol)));
-					EmployeeCatagory employeeCategory = InjuryUtils.retrieveEmployeeCategory(positionStr, genericDAO);
+					EmployeeCatagory employeeCategory = WorkerCompUtils.retrieveEmployeeCategory(positionStr, genericDAO);
 					if (employeeCategory == null) {
 						recordError = true;
 						recordErrorMsg.append("Position, ");
@@ -825,7 +1475,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setDriverCategory(employeeCategory);
 					}
 					
-					Integer incidentDateCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_INCIDENT_DATE);
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_INCIDENT_DATE);
 					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
 					if (incidentDateObj == null) {
 						recordError = true;
@@ -837,18 +1487,18 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						Date incidentDate = injuryDateFormat.parse(incidentDateStr);
 						currentInjury.setIncidentDate(incidentDate);
 					}
-					String dayOfWeek = InjuryUtils.deriveDayOfWeek(currentInjury.getIncidentDate());
+					String dayOfWeek = WorkerCompUtils.deriveDayOfWeek(currentInjury.getIncidentDate());
 					currentInjury.setIncidentDayOfWeek(dayOfWeek);
 					
-					Integer timeOfDayCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_TIME_OF_DAY);
+					Integer timeOfDayCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_TIME_OF_DAY);
 					Object timeOfDayObj = getCellValue(row.getCell(timeOfDayCol), true);
-					Integer amPMCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_AM_PM);
+					Integer amPMCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_AM_PM);
 					String amPMStr = ((String) getCellValue(row.getCell(amPMCol)));
-					String incidentTime = InjuryUtils.deriveIncidentTime(timeOfDayObj, amPMStr);
+					String incidentTime = WorkerCompUtils.deriveIncidentTime(timeOfDayObj, amPMStr);
 					currentInjury.setIncidentTime(incidentTime);
 					currentInjury.setIncidentTimeAMPM(amPMStr);
 					
-					Integer returnToWorkCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_RETURN_TO_WORK);
+					Integer returnToWorkCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_RETURN_TO_WORK);
 					Object returnToWorkObj = getCellValue(row.getCell(returnToWorkCol), true);
 					String returnToWorkStr = StringUtils.EMPTY;
 					if (returnToWorkObj != null) {
@@ -860,9 +1510,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					}
 					currentInjury.setReturnToWork(returnToWorkStr);
 					
-					Integer incidentTypeCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_INCIDENT_TYPE);
+					Integer incidentTypeCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_INCIDENT_TYPE);
 					String incidentTypeStr = ((String) getCellValue(row.getCell(incidentTypeCol)));
-					InjuryIncidentType injuryIncidentType = InjuryUtils.retrieveIncidentType(incidentTypeStr, genericDAO);
+					InjuryIncidentType injuryIncidentType = WorkerCompUtils.retrieveIncidentType(incidentTypeStr, genericDAO);
 					if (injuryIncidentType == null) {
 						recordError = true;
 						recordErrorMsg.append("Incident Type, ");
@@ -870,10 +1520,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setIncidentType(injuryIncidentType);
 					}
 					
-					Integer injuryToCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_INJURY_TO);
+					Integer injuryToCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_INJURY_TO);
 					String injuryToStr = ((String) getCellValue(row.getCell(injuryToCol)));
 					if (StringUtils.isNotEmpty(injuryToStr)) { 
-						InjuryToType injuryToType = InjuryUtils.retrieveInjuryToType(injuryToStr, genericDAO);
+						InjuryToType injuryToType = WorkerCompUtils.retrieveInjuryToType(injuryToStr, genericDAO);
 						if (injuryToType == null) {
 							recordError = true;
 							recordErrorMsg.append("Injury To, ");
@@ -882,11 +1532,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					Integer commentsCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_INJURY_COMMENTS);
+					Integer commentsCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_INJURY_COMMENTS);
 					String commentsStr = ((String) getCellValue(row.getCell(commentsCol)));
 					currentInjury.setNotes(commentsStr);
 					
-					Integer lostWorkDaysCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_LOST_WORK_DAYS);
+					Integer lostWorkDaysCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_LOST_WORK_DAYS);
 					String lostWorkDaysStr = ((String) getCellValue(row.getCell(lostWorkDaysCol), true));
 					if (StringUtils.isNotEmpty(lostWorkDaysStr)) {
 						//if (StringUtils.isNumeric(lostWorkDaysStr)) {
@@ -896,22 +1546,22 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						//}
 					}
 					
-					Integer tarpRelatedInjuryCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_TARP_RELATED_INJURY);
+					Integer tarpRelatedInjuryCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_TARP_RELATED_INJURY);
 					String tarpRelatedInjuryStr = ((String) getCellValue(row.getCell(tarpRelatedInjuryCol)));
 					if (StringUtils.equals(tarpRelatedInjuryStr, "Yes") || StringUtils.equals(tarpRelatedInjuryStr, "No")) {
 						currentInjury.setTarpRelatedInjury(tarpRelatedInjuryStr);
 					}
 					
-					Integer firstReportOfInjuryCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_FIRST_INJURY);
+					Integer firstReportOfInjuryCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_FIRST_INJURY);
 					String firstReportOfInjuryStr = ((String) getCellValue(row.getCell(firstReportOfInjuryCol)));
 					if (StringUtils.equals(firstReportOfInjuryStr, "Yes") || StringUtils.equals(firstReportOfInjuryStr, "No")) {
 						currentInjury.setFirstReportOfInjury(firstReportOfInjuryStr);
 					}
 					
-					Integer claimRepCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_CLAIM_REP);
+					Integer claimRepCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_CLAIM_REP);
 					String claimRepStr = ((String) getCellValue(row.getCell(claimRepCol)));
 					if (StringUtils.isNotEmpty(claimRepStr) && insuranceCompany != null) { 
-						InsuranceCompanyRep claimRep = InjuryUtils.retrieveClaimRep(claimRepStr, insuranceCompany, genericDAO);
+						InsuranceCompanyRep claimRep = WorkerCompUtils.retrieveClaimRep(claimRepStr, insuranceCompany, genericDAO);
 						/*if (claimRep == null) {
 							recordError = true;
 							recordErrorMsg.append("Claim Rep, ");
@@ -920,9 +1570,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						//}
 					}
 					
-					Integer statusCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_STATUS);
+					Integer statusCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_STATUS);
 					String statusStr = ((String) getCellValue(row.getCell(statusCol)));
-					StaticData status = InjuryUtils.retrieveInjuryStatus(statusStr, genericDAO);
+					StaticData status = WorkerCompUtils.retrieveInjuryStatus(statusStr, genericDAO);
 					if (status == null) {
 						recordError = true;
 						recordErrorMsg.append("Status, ");
@@ -930,7 +1580,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setInjuryStatus(Integer.valueOf(status.getDataValue()));
 					}
 					
-					Integer loationCol = colMapping.get(InjuryUtils.INJURY_MAIN_COL_LOCATION);
+					Integer loationCol = colMapping.get(WorkerCompUtils.INJURY_MAIN_COL_LOCATION);
 					String locationStr = ((String) getCellValue(row.getCell(loationCol)));
 					currentInjury.setLocation(locationStr);
 					/*if (StringUtils.isNotEmpty(locationStr)) { 
@@ -943,7 +1593,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}*/
 					
-					if (InjuryUtils.checkDuplicateInjury(currentInjury, genericDAO)) {
+					if (WorkerCompUtils.checkDuplicateInjury(currentInjury, genericDAO)) {
 						recordError = true;
 						recordErrorMsg.append("Duplicate Injury, ");
 					}
@@ -996,7 +1646,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFWorkbook wb = new HSSFWorkbook(fs);
 			HSSFSheet sheet = wb.getSheetAt(0);
 			
-			Map<String, Integer> colMapping = InjuryUtils.getInjuryReportedColMapping();
+			Map<String, Integer> colMapping = WorkerCompUtils.getInjuryReportedColMapping();
 			
 			Iterator<Row> rows = sheet.rowIterator();
 			int recordsToBeSkipped = 1;
@@ -1020,10 +1670,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					currentInjury = new Injury();
 					
-					Integer insuranceCompanyCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_INUSRANCE_COMPANY);
+					Integer insuranceCompanyCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_INUSRANCE_COMPANY);
 					String inuranceCompanyStr = ((String) getCellValue(row.getCell(insuranceCompanyCol)));
 					InsuranceCompany insuranceCompany = null;
-					insuranceCompany = InjuryUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
+					insuranceCompany = WorkerCompUtils.retrieveInsuranceCompanyByName(inuranceCompanyStr, genericDAO);
 					if (insuranceCompany == null) {
 						recordError = true;
 						recordErrorMsg.append("Inurance Company, ");
@@ -1031,9 +1681,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setInsuranceCompany(insuranceCompany);
 					}
 					
-					Integer employeeCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_EMPLOYEE);
+					Integer employeeCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_EMPLOYEE);
 					String employeeName = ((String) getCellValue(row.getCell(employeeCol)));
-					Driver driver = InjuryUtils.retrieveDriver(employeeName, genericDAO, true);
+					Driver driver = WorkerCompUtils.retrieveDriver(employeeName, genericDAO, true);
 					if (driver == null) {
 						recordError = true;
 						recordErrorMsg.append("Employee, ");
@@ -1041,7 +1691,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setDriver(driver);
 					}
 					
-					Integer incidentDateCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_INCIDENT_DATE);
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_INCIDENT_DATE);
 					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
 					if (incidentDateObj == null) {
 						recordError = true;
@@ -1054,7 +1704,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setIncidentDate(incidentDate);
 					}
 					
-					Injury existingInjury = InjuryUtils.retrieveMatchingInjury(currentInjury, genericDAO);
+					Injury existingInjury = WorkerCompUtils.retrieveMatchingInjury(currentInjury, genericDAO);
 					if (existingInjury == null) {
 						recordError = true;
 						recordErrorMsg.append("No matching existing Injury record found to update costs, ");
@@ -1064,21 +1714,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					} 
 					
-					Integer employedCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_EMPLOYED);
+					Integer employedCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_EMPLOYED);
 					String employedStr = ((String) getCellValue(row.getCell(employedCol)));
 					if (StringUtils.equals(employedStr, "Yes") || StringUtils.equals(employedStr, "No")) {
 						existingInjury.setEmployed(employedStr);
 					}
 					
-					Integer workingCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_WORKING);
+					Integer workingCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_WORKING);
 					String workingStr = ((String) getCellValue(row.getCell(workingCol)));
 					if (StringUtils.equals(workingStr, "Yes") || StringUtils.equals(workingStr, "No")) {
 						existingInjury.setWorking(workingStr);
 					}
 					
-					Integer statusCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_STATUS);
+					Integer statusCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_STATUS);
 					String statusStr = ((String) getCellValue(row.getCell(statusCol)));
-					StaticData status = InjuryUtils.retrieveInjuryStatus(statusStr, genericDAO);
+					StaticData status = WorkerCompUtils.retrieveInjuryStatus(statusStr, genericDAO);
 					if (status == null) {
 						recordError = true;
 						recordErrorMsg.append("Status, ");
@@ -1086,7 +1736,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setInjuryStatus(Integer.valueOf(status.getDataValue()));
 					}
 					
-					Integer medicalCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_MEDICAL);
+					Integer medicalCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_MEDICAL);
 					Object medicalObj = getCellValue(row.getCell(medicalCol), true);
 					Double medical = null;
 					if (medicalObj != null) {
@@ -1101,7 +1751,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setMedicalCost(medical);
 					}
 					
-					Integer indemnityCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_INDEMNITY);
+					Integer indemnityCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_INDEMNITY);
 					Object indemnityObj = getCellValue(row.getCell(indemnityCol), true);
 					Double indemnity = null;
 					if (indemnityObj != null) {
@@ -1116,7 +1766,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setIndemnityCost(indemnity);
 					}
 					
-					Integer expenseCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_EXPENSE);
+					Integer expenseCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_EXPENSE);
 					Object expenseObj = getCellValue(row.getCell(expenseCol), true);
 					Double expense = null;
 					if (expenseObj != null) {
@@ -1131,7 +1781,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setExpense(expense);
 					}
 					
-					Integer reserveCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_RESERVE);
+					Integer reserveCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_RESERVE);
 					Object reserveObj = getCellValue(row.getCell(reserveCol), true);
 					Double reserve = null;
 					if (reserveObj != null) {
@@ -1146,7 +1796,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setReserve(reserve);
 					}
 					
-					Integer totalPaidCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_TOTAL_PAID);
+					Integer totalPaidCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_TOTAL_PAID);
 					Object totalPaidObj = getCellValue(row.getCell(totalPaidCol), true);
 					Double totalPaid = null;
 					if (totalPaidObj != null) {
@@ -1161,7 +1811,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setTotalPaid(totalPaid);
 					}
 					
-					Integer totalClaimCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_TOTAL_CLAIM);
+					Integer totalClaimCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_TOTAL_CLAIM);
 					Object totalClaimObj = getCellValue(row.getCell(totalClaimCol), true);
 					Double totalClaim = null;
 					if (totalClaimObj != null) {
@@ -1176,7 +1826,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setTotalClaimed(totalClaim);
 					}
 					
-					Integer attorneyCol = colMapping.get(InjuryUtils.INJURY_REPORTED_COL_ATTORNEY);
+					Integer attorneyCol = colMapping.get(WorkerCompUtils.INJURY_REPORTED_COL_ATTORNEY);
 					String attorneyStr = ((String) getCellValue(row.getCell(attorneyCol)));
 					if (StringUtils.equals(attorneyStr, "Yes") || StringUtils.equals(attorneyStr, "No")) {
 						existingInjury.setAttorney(attorneyStr);
@@ -1229,7 +1879,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			HSSFWorkbook wb = new HSSFWorkbook(fs);
 			HSSFSheet sheet = wb.getSheetAt(0);
 			
-			Map<String, Integer> colMapping = InjuryUtils.getInjuryNotReportedColMapping();
+			Map<String, Integer> colMapping = WorkerCompUtils.getInjuryNotReportedColMapping();
 			
 			Iterator<Row> rows = sheet.rowIterator();
 			int recordsToBeSkipped = 1;
@@ -1253,11 +1903,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					currentInjury = new Injury();
 					
-					Integer driverLastNameCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_LAST_NAME);
+					Integer driverLastNameCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_LAST_NAME);
 					String driverLastName = ((String) getCellValue(row.getCell(driverLastNameCol)));
-					Integer driverFirstNameCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_FIRST_NAME);
+					Integer driverFirstNameCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_FIRST_NAME);
 					String driverFirstName = ((String) getCellValue(row.getCell(driverFirstNameCol)));
-					Driver driver = InjuryUtils.retrieveDriver(driverFirstName, driverLastName, genericDAO);
+					Driver driver = WorkerCompUtils.retrieveDriver(driverFirstName, driverLastName, genericDAO);
 					if (driver == null) {
 						recordError = true;
 						recordErrorMsg.append("Employee Name, ");
@@ -1265,7 +1915,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setDriver(driver);
 					}
 					
-					Integer incidentDateCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_INJURY_DATE);
+					Integer incidentDateCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_INJURY_DATE);
 					Object incidentDateObj = getCellValue(row.getCell(incidentDateCol), true);
 					if (incidentDateObj == null) {
 						recordError = true;
@@ -1278,7 +1928,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentInjury.setIncidentDate(incidentDate);
 					}
 					
-					Injury existingInjury = InjuryUtils.retrieveMatchingInjury(currentInjury, genericDAO);
+					Injury existingInjury = WorkerCompUtils.retrieveMatchingInjury(currentInjury, genericDAO);
 					if (existingInjury == null) {
 						recordError = true;
 						recordErrorMsg.append("No matching existing Injury record found to update costs, ");
@@ -1288,7 +1938,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					}
 					
-					Integer returnToWorkDateCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_RETURN_TO_WORK_DATE);
+					Integer returnToWorkDateCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_RETURN_TO_WORK_DATE);
 					Object returnToWorkDateObj = getCellValue(row.getCell(returnToWorkDateCol), true);
 					if (returnToWorkDateObj != null) {
 						if (returnToWorkDateObj instanceof Date) {
@@ -1302,7 +1952,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					Integer lostWorkDaysCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_LOST_DAYS);
+					Integer lostWorkDaysCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_LOST_DAYS);
 					String lostWorkDaysStr = ((String) getCellValue(row.getCell(lostWorkDaysCol), true));
 					if (StringUtils.isNotEmpty(lostWorkDaysStr)) {
 						if (StringUtils.isNumeric(lostWorkDaysStr)) {
@@ -1311,7 +1961,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					Integer medicalCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_MEDICAL);
+					Integer medicalCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_MEDICAL);
 					Object medicalObj = getCellValue(row.getCell(medicalCol), true);
 					Double medical = null;
 					if (medicalObj != null) {
@@ -1326,7 +1976,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setMedicalCost(medical);
 					}
 					
-					Integer indemnityCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_INDEMNITY);
+					Integer indemnityCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_INDEMNITY);
 					Object indemnityObj = getCellValue(row.getCell(indemnityCol), true);
 					Double indemnity = null;
 					if (indemnityObj != null) {
@@ -1341,7 +1991,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						existingInjury.setIndemnityCost(indemnity);
 					}
 					
-					Integer totalPaidCol = colMapping.get(InjuryUtils.INJURY_NOT_REPORTED_COL_TOTAL_PAID);
+					Integer totalPaidCol = colMapping.get(WorkerCompUtils.INJURY_NOT_REPORTED_COL_TOTAL_PAID);
 					Object totalPaidObj = getCellValue(row.getCell(totalPaidCol), true);
 					Double totalPaid = null;
 					if (totalPaidObj != null) {
@@ -1830,7 +2480,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		Location derivedDestination = derivedDestinationList.get(0);
 		if (derivedDestination.getId() != 230l // Varick II Landfill
 				&& derivedDestination.getId() != 82l // Reco Landfill
-				&& derivedDestination.getId() != 384l) { // Chesapeake Landfill
+				&& derivedDestination.getId() != 384l // Chesapeake Landfill
+			   && derivedDestination.getId() != 379l) { // Shamrock Landfill
 			return null;
 		}
 		

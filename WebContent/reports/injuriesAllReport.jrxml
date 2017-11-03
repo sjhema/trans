@@ -29,22 +29,23 @@
 		<variableExpression><![CDATA[$F{driver.fullName}]]></variableExpression>
 	</variable>
 	<variable name="medicalSum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{medicalCost}]]></variableExpression>
+		<variableExpression><![CDATA[$F{medicalCost} == null ? 0.0 : $F{medicalCost}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="indemnitySum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{indemnityCost}]]></variableExpression>
+		<variableExpression><![CDATA[$F{indemnityCost} == null ? 0.0 : $F{indemnityCost}]]></variableExpression>
 	</variable>
 	<variable name="expenseSum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{expense}]]></variableExpression>
+		<variableExpression><![CDATA[$F{expense} == null ? 0.0 : $F{expense}]]></variableExpression>
 	</variable>
 	<variable name="reserveSum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{reserve}]]></variableExpression>
+		<variableExpression><![CDATA[$F{reserve} == null ? 0.0 : $F{reserve}]]></variableExpression>
 	</variable>
 	<variable name="totalPaidSum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{totalPaid}]]></variableExpression>
+		<variableExpression><![CDATA[$F{totalPaid} == null ? 0.0 : $F{totalPaid}]]></variableExpression>
 	</variable>
 	<variable name="totalClaimedSum" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{totalClaimed}]]></variableExpression>
+		<variableExpression><![CDATA[$F{totalClaimed} == null ? 0.0 : $F{totalClaimed} ]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>

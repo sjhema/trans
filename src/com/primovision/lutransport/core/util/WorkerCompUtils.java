@@ -14,8 +14,14 @@ import com.primovision.lutransport.core.dao.GenericDAO;
 
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
-
+import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.accident.Accident;
+import com.primovision.lutransport.model.accident.AccidentCause;
+import com.primovision.lutransport.model.accident.AccidentRoadCondition;
+import com.primovision.lutransport.model.accident.AccidentType;
+import com.primovision.lutransport.model.accident.AccidentWeather;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 
 import com.primovision.lutransport.model.injury.Injury;
@@ -24,7 +30,7 @@ import com.primovision.lutransport.model.injury.InjuryToType;
 import com.primovision.lutransport.model.insurance.InsuranceCompany;
 import com.primovision.lutransport.model.insurance.InsuranceCompanyRep;
 
-public class InjuryUtils {
+public class WorkerCompUtils {
 	public static SimpleDateFormat injuryTimeOfDayFormat1 = new SimpleDateFormat("hh:mm");
 	public static SimpleDateFormat injuryTimeOfDayFormat2 = new SimpleDateFormat("hh:mm a");
 	public static SimpleDateFormat requiredTimeFormat = new SimpleDateFormat("HH:mm");
@@ -76,6 +82,99 @@ public class InjuryUtils {
 	public static final String INJURY_NOT_REPORTED_COL_MEDICAL = "Medical";
 	public static final String INJURY_NOT_REPORTED_COL_INDEMNITY = "Indemnity";
 	public static final String INJURY_NOT_REPORTED_COL_TOTAL_PAID = "Total Paid ";
+	
+	public static final String ACCIDENT_MAIN_COL_INUSRANCE_COMPANY = "Insurance Co";
+	public static final String ACCIDENT_MAIN_COL_CLAIM_NO = "Claim #";
+	public static final String ACCIDENT_MAIN_COL_INCIDENT_DATE = "Accident Date";
+	public static final String ACCIDENT_MAIN_COL_MONTHS_OF_SERVICE = "Mths of Service";
+	public static final String ACCIDENT_MAIN_COL_HIRE_DATE = "Hire Date";
+	public static final String ACCIDENT_MAIN_COL_DAY = "Day of week";
+	public static final String ACCIDENT_MAIN_COL_LOCATION = "Location";
+	public static final String ACCIDENT_MAIN_COL_STATE = "State";
+	public static final String ACCIDENT_MAIN_COL_DRIVER_NAME = "Name";
+	public static final String ACCIDENT_MAIN_COL_COMPANY = "Company";
+	public static final String ACCIDENT_MAIN_COL_UNIT = "Unit";
+	public static final String ACCIDENT_MAIN_COL_VEHICLE_DAMAGE = "Vehicle Damage";
+	public static final String ACCIDENT_MAIN_COL_NO_INJURED = "# Injured";
+	public static final String ACCIDENT_MAIN_COL_TOWED = "Towed";
+	public static final String ACCIDENT_MAIN_COL_CITATION = "Citation";
+	public static final String ACCIDENT_MAIN_COL_RECORDABLE = "Recordable";
+	public static final String ACCIDENT_MAIN_COL_HM_RELEASE = "HM Release";
+	public static final String ACCIDENT_MAIN_COL_ROAD = "Road";
+	public static final String ACCIDENT_MAIN_COL_WEATHER = "Weather";
+	public static final String ACCIDENT_MAIN_COL_CAUSE = "Cause";
+	public static final String ACCIDENT_MAIN_COL_ACCIDENT_COMMENTS = "Notes";
+	public static final String ACCIDENT_MAIN_COL_CLAIM_REP = "Claim Rep Contact Info";
+	public static final String ACCIDENT_MAIN_COL_STATUS = "Status";
+	
+	public static final String ACCIDENT_REPORTED_COL_INUSRANCE_COMPANY = "Insurance";
+	public static final String ACCIDENT_REPORTED_COL_CLAIM = "Claim #";
+	public static final String ACCIDENT_REPORTED_COL_INCIDENT_DATE = "Date";
+	public static final String ACCIDENT_REPORTED_COL_EMPLOYEE = "Employee";
+	public static final String ACCIDENT_REPORTED_COL_STATUS = "Status";
+	public static final String ACCIDENT_REPORTED_COL_PAID = "Paid";
+	public static final String ACCIDENT_REPORTED_COL_DEDUCTIBLE = "Deductible";
+	public static final String ACCIDENT_REPORTED_COL_EXPENSE = "Expense";
+	public static final String ACCIDENT_REPORTED_COL_RESERVE = "Reserve";
+	public static final String ACCIDENT_REPORTED_COL_TOTAL_COST = "Incurred";
+	
+	public static final String ACCIDENT_NOT_REPORTED_COL_NAME = "Last Name";
+	public static final String ACCIDENT_NOT_REPORTED_COL_INCIDENT_DATE = "Incident Date";
+	public static final String ACCIDENT_NOT_REPORTED_COL_TOTAL_COST = "Cost";
+	
+	public static Map<String, Integer> getAccidentMainColMapping() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(ACCIDENT_MAIN_COL_INUSRANCE_COMPANY, 0);
+		colMapping.put(ACCIDENT_MAIN_COL_CLAIM_NO, 1);
+		colMapping.put(ACCIDENT_MAIN_COL_INCIDENT_DATE, 2);
+		colMapping.put(ACCIDENT_MAIN_COL_MONTHS_OF_SERVICE, 3);
+		colMapping.put(ACCIDENT_MAIN_COL_HIRE_DATE, 4);
+		colMapping.put(ACCIDENT_MAIN_COL_DAY, 5);
+		colMapping.put(ACCIDENT_MAIN_COL_LOCATION, 6);
+		colMapping.put(ACCIDENT_MAIN_COL_STATE, 7);
+		colMapping.put(ACCIDENT_MAIN_COL_DRIVER_NAME, 8);
+		colMapping.put(ACCIDENT_MAIN_COL_COMPANY, 9);
+		colMapping.put(ACCIDENT_MAIN_COL_UNIT, 10);
+		colMapping.put(ACCIDENT_MAIN_COL_VEHICLE_DAMAGE, 11);
+		colMapping.put(ACCIDENT_MAIN_COL_NO_INJURED, 12);
+		colMapping.put(ACCIDENT_MAIN_COL_TOWED, 13);
+		colMapping.put(ACCIDENT_MAIN_COL_CITATION, 14);
+		colMapping.put(ACCIDENT_MAIN_COL_RECORDABLE, 15);
+		colMapping.put(ACCIDENT_MAIN_COL_HM_RELEASE, 16);
+		colMapping.put(ACCIDENT_MAIN_COL_ROAD, 17);
+		colMapping.put(ACCIDENT_MAIN_COL_WEATHER, 18);
+		colMapping.put(ACCIDENT_MAIN_COL_CAUSE, 19);
+		colMapping.put(ACCIDENT_MAIN_COL_ACCIDENT_COMMENTS, 20);
+		colMapping.put(ACCIDENT_MAIN_COL_CLAIM_REP, 23);
+		colMapping.put(ACCIDENT_MAIN_COL_STATUS, 24);
+		
+		return colMapping;
+	}
+	
+	public static Map<String, Integer> getAccidentReportedColMapping() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(ACCIDENT_REPORTED_COL_INUSRANCE_COMPANY, 1);
+		colMapping.put(ACCIDENT_REPORTED_COL_CLAIM, 2);
+		colMapping.put(ACCIDENT_REPORTED_COL_INCIDENT_DATE, 3);
+		colMapping.put(ACCIDENT_REPORTED_COL_EMPLOYEE, 4);
+		colMapping.put(ACCIDENT_REPORTED_COL_STATUS, 5);
+		colMapping.put(ACCIDENT_REPORTED_COL_PAID, 6);
+		colMapping.put(ACCIDENT_REPORTED_COL_RESERVE, 7);
+		colMapping.put(ACCIDENT_REPORTED_COL_EXPENSE, 8);
+		colMapping.put(ACCIDENT_REPORTED_COL_TOTAL_COST, 9);
+		colMapping.put(ACCIDENT_REPORTED_COL_DEDUCTIBLE, 10);
+		
+		return colMapping;
+	}
+	
+	public static Map<String, Integer> getAccidentNotReportedColMapping() {
+		Map<String, Integer> colMapping = new HashMap<String, Integer>();
+		colMapping.put(ACCIDENT_NOT_REPORTED_COL_NAME, 1);
+		colMapping.put(ACCIDENT_NOT_REPORTED_COL_INCIDENT_DATE, 2);
+		colMapping.put(ACCIDENT_NOT_REPORTED_COL_TOTAL_COST, 4);
+		
+		return colMapping;
+	}
 	
 	public static Map<String, Integer> getInjuryNotReportedColMapping() {
 		Map<String, Integer> colMapping = new HashMap<String, Integer>();
@@ -196,6 +295,49 @@ public class InjuryUtils {
 		}
 	}
 	
+	public static Driver retrieveDriverByCommaSep(String nameWithComma, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(nameWithComma) || StringUtils.indexOf(nameWithComma, ",") < 0) {
+			return null;
+		}
+		
+		String nameTokens[] = nameWithComma.split("[,]", 2);
+		String firstName = StringUtils.trimToEmpty(nameTokens[1]);
+		String lastName = StringUtils.trimToEmpty(nameTokens[0]);
+		if (StringUtils.isEmpty(firstName) || StringUtils.isEmpty(lastName)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("firstName", firstName);
+		criterias.put("lastName", lastName);
+	
+		List<Driver> driverList = genericDAO.findByCriteria(Driver.class, criterias, "id", true);
+		if (driverList == null || driverList.isEmpty()) {
+			return null;
+		} else {
+			return driverList.get(0);
+		}
+	}
+	
+	
+	public static Vehicle retrieveVehicleForUnit(String unit, Date transactionDate, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(unit)) {
+			return null;
+		}
+		
+		String vehicleQuery = "Select obj from Vehicle obj where obj.unit=" + unit;
+		if (transactionDate != null) {
+			String transactionDateStr = requiredDateFormat.format(transactionDate);
+			vehicleQuery += (" and obj.validFrom <='"
+					+ transactionDateStr + "' and obj.validTo >= '" + transactionDateStr + "'");
+		}		
+		vehicleQuery += " order by obj.id DESC";
+		
+		System.out.println("******************** Vehicle query is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		return (vehicleList == null || vehicleList.isEmpty()) ? null : vehicleList.get(0);
+	}
+	
 	public static List<Location> retrieveCompanyTerminal(String companyTerminalName, GenericDAO genericDAO) {
 		if (StringUtils.isEmpty(companyTerminalName)) {
 			return null;
@@ -312,6 +454,23 @@ public class InjuryUtils {
 		}
 	}
 	
+	public static StaticData retrieveAccidentStatus(String statusStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(statusStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("dataType", "ACCIDENT_STATUS");
+		criterias.put("dataText", statusStr);
+	
+		List<StaticData> staticDataList = genericDAO.findByCriteria(StaticData.class, criterias);
+		if (staticDataList == null || staticDataList.isEmpty()) {
+			return null;
+		} else {
+			return staticDataList.get(0);
+		}
+	}
+	
 	public static InjuryIncidentType retrieveIncidentType(String incidentTypeStr, GenericDAO genericDAO) {
 		if (StringUtils.isEmpty(incidentTypeStr)) {
 			return null;
@@ -325,6 +484,86 @@ public class InjuryUtils {
 			return null;
 		} else {
 			return incidentTypeList.get(0);
+		}
+	}
+	
+	public static State retrieveState(String stateStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(stateStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("name", stateStr);
+	
+		List<State> stateList = genericDAO.findByCriteria(State.class, criterias);
+		if (stateList == null || stateList.isEmpty()) {
+			return null;
+		} else {
+			return stateList.get(0);
+		}
+	}
+	
+	public static AccidentCause retrieveAccidentCause(String causeStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(causeStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("cause", causeStr);
+	
+		List<AccidentCause> accidentCauseList = genericDAO.findByCriteria(AccidentCause.class, criterias);
+		if (accidentCauseList == null || accidentCauseList.isEmpty()) {
+			return null;
+		} else {
+			return accidentCauseList.get(0);
+		}
+	}
+	
+	public static AccidentWeather retrieveAccidentWeather(String weatherStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(weatherStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("weather", weatherStr);
+	
+		List<AccidentWeather> accidentWeatherList = genericDAO.findByCriteria(AccidentWeather.class, criterias);
+		if (accidentWeatherList == null || accidentWeatherList.isEmpty()) {
+			return null;
+		} else {
+			return accidentWeatherList.get(0);
+		}
+	}
+	
+	public static AccidentRoadCondition retrieveAccidentRoadCondition(String roadConditionStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(roadConditionStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("roadCondition", roadConditionStr);
+	
+		List<AccidentRoadCondition> accidentRoadConditionList = genericDAO.findByCriteria(AccidentRoadCondition.class, criterias);
+		if (accidentRoadConditionList == null || accidentRoadConditionList.isEmpty()) {
+			return null;
+		} else {
+			return accidentRoadConditionList.get(0);
+		}
+	}
+	
+	public static AccidentType retrieveAccidentType(String accidentTypeStr, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(accidentTypeStr)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("accidentType", accidentTypeStr);
+	
+		List<AccidentType> accidentTypeList = genericDAO.findByCriteria(AccidentType.class, criterias);
+		if (accidentTypeList == null || accidentTypeList.isEmpty()) {
+			return null;
+		} else {
+			return accidentTypeList.get(0);
 		}
 	}
 	
@@ -375,6 +614,30 @@ public class InjuryUtils {
 	public static boolean checkDuplicateInjury(Injury anInjury, GenericDAO genericDAO) {
 		Injury existingInjury = retrieveMatchingInjury(anInjury, genericDAO);
 		return (existingInjury == null) ? false : true;
+	}
+	
+	public static boolean checkDuplicateAccident(Accident anAccident, GenericDAO genericDAO) {
+		Accident existingAccident = retrieveMatchingAccident(anAccident, genericDAO);
+		return (existingAccident == null) ? false : true;
+	}
+	
+	public static Accident retrieveMatchingAccident(Accident anAccident, GenericDAO genericDAO) {
+		if (anAccident == null || anAccident.getDriver() == null
+				|| anAccident.getIncidentDate() == null) {
+			return null;
+		}
+		
+		String query = "select obj from Accident obj where obj.driver.id=" + anAccident.getDriver().getId()
+				+ " and obj.incidentDate='" + requiredDateFormat.format(anAccident.getIncidentDate()) + "'";
+		if (anAccident.getInsuranceCompany() != null) {
+			query += " and obj.insuranceCompany.id=" + anAccident.getInsuranceCompany().getId();
+		}
+		if (StringUtils.isNotEmpty(anAccident.getClaimNumber())) {
+			query += " and obj.claimNumber='" + anAccident.getClaimNumber() + "'";
+		}
+		
+		List<Accident> accidentList = genericDAO.executeSimpleQuery(query);
+		return ((accidentList == null || accidentList.isEmpty()) ? null : accidentList.get(0));
 	}
 	
 	public static Injury retrieveMatchingInjury(Injury anInjury, GenericDAO genericDAO) {

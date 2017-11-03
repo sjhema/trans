@@ -89,6 +89,11 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/mileage";
 	}
 	
+	@RequestMapping("/accident.do")
+	public String accident(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/accident";
+	}
+	
 	@RequestMapping("/injury.do")
 	public String injury(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 		return "admin/uploaddata/injury";
@@ -282,6 +287,132 @@ public class UploadDataController extends BaseController {
 			log.warn("Unable to import :===>>>>>>>>>" + ex);
 		}
 		return "admin/uploaddata/eztollOverride";
+	}
+	
+	@RequestMapping("/accident/uploadMain.do")
+	public String importAccidentMainData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFileMain") MultipartFile file) {
+		model.addAttribute("errorList", new ArrayList<String>());
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/accident";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/accident";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importAccidentMainData(is)\n");
+			List<String> errorList = importMainSheetService.importAccidentMainData(is, createdBy);
+			if (errorList.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all Accident Main data");
+			} else {
+				model.addAttribute("errorList", errorList);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import Accident main data:===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading Accident main data!!");
+		}
+		
+		return "admin/uploaddata/accident";
+	}
+	
+	@RequestMapping("/accident/uploadReported.do")
+	public String importAccidentReportedData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFileReported") MultipartFile file) {
+		model.addAttribute("errorList", new ArrayList<String>());
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/accident";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/accident";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importAccidentReportedData(is)\n");
+			List<String> errorList = importMainSheetService.importAccidentReportedData(is, createdBy);
+			if (errorList.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all Accident Reported data");
+			} else {
+				model.addAttribute("errorList", errorList);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import Accident reported data:===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading Accident reported data!!");
+		}
+		
+		return "admin/uploaddata/accident";
+	}
+	
+	@RequestMapping("/accident/uploadNotReported.do")
+	public String importAccidentNotReportedData(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFileNotReported") MultipartFile file) {
+		model.addAttribute("errorList", new ArrayList<String>());
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/accident";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/accident";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importAccidentNotReportedData(is)\n");
+			List<String> errorList = importMainSheetService.importAccidentNotReportedData(is, createdBy);
+			if (errorList.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all Accident Not Reported data");
+			} else {
+				model.addAttribute("errorList", errorList);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import Accident not reported data:===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading Accident not reported data!!");
+		}
+		
+		return "admin/uploaddata/accident";
 	}
 	
 	@RequestMapping("/injury/uploadMain.do")
