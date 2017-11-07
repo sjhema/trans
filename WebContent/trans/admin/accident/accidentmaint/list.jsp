@@ -127,10 +127,7 @@
         <primo:textcolumn headerText="Weather" dataField="weather.weather" width="55px"/>
         <primo:textcolumn headerText="Citation" dataField="citation" width="55px"/>
         <primo:textcolumn headerText="Towed" dataField="towed" width="55px"/>
-<<<<<<< HEAD
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
-=======
->>>>>>> afddc6620d339662378af7f38f147ec23d254caa
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
