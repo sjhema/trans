@@ -51,6 +51,7 @@ import com.primovision.lutransport.model.accident.AccidentCause;
 import com.primovision.lutransport.model.accident.AccidentRoadCondition;
 import com.primovision.lutransport.model.accident.AccidentType;
 import com.primovision.lutransport.model.accident.AccidentWeather;
+import com.primovision.lutransport.model.injury.Injury;
 import com.primovision.lutransport.model.insurance.InsuranceCompany;
 import com.primovision.lutransport.model.insurance.InsuranceCompanyRep;
 
@@ -178,18 +179,18 @@ public class AccidentController extends CRUDController<Accident> {
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
 		List<InsuranceCompanyRep> claimReps = null;
-		criterias.clear();
 		if (request.getParameter("id") == null) {
 			claimReps = genericDAO.findByCriteria(InsuranceCompanyRep.class, criterias, "name", false);
-			criterias.put("status", 1);
+			//criterias.put("status", 1);
 		} else {
 			Accident entity = (Accident) model.get("modelObject");
 			if (entity != null && entity.getInsuranceCompany() != null) {
 				claimReps = retrieveClaimReps(entity.getInsuranceCompany().getId());
 			}
 		}
-		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		model.addAttribute("claimReps", claimReps);
+		
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName asc, id desc", false));
 	}
 	
 	public void setupCommon(ModelMap model, HttpServletRequest request) {
@@ -305,6 +306,16 @@ public class AccidentController extends CRUDController<Accident> {
 			if (accidentStatus.intValue() != Accident.ACCIDENT_STATUS_NOT_REPORTED.intValue()) {
 				if (entity.getInsuranceCompany() == null) {
 					bindingResult.rejectValue("insuranceCompany", "error.select.option", null, null);
+				}
+			}
+		}
+		
+		if (entity.getId() == null) {
+			String claimNo = entity.getClaimNumber();
+			if (StringUtils.isNotEmpty(claimNo)) {
+				Accident existingAccident = WorkerCompUtils.retrieveAccidentByClaimNo(claimNo, genericDAO);
+				if (existingAccident != null) {
+					bindingResult.rejectValue("claimNumber", "error.duplicate.claimNumber", null, null);
 				}
 			}
 		}

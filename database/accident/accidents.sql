@@ -66,7 +66,7 @@ CREATE TABLE `accident` (
   `modified_by` bigint(20) DEFAULT NULL,
   `status` int(11) NOT NULL,
   `accident_type` bigint(20) DEFAULT NULL,
-  `accident_cause` bigint(20) NOT NULL,
+  `accident_cause` bigint(20) DEFAULT NULL,
   `insurance_company` bigint(20) DEFAULT NULL,
   `claim_rep` bigint(20) DEFAULT NULL,
   `claim_no` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,

@@ -1147,13 +1147,15 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Integer vehicleCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_UNIT);
 					String unit = ((String) getCellValue(row.getCell(vehicleCol)));
 					unit = StringUtils.trimToEmpty(unit);
-					Vehicle vehicle = WorkerCompUtils.retrieveVehicleForUnit(unit, currentAccident.getIncidentDate(), 
-									genericDAO);
-					if (vehicle == null) {
-						recordError = true;
-						recordErrorMsg.append("Vehicle (either unit is invalid or not valid for incident date), ");
-					} else {
-						currentAccident.setVehicle(vehicle);
+					if (StringUtils.isNotEmpty(unit)) {
+						Vehicle vehicle = WorkerCompUtils.retrieveVehicleForUnit(unit, currentAccident.getIncidentDate(), 
+										genericDAO);
+						if (vehicle == null) {
+							recordError = true;
+							recordErrorMsg.append("Vehicle (either unit is invalid or not valid for incident date), ");
+						} else {
+							currentAccident.setVehicle(vehicle);
+						}
 					}
 					
 					Integer monthsOfServiceCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_MONTHS_OF_SERVICE);
@@ -1177,8 +1179,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					} else {
 						String hireDateStr = hireDateObj.toString();
 						hireDateStr = StringUtils.trimToEmpty(hireDateStr);
-						Date hireDate = accidentDateFormat.parse(hireDateStr);
-						currentAccident.setDriverHiredDate(hireDate);
+						if (StringUtils.isNotEmpty(hireDateStr)) {
+							Date hireDate = accidentDateFormat.parse(hireDateStr);
+							currentAccident.setDriverHiredDate(hireDate);
+						}
 					}
 					
 					Integer loationCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_LOCATION);
@@ -1201,23 +1205,27 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					Integer stateCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_STATE);
 					String stateStr = ((String) getCellValue(row.getCell(stateCol)));
 					stateStr = StringUtils.trimToEmpty(stateStr);
-					State state = WorkerCompUtils.retrieveState(stateStr, genericDAO);
-					if (state == null) {
-						recordError = true;
-						recordErrorMsg.append("State, ");
-					} else {
-						currentAccident.setState(state);
+					if (StringUtils.isNotEmpty(stateStr)) {
+						State state = WorkerCompUtils.retrieveState(stateStr, genericDAO);
+						if (state == null) {
+							recordError = true;
+							recordErrorMsg.append("State, ");
+						} else {
+							currentAccident.setState(state);
+						}
 					}
 					
 					Integer accidentCauseCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_CAUSE);
 					String accidentCauseStr = ((String) getCellValue(row.getCell(accidentCauseCol)));
 					accidentCauseStr = StringUtils.trimToEmpty(accidentCauseStr);
-					AccidentCause accidentCause = WorkerCompUtils.retrieveAccidentCause(accidentCauseStr, genericDAO);
-					if (accidentCause == null) {
-						recordError = true;
-						recordErrorMsg.append("Accident Cause, ");
-					} else {
-						currentAccident.setAccidentCause(accidentCause);
+					if (StringUtils.isNotEmpty(accidentCauseStr)) {
+						AccidentCause accidentCause = WorkerCompUtils.retrieveAccidentCause(accidentCauseStr, genericDAO);
+						if (accidentCause == null) {
+							recordError = true;
+							recordErrorMsg.append("Accident Cause, ");
+						} else {
+							currentAccident.setAccidentCause(accidentCause);
+						}
 					}
 					
 					Integer accidentRoadConditionCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_ROAD);
@@ -1352,12 +1360,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				}
 			}
 			
-			System.out.println("Done processing injuries...Total record count: " + recordCount 
+			System.out.println("Done processing accidents...Total record count: " + recordCount 
 					+ ". Error count: " + errorCount
 					+ ". Number of records loaded: " + successCount);
 		} catch (Exception ex) {
 			errorList.add("Not able to upload XL!!! Please try again.");
-			log.warn("Error while importing Injury Main: " + ex);
+			log.warn("Error while importing Accident Main: " + ex);
 		}
 		
 		return errorList;

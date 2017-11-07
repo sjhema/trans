@@ -321,7 +321,7 @@ public class WorkerCompUtils {
 	
 	
 	public static Vehicle retrieveVehicleForUnit(String unit, Date transactionDate, GenericDAO genericDAO) {
-		if (StringUtils.isEmpty(unit)) {
+		if (StringUtils.isEmpty(unit) || !StringUtils.isNumeric(unit)) {
 			return null;
 		}
 		
@@ -655,6 +655,27 @@ public class WorkerCompUtils {
 		List<Injury> injuryList = genericDAO.executeSimpleQuery(query);
 		return ((injuryList == null || injuryList.isEmpty()) ? null : injuryList.get(0));
 	}
+	
+	public static Injury retrieveInjuryByClaimNo(String claimNo, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(claimNo)) {
+			return null;
+		}
+		
+		String query = "select obj from Injury obj where obj.claimNumber='" + claimNo + "'";
+		List<Injury> injuryList = genericDAO.executeSimpleQuery(query);
+		return ((injuryList == null || injuryList.isEmpty()) ? null : injuryList.get(0));
+	}
+	
+	public static Accident retrieveAccidentByClaimNo(String claimNo, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(claimNo)) {
+			return null;
+		}
+		
+		String query = "select obj from Accident obj where obj.claimNumber='" + claimNo + "'";
+		List<Accident> accidentList = genericDAO.executeSimpleQuery(query);
+		return ((accidentList == null || accidentList.isEmpty()) ? null : accidentList.get(0));
+	}
+	
 	
 	public static String deriveDayOfWeek(Date date) {
 		if (date == null) {

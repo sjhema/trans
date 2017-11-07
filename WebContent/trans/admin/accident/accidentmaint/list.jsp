@@ -118,12 +118,16 @@
         <primo:textcolumn headerText="Employee" dataField="driver.fullName" />
         <primo:textcolumn headerText="Emp. Comp." dataField="driverCompany.name" width="75px"/>
         <primo:textcolumn headerText="Emp. Term." dataField="driverTerminal.name" width="45px"/>
-        <primo:textcolumn headerText="Vehicle" dataField="vehicle.unitNum" />
+        <primo:textcolumn headerText="Unit" dataField="vehicle.unitNum" />
         <primo:textcolumn headerText="Location" dataField="location" />
-        <primo:textcolumn headerText="Accident Type" dataField="accidentType.accidentType" />
+        <primo:textcolumn headerText="State" dataField="state.name" />
         <primo:staticdatacolumn headerText="Status" dataField="accidentStatus" dataType="ACCIDENT_STATUS"/>
-        <primo:textcolumn headerText="Accident Cause" dataField="accidentCause.cause" width="75px"/>
-        <primo:textcolumn headerText="Citation" dataField="citation" width="75px"/>
+        <primo:textcolumn headerText="Accident Cause" dataField="accidentCause.cause" />
+        <primo:textcolumn headerText="Road" dataField="roadCondition.roadCondition" width="55px"/>
+        <primo:textcolumn headerText="Weather" dataField="weather.weather" width="55px"/>
+        <primo:textcolumn headerText="Citation" dataField="citation" width="55px"/>
+        <primo:textcolumn headerText="Towed" dataField="towed" width="55px"/>
+        <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

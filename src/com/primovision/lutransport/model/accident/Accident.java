@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
@@ -366,5 +368,25 @@ public class Accident extends AbstractBaseModel {
 
 	public void setRecordable(String recordable) {
 		this.recordable = recordable;
+	}
+	
+	@Transient
+	public String getWeatherStr() {
+		return (weather == null ? StringUtils.EMPTY : weather.getWeather());
+	}
+	
+	@Transient
+	public String getRoadConditionStr() {
+		return (roadCondition == null ? StringUtils.EMPTY : roadCondition.getRoadCondition());
+	}
+	
+	@Transient
+	public String getAccidentCauseStr() {
+		return (accidentCause == null ? StringUtils.EMPTY : accidentCause.getCause());
+	}
+	
+	@Transient
+	public String getStateStr() {
+		return (state == null ? StringUtils.EMPTY : state.getName());
 	}
 }

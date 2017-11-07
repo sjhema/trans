@@ -137,13 +137,13 @@ function formatDate(dateElemId) {
 			<td align="${left}">
 				<select id="claimNumber" name="claimNumber" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${injuries}" var="anInjury">
-						<c:if test="${anInjury.claimNumber != null and anInjury.claimNumber != ''}">
+					<c:forEach items="${accidents}" var="anAccident">
+						<c:if test="${anAccident.claimNumber != null and anAccident.claimNumber != ''}">
 							<c:set var="selected" value="" />
-							<c:if test="${sessionScope.searchCriteria.searchMap['claimNumber'] == anInjury.claimNumber}">
+							<c:if test="${sessionScope.searchCriteria.searchMap['claimNumber'] == anAccident.claimNumber}">
 								<c:set var="selected" value="selected" />
 							</c:if>
-							<option value="${anInjury.claimNumber}" ${selected}>${anInjury.claimNumber}</option>
+							<option value="${anAccident.claimNumber}" ${selected}>${anAccident.claimNumber}</option>
 						</c:if>
 					</c:forEach>
 				</select>

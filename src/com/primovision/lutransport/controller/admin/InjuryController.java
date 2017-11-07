@@ -196,19 +196,19 @@ public class InjuryController extends CRUDController<Injury> {
 		model.addAttribute("injuryToTypes", genericDAO.findByCriteria(InjuryToType.class, criterias, "injuryTo asc", false));
 
 		List<InsuranceCompanyRep> claimReps = null;
-		criterias.clear();
 		if (request.getParameter("id") == null) {
 			claimReps = genericDAO.findByCriteria(InsuranceCompanyRep.class, criterias, "name", false);
-			criterias.put("status", 1);
+			//criterias.put("status", 1);
 		} else {
 			Injury entity = (Injury) model.get("modelObject");
 			if (entity != null && entity.getInsuranceCompany() != null) {
 				claimReps = retrieveClaimReps(entity.getInsuranceCompany().getId());
 			}
 		}
-		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		model.addAttribute("claimReps", claimReps);
-	
+		
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName asc, id desc", false));
+		
 		/*String query = "select obj from Location obj "
 				+ " where type in (1, 2)"
 				+ " order by obj.name asc, obj.type asc";
@@ -337,6 +337,16 @@ public class InjuryController extends CRUDController<Injury> {
 				/*if (StringUtils.isEmpty(entity.getClaimNumber())) {
 					bindingResult.rejectValue("claimNumber", "NotNull.java.lang.String", null, null);
 				}*/
+			}
+		}
+		
+		if (entity.getId() == null) {
+			String claimNo = entity.getClaimNumber();
+			if (StringUtils.isNotEmpty(claimNo)) {
+				Injury existingInjury = WorkerCompUtils.retrieveInjuryByClaimNo(claimNo, genericDAO);
+				if (existingInjury != null) {
+					bindingResult.rejectValue("claimNumber", "error.duplicate.claimNumber", null, null);
+				}
 			}
 		}
 	}

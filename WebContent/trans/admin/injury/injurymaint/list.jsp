@@ -122,6 +122,7 @@
         <primo:staticdatacolumn headerText="Status" dataField="injuryStatus" dataType="INJURY_STATUS"/>
         <primo:textcolumn headerText="Injury To" dataField="injuryTo.injuryTo" width="75px"/>
         <primo:textcolumn headerText="Tarp Related Injury" dataField="tarpRelatedInjury" width="75px"/>
+        <primo:numbercolumn headerText="Tot Claim" dataField="totalClaimed" dataFormat="#####0.00"/>
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
