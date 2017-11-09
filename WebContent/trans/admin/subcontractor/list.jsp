@@ -76,6 +76,7 @@
 		<primo:textcolumn headerText="Zipcode" dataField="zipcode" />
 		<primo:textcolumn headerText="Phone" dataField="phone" />
 		<primo:textcolumn headerText="Fax" dataField="fax" />
+		<primo:textcolumn headerText="Owner Op" dataField="ownerOp" />
 		<primo:datecolumn headerText="Date Terminated" dataField="subdateTerminated" dataFormat="MM-dd-yyyy"/>
 		<primo:staticdatacolumn headerText="Complete Status" dataField="status" dataType="STATUS" />
 		<%--<primo:textcolumn headerText="Comp1" dataField="company1.name" />

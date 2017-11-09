@@ -92,7 +92,8 @@ public class SubContractor extends AbstractBaseModel{
 	
 	//---------
 	
-
+	@Column(name="owner_op")
+	private String ownerOp;
 
 
 	public String getName() {
@@ -268,5 +269,13 @@ public class SubContractor extends AbstractBaseModel{
 		}
 		
 		return terminals;
+	}
+
+	public String getOwnerOp() {
+		return ownerOp;
+	}
+
+	public void setOwnerOp(String ownerOp) {
+		this.ownerOp = ownerOp;
 	}
 }

@@ -241,6 +241,15 @@ function formatDate1(){
 				<form:input path="name" cssClass="flat" style="min-width:200px; max-width:200px" maxlength="45" />
 			 	<br><form:errors path="name" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Owner Operator" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:select cssClass="flat" path="ownerOp" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:option value="Yes">Yes</form:option>
+					<form:option value="No">No</form:option>
+				</form:select> 
+				<br><form:errors path="ownerOp" cssClass="errorMessage" />
+			</td>
 		</tr>
 			<tr>
 			<td class="form-left"><primo:label code="Date Hired" /><span
