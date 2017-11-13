@@ -161,6 +161,34 @@ function formatDate(dateElemId) {
 					 value="${sessionScope.searchCriteria.searchMap.incidentDateTo}" /> 
 			</td>
 		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Paid From" /></td>
+			<td>
+				<input id="paidFrom" name="paidFrom" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.paidFrom}"/>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Paid To" /></td>
+			<td>
+				<input id="paidTo" name="paidTo" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.paidTo}"/>
+			</td>
+		</tr>
+			<tr>
+			<td align="${left}" class="first"><primo:label code="Total Cost From" /></td>
+			<td>
+				<input id="totalCostFrom" name="totalCostFrom" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.totalCostFrom}"/>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Total Cost To" /></td>
+			<td>
+				<input id="totalCostTo" name="totalCostTo" style="min-width:148px; max-width:148px" class="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" 
+					 value="${sessionScope.searchCriteria.searchMap.totalCostTo}"/>
+			</td>
+		</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>

@@ -45,6 +45,7 @@ import com.primovision.lutransport.model.FuelSurchargePadd;
 import com.primovision.lutransport.model.FuelSurchargeWeeklyRate;
 import com.primovision.lutransport.model.Invoice;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
@@ -3902,6 +3903,165 @@ throw new Exception("origin and destindation is empty");
 		return aggreateFuelLogMap;
 	}
 	
+	private String retrieveOwnerOpSubConIds(String subcontractorIds, String companyIds) {
+		if (StringUtils.isNotEmpty(subcontractorIds) && StringUtils.isEmpty(companyIds)) {
+			return subcontractorIds;
+		}
+		
+		String query = "select obj from SubContractor obj where obj.ownerOp='Yes'";
+		if (StringUtils.isNotEmpty(companyIds)) {
+			String companyCondn = " AND ( (obj.company1.id in (" + companyIds + "))" +
+													 " OR (obj.company2.id in (" + companyIds + "))" +
+													 " OR (obj.company3.id in (" + companyIds + "))" +
+												")";
+			query += companyCondn;
+		}
+		if (StringUtils.isNotEmpty(subcontractorIds)) {
+			String subConCondn = " AND (obj.id in (" + subcontractorIds + "))";
+			query += subConCondn;
+		}
+		query += " order by obj.name asc";
+		
+		List<SubContractor> subConList = genericDAO.executeSimpleQuery(query);
+		if (subConList == null || subConList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String finalSubConIds = StringUtils.EMPTY;
+		for (SubContractor aSubContractor : subConList) {
+			finalSubConIds += String.valueOf(aSubContractor.getId()) + ",";
+		}
+		return finalSubConIds.substring(0, finalSubConIds.length()-1);
+	}
+	
+	@Override
+	public MileageLogReportWrapper generateOwnerOpSubConMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
+		String companyIds = input.getCompany();
+		
+		String subcontractorIds = input.getSubcontractor();
+		subcontractorIds = retrieveOwnerOpSubConIds(subcontractorIds, companyIds);
+		if (StringUtils.isEmpty(subcontractorIds)) {
+			return null;
+		}
+		
+		String periodFrom = input.getPeriodFrom();
+		String periodTo = input.getPeriodTo();
+		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
+		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
+		
+		StringBuffer query = new StringBuffer("select obj from Ticket obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from Ticket obj where 1=1");
+		
+		if (!StringUtils.isEmpty(companyIds)){
+			query.append(" and obj.driverCompany.id in (" + companyIds + ")");
+			countQuery.append(" and obj.driverCompany.id in (" + companyIds + ")");
+		}
+		
+		if (!StringUtils.isEmpty(subcontractorIds)){
+			query.append(" and obj.subcontractor.id in (" + subcontractorIds + ")");
+			countQuery.append(" and  obj.subcontractor.id in (" + subcontractorIds + ")");
+		}
+		
+      if (!StringUtils.isEmpty(periodFrom)) {
+        	try {
+				query.append(" and obj.unloadDate >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+				countQuery.append(" and obj.unloadDate >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+        
+      if (!StringUtils.isEmpty(periodTo)){
+        	try {
+				query.append(" and obj.unloadDate <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
+				countQuery.append(" and obj.unloadDate <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+      }
+      
+      if (StringUtils.isNotEmpty(lastInStateFrom) && StringUtils.isNotEmpty(lastInStateTo)) {
+      	/*lastInStateFrom += " 00:00:00";
+      	lastInStateTo += " 23:59:59";*/
+        	
+      	query.append(" and obj.unloadDate >='"+lastInStateFrom+"'");
+			query.append(" and obj.unloadDate <='"+lastInStateTo+"'");
+			countQuery.append(" and obj.unloadDate >='"+lastInStateFrom+"'");
+			countQuery.append(" and obj.unloadDate <='"+lastInStateTo+"'");
+			
+			/*query.append(" and  obj.unloadDate between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");
+			countQuery.append(" and  obj.unloadDate between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");*/
+		}
+      
+      /*query.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
+      countQuery.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
+     */
+      
+		System.out.println("\nquery=ownerOpSubConmileageLog=>" + query + "\n");
+		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();
+		searchCriteria.setRecordCount(recordCount.intValue());
+		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
+
+		List<Ticket> ticketList = (List<Ticket>) genericDAO
+			.getEntityManager()
+			.createQuery(query.toString())
+			.setMaxResults(searchCriteria.getPageSize())
+			.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
+			.getResultList();
+		
+		MileageLogReportWrapper wrapper = new MileageLogReportWrapper();
+		wrapper.setTotalRows(ticketList.size());
+		wrapper.setCompanies(companyIds);
+		wrapper.setPeriodFrom(periodFrom);
+		wrapper.setPeriodTo(periodTo);
+		wrapper.setLastInStateFrom(lastInStateFrom);
+		wrapper.setLastInStateTo(lastInStateTo);
+		
+		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
+		double totalMiles = 0.0;
+		for (Ticket aTicket : ticketList) {
+			Double miles = retrieveLocationDistance(aTicket);
+			totalMiles += miles;
+			
+			MileageLog aReturnMileageLog = new MileageLog();
+			map(aReturnMileageLog, aTicket, miles);
+			returnMileageLogList.add(aReturnMileageLog);
+		}
+		wrapper.setTotalMiles(totalMiles);
+		
+		returnMileageLogList = aggregateMileageLogBySubConCompany(returnMileageLogList);
+		
+		wrapper.setMileageLogList(returnMileageLogList);
+		return wrapper;
+	}
+	
+	private void map(MileageLog aMilageLog, Ticket aTicket, Double miles) {
+		aMilageLog.setSubcontractorStr(aTicket.getSubcontractor().getName());
+		aMilageLog.setCompany(aTicket.getDriverCompany());
+		aMilageLog.setMiles(miles);
+	}
+	
+	private Double retrieveLocationDistance(Ticket ticket) {
+		Double zeroMiles = new Double(0.0);
+		Location origin = ticket.getOrigin();
+		Location destination = ticket.getDestination();
+		if (origin == null || destination == null) {
+			return zeroMiles;
+		}
+		
+		String query = "select obj from LocationDistance obj where 1=1";
+		query += " and obj.origin.id="+origin.getId();
+		query += " and obj.destination.id="+destination.getId();
+		List<LocationDistance> locationDistanceList = genericDAO.executeSimpleQuery(query);
+		if (locationDistanceList == null || locationDistanceList.isEmpty()) {
+			return zeroMiles;
+		} else {
+			return locationDistanceList.get(0).getMiles();
+		}
+	}
+	
 	@Override
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
 		String company = input.getCompany();
@@ -4042,6 +4202,33 @@ throw new Exception("origin and destindation is empty");
 		
 		String periodStr = mileageReportDateFormat.format(srcMileageLog.getPeriod());
 		destMileageLog.setPeriodStr(periodStr);
+	}
+	
+	private List<MileageLog> aggregateMileageLogBySubConCompany(List<MileageLog> srcMileageLogList) {
+		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
+		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
+			return aggreateMileageLogList;
+		}
+		
+		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
+		for (MileageLog aSrcMileageLog : srcMileageLogList) {
+			String key = aSrcMileageLog.getSubcontractorStr() + "|" + aSrcMileageLog.getCompany().getName();
+			
+			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
+			if (aggregateMileageLog == null) {
+				aggreateMileageLogMap.put(key, aSrcMileageLog);
+			} else {
+				Double aggregateMiles = aggregateMileageLog.getMiles() + aSrcMileageLog.getMiles();
+				aggregateMileageLog.setMiles(aggregateMiles);
+			}
+		}
+		
+		SortedSet<String> sortedKeys = new TreeSet<String>(aggreateMileageLogMap.keySet());
+		for (String aKey : sortedKeys) {
+			aggreateMileageLogList.add(aggreateMileageLogMap.get(aKey));
+		}
+		
+		return aggreateMileageLogList;
 	}
 	
 	private List<MileageLog> aggregateMileageLogByCompanyState(List<MileageLog> srcMileageLogList) {

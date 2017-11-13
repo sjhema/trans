@@ -29,6 +29,7 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.report.BillingHistoryInput;
 import com.primovision.lutransport.model.report.IFTAReportInput;
 import com.primovision.lutransport.model.report.IFTAReportWrapper;
@@ -60,7 +61,7 @@ public class MileageLogReportController extends BaseController {
 	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/start.do")
-	public String populate(ModelMap model, HttpServletRequest request) {
+	public String start(ModelMap model, HttpServletRequest request) {
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		if (criteria != null && criteria.getSearchMap() != null) {
 			criteria.getSearchMap().clear();
@@ -75,7 +76,18 @@ public class MileageLogReportController extends BaseController {
 		criterias.clear();
 		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
 		
+		List<SubContractor> subConList = retrieveOwnerOpSubContractors();
+		model.addAttribute("subcontractors", subConList);
+		
 		return "reportuser/report/mileageLogReport";
+	}
+	
+	private List<SubContractor> retrieveOwnerOpSubContractors() {
+		String query = "select obj from SubContractor obj where obj.ownerOp='Yes'";
+		query += " order by obj.name asc";
+		
+		List<SubContractor> subConList = genericDAO.executeSimpleQuery(query);
+		return subConList;
 	}
 	
 	private void populateParams(Map<String,Object> params, HttpServletRequest request, 
@@ -119,6 +131,23 @@ public class MileageLogReportController extends BaseController {
 		
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
+		 
+		populateParams(params, request, wrapper);
+		  
+		data.put("data", wrapper.getMileageLogList());
+		data.put("params", params);
+		  
+		return data;
+	}
+	
+	private Map<String, Object> generateOwnerOpSubConMileageData(SearchCriteria searchCriteria, HttpServletRequest request, MileageLogReportInput input) {
+		MileageLogReportWrapper wrapper = generateOwnerOpSubconMileageLogReport(searchCriteria, input);
+		if (wrapper == null) {
+			return null;
+		}
+		
+		Map<String, Object> data = new HashMap<String,Object>();
+		Map<String, Object> params = new HashMap<String,Object>();
 		 
 		populateParams(params, request, wrapper);
 		  
@@ -252,6 +281,10 @@ public class MileageLogReportController extends BaseController {
 		return reportService.generateMileageLogData(searchCriteria, input);
 	}
 	
+	public MileageLogReportWrapper generateOwnerOpSubconMileageLogReport(SearchCriteria searchCriteria, MileageLogReportInput input) {
+		return reportService.generateOwnerOpSubConMileageLogData(searchCriteria, input);
+	}
+	
 	public IFTAReportWrapper generateIFTAReport(SearchCriteria searchCriteria, IFTAReportInput input) {
 		return reportService.generateIFTAData(searchCriteria, input);
 	}
@@ -310,6 +343,67 @@ public class MileageLogReportController extends BaseController {
 			request.setAttribute("jasperPrint", jasperPrint);
 			
 			return "reportuser/report/mileagelogreport/"+type;
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "error";
+		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/ownerOpSubConSearch.do")
+	public String ownerOpSubConSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
+			@ModelAttribute("modelObject") MileageLogReportInput input, 
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+      System.out.println("\nMileageLogReportController==ownerOpSubConSearch()==type===>"+type+"\n"); 
+		
+      populateSearchCriteria(request, request.getParameterMap());
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+      
+      Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		String p = request.getParameter("p");
+		if (p == null) {
+			request.getSession().setAttribute("input", input);
+		}
+		
+		MileageLogReportInput input1 = (MileageLogReportInput)request.getSession().getAttribute("input");
+		try {
+			Map<String, Object> datas; 
+			if (p == null) {
+				 datas = generateOwnerOpSubConMileageData(criteria, request, input);
+		   } else {
+				 datas = generateOwnerOpSubConMileageData(criteria, request, input1);	
+			}
+			
+			if (datas == null) {
+				request.getSession().setAttribute("error", "No onwer operator subcontrators found!!");
+				return "reportuser/report/mileageLogReport";
+			}
+			
+		   if (StringUtils.isEmpty(type)) {
+				type = "html";
+		   }
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			String reportType = "ownerOpSubConMileageReport";
+			if (!type.equals("html")) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename="+reportType+"." + type);
+			}
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String, Object>) datas.get("params");
+			List<MileageLog> mielageLogList = (List<MileageLog>) datas.get("data");
+			
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
+					mielageLogList, params, request);
+			request.setAttribute("jasperPrint", jasperPrint);
+			
+			return "reportuser/report/mileagelogreport/"+type+reportType;
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.getSession().setAttribute("errors", e.getMessage());
@@ -568,6 +662,61 @@ public class MileageLogReportController extends BaseController {
 			} else {
 				out = dynamicReportService.generateStaticReport(reportType,
 						(List)datas.get("data"), params, type, request);
+			}
+		
+			out.writeTo(response.getOutputStream());
+			out.close();
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
+		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/ownerOpSubConExport.do")
+	public String ownerOpSubConExport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+		System.out.println("\nmileageLogBillingController==ownerOpSubConSearchExport()==type===>"+type+"\n");
+		
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+		
+		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
+		try {
+			Map<String,Object> datas = generateOwnerOpSubConMileageData(criteria, request, input);
+			
+			String reportType = "ownerOpSubConMileageReport";
+			
+			if (StringUtils.isEmpty(type)) {
+				type = "xlsx";
+			}
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename="+reportType+"." + type);
+			}
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String,Object>)datas.get("params");
+			List<MileageLog> mielageLogList = (List<MileageLog>) datas.get("data");
+			
+			if (type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport(reportType+"pdf",
+						mielageLogList, params, type, request);
+			} else if (type.equals("csv")) {
+				out = dynamicReportService.generateStaticReport(reportType+"csv",
+						mielageLogList, params, type, request);
+			} else {
+				out = dynamicReportService.generateStaticReport(reportType,
+						mielageLogList, params, type, request);
 			}
 		
 			out.writeTo(response.getOutputStream());

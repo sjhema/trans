@@ -91,6 +91,11 @@ public class AccidentReportController extends BaseController {
 		
 		String accidentType = (String) criteria.getSearchMap().get("accidentType");
 		
+		String paidFrom = (String) criteria.getSearchMap().get("paidFrom");
+		String paidTo = (String) criteria.getSearchMap().get("paidTo");
+		String totalCostFrom = (String) criteria.getSearchMap().get("totalCostFrom");
+		String totalCostTo = (String) criteria.getSearchMap().get("totalCostTo");
+		
 		String accidentStatus = StringUtils.EMPTY;
 		if (StringUtils.isNotEmpty(overrideAccidentStatus)) {
 			accidentStatus = overrideAccidentStatus;
@@ -140,6 +145,20 @@ public class AccidentReportController extends BaseController {
       	}
       	accidentStatusClause += " in (";
 			whereClause.append(accidentStatusClause + accidentStatus + ")");
+		}
+      
+      if (StringUtils.isNotEmpty(paidFrom)) {
+			whereClause.append(" and obj.paid >=" + paidFrom);
+		}
+      if (StringUtils.isNotEmpty(paidTo)) {
+			whereClause.append(" and obj.paid <=" + paidTo);
+		}
+      
+      if (StringUtils.isNotEmpty(totalCostFrom)) {
+			whereClause.append(" and obj.totalCost >=" + totalCostFrom);
+		}
+      if (StringUtils.isNotEmpty(totalCostTo)) {
+			whereClause.append(" and obj.totalCost <=" + totalCostTo);
 		}
       
       query.append(whereClause);

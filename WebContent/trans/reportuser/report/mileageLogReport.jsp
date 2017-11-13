@@ -29,6 +29,12 @@ function processMPGReport() {
 	document.forms[0].submit();
 }
 
+function processOwnerOpSubConReport() {
+	document.forms[0].elements["reportType"].value = 'OWNER_OP_SUBCON';
+	document.forms[0].action='ownerOpSubConSearch.do'
+	document.forms[0].submit();
+}
+
 $(function() {
 	$("#periodFrom").datepicker( {
         changeMonth: true,
@@ -222,21 +228,33 @@ $(document).ready(function() {
 				</form:select>
 			</td>
 		</tr>
+		<tr>
+		 	<td class="form-left"><primo:label code="Subcontractors" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="subcontractor" multiple="true">
+					<form:option value="-1">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${subcontractors}" itemValue="id" itemLabel="name" />
+				</form:select>
+			</td>
+		</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}" colspan="3">
 				<input type="button"
 					onclick="javascript:processMileageLogTotalsReport()" value="Totals" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processMileageLogDetailsReport()" value="HUT" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processIFTAReport()" value="IFTA" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processMPGReport()" value="MPG" />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processOwnerOpSubConReport()" value="Subcon. mileage report" />
 			</td>
 		</tr>
 	</table>

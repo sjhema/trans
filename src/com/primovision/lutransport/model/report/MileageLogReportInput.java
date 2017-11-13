@@ -9,6 +9,7 @@ public class MileageLogReportInput {
 	private String periodTo;
 	private String state;
 	private String company;
+	private String subcontractor;
 	private String unit;
 	private String firstInStateFrom;
 	private String firstInStateTo;
@@ -101,5 +102,11 @@ public class MileageLogReportInput {
 	}
 	public void setDrillDownUnit(String drillDownUnit) {
 		this.drillDownUnit = drillDownUnit;
+	}
+	public String getSubcontractor() {
+		return subcontractor;
+	}
+	public void setSubcontractor(String subcontractor) {
+		this.subcontractor = subcontractor;
 	}
 }

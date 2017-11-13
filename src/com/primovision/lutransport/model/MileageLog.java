@@ -70,6 +70,9 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 	@Transient
 	private String periodStr;
 	
+	@Transient
+	private String subcontractorStr;
+	
 	public Date getFirstInState() {
 		return firstInState;
 	}
@@ -174,5 +177,14 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 	@Transient
 	public void setPeriodStr(String periodStr) {
 		this.periodStr = periodStr;
+	}
+
+	@Transient
+	public String getSubcontractorStr() {
+		return subcontractorStr;
+	}
+	@Transient
+	public void setSubcontractorStr(String subcontractorStr) {
+		this.subcontractorStr = subcontractorStr;
 	}
 }
