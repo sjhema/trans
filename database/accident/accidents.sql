@@ -143,3 +143,20 @@ VALUES ('300146', '/uploadData/accident.do', 'Upload Accident', '3', 'Upload Acc
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300146', '1'); -- ADMIN
+
+----
+UPDATE `lutransport`.`business_object` SET `URL`='/reportuser/report/mileagelog/start.do,/reportuser/report/mileagelog/save.do,/reportuser/report/mileagelog/search.do,/reportuser/report/mileagelog/iftaSearch.do,/reportuser/report/mileagelog/mpgSearch.do,/reportuser/report/mileagelog/export.do,/reportuser/report/mileagelog/iftaExport.do,/reportuser/report/mileagelog/mpgExport.do,/reportuser/report/mileagelog/ajax.do,/reportuser/report/mileagelog/mileageLogDetailsDrillDownReport.do,/reportuser/report/mileagelog/ownerOpSubConSearch.do,/reportuser/report/mileagelog/ownerOpSubConExport.do' WHERE `ID`='30105';
+---
+
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Workers Comp.', `OBJECT_NAME`='Workers Comp.' WHERE `ID`='30014';
+
+INSERT INTO `lutransport`.`business_object` 
+(`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
+VALUES ('30015', '/admin/accident/accidentmaint/list.do?rst=1', 'Accidents', '2', 'Accidents', '/admin/accident/accidentmaint/list.do?rst=1,/admin/accident/accidentmaint/create.do,/admin/accident/accidentmaint/edit.do,/admin/accident/accidentmaint/delete.do,/admin/accident/accidentmaint/save.do,/admin/accident/accidentmaint/search.do,/admin/accident/accidentmaint/export.do,/admin/accident/accidentmaint/ajax.do,/admin/accident/accidentmaint/copy.do,/admin/accident/accidentmaint/print.do', '1', '7', '0', '1', '/1/30015/');
+
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '30015', '1'); -- ADMIN
+
+UPDATE `lutransport`.`business_object` SET `display_order`='1', `parent_id`='30015', `hierarchy`='/1/30015/300144/' WHERE `ID`='300144';
+UPDATE `lutransport`.`business_object` SET `display_order`='2', `parent_id`='30015', `hierarchy`='/1/30015/300145/' WHERE `ID`='300145';
+UPDATE `lutransport`.`business_object` SET `display_order`='3', `parent_id`='30015', `hierarchy`='/1/30015/300146/' WHERE `ID`='300146';
