@@ -3962,33 +3962,34 @@ throw new Exception("origin and destindation is empty");
 			countQuery.append(" and  obj.subcontractor.id in (" + subcontractorIds + ")");
 		}
 		
-      if (!StringUtils.isEmpty(periodFrom)) {
+      if (StringUtils.isNotEmpty(periodFrom) && StringUtils.isNotEmpty(periodTo)) {
         	try {
-				query.append(" and obj.unloadDate >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
-				countQuery.append(" and obj.unloadDate >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
-			} catch (ParseException e) {
+        		String periodFromDateStr = mysqldf.format(mileageSearchDateFormat.parse(periodFrom));
+        		String periodToDateStr = mysqldf.format(determineMonthEndDate(mileageSearchDateFormat.parse(periodTo)));
+				String dateCondn = " and ( (obj.unloadDate >='"+periodFromDateStr+"'"
+									  + "        and obj.unloadDate <='"+periodToDateStr+"')";
+				dateCondn +=       "    OR (obj.loadDate >='"+periodFromDateStr+"'"
+							 +        "        and obj.loadDate <='"+periodToDateStr+"')"
+							 +        ")";
+				query.append(dateCondn);
+				countQuery.append(dateCondn);
+        	} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
-        
-      if (!StringUtils.isEmpty(periodTo)){
-        	try {
-				query.append(" and obj.unloadDate <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
-				countQuery.append(" and obj.unloadDate <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-      }
       
       if (StringUtils.isNotEmpty(lastInStateFrom) && StringUtils.isNotEmpty(lastInStateTo)) {
       	/*lastInStateFrom += " 00:00:00";
       	lastInStateTo += " 23:59:59";*/
-        	
-      	query.append(" and obj.unloadDate >='"+lastInStateFrom+"'");
-			query.append(" and obj.unloadDate <='"+lastInStateTo+"'");
-			countQuery.append(" and obj.unloadDate >='"+lastInStateFrom+"'");
-			countQuery.append(" and obj.unloadDate <='"+lastInStateTo+"'");
-			
+      	
+      	String dateCondn = " and ( (obj.unloadDate >='"+lastInStateFrom+"'"
+      						  + "        and obj.unloadDate <='"+lastInStateTo+"')";
+      	dateCondn +=       "    OR (obj.loadDate >='"+lastInStateFrom+"'"
+      				 +        "        and obj.loadDate <='"+lastInStateTo+"')"
+      				 +        ")";
+      	query.append(dateCondn);
+      	countQuery.append(dateCondn);
+       
 			/*query.append(" and  obj.unloadDate between '" + lastInStateFrom
 					+ "' and '" + lastInStateTo + "'");
 			countQuery.append(" and  obj.unloadDate between '" + lastInStateFrom
@@ -4035,6 +4036,13 @@ throw new Exception("origin and destindation is empty");
 		
 		wrapper.setMileageLogList(returnMileageLogList);
 		return wrapper;
+	}
+	
+	private Date determineMonthEndDate(Date date) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+		return c.getTime();
 	}
 	
 	private void map(MileageLog aMilageLog, Ticket aTicket, Double miles) {
