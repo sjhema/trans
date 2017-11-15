@@ -3968,9 +3968,9 @@ throw new Exception("origin and destindation is empty");
         		String periodToDateStr = mysqldf.format(determineMonthEndDate(mileageSearchDateFormat.parse(periodTo)));
 				String dateCondn = " and ( (obj.unloadDate >='"+periodFromDateStr+"'"
 									  + "        and obj.unloadDate <='"+periodToDateStr+"')";
-				dateCondn +=       "    OR (obj.loadDate >='"+periodFromDateStr+"'"
-							 +        "        and obj.loadDate <='"+periodToDateStr+"')"
-							 +        ")";
+				/*dateCondn +=       "    OR (obj.loadDate >='"+periodFromDateStr+"'"
+							 +        "        and obj.loadDate <='"+periodToDateStr+"')"*/
+				dateCondn		  +=     ")";
 				query.append(dateCondn);
 				countQuery.append(dateCondn);
         	} catch (ParseException e) {
@@ -3984,9 +3984,9 @@ throw new Exception("origin and destindation is empty");
       	
       	String dateCondn = " and ( (obj.unloadDate >='"+lastInStateFrom+"'"
       						  + "        and obj.unloadDate <='"+lastInStateTo+"')";
-      	dateCondn +=       "    OR (obj.loadDate >='"+lastInStateFrom+"'"
-      				 +        "        and obj.loadDate <='"+lastInStateTo+"')"
-      				 +        ")";
+      	/*dateCondn +=       "    OR (obj.loadDate >='"+lastInStateFrom+"'"
+      				 +        "        and obj.loadDate <='"+lastInStateTo+"')"*/
+      	dateCondn        +=     ")";
       	query.append(dateCondn);
       	countQuery.append(dateCondn);
        
@@ -4020,10 +4020,11 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setLastInStateFrom(lastInStateFrom);
 		wrapper.setLastInStateTo(lastInStateTo);
 		
+		Map<String, LocationDistance> locationDistanceMap = retrieveAllLocationDistance();
 		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
 		double totalMiles = 0.0;
 		for (Ticket aTicket : ticketList) {
-			Double miles = retrieveLocationDistance(aTicket);
+			Double miles = retrieveLocationDistance(locationDistanceMap, aTicket);
 			totalMiles += miles;
 			
 			MileageLog aReturnMileageLog = new MileageLog();
@@ -4049,6 +4050,36 @@ throw new Exception("origin and destindation is empty");
 		aMilageLog.setSubcontractorStr(aTicket.getSubcontractor().getName());
 		aMilageLog.setCompany(aTicket.getDriverCompany());
 		aMilageLog.setMiles(miles);
+	}
+	
+	private Map<String, LocationDistance> retrieveAllLocationDistance() {
+		String query = "select obj from LocationDistance obj order by obj.origin.name asc, obj.destination.name asc";
+		List<LocationDistance> locationDistanceList = genericDAO.executeSimpleQuery(query);
+		
+		Map<String, LocationDistance> locationDistanceMap = new HashMap<String, LocationDistance>();
+		for (LocationDistance aLocationDistance : locationDistanceList) {
+			String key = aLocationDistance.getOrigin().getId().longValue() + "|" 
+						+ aLocationDistance.getDestination().getId().longValue();
+			locationDistanceMap.put(key, aLocationDistance);
+		}
+		return locationDistanceMap;
+	}
+	
+	private Double retrieveLocationDistance(Map<String, LocationDistance> locationDistanceMap, Ticket ticket) {
+		Double zeroMiles = new Double(0.0);
+		Location origin = ticket.getOrigin();
+		Location destination = ticket.getDestination();
+		if (origin == null || destination == null) {
+			return zeroMiles;
+		}
+		
+		String key = origin.getId().longValue() + "|" + destination.getId().longValue();
+		LocationDistance aLocationDistance = locationDistanceMap.get(key);
+		if (aLocationDistance == null) {
+			return zeroMiles;
+		} else {
+			return aLocationDistance.getMiles();
+		}
 	}
 	
 	private Double retrieveLocationDistance(Ticket ticket) {
