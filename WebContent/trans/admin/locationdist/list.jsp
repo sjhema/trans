@@ -1,11 +1,11 @@
 <%@include file="/common/taglibs.jsp"%>
 <h3>
-	<primo:label code="Manage Location Distance" />
+	<primo:label code="Manage Load Miles" />
 </h3>
 <form:form action="search.do" method="post" name="locationDistanceSearchForm">
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
-			<td colspan="4"><b>Search Location Distance</b></td>
+			<td colspan="4"><b>Search Load Miles</b></td>
 		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Origin"/></td>

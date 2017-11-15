@@ -22,7 +22,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[LOCATION DISTANCE REPORT]]></text>
+				<text><![CDATA[LOAD MILES REPORT]]></text>
 			</staticText>
 		</band>
 	</pageHeader>

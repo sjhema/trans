@@ -160,7 +160,7 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 		
 		if (entity.getId() == null) {
 			if (checkDuplicate(entity)) {
-				request.getSession().setAttribute("error", "Duplicate Location distance");
+				request.getSession().setAttribute("error", "Duplicate Load Miles");
 				return "redirect:create.do";
 			}
 		}
@@ -170,11 +170,11 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 		cleanUp(request);
 		
 		if (StringUtils.isNotEmpty(request.getParameter("id"))){
-			request.getSession().setAttribute("msg", "Location distance updated successfully");
+			request.getSession().setAttribute("msg", "Load Miles updated successfully");
 			return "redirect:list.do";
 		}
 		else {			
-			request.getSession().setAttribute("msg", "Location distance added successfully");
+			request.getSession().setAttribute("msg", "Load Miles added successfully");
 			return "redirect:create.do";
 		}
 	}
@@ -186,7 +186,7 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 			return false;
 		}
 		
-		String query = "select count(obj)  from LocationDistance obj where 1=1"
+		String query = "select count(obj) from LocationDistance obj where 1=1"
 				+ " and obj.origin.id=" + origin.getId()
 				+ " and obj.destination.id=" + destination.getId();
 		 Long recordCount = (Long) genericDAO.getEntityManager().createQuery(
@@ -217,7 +217,7 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 		String reportName = "locationDistanceReport";
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html")) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
+			response.setHeader("Content-Disposition", "attachment;filename=" + "loadMilesReport" + "." + type);
 		}
 		
 		List<LocationDistance> locationDistanceList = searchForExport(model, request);

@@ -1,14 +1,14 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <h3>
-	<primo:label code="Add/Update Location Distance" />
+	<primo:label code="Add/Update Load Miles" />
 </h3>
 
 <form:form action="save.do" name="modelForm" modelAttribute="modelObject" method="post">
 	<form:hidden path="id" id="id" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
-			<td colspan="5"><b>Location Distance</b></td>
+			<td colspan="5"><b>Load Miles</b></td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Origin" /><span class="errorMessage">*</span></td>

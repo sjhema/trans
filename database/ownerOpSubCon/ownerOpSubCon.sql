@@ -23,3 +23,5 @@ VALUES ('30107', '/admin/locationdist/list.do?rst=1', 'Manage Location Distance'
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '30107', '1');
+
+UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Manage Load Miles', `OBJECT_NAME`='Manage Load Miles', `display_order`='8', `parent_id`='140', `hierarchy`='/1/140/30107' WHERE `ID`='30107';

@@ -229,7 +229,7 @@ $(document).ready(function() {
 			</td>
 		</tr>
 		<tr>
-		 	<td class="form-left"><primo:label code="Subcontractors" /><span class="errorMessage"></span></td>
+		 	<td class="form-left"><primo:label code="Owner Operator" /><span class="errorMessage"></span></td>
 			<td>
 				<form:select cssClass="flat" path="subcontractor" multiple="true">
 					<form:option value="-1">------<primo:label code="Please Select" />------</form:option>
@@ -254,7 +254,7 @@ $(document).ready(function() {
 					onclick="javascript:processMPGReport()" value="MPG" />
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
-					onclick="javascript:processOwnerOpSubConReport()" value="Subcon. mileage report" />
+					onclick="javascript:processOwnerOpSubConReport()" value="Owner Operator Miles" />
 			</td>
 		</tr>
 	</table>
