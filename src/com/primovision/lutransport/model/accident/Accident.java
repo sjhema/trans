@@ -115,6 +115,12 @@ public class Accident extends AbstractBaseModel {
 	@Column(name="hm_release")
 	private String hmRelease;
 	
+	@Column(name="incident_time")
+	private String incidentTime;
+	
+	@Column(name="fatality")
+	private String fatality;
+	
 	@Column(name="paid")
 	private Double paid;
 	
@@ -370,6 +376,22 @@ public class Accident extends AbstractBaseModel {
 		this.recordable = recordable;
 	}
 	
+	public String getIncidentTime() {
+		return incidentTime;
+	}
+
+	public void setIncidentTime(String incidentTime) {
+		this.incidentTime = incidentTime;
+	}
+
+	public String getFatality() {
+		return fatality;
+	}
+
+	public void setFatality(String fatality) {
+		this.fatality = fatality;
+	}
+
 	@Transient
 	public String getWeatherStr() {
 		return (weather == null ? StringUtils.EMPTY : weather.getWeather());

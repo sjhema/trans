@@ -548,11 +548,17 @@ function formatTime(timeElemId) {
 			</td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Incident Date" /><span class="errorMessage">*</span></td>
+			<td class="form-left"><primo:label code="Accident Date" /><span class="errorMessage">*</span></td>
 			<td align="${left}">
 				<form:input id="datepicker" path="incidentDate" style="min-width:158px; max-width:158px" 
 					cssClass="flat" size="10" onblur="return formatDate('datepicker');" />
 				<br><form:errors path="incidentDate" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Accident Time" /></td>
+			<td align="${left}">
+				<form:input path="incidentTime" size="5" style="min-width:158px; max-width:158px" cssClass="flat" 
+					onkeypress="return onlyNumbers(event, false)" onblur="return formatTime('incidentTime')"/>
+				<br><form:errors path="incidentTime" cssClass="errorMessage" /> 
 			</td>
 		</tr>
 		<tr>
@@ -623,6 +629,22 @@ function formatTime(timeElemId) {
 			</td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Fatality" /><span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:select cssClass="flat" path="fatality" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:option value="Yes">Yes</form:option>
+					<form:option value="No">No</form:option>
+				</form:select>
+				<br><form:errors path="fatality" cssClass="errorMessage" /> 
+			</td>
+			<td class="form-left"><primo:label code="# Injured" /></td>
+			<td align="${left}">
+				<form:input path="noInjured" style="min-width:162px; max-width:162px" cssClass="flat" />
+				<br><form:errors path="noInjured" cssClass="errorMessage" /> 
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Vehicle Damage" /><span class="errorMessage"></span></td>
 			<td align="${left}">
 				<form:select cssClass="flat" path="vehicleDamage" style="min-width:166px; max-width:166px">
@@ -631,11 +653,6 @@ function formatTime(timeElemId) {
 					<form:option value="No">No</form:option>
 				</form:select>
 				<br><form:errors path="vehicleDamage" cssClass="errorMessage" /> 
-			</td>
-			<td class="form-left"><primo:label code="# Injured" /></td>
-			<td align="${left}">
-				<form:input path="noInjured" style="min-width:162px; max-width:162px" cssClass="flat" />
-				<br><form:errors path="noInjured" cssClass="errorMessage" /> 
 			</td>
 		</tr>
 		<tr>

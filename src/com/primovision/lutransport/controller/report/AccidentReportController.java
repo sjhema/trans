@@ -91,6 +91,8 @@ public class AccidentReportController extends BaseController {
 		
 		String accidentType = (String) criteria.getSearchMap().get("accidentType");
 		
+		String recordable = (String) criteria.getSearchMap().get("recordable");
+		
 		String paidFrom = (String) criteria.getSearchMap().get("paidFrom");
 		String paidTo = (String) criteria.getSearchMap().get("paidTo");
 		String totalCostFrom = (String) criteria.getSearchMap().get("totalCostFrom");
@@ -115,6 +117,9 @@ public class AccidentReportController extends BaseController {
 		}
 		if (StringUtils.isNotEmpty(claimNumber)) {
 			whereClause.append(" and obj.claimNumber='" + claimNumber + "'");
+		}
+		if (StringUtils.isNotEmpty(recordable)) {
+			whereClause.append(" and obj.recordable='" + recordable + "'");
 		}
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");

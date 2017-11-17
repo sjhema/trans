@@ -94,6 +94,14 @@
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="Recordable"/></td>
+			<td align="${left}">
+				<select id="recordable" name="recordable" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<option value="Yes">Yes</option>
+					<option value="No">No</option>
+				</select>
+			</td>
 	   	</tr>
 	 	<tr>
 			<td align="${left}"></td>
@@ -112,21 +120,24 @@
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false"
 		exportPdf="true" exportXls="true" exportCsv="true">
-		<primo:textcolumn headerText="Ins Comp." dataField="insuranceCompany.name" width="50px"/>
-		<primo:textcolumn headerText="Claim #" dataField="claimNumber" width="50px"/>
-	    <primo:datecolumn headerText="Incident Date" dataField="incidentDate" dataFormat="MM-dd-yyyy" width="95px"/>
+		<primo:textcolumn headerText="Ins Comp." dataField="insuranceCompany.name"/>
+		<primo:textcolumn headerText="Claim #" dataField="claimNumber"/>
+	    <primo:datecolumn headerText="Accident Date" dataField="incidentDate" dataFormat="MM-dd-yyyy"/>
+	    <primo:textcolumn headerText="Accident Time" dataField="incidentTime" />
         <primo:textcolumn headerText="Employee" dataField="driver.fullName" />
-        <primo:textcolumn headerText="Emp. Comp." dataField="driverCompany.name" width="75px"/>
-        <primo:textcolumn headerText="Emp. Term." dataField="driverTerminal.name" width="45px"/>
+        <primo:textcolumn headerText="Comp." dataField="driverCompany.name"/>
+        <primo:textcolumn headerText="Term." dataField="driverTerminal.code"/>
         <primo:textcolumn headerText="Unit" dataField="vehicle.unitNum" />
         <primo:textcolumn headerText="Location" dataField="location" />
         <primo:textcolumn headerText="State" dataField="state.name" />
         <primo:staticdatacolumn headerText="Status" dataField="accidentStatus" dataType="ACCIDENT_STATUS"/>
         <primo:textcolumn headerText="Accident Cause" dataField="accidentCause.cause" />
-        <primo:textcolumn headerText="Road" dataField="roadCondition.roadCondition" width="55px"/>
-        <primo:textcolumn headerText="Weather" dataField="weather.weather" width="55px"/>
-        <primo:textcolumn headerText="Citation" dataField="citation" width="55px"/>
-        <primo:textcolumn headerText="Towed" dataField="towed" width="55px"/>
+        <primo:textcolumn headerText="Rec." dataField="recordable"/>
+        <primo:textcolumn headerText="# inj." dataField="noInjured"/>
+        <primo:textcolumn headerText="Fatal." dataField="fatality"/>
+        <primo:textcolumn headerText="Road" dataField="roadCondition.roadCondition"/>
+        <primo:textcolumn headerText="Citn." dataField="citation"/>
+        <primo:textcolumn headerText="Tow" dataField="towed"/>
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
     </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>

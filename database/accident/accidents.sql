@@ -95,6 +95,8 @@ CREATE TABLE `accident` (
   `expense` double DEFAULT NULL,
   `total_cost` double DEFAULT NULL,
   `deductible` double DEFAULT NULL,
+  `incident_time` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `fatality` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `accident_insurance_comp_fk_idx` (`insurance_company`),
   KEY `accident_insurance_comp_rep_fk_idx` (`claim_rep`),

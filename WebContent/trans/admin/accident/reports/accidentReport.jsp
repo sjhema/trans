@@ -133,6 +133,14 @@ function formatDate(dateElemId) {
 			</td>
 	   	</tr>
 		<tr>
+			<td align="${left}" class="first"><primo:label code="Recordable"/></td>
+			<td align="${left}">
+				<select id="recordable" name="recordable" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<option value="Yes">Yes</option>
+					<option value="No">No</option>
+				</select>
+			</td>
 			<td align="${left}" class="first"><primo:label code="Claim No."/></td>
 			<td align="${left}">
 				<select id="claimNumber" name="claimNumber" style="min-width:154px; max-width:154px">
@@ -161,6 +169,7 @@ function formatDate(dateElemId) {
 					 value="${sessionScope.searchCriteria.searchMap.incidentDateTo}" /> 
 			</td>
 		</tr>
+		<!-- 
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Paid From" /></td>
 			<td>
@@ -175,7 +184,8 @@ function formatDate(dateElemId) {
 					 value="${sessionScope.searchCriteria.searchMap.paidTo}"/>
 			</td>
 		</tr>
-			<tr>
+		-->
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Total Cost From" /></td>
 			<td>
 				<input id="totalCostFrom" name="totalCostFrom" style="min-width:148px; max-width:148px" class="flat" 

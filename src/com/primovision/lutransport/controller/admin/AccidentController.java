@@ -114,6 +114,8 @@ public class AccidentController extends CRUDController<Accident> {
 		
 		String claimNumber = (String) criteria.getSearchMap().get("claimNumber");
 		
+		String recordable = (String) criteria.getSearchMap().get("recordable");
+		
 		String accidentType = (String) criteria.getSearchMap().get("accidentType");
 		String accidentStatus = (String) criteria.getSearchMap().get("accidentStatus");
 		
@@ -129,6 +131,9 @@ public class AccidentController extends CRUDController<Accident> {
 		}
 		if (StringUtils.isNotEmpty(claimNumber)) {
 			whereClause.append(" and obj.claimNumber='" + claimNumber + "'");
+		}
+		if (StringUtils.isNotEmpty(recordable)) {
+			whereClause.append(" and obj.recordable='" + recordable + "'");
 		}
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");
