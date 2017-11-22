@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.operator;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.BillingRate;
@@ -48,6 +52,7 @@ import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.WMTicket;
+import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.Employee;
@@ -106,7 +111,7 @@ public class TicketController extends CRUDController<Ticket> {
 		setupList(model, request);
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
-		String driverdIds = "";
+		/*String driverdIds = "";
 		String driverId = (String) criteria.getSearchMap().get(
 		"driver.id");		
 		if (!StringUtils.isEmpty(driverId)) {			
@@ -131,8 +136,55 @@ public class TicketController extends CRUDController<Ticket> {
 		dateupdateService.updateDate(request, "uDate","unloadDate");
 		dateupdateService.updateDate(request, "pDate","payRollBatch");
 		model.addAttribute("list",
-				genericDAO.search(getEntityClass(), criteria));
+				genericDAO.search(getEntityClass(), criteria));*/
+		
+		List<Ticket> ticketList = performSearch(criteria, request);
+		model.addAttribute("list", ticketList);
 		return urlContext + "/list";
+	}
+	
+	private List<Ticket> performSearch(SearchCriteria criteria, HttpServletRequest request) {
+		String driverdIds = "";
+		String driverId = (String) criteria.getSearchMap().get("driver.id");		
+		if (!StringUtils.isEmpty(driverId)) {			
+			Map criterias = new HashMap();
+			criterias.put("fullName", driverId);
+			List<Driver> drivers = genericDAO.findByCriteria(Driver.class, criterias);
+			if(drivers!=null && drivers.size()>0){
+				for(Driver driver:drivers){
+					if(driverdIds.equals(""))
+						driverdIds = driver.getId().toString();
+					else
+						driverdIds = driverdIds+","+driver.getId();					
+				}
+				criteria.getSearchMap().put("driver.id",driverdIds);
+			}
+		}
+		
+		checkAndRemoveSubContractorCriteria(criteria);
+		
+		dateupdateService.updateDate(request, "billBatchDate", "billBatch");
+		dateupdateService.updateDate(request, "lDate","loadDate");
+		dateupdateService.updateDate(request, "uDate","unloadDate");
+		dateupdateService.updateDate(request, "pDate","payRollBatch");
+		
+		return genericDAO.search(getEntityClass(), criteria);
+	}
+
+	private List<Ticket> searchForExport(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPage = criteria.getPage();
+		int origPageSize = criteria.getPageSize();
+		
+		criteria.setPage(0);
+		criteria.setPageSize(15000);
+		
+		List<Ticket> ticketList = performSearch(criteria, request);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(origPageSize);
+		
+		return ticketList;
 	}
 
 	@Override
@@ -2204,6 +2256,78 @@ public class TicketController extends CRUDController<Ticket> {
 		}
 		// return to list
 		return "redirect:/" + urlContext + "/list.do";
+	}
+	
+	@Override
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		if (StringUtils.equals("xls", type )) {
+			exportForUpload(model, request, response);
+			return;
+		}
+		
+		List columnPropertyList = (List) request.getSession().getAttribute(
+				"columnPropertyList");
+		SearchCriteria criteria = (SearchCriteria) request.getSession()
+				.getAttribute("searchCriteria");
+
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html"))
+			response.setHeader("Content-Disposition", "attachment;filename="
+					+ urlContext + "Report." + type);
+		try {
+			criteria.setPageSize(100000);
+			String label = getCriteriaAsString(criteria);
+			ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(),
+					columnPropertyList, criteria, request);
+			out.writeTo(response.getOutputStream());
+			if (type.equals("html"))
+				response.getOutputStream()
+						.println(
+								"<script language=\"javascript\">window.print()</script>");
+			criteria.setPageSize(25);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		}
+	}
+	
+	private void exportForUpload(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response) {
+		String reportName = "ticketsForUpload";
+		String type = "csv";
+		response.setContentType(MimeUtil.getContentType(type));
+		response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
+		
+		List<Ticket> ticketList = searchForExport(model, request);
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		//List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+		ByteArrayOutputStream out = null;
+		try {
+			/*out = dynamicReportService.exportReport(
+						urlContext + "Report", type, getEntityClass(), injuryList,
+						columnPropertyList, request);*/
+			out = dynamicReportService.generateStaticReport(reportName,
+					ticketList, params, type, request);
+			out.writeTo(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+					out = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@ModelAttribute("modelObject")

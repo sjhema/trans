@@ -6786,6 +6786,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<String> importMainSheet(InputStream is) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+		
 		// initializing the InputStream from a file using
 		// POIFSFileSystem, before converting the result
 		// into an HSSFWorkbook instance
@@ -6825,12 +6827,33 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					ticket = new Ticket();
 					ticket.setTicketStatus(1);
 					ticket.setPayRollStatus(1);
-					if (validDate(getCellValue(row.getCell(0))))
+
+					Object loadDateObj = getCellValue(row.getCell(0), true);
+					if (loadDateObj == null) {
+						error = true;
+						lineError.append("Load Date,");
+					} else if (loadDateObj instanceof Date) {
+						ticket.setLoadDate((Date)loadDateObj);
+					} else {
+						String loadDateStr = loadDateObj.toString();
+						loadDateStr = StringUtils.trimToEmpty(loadDateStr);
+						Date loadDate = sdf.parse(loadDateStr);
+						ticket.setLoadDate(loadDate);
+					}
+					/*try {
+						Date loadDate = sdf.parse((String) getCellValue(row.getCell(0), true));
+						ticket.setLoadDate(loadDate);
+					} catch (ParseException p) {
+						error = true;
+						lineError.append("Load Date,");
+					}*/
+					
+					/*if (validDate(getCellValue(row.getCell(0))))
 						ticket.setLoadDate((Date) getCellValue(row.getCell(0)));
 					else {
 						error = true;
 						lineError.append("Load Date,");
-					}
+					}*/
 					if (validTime((String) getCellValue(row.getCell(1)))) {
 						StringBuilder timeIn = new StringBuilder(
 								StringUtils.leftPad((String) getCellValue(row.getCell(1)), 4, '0'));
@@ -6877,13 +6900,33 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						lineError.append("Trailer,");
 						log.warn(ex.getMessage());
 					}
-					Object unloadDate = getCellValue(row.getCell(5));
+					
+					Object unloadDateObj = getCellValue(row.getCell(5), true);
+					if (unloadDateObj == null) {
+						error = true;
+						lineError.append("Unload Date,");
+					} else if (unloadDateObj instanceof Date) {
+						ticket.setUnloadDate((Date)unloadDateObj);
+					} else {
+						String unloadDateStr = unloadDateObj.toString();
+						unloadDateStr = StringUtils.trimToEmpty(unloadDateStr);
+						Date unloadDate = sdf.parse(unloadDateStr);
+						ticket.setUnloadDate(unloadDate);
+					}
+					/*try {
+						Date unloadDate = sdf.parse((String) getCellValue(row.getCell(5)));
+						ticket.setUnloadDate(unloadDate);
+					} catch (ParseException p) {
+						error = true;
+						lineError.append("Unload Date,");
+					}*/
+					/*Object unloadDate = getCellValue(row.getCell(5));
 					if (validDate(unloadDate))
 						ticket.setUnloadDate((Date) unloadDate);
 					else {
 						error = true;
 						lineError.append("" + " Date,");
-					}
+					}*/
 					if (validTime((String) getCellValue(row.getCell(6)))) {
 						StringBuilder timeIn = new StringBuilder(
 								StringUtils.leftPad((String) getCellValue(row.getCell(6)), 4, '0'));
@@ -7119,6 +7162,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							 * 
 							 * else {
 							 */
+							//String subcontractorMod = subcontractor.replace("&", "\"&\"");
 							criterias.clear();
 							criterias.put("name", subcontractor);
 							SubContractor contractor = genericDAO.getByCriteria(SubContractor.class, criterias);
@@ -7134,13 +7178,34 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						error = true;
 						lineError.append("Sub Contractor,");
 					}
-					Object billBatch = getCellValue(row.getCell(22));
+					
+					Object billbatchDateObj = getCellValue(row.getCell(22), true);
+					if (billbatchDateObj == null) {
+						error = true;
+						lineError.append("Bill Batch Date,");
+					} else if (billbatchDateObj instanceof Date) {
+						ticket.setBillBatch((Date)billbatchDateObj);
+					} else {
+						String billbatchDateStr = billbatchDateObj.toString();
+						billbatchDateStr = StringUtils.trimToEmpty(billbatchDateStr);
+						Date billbatchDate = sdf.parse(billbatchDateStr);
+						ticket.setBillBatch(billbatchDate);
+					}
+					/*try {
+						Date billBatch = sdf.parse((String) getCellValue(row.getCell(22)));
+						ticket.setBillBatch(billBatch);
+					} catch (ParseException p) {
+						error = true;
+						lineError.append("Batch Date,");
+					}*/
+					
+					/*Object billBatch = getCellValue(row.getCell(22));
 					if (validDate(billBatch))
 						ticket.setBillBatch((Date) billBatch);
 					else {
 						error = true;
 						lineError.append("Batch Date,");
-					}
+					}*/
 					try {
 						criterias.clear();
 						String locCode = (String) getCellValue(row.getCell(24));
@@ -7186,10 +7251,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					if (!error) {
 						if (tickets.contains(ticket)) {
 							lineError.append("Duplicate Ticket,");
-							error = true;
-							errorcount++;
+							/*error = true;
+							errorcount++;*/
 						} else {
-							tickets.add(ticket);
+							//tickets.add(ticket);
+							genericDAO.saveOrUpdate(ticket);
 						}
 					} else {
 						errorcount++;
@@ -7209,11 +7275,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		} catch (Exception e) {
 			log.warn("Error in import customer :" + e);
 		}
-		if (errorcount == 0) {
+		/*if (errorcount == 0) {
 			for (Ticket ticket : tickets) {
 				genericDAO.saveOrUpdate(ticket);
 			}
-		}
+		}*/
 		return list;
 	}
 

@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -574,6 +575,23 @@ public class Ticket extends AbstractBaseModel {
 		this.driverPayRate = driverPayRate;
 	}
 	
+	@Transient
+	public String getSubcontractorName() {
+		if (subcontractor == null) {
+			return StringUtils.EMPTY;
+		} else {
+			return subcontractor.getName();
+		}
+	}
+	
+	@Transient
+	public String getTrailerNum() {
+		if (trailer == null) {
+			return StringUtils.EMPTY;
+		} else {
+			return trailer.getUnitNum();
+		}
+	}
 
 	@Override
 	public boolean equals(Object obj) {
