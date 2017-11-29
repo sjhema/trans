@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.primovision.lutransport.controller.BaseController;
 
 import com.primovision.lutransport.core.util.MimeUtil;
-
+import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.accident.Accident;
@@ -72,6 +72,10 @@ public class AccidentReportController extends BaseController {
 		criterias.put("dataType", "ACCIDENT_STATUS");
 		model.addAttribute("statuses", genericDAO.findByCriteria(StaticData.class, criterias, "dataText", false));
 		
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
 		// select obj from Vehicle obj where obj.type=1 group by obj.unit
 		String vehicleQuery = "select obj from Vehicle obj group by obj.unit, obj.type";
 		model.addAttribute("vehicles", genericDAO.executeSimpleQuery(vehicleQuery));
@@ -84,6 +88,7 @@ public class AccidentReportController extends BaseController {
 	
 	private Map<String, Object> performSearch(SearchCriteria criteria, String overrideAccidentStatus,
 			Boolean searchNotInAccidentStatus) {
+		String driverCompany = (String) criteria.getSearchMap().get("driverCompany");
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
 		
@@ -112,6 +117,9 @@ public class AccidentReportController extends BaseController {
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Accident obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
 		
+		if (StringUtils.isNotEmpty(driverCompany)) {
+			whereClause.append(" and obj.driverCompany.id=" + driverCompany);
+		}
 		if (StringUtils.isNotEmpty(insuranceCompany)) {
 			whereClause.append(" and obj.insuranceCompany.id=" + insuranceCompany);
 		}
