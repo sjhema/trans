@@ -152,7 +152,7 @@ public class InjuryReportController extends BaseController {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.driverCompany.name asc, obj.driverTerminal.name asc, obj.driver.fullName asc, obj.incidentDate asc");
+      query.append(" order by obj.incidentDate desc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	

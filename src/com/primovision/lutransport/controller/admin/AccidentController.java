@@ -45,6 +45,7 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.accident.AccidentCause;
@@ -75,6 +76,7 @@ public class AccidentController extends CRUDController<Accident> {
 		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(Vehicle.class));
 		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
+		binder.registerCustomEditor(SubContractor.class, new AbstractModelEditor(SubContractor.class));
 		binder.registerCustomEditor(InsuranceCompany.class, new AbstractModelEditor(InsuranceCompany.class));
 		binder.registerCustomEditor(InsuranceCompanyRep.class, new AbstractModelEditor(InsuranceCompanyRep.class));
 		binder.registerCustomEditor(AccidentType.class, new AbstractModelEditor(AccidentType.class));
@@ -196,6 +198,15 @@ public class AccidentController extends CRUDController<Accident> {
 		model.addAttribute("claimReps", claimReps);
 		
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName asc, id desc", false));
+		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class,	criterias, "name", false));
+		
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		criterias.clear();
+		criterias.put("type", 4);
+		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
 	}
 	
 	public void setupCommon(ModelMap model, HttpServletRequest request) {
@@ -268,11 +279,15 @@ public class AccidentController extends CRUDController<Accident> {
 	}
 	
 	private void setDriverDetails(Accident entity) {
+		if (entity.getDriver() == null) {
+			return;
+		}
+		
 		Long driverId = entity.getDriver().getId();
 		Driver driver = retrieveDriver(driverId);
 		
-		entity.setDriverCompany(driver.getCompany());
-		entity.setDriverTerminal(driver.getTerminal());
+		/*entity.setDriverCompany(driver.getCompany());
+		entity.setDriverTerminal(driver.getTerminal());*/
 		entity.setDriverHiredDate(driver.getDateHired());
 	}
 	
@@ -285,8 +300,17 @@ public class AccidentController extends CRUDController<Accident> {
 		if (entity.getIncidentDate() == null) {
 			bindingResult.rejectValue("incidentDate", "NotNull.java.util.Date", null, null);
 		}
-		if (entity.getDriver() == null) {
+		if (entity.getDriver() == null && entity.getSubcontractor() == null) {
 			bindingResult.rejectValue("driver", "error.select.option", null, null);
+		}
+		if (entity.getDriver() != null && entity.getSubcontractor() != null) {
+			bindingResult.rejectValue("subcontractor", "error.select.option", null, null);
+		}
+		if (entity.getDriverCompany() == null) {
+			bindingResult.rejectValue("driverCompany", "error.select.option", null, null);
+		}
+		if (entity.getDriverTerminal() == null) {
+			bindingResult.rejectValue("driverTerminal", "error.select.option", null, null);
 		}
 		if (entity.getVehicle() == null) {
 			bindingResult.rejectValue("vehicle", "error.select.option", null, null);
@@ -431,7 +455,20 @@ public class AccidentController extends CRUDController<Accident> {
 		} else if (StringUtils.equalsIgnoreCase("saveAccidentRoadCondition", action)) {
 			AccidentRoadCondition accidentRoadCondition = saveAccidentRoadCondition(request);
 			return "Accident Road Condition details saved successfully:" + accidentRoadCondition.getId();
-		} 
+		} else if (StringUtils.equals("retrieveDriverCompTerm", action)) {
+			String driverIdStr = request.getParameter("driverId");
+			if (StringUtils.isEmpty(driverIdStr)) {
+				return StringUtils.EMPTY;
+			}
+			
+			Long driverId = Long.valueOf(driverIdStr);
+			Driver driver = genericDAO.getById(Driver.class, driverId);
+			if (driver == null) {
+				return StringUtils.EMPTY;
+			} 
+			
+			return driver.getCompany().getId().longValue() + "|" + driver.getTerminal().getId().longValue();
+		}
 		
 		return StringUtils.EMPTY;
 	}

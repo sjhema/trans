@@ -125,6 +125,7 @@
 	    <primo:datecolumn headerText="Accident Date" dataField="incidentDate" dataFormat="MM-dd-yyyy"/>
 	    <primo:textcolumn headerText="Accident Time" dataField="incidentTime" />
         <primo:textcolumn headerText="Employee" dataField="driver.fullName" />
+        <primo:textcolumn headerText="Subcon." dataField="subcontractor.name" />
         <primo:textcolumn headerText="Comp." dataField="driverCompany.name"/>
         <primo:textcolumn headerText="Term." dataField="driverTerminal.code"/>
         <primo:textcolumn headerText="Unit" dataField="vehicle.unitNum" />

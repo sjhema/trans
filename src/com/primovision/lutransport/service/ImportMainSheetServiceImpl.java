@@ -1117,15 +1117,30 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					}
 					currentAccident.setClaimNumber(claimNo);
 					
+					boolean missingDriver = false;
 					Integer driverNameCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_DRIVER_NAME);
 					String driverName = ((String) getCellValue(row.getCell(driverNameCol)));
 					driverName = StringUtils.trimToEmpty(driverName);
 					Driver driver = WorkerCompUtils.retrieveDriverByCommaSep(driverName, genericDAO);
 					if (driver == null) {
-						recordError = true;
-						recordErrorMsg.append("Employee Name, ");
+						/*recordError = true;
+						recordErrorMsg.append("Employee Name, ");*/
+						missingDriver = true;
 					} else {
 						currentAccident.setDriver(driver);
+					}
+					
+					if (missingDriver) {
+						Integer subcontractorNameCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_SUBCONTRACTOR);
+						String subcontractorName = ((String) getCellValue(row.getCell(subcontractorNameCol)));
+						subcontractorName = StringUtils.trimToEmpty(subcontractorName);
+						SubContractor subcontractor = WorkerCompUtils.retrieveSubcontractor(subcontractorName, genericDAO);
+						if (subcontractor == null) {
+							recordError = true;
+							recordErrorMsg.append("Either Employee or Subcontractor is required ");
+						} else {
+							currentAccident.setSubcontractor(subcontractor);
+						}
 					}
 					
 					Integer incidentDateCol = colMapping.get(WorkerCompUtils.ACCIDENT_MAIN_COL_INCIDENT_DATE);
@@ -7251,11 +7266,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					if (!error) {
 						if (tickets.contains(ticket)) {
 							lineError.append("Duplicate Ticket,");
-							/*error = true;
-							errorcount++;*/
+							error = true;
+							errorcount++;
 						} else {
-							//tickets.add(ticket);
-							genericDAO.saveOrUpdate(ticket);
+							tickets.add(ticket);
+							//genericDAO.saveOrUpdate(ticket);
 						}
 					} else {
 						errorcount++;
@@ -7275,11 +7290,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		} catch (Exception e) {
 			log.warn("Error in import customer :" + e);
 		}
-		/*if (errorcount == 0) {
+		if (errorcount == 0) {
 			for (Ticket ticket : tickets) {
 				genericDAO.saveOrUpdate(ticket);
 			}
-		}*/
+		}
 		return list;
 	}
 

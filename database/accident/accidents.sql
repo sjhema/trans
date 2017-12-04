@@ -134,7 +134,7 @@ VALUES (now(), '1', '300144', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300145', '/admin/accident/reports/start.do?rst=1', 'Accident Reports', '3', 'Accident Reports', 
-'/admin/accident/reports/start.do?rst=1,/admin/accident/reports/notReportedSearch.do,/admin/accident/reports/notReportedExport.do,/admin/accident/reports/reportedSearch.do,/admin/accident/reports/reportedExport.do,/admin/accident/reports/allSearch.do,/admin/accident/reports/allExport.do,/admin/accident/reports/ajax.do', '1', '5', '0', '30014', '/1/30014/300145/');
+'/admin/accident/reports/start.do?rst=1,/admin/accident/reports/notReportedSearch.do,/admin/accident/reports/notReportedExport.do,/admin/accident/reports/reportedSearch.do,/admin/accident/reports/reportedExport.do,/admin/accident/reports/allSearch.do,/admin/accident/reports/allExport.do,/admin/accident/reports/yoySearch.do,/admin/accident/reports/yoyExport.do,/admin/accident/reports/ajax.do', '1', '5', '0', '30014', '/1/30014/300145/');
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300145', '1'); -- ADMIN
@@ -162,3 +162,32 @@ VALUES (now(), '1', '30015', '1'); -- ADMIN
 UPDATE `lutransport`.`business_object` SET `display_order`='1', `parent_id`='30015', `hierarchy`='/1/30015/300144/' WHERE `ID`='300144';
 UPDATE `lutransport`.`business_object` SET `display_order`='2', `parent_id`='30015', `hierarchy`='/1/30015/300145/' WHERE `ID`='300145';
 UPDATE `lutransport`.`business_object` SET `display_order`='3', `parent_id`='30015', `hierarchy`='/1/30015/300146/' WHERE `ID`='300146';
+
+---
+ALTER TABLE `lutransport`.`accident` 
+DROP FOREIGN KEY `accident_driver_comp_location_fk`,
+DROP FOREIGN KEY `accident_driver_fk`,
+DROP FOREIGN KEY `accident_driver_terminal_location_fk`;
+ALTER TABLE `lutransport`.`accident` 
+CHANGE COLUMN `driver` `driver` BIGINT(20) NULL DEFAULT NULL ,
+CHANGE COLUMN `driver_company` `driver_company` BIGINT(20) NULL DEFAULT NULL ,
+CHANGE COLUMN `driver_terminal` `driver_terminal` BIGINT(20) NULL DEFAULT NULL ;
+ALTER TABLE `lutransport`.`accident` 
+ADD CONSTRAINT `accident_driver_comp_location_fk`
+  FOREIGN KEY (`driver_company`)
+  REFERENCES `lutransport`.`location` (`id`),
+ADD CONSTRAINT `accident_driver_fk`
+  FOREIGN KEY (`driver`)
+  REFERENCES `lutransport`.`driver` (`id`),
+ADD CONSTRAINT `accident_driver_terminal_location_fk`
+  FOREIGN KEY (`driver_terminal`)
+  REFERENCES `lutransport`.`location` (`id`);
+  
+  ALTER TABLE `lutransport`.`accident` 
+ADD COLUMN `subcontractor` BIGINT(20) NULL DEFAULT NULL AFTER `fatality`,
+ADD INDEX `accident_subcon_fk_idx` (`subcontractor` ASC);
+ALTER TABLE `lutransport`.`accident` 
+ADD CONSTRAINT `accident_subcon_fk`
+  FOREIGN KEY (`subcontractor`)
+  REFERENCES `lutransport`.`subcontractor` (`id`);
+  

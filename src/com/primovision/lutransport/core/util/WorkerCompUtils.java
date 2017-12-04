@@ -16,6 +16,7 @@ import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.accident.AccidentCause;
@@ -106,6 +107,7 @@ public class WorkerCompUtils {
 	public static final String ACCIDENT_MAIN_COL_ACCIDENT_COMMENTS = "Notes";
 	public static final String ACCIDENT_MAIN_COL_CLAIM_REP = "Claim Rep Contact Info";
 	public static final String ACCIDENT_MAIN_COL_STATUS = "Status";
+	public static final String ACCIDENT_MAIN_COL_SUBCONTRACTOR = "Subcontractor";
 	
 	public static final String ACCIDENT_REPORTED_COL_INUSRANCE_COMPANY = "Insurance";
 	public static final String ACCIDENT_REPORTED_COL_CLAIM = "Claim #";
@@ -147,6 +149,7 @@ public class WorkerCompUtils {
 		colMapping.put(ACCIDENT_MAIN_COL_ACCIDENT_COMMENTS, 20);
 		colMapping.put(ACCIDENT_MAIN_COL_CLAIM_REP, 23);
 		colMapping.put(ACCIDENT_MAIN_COL_STATUS, 24);
+		colMapping.put(ACCIDENT_MAIN_COL_SUBCONTRACTOR, 25);
 		
 		return colMapping;
 	}
@@ -250,6 +253,22 @@ public class WorkerCompUtils {
 			return null;
 		} else {
 			return inuranceCompanyList.get(0);
+		}
+	}
+	
+	public static SubContractor retrieveSubcontractor(String subcontractorName, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(subcontractorName)) {
+			return null;
+		}
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("name", subcontractorName);
+	
+		List<SubContractor> subcontractorList = genericDAO.findByCriteria(SubContractor.class, criterias, "id", true);
+		if (subcontractorList == null || subcontractorList.isEmpty()) {
+			return null;
+		} else {
+			return subcontractorList.get(0);
 		}
 	}
 	

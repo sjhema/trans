@@ -41,6 +41,27 @@ function retrieveClaimReps() {
 	});
 }
 
+function retrieveDriverCompTerm() {
+	var driverId = $('#driver').val();
+	if (driverId == "") {
+		return;
+	}
+	
+	$.ajax({
+  		url: "${ctx}/admin/accident/accidentmaint/ajax.do?action=retrieveDriverCompTerm&driverId=" + driverId,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData != '') {
+	       		var compTermTokens = responseData.split("|");
+	       		var driverCompanySel = $("#driverCompany");
+	       		driverCompanySel.val(compTermTokens[0]);
+	       		var driverTerminalSel = $("#driverTerminal");
+	       		driverTerminalSel.val(compTermTokens[1]);
+       		}
+		}
+	});
+}
+
 function saveAccidentCause() {
 	clearAccidentCauseDialogMsgs();
 	
@@ -530,9 +551,10 @@ function formatTime(timeElemId) {
 			</td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Employee" /><span class="errorMessage">*</span></td>
+			<td class="form-left"><primo:label code="Employee" /><span class="errorMessage"></span></td>
 			<td>
-				<form:select cssClass="flat" path="driver" id="driver" style="min-width:166px; max-width:166px">
+				<form:select cssClass="flat" path="driver" id="driver" style="min-width:166px; max-width:166px"
+					onchange="javascript:retrieveDriverCompTerm();">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${drivers}" itemValue="id" itemLabel="fullName"/>
 				</form:select> 
@@ -545,6 +567,34 @@ function formatTime(timeElemId) {
 					<form:options items="${vehicles}" itemValue="unitNum" itemLabel="unitNum"/>
 				</form:select> 
 				<br> <form:errors path="vehicle.unitNum" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Subcontractor" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="subcontractor" id="subcontractor" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:options items="${subcontractors}" itemValue="id" itemLabel="name"/>
+				</form:select> 
+				<br> <form:errors path="subcontractor" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Company" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="driverCompany" id="driverCompany" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name"/>
+				</form:select> 
+				<br> <form:errors path="driverCompany" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Terminal" /><span class="errorMessage">*</span></td>
+			<td>
+				<form:select cssClass="flat" path="driverTerminal" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name"/>
+				</form:select> 
+				<br> <form:errors path="driverTerminal" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>

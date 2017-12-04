@@ -15,6 +15,7 @@ import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.State;
+import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.insurance.InsuranceCompany;
@@ -44,6 +45,10 @@ public class Accident extends AbstractBaseModel {
 	@ManyToOne
 	@JoinColumn(name="driver")
 	private Driver driver;
+	
+	@ManyToOne
+	@JoinColumn(name="subcontractor")
+	private SubContractor subcontractor;
 	
 	@ManyToOne
 	@JoinColumn(name="vehicle")
@@ -392,6 +397,14 @@ public class Accident extends AbstractBaseModel {
 		this.fatality = fatality;
 	}
 
+	public SubContractor getSubcontractor() {
+		return subcontractor;
+	}
+
+	public void setSubcontractor(SubContractor subcontractor) {
+		this.subcontractor = subcontractor;
+	}
+
 	@Transient
 	public String getWeatherStr() {
 		return (weather == null ? StringUtils.EMPTY : weather.getWeather());
@@ -410,5 +423,15 @@ public class Accident extends AbstractBaseModel {
 	@Transient
 	public String getStateStr() {
 		return (state == null ? StringUtils.EMPTY : state.getName());
+	}
+	
+	@Transient
+	public String getDriverName() {
+		return (driver == null ? StringUtils.EMPTY : driver.getFullName());
+	}
+	
+	@Transient
+	public String getSubcontractorName() {
+		return (subcontractor == null ? StringUtils.EMPTY : subcontractor.getName());
 	}
 }
