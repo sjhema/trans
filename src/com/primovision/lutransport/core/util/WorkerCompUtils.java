@@ -641,13 +641,19 @@ public class WorkerCompUtils {
 	}
 	
 	public static Accident retrieveMatchingAccident(Accident anAccident, GenericDAO genericDAO) {
-		if (anAccident == null || anAccident.getDriver() == null
+		if (anAccident == null 
 				|| anAccident.getIncidentDate() == null) {
 			return null;
 		}
 		
-		String query = "select obj from Accident obj where obj.driver.id=" + anAccident.getDriver().getId()
-				+ " and obj.incidentDate='" + requiredDateFormat.format(anAccident.getIncidentDate()) + "'";
+		String query = "select obj from Accident obj where "
+				+ " obj.incidentDate='" + requiredDateFormat.format(anAccident.getIncidentDate()) + "'";
+		if (anAccident.getDriver() != null) {
+			query += " and obj.driver.id=" + anAccident.getDriver().getId();
+		}
+		if (anAccident.getSubcontractor() != null) {
+			query += " and obj.subcontractor.id=" + anAccident.getSubcontractor().getId();
+		}
 		if (anAccident.getInsuranceCompany() != null) {
 			query += " and obj.insuranceCompany.id=" + anAccident.getInsuranceCompany().getId();
 		}
