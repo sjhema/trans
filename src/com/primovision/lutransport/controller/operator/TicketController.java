@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1215,10 +1216,15 @@ public class TicketController extends CRUDController<Ticket> {
 			}
 		}
 		
+		String mode = request.getParameter("mode");
+		if (StringUtils.equals("REVERT", mode)) {
+			String revertMsg = processRevert(commaSperatedID, request);
+		}
+		
 		String ticketQuery = "select obj from Ticket obj where obj.ticketStatus=2 and obj.id in ("+commaSperatedID+")";
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
 		
-		if(tickets.size() > 0 && !tickets.isEmpty()) {
+		if(tickets.size() > 0 && !tickets.isEmpty() && !StringUtils.equals("REVERT", mode)) {
 			request.getSession().removeAttribute("bulkeditids");
 			request.getSession().setAttribute("error",
 			"Some tickets are invoiced. Select only Available tickets. Contact Admin for Invoiced ticket update.");
@@ -1232,6 +1238,25 @@ public class TicketController extends CRUDController<Ticket> {
 		}
 	}
 	
+	private String processRevert(String ticketIds, HttpServletRequest request) {
+		String ticketQuery = "select obj from Ticket obj where obj.id in ("+ticketIds+")";
+		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
+		if (tickets == null || tickets.isEmpty()) {
+			return "No ticktes found for specified criteria";
+		}
+		
+		for (Ticket aTicket : tickets) {
+			aTicket.setPayRollBatch(null);
+			aTicket.setPayRollStatus(0);
+			//aTicket.setDriverPayRate(null);
+			
+			aTicket.setModifiedBy(getUser(request).getId());
+			aTicket.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(aTicket);
+		}
+		
+		return "Reverted successfully";
+	} 
 	
 	
 	@RequestMapping("/prPendingYes.do")

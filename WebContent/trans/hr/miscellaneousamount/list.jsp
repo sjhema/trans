@@ -179,11 +179,15 @@ function formatDate(){
 			<primo:textcolumn headerText="Terminal" dataField="terminal.name" />
 			<primo:textcolumn headerText="Misc. Amount" dataField="misamount" />
 			<primo:textcolumn headerText="Misc. Description" dataField="miscNotes" />
+			<primo:textcolumn headerText="Misc. Category" dataField="miscType" />  
 			<primo:datecolumn headerText="Bill Batch From" dataField="batchFrom"
 			dataFormat="MM-dd-yyyy" />
 		<primo:datecolumn headerText="Bill Batch To" dataField="batchTo"
 			dataFormat="MM-dd-yyyy" />
-			<primo:textcolumn headerText="Misc. Category" dataField="miscType" />                              
+			<primo:datecolumn headerText="Payroll Batch" dataField="payRollBatch"
+			dataFormat="MM-dd-yyyy" />
+			<primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
+			<primo:anchorcolumn headerText="RVT PAY" linkUrl="/hr/miscellaneousamount/edit.do?id={id}&mode=REVERT" linkText="RVT PAY" dataField=""/>                            
 			</primo:datatable>
 		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList")); %>
 	</form:form>

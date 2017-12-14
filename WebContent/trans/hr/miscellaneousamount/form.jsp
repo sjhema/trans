@@ -454,7 +454,18 @@ function getDriver()
 		<form:options items="${miscellaneousType}" itemValue="dataValue" itemLabel="dataLabel"/> 
          </form:select>
             <%-- <br> <form:errors path="miscType" cssClass="errorMessage" /> --%>
-</td>	
+</td>
+</tr>
+<%--
+<tr>
+<td class="form-left" ><primo:label code="Payroll Batch" /></td>
+<td align="${left}"><form:input style="min-width:150px; max-width:150px" path="payRollBatch" cssClass="flat"/> 
+</td>
+<td class="form-left" ><primo:label code="Payroll Pending" /></td>
+<td align="${left}"><form:input style="min-width:150px; max-width:150px" path="payRollStatus" cssClass="flat"/> 
+</td>
+</tr>
+--%>	
 <tr>
   <td class="form-left"><primo:label code="Notes" /><span
 				class="errorMessage"></span></td>

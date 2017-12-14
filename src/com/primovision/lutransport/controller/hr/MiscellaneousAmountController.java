@@ -26,6 +26,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
@@ -52,12 +53,17 @@ import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.HrReportService;
 import com.primovision.lutransport.model.hr.MiscellaneousAmount;
+import com.primovision.lutransport.model.hrreport.DriverPay;
+import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
+import com.primovision.lutransport.model.hrreport.DriverPayroll;
 import com.primovision.lutransport.model.report.Summary;
 
 
 @Controller
 @RequestMapping("/hr/miscellaneousamount")
 public class MiscellaneousAmountController extends CRUDController<MiscellaneousAmount> {	
+	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public MiscellaneousAmountController() {		
 		setUrlContext("/hr/miscellaneousamount");
@@ -81,6 +87,194 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 		}
 		
+		@Override
+		public String edit2(ModelMap model, HttpServletRequest request) {
+			String mode = request.getParameter("mode");
+			if (StringUtils.equals("REVERT", mode)) {
+				String revertMsg = processRevert(model, request);
+			}
+			
+			setupUpdate(model, request);
+			return urlContext + "/form";
+		}
+		
+		private String processRevert(ModelMap model, HttpServletRequest request) {
+			MiscellaneousAmount miscAmt = (MiscellaneousAmount) model.get("modelObject");
+			if (miscAmt.getPayRollBatch() == null || miscAmt.getPayRollStatus() == 1) {
+				return StringUtils.EMPTY;
+			}
+			
+			String miscType = deduceMiscType(miscAmt);
+			if (StringUtils.isEmpty(miscType)) {
+				return StringUtils.EMPTY;
+			}
+			
+			Driver driver = miscAmt.getDriver();
+			String payTerm = driver.getPayTerm();
+			if (StringUtils.equals("1", payTerm)) {
+				return processRevertForDriver(request, miscAmt, miscType);
+			} else if (StringUtils.equals("2", payTerm)) {
+				return processRevertForHourly(request, miscAmt, miscType);
+			} else if (StringUtils.equals("3", payTerm)) {
+				return processRevertForSalary(request, miscAmt, miscType);
+			} else {
+				return "Payroll Revert not supported for specified employee type";
+			}
+		}
+		
+		private String processRevertForHourly(HttpServletRequest request, MiscellaneousAmount miscAmt,
+				String miscType) {
+			return "Payroll Reverted successfully";
+		}
+		
+		private String processRevertForSalary(HttpServletRequest request, MiscellaneousAmount miscAmt,
+				String miscType) {
+			return "Payroll Reverted successfully";
+		}
+		
+		private String processRevertForDriver(HttpServletRequest request, MiscellaneousAmount miscAmtObj,
+				String miscType) {
+			Driver driver = miscAmtObj.getDriver();
+			String driverFullName = driver.getFullName();
+
+			String checkDate = sdf.format(miscAmtObj.getPayRollBatch());
+			//String batchDateFrom = sdf.format(miscAmtObj.getBatchFrom());
+			String batchDateTo = sdf.format(miscAmtObj.getBatchTo());
+			
+			String company = String.valueOf(miscAmtObj.getCompany().getId());
+			String terminal = String.valueOf(miscAmtObj.getTerminal().getId());
+			
+			boolean revertMisc = StringUtils.equals(miscType, "MISC") ? true : false;
+			boolean revertReimb = StringUtils.equals(miscType, "REIMB") ? true : false;
+			
+			StringBuilder driverPayQuery = new StringBuilder("select obj from DriverPay obj where 1=1");
+			if (StringUtils.isNotEmpty(driverFullName)){
+				driverPayQuery.append(" and drivername='").append(driverFullName).append("'");
+			}
+			if (StringUtils.isNotEmpty(company)){
+				driverPayQuery.append(" and company='").append(company).append("'");
+			}
+			if (StringUtils.isNotEmpty(terminal)){
+				driverPayQuery.append(" and terminal='").append(terminal).append("'");
+			}
+			/*if (StringUtils.isNotEmpty(batchDateFrom)){				
+				batchDateFrom = ReportDateUtil.getFromDate(batchDateFrom);
+				driverPayQuery.append(" and billBatchDateFrom >='").append(batchDateFrom).append("'");
+			}*/
+			if (StringUtils.isNotEmpty(batchDateTo)){				
+				batchDateTo = ReportDateUtil.getFromDate(batchDateTo);
+				driverPayQuery.append(" and billBatchDateTo ='").append(batchDateTo).append("'");
+			}
+			if (StringUtils.isNotEmpty(checkDate)){				
+				checkDate = ReportDateUtil.getFromDate(checkDate);
+				driverPayQuery.append(" and payRollBatch ='").append(checkDate).append("'");
+			}
+			
+			List<DriverPay> driverPayList = genericDAO.executeSimpleQuery(driverPayQuery.toString());
+			if (driverPayList == null || driverPayList.isEmpty()) {
+				return "Driver pay not found for selected criteria";
+			}
+			DriverPay driverPay = driverPayList.get(0);
+			
+			Map<String, Object> criterias = new HashMap<String, Object>();
+			criterias.put("company", driverPay.getCompany());
+			criterias.put("payRollBatch", driverPay.getPayRollBatch());
+			criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
+			criterias.put("billBatchTo", driverPay.getBillBatchDateTo());
+			if (driverPay.getTerminal() != null) {
+				criterias.put("terminal", driverPay.getTerminal());
+			}
+			
+			List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
+			if (driverPayrollList == null || driverPayrollList.isEmpty()) {
+				return "Driver pay not found for selected criteria";
+			}
+			DriverPayroll driverPayroll = driverPayrollList.get(0);
+			
+			criterias.clear();
+			criterias.put("company", driverPay.getCompany());
+			criterias.put("payRollBatch", driverPay.getPayRollBatch());
+			criterias.put("billBatchDateFrom", driverPay.getBillBatchDateFrom());
+			criterias.put("billBatchDateTo", driverPay.getBillBatchDateTo());
+			if (driverPay.getTerminal() != null) {
+				criterias.put("terminal", driverPay.getTerminal());
+			}
+			List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
+			if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
+				return "Driver pay not found for selected criteria";
+			}
+			DriverPayFreezWrapper driverPayFreezWrapper = driverPayFreezeWrapperList.get(0);
+			
+			revert(miscAmtObj, request);
+			
+			Double miscAmt = miscAmtObj.getMisamount();
+			driverPayroll.setSumAmount(driverPayroll.getSumAmount() - miscAmt);
+			
+			if (revertReimb) {
+				driverPay.setReimburseAmount(driverPay.getReimburseAmount() - miscAmt);
+				
+				if (driverPayFreezWrapper.getReimburseAmount() != null
+						&& driverPayFreezWrapper.getReimburseAmount() != 0.0) {
+					driverPayFreezWrapper.setReimburseAmount(driverPayFreezWrapper.getReimburseAmount() - miscAmt);
+				}
+				if (driverPayFreezWrapper.getReimburseAmt() != null
+						&& driverPayFreezWrapper.getReimburseAmt() != 0.0) {
+					driverPayFreezWrapper.setReimburseAmt(driverPayFreezWrapper.getReimburseAmt());
+				}
+			}
+			
+			if (revertMisc) {
+				driverPay.setMiscAmount(driverPay.getMiscAmount() - miscAmt);
+				driverPay.setTotalAmount(driverPay.getTotalAmount() - miscAmt);
+				
+				if (driverPayFreezWrapper.getMiscAmount() != null
+						&& driverPayFreezWrapper.getMiscAmount() != 0.0) {
+					driverPayFreezWrapper.setMiscAmount(driverPayFreezWrapper.getMiscAmount() - miscAmt);
+				}
+				if (driverPayFreezWrapper.getMiscamt() != null
+						&& driverPayFreezWrapper.getMiscamt() != 0.0) {
+					driverPayFreezWrapper.setMiscamt(driverPayFreezWrapper.getMiscamt() - miscAmt);
+				}
+				if (driverPayFreezWrapper.getTotalAmount() != null
+						&& driverPayFreezWrapper.getTotalAmount() != 0.0) {
+					driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - miscAmt);
+				}
+			}
+			
+			driverPay.setModifiedBy(getUser(request).getId());
+			driverPay.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(driverPay);
+			
+			driverPayroll.setModifiedBy(getUser(request).getId());
+			driverPayroll.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(driverPayroll);
+			
+			driverPayFreezWrapper.setModifiedBy(getUser(request).getId());
+			driverPayFreezWrapper.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(driverPayFreezWrapper);
+			
+			return "Payroll Reverted successfully";
+		}
+		
+		private String deduceMiscType(MiscellaneousAmount miscAmt) {
+			if (!StringUtils.equals(miscAmt.getMiscNotes(), "Reimbursement")
+					&& !StringUtils.equals(miscAmt.getMiscType(), "Quarter Bonus")) {
+				return "MISC";
+			} else if (StringUtils.equals(miscAmt.getMiscNotes(), "Reimbursement")) {
+				return "REIMB";
+			} else {
+				return StringUtils.EMPTY;
+			}
+		}
+		
+		private void revert(MiscellaneousAmount miscAmt, HttpServletRequest request) {
+			miscAmt.setPayRollStatus(1);
+			miscAmt.setPayRollBatch(null);
+			
+			miscAmt.setModifiedBy(getUser(request).getId());
+			miscAmt.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(miscAmt);
+		}
 		
 		@Override
 		public String search2(ModelMap model, HttpServletRequest request) {
