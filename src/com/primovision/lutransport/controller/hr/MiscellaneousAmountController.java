@@ -192,6 +192,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			DriverPayroll driverPayroll = driverPayrollList.get(0);
 			
 			criterias.clear();
+			criterias.put("drivername", driverPay.getDrivername());
 			criterias.put("company", driverPay.getCompany());
 			criterias.put("payRollBatch", driverPay.getPayRollBatch());
 			criterias.put("billBatchDateFrom", driverPay.getBillBatchDateFrom());

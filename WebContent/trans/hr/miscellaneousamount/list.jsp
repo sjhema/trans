@@ -174,7 +174,8 @@ function formatDate(){
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false"
 			 >
-			<primo:textcolumn headerText="Employee" dataField="driver.fullName" />			
+			<primo:textcolumn headerText="Employee" dataField="driver.fullName" />	
+			<primo:textcolumn headerText="Category" dataField="driver.catagory.name" />		
 			<primo:textcolumn headerText="Company" dataField="company.name" />
 			<primo:textcolumn headerText="Terminal" dataField="terminal.name" />
 			<primo:textcolumn headerText="Misc. Amount" dataField="misamount" />
