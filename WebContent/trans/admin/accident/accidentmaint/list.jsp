@@ -22,6 +22,23 @@
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="Claim No."/></td>
+			<td align="${left}">
+				<select id="claimNumber" name="claimNumber" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${accidents}" var="anAccident">
+						<c:if test="${anAccident.claimNumber != null and anAccident.claimNumber != ''}">
+							<c:set var="selected" value="" />
+							<c:if test="${sessionScope.searchCriteria.searchMap['claimNumber'] == anAccident.claimNumber}">
+								<c:set var="selected" value="selected" />
+							</c:if>
+							<option value="${anAccident.claimNumber}" ${selected}>${anAccident.claimNumber}</option>
+						</c:if>
+					</c:forEach>
+				</select>
+			</td>
+	   	</tr>
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Employee"/></td>
 			<td align="${left}">
 				<select id="driver" name="driver" style="min-width:154px; max-width:154px">
@@ -35,20 +52,16 @@
 					</c:forEach>
 				</select>
 			</td>
-	   	</tr>
-		<tr>
-			<td align="${left}" class="first"><primo:label code="Claim No."/></td>
+			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
 			<td align="${left}">
-				<select id="claimNumber" name="claimNumber" style="min-width:154px; max-width:154px">
+				<select id="subcontractor" name="subcontractor" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${accidents}" var="anAccident">
-						<c:if test="${anAccident.claimNumber != null and anAccident.claimNumber != ''}">
-							<c:set var="selected" value="" />
-							<c:if test="${sessionScope.searchCriteria.searchMap['claimNumber'] == anAccident.claimNumber}">
-								<c:set var="selected" value="selected" />
-							</c:if>
-							<option value="${anAccident.claimNumber}" ${selected}>${anAccident.claimNumber}</option>
+					<c:forEach items="${subcontractors}" var="aSubcontractor">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['subcontractor'] == aSubcontractor.id}">
+							<c:set var="selected" value="selected"/>
 						</c:if>
+						<option value="${aSubcontractor.id}" ${selected}>${aSubcontractor.name}</option>
 					</c:forEach>
 				</select>
 			</td>

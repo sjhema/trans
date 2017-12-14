@@ -113,6 +113,7 @@ public class AccidentController extends CRUDController<Accident> {
 	private List<Accident> performSearch(SearchCriteria criteria) {
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
+		String subcontractor = (String) criteria.getSearchMap().get("subcontractor");
 		
 		String claimNumber = (String) criteria.getSearchMap().get("claimNumber");
 		
@@ -139,6 +140,9 @@ public class AccidentController extends CRUDController<Accident> {
 		}
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");
+		}
+		if (StringUtils.isNotEmpty(subcontractor)) {
+			whereClause.append(" and obj.subcontractor.id=" + subcontractor);
 		}
 	   if (StringUtils.isNotEmpty(incidentDateFrom)){
         	try {
@@ -198,7 +202,6 @@ public class AccidentController extends CRUDController<Accident> {
 		model.addAttribute("claimReps", claimReps);
 		
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName asc, id desc", false));
-		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class,	criterias, "name", false));
 		
 		criterias.clear();
 		criterias.put("type", 3);
@@ -218,6 +221,7 @@ public class AccidentController extends CRUDController<Accident> {
 		model.addAttribute("roadConditions", genericDAO.findByCriteria(AccidentRoadCondition.class, criterias, "roadCondition asc", false));
 		model.addAttribute("allWeather", genericDAO.findByCriteria(AccidentWeather.class, criterias, "weather asc", false));
 		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
+		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class,	criterias, "name", false));
 		
 		criterias.clear();
 		criterias.put("dataType", "ACCIDENT_STATUS");
@@ -263,6 +267,9 @@ public class AccidentController extends CRUDController<Accident> {
 		
 		request.getSession().setAttribute("msg", "Accident details saved successfully");
 		
+		if (entity.getModifiedAt() == null) {
+			model.addAttribute("modelObject", new Accident());
+		}
 		setupCreate(model, request);
 		
 		return getUrlContext() + "/form";

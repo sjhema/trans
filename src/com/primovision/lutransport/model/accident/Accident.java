@@ -132,6 +132,9 @@ public class Accident extends AbstractBaseModel {
 	@Column(name="deductible")
 	private Double deductible;
 	
+	@Column(name="reimbursement")
+	private Double reimbursement;
+	
 	@Column(name="expense")
 	private Double expense;
 	
@@ -403,6 +406,14 @@ public class Accident extends AbstractBaseModel {
 
 	public void setSubcontractor(SubContractor subcontractor) {
 		this.subcontractor = subcontractor;
+	}
+
+	public Double getReimbursement() {
+		return reimbursement;
+	}
+
+	public void setReimbursement(Double reimbursement) {
+		this.reimbursement = reimbursement;
 	}
 
 	@Transient

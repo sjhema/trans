@@ -191,3 +191,7 @@ ADD CONSTRAINT `accident_subcon_fk`
   FOREIGN KEY (`subcontractor`)
   REFERENCES `lutransport`.`subcontractor` (`id`);
   
+  
+  ALTER TABLE `lutransport`.`accident` 
+ADD COLUMN `reimbursement` DOUBLE NULL DEFAULT NULL AFTER `subcontractor`;
+

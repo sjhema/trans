@@ -752,6 +752,12 @@ function formatTime(timeElemId) {
 					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
 				<br><form:errors path="deductible" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Reimbursement" /><span class="errorMessage"></span></td>
+			<td>
+				<form:input path="reimbursement" style="min-width:162px; max-width:162px" cssClass="flat" 
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
+				<br><form:errors path="reimbursement" cssClass="errorMessage" />
+			</td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="Expense" /><span class="errorMessage"></span></td>
@@ -768,17 +774,17 @@ function formatTime(timeElemId) {
 			</td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Total Cost" /><span class="errorMessage"></span></td>
-			<td>
-				<form:input path="totalCost" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="9" onkeypress="return onlyNumbers(event, true)" />
-				<br><form:errors path="totalCost" cssClass="errorMessage" />
-			</td>
 			<td class="form-left"><primo:label code="Paid" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="paid" style="min-width:162px; max-width:162px" cssClass="flat" 
 					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
 				<br><form:errors path="paid" cssClass="errorMessage" />
+			</td>
+			<td class="form-left"><primo:label code="Total Cost" /><span class="errorMessage"></span></td>
+			<td>
+				<form:input path="totalCost" style="min-width:162px; max-width:162px" cssClass="flat" 
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)" />
+				<br><form:errors path="totalCost" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
