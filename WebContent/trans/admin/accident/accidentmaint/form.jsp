@@ -62,6 +62,26 @@ function retrieveDriverCompTerm() {
 	});
 }
 
+function populateTotalCost() {
+	var paid = $("#paid").val();
+	var expense = $("#expense").val();
+	var reserve = $("#reserve").val();
+	
+	var totalCost = parseFloat("0.00");
+	
+	if (paid != "") {
+		totalCost += parseFloat(paid);
+	}
+	if (expense != "") {
+		totalCost += parseFloat(expense);
+	}
+	if (reserve != "") {
+		totalCost += parseFloat(reserve);
+	}
+	
+	$("#totalCost").val(totalCost.toFixed(2));
+}
+
 function saveAccidentCause() {
 	clearAccidentCauseDialogMsgs();
 	
@@ -763,13 +783,13 @@ function formatTime(timeElemId) {
 			<td class="form-left"><primo:label code="Expense" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="expense" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();" />  
 				<br><form:errors path="expense" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Reserve" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="reserve" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"/>  
 				<br><form:errors path="reserve" cssClass="errorMessage" />
 			</td>
 		</tr>
@@ -777,7 +797,7 @@ function formatTime(timeElemId) {
 			<td class="form-left"><primo:label code="Paid" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="paid" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"/>  
 				<br><form:errors path="paid" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Total Cost" /><span class="errorMessage"></span></td>

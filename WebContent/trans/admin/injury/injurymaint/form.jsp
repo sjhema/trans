@@ -276,7 +276,7 @@ function populateTotalCost() {
 	var expenseElem = document.getElementById("expense");
 	var reserveElem = document.getElementById("reserve");
 	
-	var toalPaidElem = document.getElementById("totalPaid");
+	//var toalPaidElem = document.getElementById("totalPaid");
 	var totalClaimedElem = document.getElementById("totalClaimed");
 	
 	var medicalCost = parseFloat(0.00);
@@ -299,10 +299,10 @@ function populateTotalCost() {
 		reserve = parseFloat((parseFloat(reserveElem.value)).toFixed(2));
 	}
 	
-	var totalPaid =  parseFloat((medicalCost + indemnityCost + expense + reserve).toFixed(2));
+	//var totalPaid =  parseFloat((medicalCost + indemnityCost + expense + reserve).toFixed(2));
 	var totalClaimed =  parseFloat((medicalCost + indemnityCost + expense + reserve).toFixed(2));
 	
-	toalPaidElem.value = totalPaid;
+	//toalPaidElem.value = totalPaid;
 	totalClaimedElem.value = totalClaimed;
 }
 
@@ -607,13 +607,13 @@ function formatTime(timeElemId) {
 			<td class="form-left"><primo:label code="Medical Cost" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="medicalCost" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"/>  
 				<br><form:errors path="medicalCost" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Indemnity" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="indemnityCost" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  onchange="return populateTotalCost();"/>  
 				<br><form:errors path="indemnityCost" cssClass="errorMessage" />
 			</td>
 		</tr>
@@ -621,17 +621,18 @@ function formatTime(timeElemId) {
 			<td class="form-left"><primo:label code="Expense" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="expense" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)"  />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();" />  
 				<br><form:errors path="expense" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Reserve" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="reserve" style="min-width:162px; max-width:162px" cssClass="flat" 
-					 maxlength="7" onkeypress="return onlyNumbers(event, true)" />  
+					 maxlength="7" onkeypress="return onlyNumbers(event, true)" onchange="return populateTotalCost();"/>  
 				<br><form:errors path="reserve" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
+			<%--
 			<td class="form-left"><primo:label code="Total Paid" /><span class="errorMessage"></span></td>
 			<td>
 				<!-- 
@@ -642,6 +643,7 @@ function formatTime(timeElemId) {
 					 maxlength="9" onkeypress="return onlyNumbers(event, true)" />
 				<br><form:errors path="totalPaid" cssClass="errorMessage" />
 			</td>
+			--%>
 			<td class="form-left"><primo:label code="Total Claimed" /><span class="errorMessage"></span></td>
 			<td>
 				<form:input path="totalClaimed" style="min-width:162px; max-width:162px" cssClass="flat" 
