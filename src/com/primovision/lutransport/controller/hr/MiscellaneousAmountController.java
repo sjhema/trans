@@ -50,12 +50,16 @@ import com.primovision.lutransport.model.hr.EmpBonusTypesList;
 //import com.primovision.lutransport.model.hr.Employee;
 import com.primovision.lutransport.model.hr.EmployeeBonus;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hr.HourlyPayrollInvoice;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.HrReportService;
 import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hrreport.DriverPay;
 import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPayroll;
+import com.primovision.lutransport.model.hrreport.HourlyPayrollInvoiceDetails;
+import com.primovision.lutransport.model.hrreport.WeeklyPay;
+import com.primovision.lutransport.model.hrreport.WeeklyPayDetail;
 import com.primovision.lutransport.model.report.Summary;
 
 
@@ -64,6 +68,7 @@ import com.primovision.lutransport.model.report.Summary;
 public class MiscellaneousAmountController extends CRUDController<MiscellaneousAmount> {	
 	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 	public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static SimpleDateFormat mysqldf1 = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public MiscellaneousAmountController() {		
 		setUrlContext("/hr/miscellaneousamount");
@@ -92,6 +97,11 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			String mode = request.getParameter("mode");
 			if (StringUtils.equals("REVERT", mode)) {
 				String revertMsg = processRevert(model, request);
+				if (StringUtils.contains(revertMsg, "success")) {
+					request.getSession().setAttribute("msg", "Payroll reverted successfully");
+				} else {
+					request.getSession().setAttribute("error", revertMsg);
+				}
 			}
 			
 			setupUpdate(model, request);
@@ -101,7 +111,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		private String processRevert(ModelMap model, HttpServletRequest request) {
 			MiscellaneousAmount miscAmt = (MiscellaneousAmount) model.get("modelObject");
 			if (miscAmt.getPayRollBatch() == null || miscAmt.getPayRollStatus() == 1) {
-				return StringUtils.EMPTY;
+				return "Nothing to revert";
 			}
 			
 			String miscType = deduceMiscType(miscAmt);
@@ -122,13 +132,172 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			}
 		}
 		
-		private String processRevertForHourly(HttpServletRequest request, MiscellaneousAmount miscAmt,
+		private String processRevertForHourly(HttpServletRequest request, MiscellaneousAmount miscAmtObj,
 				String miscType) {
+			Driver driver = miscAmtObj.getDriver();
+			String driverFullName = driver.getFullName();
+
+			String checkDate = mysqldf1.format(miscAmtObj.getPayRollBatch());
+			String batchDateFrom = mysqldf1.format(miscAmtObj.getBatchFrom());
+			String batchDateTo = mysqldf1.format(miscAmtObj.getBatchTo());
+			
+			String company = String.valueOf(miscAmtObj.getCompany().getId());
+			String terminal = miscAmtObj.getTerminal() == null ? StringUtils.EMPTY 
+					: String.valueOf(miscAmtObj.getTerminal().getId());
+			
+			boolean revertMisc = StringUtils.equals(miscType, "MISC") ? true : false;
+			boolean revertReimb = StringUtils.equals(miscType, "REIMB") ? true : false;
+			
+			StringBuilder hourlyPayQuery= new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where ")
+					.append(" obj.date='")
+					.append(mysqldf1.format(checkDate))
+					.append("' and obj.batchdate='")
+					.append(batchDateFrom)
+					.append("' and obj.batchdateTo='")
+					.append(batchDateTo)
+					.append("' and obj.companyLoc=")
+					.append(company);
+			if (StringUtils.isNotEmpty(driverFullName)){
+				hourlyPayQuery.append(" and driver='").append(driverFullName).append("'");
+			}
+			if (StringUtils.isNotEmpty(terminal)) {
+				hourlyPayQuery.append(" and obj.terminalLoc="+terminal);
+			} else {
+				hourlyPayQuery.append(" and obj.terminalLoc="+null);
+			}
+			
+			List<HourlyPayrollInvoiceDetails> hourlyPayrollInvoiceDetailsList = genericDAO.executeSimpleQuery(hourlyPayQuery.toString());
+			if (hourlyPayrollInvoiceDetailsList == null || hourlyPayrollInvoiceDetailsList.isEmpty()) {
+				return "Hourly pay not found for selected criteria";
+			}
+			if (hourlyPayrollInvoiceDetailsList.size() > 1) {
+				return "More than one Hourly pay found for selected criteria";
+			} 
+			HourlyPayrollInvoiceDetails hourlyPayrollInvoiceDetails = hourlyPayrollInvoiceDetailsList.get(0);
+			
+			Map<String, Object> criterias = new HashMap<String, Object>();
+			criterias.put("company", hourlyPayrollInvoiceDetails.getCompany());
+			criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getDate());
+			criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getBatchdate());
+			criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getBatchdateTo());
+			if (hourlyPayrollInvoiceDetails.getTerminal() != null) {
+				criterias.put("terminal", hourlyPayrollInvoiceDetails.getTerminal());
+			}
+			
+			List<HourlyPayrollInvoice> hourlyPayrollInvoiceList = genericDAO.findByCriteria(HourlyPayrollInvoice.class, criterias);
+			if (hourlyPayrollInvoiceList == null || hourlyPayrollInvoiceList.isEmpty()) {
+				return "Hourly pay not found for selected criteria";
+			}
+			if (hourlyPayrollInvoiceList.size() > 1) {
+				return "More than one Hourly pay found for selected criteria";
+			} 
+			HourlyPayrollInvoice hourlyPayrollInvoice = hourlyPayrollInvoiceList.get(0);
+			
+			revert(miscAmtObj, request);
+			
+			Double miscAmt = miscAmtObj.getMisamount();
+			hourlyPayrollInvoice.setSumtotalamount(hourlyPayrollInvoice.getSumtotalamount() - miscAmt);
+			
+			if (revertReimb) {
+				hourlyPayrollInvoiceDetails.setReimburseAmount(hourlyPayrollInvoiceDetails.getReimburseAmount() - miscAmt);
+			}
+			
+			if (revertMisc) {
+				hourlyPayrollInvoiceDetails.setMiscAmount(hourlyPayrollInvoiceDetails.getMiscAmount() - miscAmt);
+				hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - miscAmt);
+				
+			}
+			
+			hourlyPayrollInvoiceDetails.setModifiedBy(getUser(request).getId());
+			hourlyPayrollInvoiceDetails.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(hourlyPayrollInvoiceDetails);
+			
+			hourlyPayrollInvoice.setModifiedBy(getUser(request).getId());
+			hourlyPayrollInvoice.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(hourlyPayrollInvoice);
+			
 			return "Payroll Reverted successfully";
 		}
 		
-		private String processRevertForSalary(HttpServletRequest request, MiscellaneousAmount miscAmt,
+		private String processRevertForSalary(HttpServletRequest request, MiscellaneousAmount miscAmtObj,
 				String miscType) {
+			Driver driver = miscAmtObj.getDriver();
+			String driverFullName = driver.getFullName();
+
+			String checkDate = mysqldf1.format(miscAmtObj.getPayRollBatch());
+			//String batchDateFrom = mysqldf1.format(miscAmtObj.getBatchFrom());
+			String batchDateTo = mysqldf1.format(miscAmtObj.getBatchTo());
+			
+			String company = String.valueOf(miscAmtObj.getCompany().getId());
+			String terminal = miscAmtObj.getTerminal() == null ? StringUtils.EMPTY 
+					: String.valueOf(miscAmtObj.getTerminal().getId());
+			
+			boolean revertMisc = StringUtils.equals(miscType, "MISC") ? true : false;
+			boolean revertReimb = StringUtils.equals(miscType, "REIMB") ? true : false;
+		
+			StringBuilder weeklyPayQuery= new StringBuilder("select obj from WeeklyPayDetail obj where ")
+					.append(" obj.checkDate='")
+					.append(mysqldf1.format(checkDate))
+					.append("' and obj.payRollBatch='")
+					.append(batchDateTo)
+					.append("' and obj.company=")
+					.append(company);
+			if (StringUtils.isNotEmpty(driverFullName)){
+				weeklyPayQuery.append(" and driver='").append(driverFullName).append("'");
+			}
+			if (StringUtils.isNotEmpty(terminal)) {
+				weeklyPayQuery.append(" and obj.terminal="+terminal);
+			} 
+			
+			List<WeeklyPayDetail> weeklyPayDetailList = genericDAO.executeSimpleQuery(weeklyPayQuery.toString());
+			if (weeklyPayDetailList == null || weeklyPayDetailList.isEmpty()) {
+				return "Salary pay not found for selected criteria";
+			}
+			if (weeklyPayDetailList.size() > 1) {
+				return "More than one Salary pay found for selected criteria";
+			} 
+			WeeklyPayDetail weeklyPayDetail = weeklyPayDetailList.get(0);
+			
+			Map<String, Object> criterias = new HashMap<String, Object>();
+			criterias.put("company", weeklyPayDetail.getCompany());
+			criterias.put("checkDate", weeklyPayDetail.getCheckDate());
+			criterias.put("payRollBatch", weeklyPayDetail.getPayRollBatch());
+			if (weeklyPayDetail.getTerminal() != null) {
+				criterias.put("terminal", weeklyPayDetail.getTerminal());
+			}
+			
+			List<WeeklyPay> weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
+			if (weeklyPayList == null || weeklyPayList.isEmpty()) {
+				return "Salary pay not found for selected criteria";
+			}
+			if (weeklyPayList.size() > 1) {
+				return "More than one Salary pay found for selected criteria";
+			} 
+			WeeklyPay weeklyPay = weeklyPayList.get(0);
+			
+			revert(miscAmtObj, request);
+			
+			Double miscAmt = miscAmtObj.getMisamount();
+			weeklyPay.setSumAmount(weeklyPay.getSumAmount() - miscAmt);
+			
+			if (revertReimb) {
+				weeklyPayDetail.setReimburseAmount(weeklyPayDetail.getReimburseAmount() - miscAmt);
+			}
+			
+			if (revertMisc) {
+				weeklyPayDetail.setMiscAmount(weeklyPayDetail.getMiscAmount() - miscAmt);
+				weeklyPayDetail.setTotalAmount(weeklyPayDetail.getTotalAmount() - miscAmt);
+				
+			}
+			
+			weeklyPayDetail.setModifiedBy(getUser(request).getId());
+			weeklyPayDetail.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(weeklyPayDetail);
+			
+			weeklyPay.setModifiedBy(getUser(request).getId());
+			weeklyPay.setModifiedAt(Calendar.getInstance().getTime());
+			genericDAO.saveOrUpdate(weeklyPay);
+			
 			return "Payroll Reverted successfully";
 		}
 		
@@ -142,7 +311,8 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			String batchDateTo = sdf.format(miscAmtObj.getBatchTo());
 			
 			String company = String.valueOf(miscAmtObj.getCompany().getId());
-			String terminal = String.valueOf(miscAmtObj.getTerminal().getId());
+			String terminal = miscAmtObj.getTerminal() == null ? StringUtils.EMPTY 
+					: String.valueOf(miscAmtObj.getTerminal().getId());
 			
 			boolean revertMisc = StringUtils.equals(miscType, "MISC") ? true : false;
 			boolean revertReimb = StringUtils.equals(miscType, "REIMB") ? true : false;
@@ -174,6 +344,9 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (driverPayList == null || driverPayList.isEmpty()) {
 				return "Driver pay not found for selected criteria";
 			}
+			if (driverPayList.size() > 1) {
+				return "More than one Driver pay found for selected criteria";
+			} 
 			DriverPay driverPay = driverPayList.get(0);
 			
 			Map<String, Object> criterias = new HashMap<String, Object>();
@@ -189,6 +362,9 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (driverPayrollList == null || driverPayrollList.isEmpty()) {
 				return "Driver pay not found for selected criteria";
 			}
+			if (driverPayrollList.size() > 1) {
+				return "More than one Driver pay found for selected criteria";
+			} 
 			DriverPayroll driverPayroll = driverPayrollList.get(0);
 			
 			criterias.clear();
@@ -204,6 +380,9 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
 				return "Driver pay not found for selected criteria";
 			}
+			if (driverPayFreezeWrapperList.size() > 1) {
+				return "More than one Driver pay found for selected criteria";
+			} 
 			DriverPayFreezWrapper driverPayFreezWrapper = driverPayFreezeWrapperList.get(0);
 			
 			revert(miscAmtObj, request);
