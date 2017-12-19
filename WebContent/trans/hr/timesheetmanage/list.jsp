@@ -98,6 +98,7 @@
 		<primo:textcolumn headerText="Total Hrs" dataField="hoursworkedInweekRoundedValue" />
 		<primo:textcolumn headerText="Category" dataField="catagory.name" />
 		<primo:anchorcolumn headerText="Copy"  linkUrl="/hr/timesheetmanage/copy.do?id={id}" linkText="Copy"/>
+		<primo:anchorcolumn headerText="Add To Prev"  linkUrl="/hr/timesheetmanage/edit.do?id={id}&mode=ADD_TO_PREV" linkText="Add To Prev"/>
 		
 		<%-- <primo:textcolumn headerText="Sign In" dataField="signintime" />
 		<primo:textcolumn headerText="Sing Out" dataField="signouttime" /> --%>

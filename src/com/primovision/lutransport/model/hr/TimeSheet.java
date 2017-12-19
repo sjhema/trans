@@ -10,6 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
@@ -27,11 +29,16 @@ import com.primovision.lutransport.model.Ticket;
 @Entity
 @Table(name ="timesheet")
 public class TimeSheet extends AbstractBaseModel {
-	
+	@Transient
+	public static String ADD_TO_PREV_MODE = "ADD_TO_PREV";
 
 	private static final long serialVersionUID = 1L;
 
+	@Column(name="seq_num1")
+	private Integer sequenceNum1;
 	
+	@Transient
+	private String mode = StringUtils.EMPTY;
 	
 	@ManyToOne
 	@JoinColumn(name="employee")
@@ -2180,8 +2187,23 @@ public class TimeSheet extends AbstractBaseModel {
 	public void setSluncHours(Double sluncHours) {
 		this.sluncHours = sluncHours;
 	}
-	
-	
-	
+
+	public Integer getSequenceNum1() {
+		return sequenceNum1;
+	}
+
+	public void setSequenceNum1(Integer sequenceNum1) {
+		this.sequenceNum1 = sequenceNum1;
+	}
+
+	@Transient
+	public String getMode() {
+		return mode;
+	}
+
+	@Transient
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
 	
 }

@@ -4605,6 +4605,8 @@ public class HrReportServiceImpl implements HrReportService {
 			
 			if (timeSheet != null) {
 				HourlyPayrollInvoiceDetails output = new HourlyPayrollInvoiceDetails();
+				output.setSequenceNum1(timeSheet.getSequenceNum1());
+				
 				if(timeSheet.getDriver() != null){
 					driverList.add(timeSheet.getDriver().getFullName());
 				}
@@ -8953,6 +8955,11 @@ public class HrReportServiceImpl implements HrReportService {
 					Driver employee=genericDAO.getByCriteria(Driver.class, criterias);
 					if(employee!=null){		
 						PayChexDetail detail=new PayChexDetail();
+						
+						if (invoiceDetails.getSequenceNum1() != null && invoiceDetails.getSequenceNum1() != 0) {
+							detail.setSeqNo(invoiceDetails.getSequenceNum1());
+						}
+						
 						criterias.clear();
 						criterias.put("terminal.id",employee.getTerminal().getId());
 						criterias.put("company.id", employee.getCompany().getId());
@@ -8993,6 +9000,11 @@ public class HrReportServiceImpl implements HrReportService {
 					Driver employee=genericDAO.getByCriteria(Driver.class, criterias);
 					if(employee!=null){
 						PayChexDetail detail=new PayChexDetail();
+						
+						if (invoiceDetails.getSequenceNum1() != null && invoiceDetails.getSequenceNum1() != 0) {
+							detail.setSeqNo(invoiceDetails.getSequenceNum1());
+						}
+						
 						criterias.clear();
 						criterias.put("terminal.id",employee.getTerminal().getId());
 						criterias.put("company.id", employee.getCompany().getId());

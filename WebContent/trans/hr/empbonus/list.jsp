@@ -156,6 +156,11 @@ function formatDate(){
 			<primo:textcolumn headerText="Batch Date To" dataField="batchTo" dataFormat="MM-dd-yyyy"/>
 			<primo:datecolumn headerText="Bonus Types" dataField="bonustypes"/>
 			<primo:datecolumn headerText="Total amount" dataField="amounts"/>
+			<primo:datecolumn headerText="Payroll Batch" dataField="payRollBatch"
+			dataFormat="MM-dd-yyyy" />
+			<primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
+			<primo:anchorcolumn headerText="RVT PAY" linkUrl="/hr/empbonus/edit.do?id={id}&mode=REVERT" linkText="RVT PAY" dataField=""/>                            
+			
 			<%-- <primo:textcolumn headerText="Bonus Type" dataField="bonustype.typename" />
 			<primo:datecolumn headerText="Amount" dataField="bonusamount" /> --%>
 			                                                            

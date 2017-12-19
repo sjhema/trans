@@ -1,4 +1,5 @@
 <%@include file="/common/taglibs.jsp"%>
+<%@ page import="com.primovision.lutransport.model.hr.TimeSheet" %>
 <script type="text/javascript">
 function getworksHours0(field){ 
 	
@@ -62,19 +63,11 @@ function getworksHours20(field){
 		slunchHour = 0.0 ;
 	}
 	
+	var hoursworked = 0.0;
+	
 	if(signIn=="" &&  signOut==""  && signIn2==""  && signOut2=="" ){
 		document.getElementById("shoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("shoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
-	var hoursworked = 0.0;
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -149,16 +142,17 @@ function getworksHours20(field){
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
 				
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem;
-				
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem;
+				 */
 				document.getElementById("shoursworkedid").value=Number(hoursworked).toFixed(2);
 				
 			}
 		});	
-	}*/
+	}
+	
 	
 }
 }
@@ -215,20 +209,11 @@ function getworksHours21(field){
 	if(slunchHour==""){
 		slunchHour = 0.0 ;
 	}
-	
-	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
-		document.getElementById("mhoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
-	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("mhoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
 	var hoursworked = 0.0;
+	
+	if(signIn=="" && signIn2=="" && signOut=="" && signIn2=="" ){
+		document.getElementById("mhoursworkedid").value="";
+	}
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -298,16 +283,15 @@ function getworksHours21(field){
 				    hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 				    hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem; 
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				$("#mhoursworkedid").val(Number(hoursworked).toFixed(2));
 				//document.getElementById("mhoursworkedid").value=Number(hoursworked).toFixed(2);		
 			}
 		});	
-	}
-	*/
+	}	
 }
 }
 
@@ -362,19 +346,11 @@ function getworksHours22(field){
 		slunchHour = 0.0 ;
 	}
 	
+	var hoursworked = 0.0;
+	
 	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
 		document.getElementById("thoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("thoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
-	var hoursworked = 0.0;
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -443,14 +419,14 @@ function getworksHours22(field){
 					hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem; 
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				document.getElementById("thoursworkedid").value=Number(hoursworked).toFixed(2);			
 			}
 		});	
-	}*/
+	}
 }
 }
 
@@ -506,19 +482,11 @@ function getworksHours23(field){
 		slunchHour = 0.0 ;
 	}
 	
+	var hoursworked = 0.0;
+	
 	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
 		document.getElementById("whoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("whoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
-	var hoursworked = 0.0;
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -587,14 +555,14 @@ function getworksHours23(field){
 					hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem; 
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				document.getElementById("whoursworkedid").value=Number(hoursworked).toFixed(2);			
 			}
 		});	
-	}*/
+	}
 }
 }
 
@@ -622,19 +590,11 @@ function getworksHours24(field){
 		slunchHour = 0.0 ;
 	}
 	
+	var hoursworked = 0.0;
+	
 	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
 		document.getElementById("thhoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("thhoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
-	var hoursworked = 0.0;
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -705,14 +665,14 @@ function getworksHours24(field){
 					hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem; 
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				document.getElementById("thhoursworkedid").value=Number(hoursworked).toFixed(2);				
 			}
 		});	
-	}*/
+	}
 }
 }
 
@@ -745,7 +705,10 @@ function getworksHours5(field){
 }
 
 
+
+
 function getworksHours25(field){ 
+
 	if(!getTime(field)){
 	var signIn=document.getElementById("fsignintimeid").value;
 	var signInamOrpm=document.getElementById("fsigninampmid").value;
@@ -763,19 +726,10 @@ function getworksHours25(field){
 		slunchHour = 0.0 ;
 	}
 	
-	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ) {
-		document.getElementById("fhoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
-	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("fhoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
 	var hoursworked = 0.0;
+	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
+		document.getElementById("fhoursworkedid").value="";
+	}
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -783,6 +737,7 @@ function getworksHours25(field){
 				var listData=jQuery.parseJSON(data);
 				hoursworked=parseFloat(hoursworked)+parseFloat(listData[0]);
 				hoursworked=Number(hoursworked).toFixed(2);
+
 				slunchHour = Number(slunchHour).toFixed(2);
 				slunchHourArray = (slunchHour+"").split(".");
 				
@@ -843,16 +798,17 @@ function getworksHours25(field){
 					hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem; 
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				document.getElementById("fhoursworkedid").value=Number(hoursworked).toFixed(2);				
 			}
 		});	
-	}*/
+	}
 }
 }
+
 
 
 function getworksHours6(field){ 
@@ -903,19 +859,11 @@ function getworksHours26(field){
 		slunchHour = 0.0 ;
 	}
 	
+	var hoursworked = 0.0;
+	
 	if(signIn=="" && signIn2=="" && signOut=="" && signOut2=="" ){
 		document.getElementById("sthoursworkedid").value="";
-		// Work duration calculation fix - 6th Apr 2016
-		return;
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	calculateAndSetWorkDuration("sthoursworkedid", signIn, signInamOrpm, signOut, signOutamOrpm,
-	                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour);
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*
-	var hoursworked = 0.0;
 	if(signIn!="" && signInamOrpm!="" && signOut!="" && signOutamOrpm!=""){
 		jQuery.ajax({
 			url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm,
@@ -988,40 +936,23 @@ function getworksHours26(field){
 					hoursworked=parseInt(hoursworkedarray[0])+parseInt(hours);
 					hoursworked=(hoursworked+".")+minutes;				    
 				}
-				// hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
-				//hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
-				//hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
-				//hoursworked=(hoursworkedquo+".")+hoursworkedrem;
+				/* hoursworkedhr = Number(hoursworked).toFixed(2)- parseInt(slunchHourArray[0]);
+				hoursworkedquo = parseInt(((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))/60);
+				hoursworkedrem = (((Number(hoursworkedhr)*60) - parseInt(slunchHourArray[1]))%60);				
+				hoursworked=(hoursworkedquo+".")+hoursworkedrem; */
 				document.getElementById("sthoursworkedid").value=Number(hoursworked).toFixed(2);
 				
 				
 			}
 		});	
-	}*/
+	}
 	
 	
 	}
 }
 
-// Work duration calculation fix - 6th Apr 2016
-function calculateAndSetWorkDuration(hoursWorkedElemId, signIn, signInamOrpm, signOut, signOutamOrpm,
-                          signIn2, signInamOrpm2, signOut2, signOutamOrpm2, slunchHour) { 
-	if ( (signIn == "" || signInamOrpm == "" || signOut == "" || signOutamOrpm == "")
-			&& (signIn2 == "" || signInamOrpm2 == "" || signOut2 == "" || signOutamOrpm2 == "") ) {
-		return;
-	}
-	
-	jQuery.ajax({
-		url:'${ctx}/hr/timesheetmanage/ajax.do?action=fidworkedHours'
-			+ '&signIn='+signIn+'&signInamOrpm='+signInamOrpm+'&signOut='+signOut+'&signOutamOrpm='+signOutamOrpm
-			+ '&signIn2='+signIn2+'&signInamOrpm2='+signInamOrpm2+'&signOut2='+signOut2+'&signOutamOrpm2='+signOutamOrpm2
-			+ '&lunchDuration='+slunchHour,
-		success: function( data ) {
-			var listData = jQuery.parseJSON(data);
-			document.getElementById(hoursWorkedElemId).value = listData[0];
-		}
-	});	
-}
+
+
 
 function getComTermCatagory(){
 
@@ -1916,6 +1847,7 @@ function formatDate6(){
 <h3><primo:label code="Add/Update Time Sheet" /></h3>
 <form:form action="save.do" name="typeForm" id="timesheetManageForm" commandName="modelObject" method="post">
 	<form:hidden path="id" id="id" />
+	<form:hidden path="mode" id="mode"/>
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="14"><b><primo:label code="Manage Time Sheet" /></b></td>
@@ -2714,7 +2646,16 @@ function formatDate6(){
 	 			 --%>
 		  			
 	  </tr>
-	  
+	  <c:if test="${modelObject.mode eq 'ADD_TO_PREV'}">
+		  <tr>
+	         <td class="form-left"><primo:label code="Seq Num" /><span class="errorMessage">*</span></td>
+	         <td align="${left}">
+	         	<form:input path="sequenceNum1" id="sequenceNum1" style="min-width:100px; max-width:100px" 
+						class="flat"/> 
+				<br><form:errors path="sequenceNum1" cssClass="errorMessage" />
+			 </td>
+		  </tr>
+	  </c:if>
 	  
 	  
 	

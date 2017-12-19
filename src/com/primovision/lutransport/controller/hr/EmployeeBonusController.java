@@ -50,8 +50,12 @@ import com.primovision.lutransport.model.hr.EmpBonusTypesList;
 import com.primovision.lutransport.model.hr.EmployeeBonus;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.LeaveType;
+import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.Ptodapplication;
+import com.primovision.lutransport.model.hrreport.DriverPay;
+import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPayWrapper;
+import com.primovision.lutransport.model.hrreport.DriverPayroll;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.HrReportService;
@@ -63,6 +67,8 @@ import com.primovision.lutransport.service.HrReportService;
 @Controller
 @RequestMapping("/hr/empbonus")
 public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
+	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	
 	public EmployeeBonusController() {
 	
 	setUrlContext("/hr/empbonus");
@@ -165,9 +171,154 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	@Override
 	public String edit2(ModelMap model, HttpServletRequest request) {
 		// TODO Auto-generated method stub
+		
+		String mode = request.getParameter("mode");
+		if (StringUtils.equals("REVERT", mode)) {
+			String revertMsg = processRevert(model, request);
+		}
+		
 		String id=request.getParameter("id");
 		 return "redirect:edit1.do?id="+id;
 	}
+	
+	private String processRevert(ModelMap model, HttpServletRequest request) {
+		EmployeeBonus empBonus = (EmployeeBonus) model.get("modelObject");
+		if (empBonus.getPayRollBatch() == null || empBonus.getPayRollStatus() == 1) {
+			return StringUtils.EMPTY;
+		}
+		
+		Driver driver = empBonus.getDriver();
+		String payTerm = driver.getPayTerm();
+		if (StringUtils.equals("1", payTerm)) {
+			return processRevertForDriver(request, empBonus);
+		} else if (StringUtils.equals("2", payTerm)) {
+			return processRevertForHourly(request, empBonus);
+		} else if (StringUtils.equals("3", payTerm)) {
+			return processRevertForSalary(request, empBonus);
+		} else {
+			return "Payroll Revert not supported for specified employee type";
+		}
+	}
+	
+	private String processRevertForHourly(HttpServletRequest request, EmployeeBonus empBonus) {
+		return "Payroll Reverted successfully";
+	}
+	
+	private String processRevertForSalary(HttpServletRequest request, EmployeeBonus empBonus) {
+		return "Payroll Reverted successfully";
+	}
+	
+	private String processRevertForDriver(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Driver driver = empBonusObj.getDriver();
+		String driverFullName = driver.getFullName();
+
+		String checkDate = sdf.format(empBonusObj.getPayRollBatch());
+		//String batchDateFrom = sdf.format(miscAmtObj.getBatchFrom());
+		String batchDateTo = sdf.format(empBonusObj.getBatchTo());
+		
+		String company = String.valueOf(empBonusObj.getCompany().getId());
+		String terminal = String.valueOf(empBonusObj.getTerminal().getId());
+		
+		StringBuilder driverPayQuery = new StringBuilder("select obj from DriverPay obj where 1=1");
+		if (StringUtils.isNotEmpty(driverFullName)){
+			driverPayQuery.append(" and drivername='").append(driverFullName).append("'");
+		}
+		if (StringUtils.isNotEmpty(company)){
+			driverPayQuery.append(" and company='").append(company).append("'");
+		}
+		if (StringUtils.isNotEmpty(terminal)){
+			driverPayQuery.append(" and terminal='").append(terminal).append("'");
+		}
+		/*if (StringUtils.isNotEmpty(batchDateFrom)){				
+			batchDateFrom = ReportDateUtil.getFromDate(batchDateFrom);
+			driverPayQuery.append(" and billBatchDateFrom >='").append(batchDateFrom).append("'");
+		}*/
+		if (StringUtils.isNotEmpty(batchDateTo)){				
+			batchDateTo = ReportDateUtil.getFromDate(batchDateTo);
+			driverPayQuery.append(" and billBatchDateTo ='").append(batchDateTo).append("'");
+		}
+		if (StringUtils.isNotEmpty(checkDate)){				
+			checkDate = ReportDateUtil.getFromDate(checkDate);
+			driverPayQuery.append(" and payRollBatch ='").append(checkDate).append("'");
+		}
+		
+		List<DriverPay> driverPayList = genericDAO.executeSimpleQuery(driverPayQuery.toString());
+		if (driverPayList == null || driverPayList.isEmpty()) {
+			return "Driver pay not found for selected criteria";
+		}
+		DriverPay driverPay = driverPayList.get(0);
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("company", driverPay.getCompany());
+		criterias.put("payRollBatch", driverPay.getPayRollBatch());
+		criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
+		criterias.put("billBatchTo", driverPay.getBillBatchDateTo());
+		if (driverPay.getTerminal() != null) {
+			criterias.put("terminal", driverPay.getTerminal());
+		}
+		
+		List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
+		if (driverPayrollList == null || driverPayrollList.isEmpty()) {
+			return "Driver pay not found for selected criteria";
+		}
+		DriverPayroll driverPayroll = driverPayrollList.get(0);
+		
+		criterias.clear();
+		criterias.put("drivername", driverPay.getDrivername());
+		criterias.put("company", driverPay.getCompany());
+		criterias.put("payRollBatch", driverPay.getPayRollBatch());
+		criterias.put("billBatchDateFrom", driverPay.getBillBatchDateFrom());
+		criterias.put("billBatchDateTo", driverPay.getBillBatchDateTo());
+		if (driverPay.getTerminal() != null) {
+			criterias.put("terminal", driverPay.getTerminal());
+		}
+		List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
+		if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
+			return "Driver pay not found for selected criteria";
+		}
+		DriverPayFreezWrapper driverPayFreezWrapper = driverPayFreezeWrapperList.get(0);
+		
+		revert(empBonusObj, request);
+		
+		Double bonusAmt = empBonusObj.getBonustype().getAmount();
+		driverPayroll.setSumAmount(driverPayroll.getSumAmount() - bonusAmt);
+		
+		driverPay.setBonusAmount(driverPay.getBonusAmount() - bonusAmt);
+		driverPay.setTotalAmount(driverPay.getTotalAmount() - bonusAmt);
+			
+		if (driverPayFreezWrapper.getBonusAmount() != null
+				&& driverPayFreezWrapper.getBonusAmount() != 0.0) {
+			driverPayFreezWrapper.setBonusAmount(driverPayFreezWrapper.getBonusAmount() - bonusAmt);
+		}
+		if (driverPayFreezWrapper.getTotalAmount() != null
+				&& driverPayFreezWrapper.getTotalAmount() != 0.0) {
+			driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - bonusAmt);
+		}
+		
+		driverPay.setModifiedBy(getUser(request).getId());
+		driverPay.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(driverPay);
+		
+		driverPayroll.setModifiedBy(getUser(request).getId());
+		driverPayroll.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(driverPayroll);
+		
+		driverPayFreezWrapper.setModifiedBy(getUser(request).getId());
+		driverPayFreezWrapper.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(driverPayFreezWrapper);
+		
+		return "Payroll Reverted successfully";
+	}
+	
+	private void revert(EmployeeBonus empBonus, HttpServletRequest request) {
+		empBonus.setPayRollStatus(1);
+		empBonus.setPayRollBatch(null);
+		
+		empBonus.setModifiedBy(getUser(request).getId());
+		empBonus.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(empBonus);
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/edit1.do")
 	public String edit3(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 		// TODO Auto-generated method stub

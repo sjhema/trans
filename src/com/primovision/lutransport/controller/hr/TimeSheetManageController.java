@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,17 +13,13 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
+import java.util.GregorianCalendar;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IntegerField;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeField;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.Days;
-import org.joda.time.Hours;
 import org.joda.time.LocalDate;
-import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -79,8 +76,6 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 	}
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
-	private static DateTimeFormatter durationFormat = DateTimeFormat.forPattern("hh:mm a");
-	
 	@Override
 	public void initBinder(WebDataBinder binder) {
 		// SimpleDateFormat("yyyy-MM-dd")
@@ -95,6 +90,27 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 		
 	}
 
+	@Override
+	public String edit2(ModelMap model, HttpServletRequest request) {
+		String mode = request.getParameter("mode");
+		if (StringUtils.equals(TimeSheet.ADD_TO_PREV_MODE, mode)) {
+			TimeSheet origEntity = (TimeSheet) model.get("modelObject");
+			TimeSheet newEntity = new TimeSheet();
+			newEntity.setDriver(origEntity.getDriver());
+			newEntity.setCompany(origEntity.getCompany());
+			newEntity.setTerminal(origEntity.getTerminal());
+			newEntity.setCatagory(origEntity.getCatagory());
+			//newEntity.setBatchdate(origEntity.getBatchdate());
+			newEntity.setWeeklyHours(origEntity.getWeeklyHours());
+			newEntity.setDailyHours(origEntity.getDailyHours());
+			newEntity.setMode(TimeSheet.ADD_TO_PREV_MODE);
+			
+			model.addAttribute("modelObject", newEntity);
+		} 
+		
+		setupUpdate(model, request);
+		return urlContext + "/form";
+	}
 	
 	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
@@ -908,10 +924,12 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 		
 		List<TimeSheet> timeSheetList=genericDAO.executeSimpleQuery(duplicateCheckQuery.toString());
 		
-		if(timeSheetList.size()>0 && timeSheetList!=null){
-			request.getSession().setAttribute("error","Record already exist with same details.");
-			setupCreate(model, request);
-			return urlContext + "/form";
+		if (!StringUtils.equals(TimeSheet.ADD_TO_PREV_MODE, entity.getMode())) {
+			if(timeSheetList.size()>0 && timeSheetList!=null){
+				request.getSession().setAttribute("error","Record already exist with same details.");
+				setupCreate(model, request);
+				return urlContext + "/form";
+			}
 		}
 		
 		
@@ -926,98 +944,7 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 		
 		
 	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	/*public static void main(String[] args) {
-		String startTime1 = "06:16 AM";
-		String stopTime1 = "11:01 AM";
-		
-		String startTime2 = "12:59 PM";
-		String stopTime2 = "06:01 PM";
-		
-		String lunchDuration = "0.3";
-		
-		String workedDuration = calculateWorkedDuration(startTime1, stopTime1, 
-				startTime2, stopTime2, lunchDuration);
-		System.out.println("Worked duration : " + workedDuration);
-	}*/
-	
-	// Work duration calculation fix - 6th Apr 2016
-	private String calculateWorkedDuration(String startTime1, String stopTime1, 
-			String startTime2, String stopTime2, String lunchDuration) {
-		String workedDurationStr = StringUtils.EMPTY;
-		try {
-			int totalMins = calculateDuration(startTime1, stopTime1);
-			totalMins += calculateDuration(startTime2, stopTime2);
-			if (totalMins == 0) {
-				return StringUtils.EMPTY;
-			}
-		   
-		   int lunchDurationMinutes = convertToMinutes(lunchDuration);
-		   
-		   int workedMinutes = totalMins - lunchDurationMinutes;
-		   if (workedMinutes == 0) {
-				return StringUtils.EMPTY;
-			}
-		   
-		   int workedDurationInHours = (workedMinutes/60);
-		   int workedDurationInMinutes = (workedMinutes % 60);
-		   
-		   String workedDurationInMinutesStr = String.valueOf(workedDurationInMinutes);
-		   if (workedDurationInMinutesStr.length() == 1) {
-		   	workedDurationInMinutesStr = "0" + workedDurationInMinutesStr;
-		   }
-		   
-		   workedDurationStr = workedDurationInHours + ":" + workedDurationInMinutesStr;
-		   System.out.println("Worked duration : " + workedDurationStr);
-		 } catch (Exception e) {
-		    e.printStackTrace();
-		 }
-		
-		return workedDurationStr;
-	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	private int calculateDuration(String startTime, String endTime) {
-		if (StringUtils.isEmpty(startTime) || StringUtils.isEmpty(endTime)) {
-			return 0;
-		}
-		
-		DateTime dtStart = durationFormat.parseDateTime(startTime);
-	   DateTime dtStop = durationFormat.parseDateTime(endTime);
-	
-	   /*System.out.print(Days.daysBetween(dtStart, dtStop).getDays() + " days, ");
-	   System.out.print(Hours.hoursBetween(dtStart, dtStop).getHours() % 24 + " hours, ");
-	   System.out.print(org.joda.time.Minutes.minutesBetween(dtStart, dtStop).getMinutes() % 60 + " minutes, ");
-	   System.out.println(Seconds.secondsBetween(dtStart, dtStop).getSeconds() % 60 + " seconds.");*/
-	   
-	   int hours = Hours.hoursBetween(dtStart, dtStop).getHours() % 24;
-	   int mins = org.joda.time.Minutes.minutesBetween(dtStart, dtStop).getMinutes() % 60;
-	   return mins + (hours * 60);
-	}
-	
-	// Work duration calculation fix - 6th Apr 2016
-	private int convertToMinutes(String duration) {
-		if (StringUtils.isEmpty(duration) || StringUtils.equals("0", duration) || StringUtils.equals("0.0", duration)) {
-			return 0;
-		}
-		
-		String[] durationTokens = duration.split("\\.");
-	   int durationHours = Integer.parseInt(durationTokens[0]);
-	   
-	   String durationMinutesStr = durationTokens[1];
-	   if (durationMinutesStr.length() == 1) {
-	   	durationMinutesStr += "0";
-	   } else if (durationMinutesStr.length() == 2) {
-	   		if (durationMinutesStr.startsWith("0")) {
-	   			durationMinutesStr = durationMinutesStr.substring(1);
-	   		}
-	   }
-	   
-	   int lunchDurationMinutes = Integer.parseInt(durationMinutesStr);
-	   lunchDurationMinutes += (durationHours * 60);
-	   return lunchDurationMinutes;
-	}
+        
 	
 	protected String processAjaxRequest(HttpServletRequest request,String action, Model model) 
 	{
@@ -1146,43 +1073,20 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 		}
 		
 		
-		if("fidworkedHours".equalsIgnoreCase(action)) {
-			String signIn1 = request.getParameter("signIn");
-			String signInamOrpm1 = request.getParameter("signInamOrpm");
-			String signOut1 = request.getParameter("signOut");
-			String signOutamOrpm1 = request.getParameter("signOutamOrpm");
-			
-			String signIn2 = request.getParameter("signIn2");
-			String signInamOrpm2 = request.getParameter("signInamOrpm2");
-			String signOut2 = request.getParameter("signOut2");
-			String signOutamOrpm2 = request.getParameter("signOutamOrpm2");
-			
-			String lunchDuration = request.getParameter("lunchDuration");
-			
-			// Work duration calculation fix - 6th Apr 2016
-			//if(!StringUtils.isEmpty(request.getParameter("signIn")) && !StringUtils.isEmpty(request.getParameter("signInamOrpm")) &&  !StringUtils.isEmpty(request.getParameter("signOut")) && !StringUtils.isEmpty(request.getParameter("signOutamOrpm")))
-			if( (!StringUtils.isEmpty(signIn1) && !StringUtils.isEmpty(signInamOrpm1) 
-					&& !StringUtils.isEmpty(signOut1) && !StringUtils.isEmpty(signOutamOrpm1))
-					|| (!StringUtils.isEmpty(signIn2) && !StringUtils.isEmpty(signInamOrpm2) 
-							&& !StringUtils.isEmpty(signOut2) && !StringUtils.isEmpty(signOutamOrpm2)))
+		if("fidworkedHours".equalsIgnoreCase(action)){
+			if(!StringUtils.isEmpty(request.getParameter("signIn")) && !StringUtils.isEmpty(request.getParameter("signInamOrpm")) &&  !StringUtils.isEmpty(request.getParameter("signOut")) && !StringUtils.isEmpty(request.getParameter("signOutamOrpm")))
 			{
-				// Work duration calculation fix - 6th Apr 2016
+				//System.out.println("\nfidworkedHours\n");
 				List<String> list = new ArrayList<String>();
+				String singIn=request.getParameter("signIn");
+				String signInamOrpm=request.getParameter("signInamOrpm");
+				String signOut=request.getParameter("signOut");
+				String signOutamOrpm=request.getParameter("signOutamOrpm");
 				
-				// Work duration calculation fix - 6th Apr 2016
-				String startTime1 = StringUtils.isEmpty(signIn1) ? signIn1 : signIn1+" "+signInamOrpm1;
-				String stopTime1 = StringUtils.isEmpty(signOut1) ? signOut1 : signOut1+" "+signOutamOrpm1;
-				String startTime2 = StringUtils.isEmpty(signIn2) ? signIn2 : signIn2+" "+signInamOrpm2;
-				String stopTime2 = StringUtils.isEmpty(signOut2) ? signOut2 : signOut2+" "+signOutamOrpm2;
-				String workedDuration = calculateWorkedDuration(startTime1, stopTime1,
-						startTime2, stopTime2, lunchDuration);
+				//System.out.println("\nsignInamOrpm===>"+signInamOrpm+"\n");
+				//System.out.println("\ninminutes===>"+signOutamOrpm+"\n");
 				
-				list.add(StringUtils.replace(workedDuration, ":", "."));
-				Gson gson = new Gson();
-				return gson.toJson(list);
-				
-				// Work duration calculation fix - 6th Apr 2016
-				/*String inhours=singIn.substring(0,2);
+				String inhours=singIn.substring(0,2);
 				String inminutes=singIn.substring(3,5);
 				String outhours=signOut.substring(0,2);
 				String outminutes=signOut.substring(3,5);
@@ -1239,10 +1143,11 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 					
 				}
 				
-				//if(timeoutminutes< timeinminutes){
-					//timeouthours=timeouthours-1;
-					//timeoutminutes=timeoutminutes+60;
-				//}				
+				/*if(timeoutminutes< timeinminutes){
+					timeouthours=timeouthours-1;
+					timeoutminutes=timeoutminutes+60;
+				}*/
+				
 				
 				Double workedHours=timeouthours-timeinhours;
 				Double workedMinutes=timeoutminutes-timeinminutes;
@@ -1256,7 +1161,7 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 				
 				list.add(wHours);
 				Gson gson = new Gson();
-				return gson.toJson(list);*/
+				return gson.toJson(list);
 			}
 		
 		}

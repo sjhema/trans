@@ -36,6 +36,8 @@ public class HourlyPayrollInvoiceDetails extends AbstractBaseModel implements Re
 	@Column(name="payroll_date")
 	String date;
 	
+	@Column(name="seq_num1")
+	private Integer sequenceNum1;
 	
 	private Date payRollBatchFrom;
 	
@@ -421,6 +423,14 @@ public class HourlyPayrollInvoiceDetails extends AbstractBaseModel implements Re
 	
 	public void setPayRollCheckDate(Date payRollCheckDate) {
 		this.payRollCheckDate = payRollCheckDate;
+	}
+
+	public Integer getSequenceNum1() {
+		return sequenceNum1;
+	}
+
+	public void setSequenceNum1(Integer sequenceNum1) {
+		this.sequenceNum1 = sequenceNum1;
 	}
 	
 }
