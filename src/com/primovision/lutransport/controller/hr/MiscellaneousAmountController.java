@@ -205,7 +205,8 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			if (revertMisc) {
 				hourlyPayrollInvoiceDetails.setMiscAmount(hourlyPayrollInvoiceDetails.getMiscAmount() - miscAmt);
-				hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - miscAmt);
+				//hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - miscAmt);
+				hourlyPayrollInvoiceDetails.setSumOfTotVacSicBonus(hourlyPayrollInvoiceDetails.getSumOfTotVacSicBonus() - miscAmt);
 			}
 			
 			Long userId = getUser(request).getId();
@@ -388,7 +389,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 				criterias.put("terminal", driverPay.getTerminal());
 			}
 			if (revertMisc) {
-				criterias.put("miscAmount", miscAmt);
+				criterias.put("isMainRow", "yes");
 			}
 			if (revertReimb) {
 				criterias.put("reimburseAmount", miscAmt);
@@ -431,6 +432,28 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 						&& driverPayFreezWrapper.getMiscamt() != 0.0) {
 					driverPayFreezWrapper.setMiscamt(driverPayFreezWrapper.getMiscamt() - miscAmt);
 				}
+				
+				String notes = miscAmtObj.getMiscDetailedNotes();
+				if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote0())) {
+					driverPayFreezWrapper.setMiscnote0(null);
+					driverPayFreezWrapper.setMiscamt0(0.0);
+				} else if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote1())) {
+					driverPayFreezWrapper.setMiscnote1(null);
+					driverPayFreezWrapper.setMiscamt1(0.0);
+				} else if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote2())) {
+					driverPayFreezWrapper.setMiscnote2(null);
+					driverPayFreezWrapper.setMiscamt2(0.0);
+				} else if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote3())) {
+					driverPayFreezWrapper.setMiscnote3(null);
+					driverPayFreezWrapper.setMiscamt3(0.0);
+				} else if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote4())) {
+					driverPayFreezWrapper.setMiscnote4(null);
+					driverPayFreezWrapper.setMiscamt4(0.0);
+				} else if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote5())) {
+					driverPayFreezWrapper.setMiscnote5(null);
+					driverPayFreezWrapper.setMiscamt5(0.0);
+				}
+				
 				if (driverPayFreezWrapper.getTotalAmount() != null
 						&& driverPayFreezWrapper.getTotalAmount() != 0.0) {
 					driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - miscAmt);

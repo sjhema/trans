@@ -297,7 +297,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		hourlyPayrollInvoice.setSumtotalamount(hourlyPayrollInvoice.getSumtotalamount() - bonusAmt);
 		
 		hourlyPayrollInvoiceDetails.setBonusAmounts(hourlyPayrollInvoiceDetails.getBonusAmounts() - bonusAmt);
-		hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - bonusAmt);
+		//hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - bonusAmt);
 		hourlyPayrollInvoiceDetails.setSumOfTotVacSicBonus(hourlyPayrollInvoiceDetails.getSumOfTotVacSicBonus() - bonusAmt);
 		
 		Long userId = getUser(request).getId();
