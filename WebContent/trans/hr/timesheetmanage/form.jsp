@@ -2646,7 +2646,7 @@ function formatDate6(){
 	 			 --%>
 		  			
 	  </tr>
-	  <c:if test="${modelObject.mode eq 'ADD_TO_PREV'}">
+	  <c:if test="${modelObject.mode eq 'ADD_TO_PREV' || modelObject.sequenceNum1 != null}">
 		  <tr>
 	         <td class="form-left"><primo:label code="Seq Num" /><span class="errorMessage">*</span></td>
 	         <td align="${left}">
