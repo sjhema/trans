@@ -433,7 +433,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 					driverPayFreezWrapper.setMiscamt(driverPayFreezWrapper.getMiscamt() - miscAmt);
 				}
 				
-				String notes = miscAmtObj.getMiscDetailedNotes();
+				String notes = miscAmtObj.getMiscNotes();
 				if (StringUtils.equals(notes, driverPayFreezWrapper.getMiscnote0())) {
 					driverPayFreezWrapper.setMiscnote0(null);
 					driverPayFreezWrapper.setMiscamt0(0.0);
