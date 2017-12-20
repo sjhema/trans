@@ -20,10 +20,6 @@ function editMultipleData() {
 }
 
 function processRevert() {
-	if (!confirm("Do you want to revert the selected tickets?")) {
-		return;
-	}
-	
 	var inputs = document.getElementsByName("id");
 	var submitForm = false;
 	for (var i = 0; i < inputs.length; i++) {
@@ -35,6 +31,10 @@ function processRevert() {
 		alert("Please select at least one record");
 		return;
 	} 
+	
+	if (!confirm("Do you want to revert the selected tickets?")) {
+		return;
+	}
 	
 	document.deleteForm.action = "bulkedit.do?mode=REVERT";
 	document.deleteForm.submit();

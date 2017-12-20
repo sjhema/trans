@@ -107,6 +107,7 @@ function confirmAddToPrev(id) {
 		<primo:textcolumn headerText="Holiday Hrs" dataField="holidayhours" />
 		<primo:textcolumn headerText="Total Hrs" dataField="hoursworkedInweekRoundedValue" />
 		<primo:textcolumn headerText="Category" dataField="catagory.name" />
+		 <primo:datecolumn headerText="Check Date" dataField="hourlypayrollinvoiceDate" dataFormat="MM-dd-yyyy"/>
 		<primo:anchorcolumn headerText="Copy"  linkUrl="/hr/timesheetmanage/copy.do?id={id}" linkText="Copy"/>
 		<primo:anchorcolumn headerText="Add To Prev" linkUrl="javascript:confirmAddToPrev('{id}')" linkText="Add To Prev"/>
 			

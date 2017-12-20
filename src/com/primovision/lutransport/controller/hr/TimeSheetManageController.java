@@ -95,6 +95,11 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 		String mode = request.getParameter("mode");
 		if (StringUtils.equals(TimeSheet.ADD_TO_PREV_MODE, mode)) {
 			TimeSheet origEntity = (TimeSheet) model.get("modelObject");
+			if (origEntity.getHourlypayrollinvoiceDate() == null) {
+				request.getSession().setAttribute("error", "Unable to revert - Timesheet not in paid status");
+				return "redirect:list.do";
+			}
+			
 			TimeSheet newEntity = new TimeSheet();
 			newEntity.setDriver(origEntity.getDriver());
 			newEntity.setCompany(origEntity.getCompany());

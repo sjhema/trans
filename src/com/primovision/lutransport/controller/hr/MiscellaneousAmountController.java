@@ -112,7 +112,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		private String processRevert(ModelMap model, HttpServletRequest request) {
 			MiscellaneousAmount miscAmt = (MiscellaneousAmount) model.get("modelObject");
 			if (miscAmt.getPayRollBatch() == null || miscAmt.getPayRollStatus() == 1) {
-				return "Nothing to revert";
+				return "Unable to revert - Miscellaneous pay not in paid status";
 			}
 			
 			String miscType = deduceMiscType(miscAmt);

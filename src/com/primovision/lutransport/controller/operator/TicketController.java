@@ -1253,6 +1253,12 @@ public class TicketController extends CRUDController<Ticket> {
 		}
 		
 		for (Ticket aTicket : tickets) {
+			if (aTicket.getPayRollBatch() == null) {
+				return "Unable to revert - some Tickets are not in paid status";
+			}
+		}
+		
+		for (Ticket aTicket : tickets) {
 			aTicket.setPayRollBatch(null);
 			aTicket.setPayRollStatus(1);
 			//aTicket.setDriverPayRate(null);

@@ -214,7 +214,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	private String processRevert(ModelMap model, HttpServletRequest request) {
 		EmployeeBonus empBonus = (EmployeeBonus) model.get("modelObject");
 		if (empBonus.getPayRollBatch() == null || empBonus.getPayRollStatus() == 1) {
-			return "Nothing to revert";
+			return "Unable to revert - Employee bonus not in paid status";
 		}
 		
 		Driver driver = empBonus.getDriver();
