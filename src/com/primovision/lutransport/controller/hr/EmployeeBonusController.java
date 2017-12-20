@@ -474,6 +474,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 			criterias.put("terminal", driverPay.getTerminal());
 		}
 		criterias.put("bonusAmount", bonusAmt);
+		criterias.put("isMainRow", "yes");
 		
 		List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
 		if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
@@ -495,6 +496,16 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 				&& driverPayFreezWrapper.getBonusAmount() != 0.0) {
 			driverPayFreezWrapper.setBonusAmount(driverPayFreezWrapper.getBonusAmount() - bonusAmt);
 		}
+		driverPayFreezWrapper.setBonusTypeName0(null);
+		driverPayFreezWrapper.setBonusAmount0(0.0);
+		driverPayFreezWrapper.setBonusTypeName1(null);
+		driverPayFreezWrapper.setBonusAmount1(0.0);
+		driverPayFreezWrapper.setBonusTypeName2(null);
+		driverPayFreezWrapper.setBonusAmount2(0.0);
+		driverPayFreezWrapper.setBonusTypeName3(null);
+		driverPayFreezWrapper.setBonusAmount3(0.0);
+		driverPayFreezWrapper.setBonusTypeName4(null);
+		driverPayFreezWrapper.setBonusAmount4(0.0);
 		if (driverPayFreezWrapper.getTotalAmount() != null
 				&& driverPayFreezWrapper.getTotalAmount() != 0.0) {
 			driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - bonusAmt);
