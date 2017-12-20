@@ -270,12 +270,12 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		HourlyPayrollInvoiceDetails hourlyPayrollInvoiceDetails = hourlyPayrollInvoiceDetailsList.get(0);
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
-		criterias.put("company", hourlyPayrollInvoiceDetails.getCompany());
-		criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getDate());
-		criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getBatchdate());
-		criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getBatchdateTo());
-		if (hourlyPayrollInvoiceDetails.getTerminal() != null) {
-			criterias.put("terminal", hourlyPayrollInvoiceDetails.getTerminal());
+		criterias.put("companyLoc.id", hourlyPayrollInvoiceDetails.getCompanyLoc().getId());
+		criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getPayRollCheckDate());
+		criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getPayRollBatchFrom());
+		criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getPayRollBatchTo());
+		if (hourlyPayrollInvoiceDetails.getTerminalLoc() != null) {
+			criterias.put("terminal.id", hourlyPayrollInvoiceDetails.getTerminalLoc().getId());
 		}
 		
 		List<HourlyPayrollInvoice> hourlyPayrollInvoiceList = genericDAO.findByCriteria(HourlyPayrollInvoice.class, criterias);
@@ -344,19 +344,23 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		WeeklyPayDetail weeklyPayDetail = weeklyPayDetailList.get(0);
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
-		criterias.put("company", weeklyPayDetail.getCompany());
+		criterias.put("company.id", weeklyPayDetail.getCompany().getId());
 		criterias.put("checkDate", weeklyPayDetail.getCheckDate());
 		criterias.put("payRollBatch", weeklyPayDetail.getPayRollBatch());
 		if (weeklyPayDetail.getTerminal() != null) {
-			criterias.put("terminal", weeklyPayDetail.getTerminal());
+			criterias.put("terminal.id", weeklyPayDetail.getTerminal().getId());
 		}
 		
 		List<WeeklyPay> weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
 		if (weeklyPayList == null || weeklyPayList.isEmpty()) {
-			return "Unable to revert - Salary pay not found for selected criteria";
+			criterias.remove("terminal.id");
+			weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
+			if (weeklyPayList == null || weeklyPayList.isEmpty()) {
+				return "Unable to revert - Salary pay header not found for selected criteria";
+			}
 		}
 		if (weeklyPayList.size() > 1) {
-			return "Unable to revert - More than one Salary pay found for selected criteria";
+			return "Unable to revert - More than one Salary pay header found for selected criteria";
 		} 
 		WeeklyPay weeklyPay = weeklyPayList.get(0);
 		
@@ -382,6 +386,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	private String processRevertForDriver(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Double bonusAmt = empBonusObj.getBonustype().getAmount();
 		Driver driver = empBonusObj.getDriver();
 		String driverFullName = driver.getFullName();
 
@@ -436,7 +441,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
 		if (driverPayrollList == null || driverPayrollList.isEmpty()) {
-			return "Unable to revert - Driver pay header not found for selected criteria";
+			criterias.remove("terminal");
+			driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
+			if (driverPayrollList == null || driverPayrollList.isEmpty()) {
+				return "Unable to revert - Driver pay header not found for selected criteria";
+			}
 		}
 		if (driverPayrollList.size() > 1) {
 			return "Unable to revert - More than one Driver pay header found for selected criteria";
@@ -452,6 +461,8 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		if (driverPay.getTerminal() != null) {
 			criterias.put("terminal", driverPay.getTerminal());
 		}
+		criterias.put("bonusAmount", bonusAmt);
+		
 		List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
 		if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
 			return "Unable to revert - Driver pay freeze wrapper not found for selected criteria";
@@ -463,7 +474,6 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		revert(empBonusObj, request);
 		
-		Double bonusAmt = empBonusObj.getBonustype().getAmount();
 		driverPayroll.setSumAmount(driverPayroll.getSumAmount() - bonusAmt);
 		
 		driverPay.setBonusAmount(driverPay.getBonusAmount() - bonusAmt);

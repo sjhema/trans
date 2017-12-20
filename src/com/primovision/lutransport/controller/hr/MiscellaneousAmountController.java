@@ -260,19 +260,23 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			WeeklyPayDetail weeklyPayDetail = weeklyPayDetailList.get(0);
 			
 			Map<String, Object> criterias = new HashMap<String, Object>();
-			criterias.put("company", weeklyPayDetail.getCompany());
+			criterias.put("company.id", weeklyPayDetail.getCompany().getId());
 			criterias.put("checkDate", weeklyPayDetail.getCheckDate());
 			criterias.put("payRollBatch", weeklyPayDetail.getPayRollBatch());
 			if (weeklyPayDetail.getTerminal() != null) {
-				criterias.put("terminal", weeklyPayDetail.getTerminal());
+				criterias.put("terminal.id", weeklyPayDetail.getTerminal().getId());
 			}
 			
 			List<WeeklyPay> weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
 			if (weeklyPayList == null || weeklyPayList.isEmpty()) {
-				return "Unable to revert - Salary pay not found for selected criteria";
+				criterias.remove("terminal.id");
+				weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
+				if (weeklyPayList == null || weeklyPayList.isEmpty()) {
+					return "Unable to revert - Salary pay header not found for selected criteria";
+				}
 			}
 			if (weeklyPayList.size() > 1) {
-				return "Unable to revert - More than one Salary pay found for selected criteria";
+				return "Unable to revert - More than one Salary pay header found for selected criteria";
 			} 
 			WeeklyPay weeklyPay = weeklyPayList.get(0);
 			
@@ -304,6 +308,8 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		
 		private String processRevertForDriver(HttpServletRequest request, MiscellaneousAmount miscAmtObj,
 				String miscType) {
+			Double miscAmt = miscAmtObj.getMisamount();
+			
 			Driver driver = miscAmtObj.getDriver();
 			String driverFullName = driver.getFullName();
 
@@ -353,7 +359,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			Map<String, Object> criterias = new HashMap<String, Object>();
 			criterias.put("company", driverPay.getCompany());
 			criterias.put("payRollBatch", driverPay.getPayRollBatch());
-			//criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
+			criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
 			criterias.put("billBatchTo", driverPay.getBillBatchDateTo());
 			if (driverPay.getTerminal() != null) {
 				criterias.put("terminal", driverPay.getTerminal());
@@ -361,7 +367,11 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
 			if (driverPayrollList == null || driverPayrollList.isEmpty()) {
-				return "Unable to revert - Driver pay header not found for selected criteria";
+				criterias.remove("terminal");
+				driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
+				if (driverPayrollList == null || driverPayrollList.isEmpty()) {
+					return "Unable to revert - Driver pay header not found for selected criteria";
+				}
 			}
 			if (driverPayrollList.size() > 1) {
 				return "Unable to revert - More than one Driver pay header found for selected criteria";
@@ -377,6 +387,12 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (driverPay.getTerminal() != null) {
 				criterias.put("terminal", driverPay.getTerminal());
 			}
+			if (revertMisc) {
+				criterias.put("miscAmount", miscAmt);
+			}
+			if (revertReimb) {
+				criterias.put("reimburseAmount", miscAmt);
+			}
 			List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
 			if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
 				return "Unable to revert - Driver pay freeze wrapper not found for selected criteria";
@@ -388,7 +404,6 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			revert(miscAmtObj, request);
 			
-			Double miscAmt = miscAmtObj.getMisamount();
 			driverPayroll.setSumAmount(driverPayroll.getSumAmount() - miscAmt);
 			
 			if (revertReimb) {
