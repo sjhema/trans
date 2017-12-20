@@ -177,12 +177,12 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			HourlyPayrollInvoiceDetails hourlyPayrollInvoiceDetails = hourlyPayrollInvoiceDetailsList.get(0);
 			
 			Map<String, Object> criterias = new HashMap<String, Object>();
-			criterias.put("company", hourlyPayrollInvoiceDetails.getCompany());
-			criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getDate());
-			criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getBatchdate());
-			criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getBatchdateTo());
-			if (hourlyPayrollInvoiceDetails.getTerminal() != null) {
-				criterias.put("terminal", hourlyPayrollInvoiceDetails.getTerminal());
+			criterias.put("companyLoc.id", hourlyPayrollInvoiceDetails.getCompanyLoc().getId());
+			criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getPayRollCheckDate());
+			criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getPayRollBatchFrom());
+			criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getPayRollBatchTo());
+			if (hourlyPayrollInvoiceDetails.getTerminalLoc() != null) {
+				criterias.put("terminal.id", hourlyPayrollInvoiceDetails.getTerminalLoc().getId());
 			}
 			
 			List<HourlyPayrollInvoice> hourlyPayrollInvoiceList = genericDAO.findByCriteria(HourlyPayrollInvoice.class, criterias);
