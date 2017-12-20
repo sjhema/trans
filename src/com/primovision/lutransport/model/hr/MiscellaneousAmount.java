@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
@@ -16,7 +17,8 @@ import com.primovision.lutransport.model.Location;
 @Entity
 @Table(name ="miscellaneous_amount")
 public class MiscellaneousAmount extends AbstractBaseModel {	
-	
+	@Transient
+	public static String REVERT_MODE = "REVERT";
 	
 	@NotNull
 	@Column(name = "batchfrom")

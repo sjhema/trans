@@ -20,6 +20,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @Table(name = "ticket")
 public class Ticket extends AbstractBaseModel {
+	@Transient
+	public static String REVERT_MODE = "REVERT";
 
 	private static final long serialVersionUID = 1807241954265797561L;
 	

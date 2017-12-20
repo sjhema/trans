@@ -20,21 +20,24 @@ function editMultipleData() {
 }
 
 function processRevert() {
+	if (!confirm("Do you want to revert the selected tickets?")) {
+		return;
+	}
+	
 	var inputs = document.getElementsByName("id");
 	var submitForm = false;
-	for ( var i = 0; i < inputs.length; i++) {
+	for (var i = 0; i < inputs.length; i++) {
 		if (inputs[i].checked == true) {
 			submitForm = true;
 		}
 	}
-	if (submitForm) {
-		
-			document.deleteForm.action = "bulkedit.do?mode=REVERT";
-			document.deleteForm.submit();
-		
-	} else {
+	if (!submitForm) {
 		alert("Please select at least one record");
-	}
+		return;
+	} 
+	
+	document.deleteForm.action = "bulkedit.do?mode=REVERT";
+	document.deleteForm.submit();
 }
 
 

@@ -1,5 +1,12 @@
 <%@include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
+function confirmRevert(id) {
+	if (!confirm("Do you want to revert the selected Misc record?")) {
+		return;
+	}
+	
+	document.location = "${ctx}/hr/miscellaneousamount/edit.do?id=" + id + "&mode=REVERT";
+}
 
 /**
  * Function for Editable Date
@@ -188,7 +195,8 @@ function formatDate(){
 			<primo:datecolumn headerText="Payroll Batch" dataField="payRollBatch"
 			dataFormat="MM-dd-yyyy" />
 			<primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
-			<primo:anchorcolumn headerText="RVT PAY" linkUrl="/hr/miscellaneousamount/edit.do?id={id}&mode=REVERT" linkText="RVT PAY" dataField=""/>                            
+			<primo:anchorcolumn headerText="RVT PAY" linkUrl="javascript:confirmRevert('{id}')" linkText="RVT PAY"/>
+			
 			</primo:datatable>
 		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList")); %>
 	</form:form>

@@ -95,12 +95,13 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		@Override
 		public String edit2(ModelMap model, HttpServletRequest request) {
 			String mode = request.getParameter("mode");
-			if (StringUtils.equals("REVERT", mode)) {
+			if (StringUtils.equals(MiscellaneousAmount.REVERT_MODE, mode)) {
 				String revertMsg = processRevert(model, request);
 				if (StringUtils.contains(revertMsg, "success")) {
 					request.getSession().setAttribute("msg", "Payroll reverted successfully");
 				} else {
 					request.getSession().setAttribute("error", revertMsg);
+					return "redirect:list.do";
 				}
 			}
 			
@@ -116,7 +117,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			String miscType = deduceMiscType(miscAmt);
 			if (StringUtils.isEmpty(miscType)) {
-				return StringUtils.EMPTY;
+				return "Misc type could not be determined";
 			}
 			
 			Driver driver = miscAmt.getDriver();
@@ -150,7 +151,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			StringBuilder hourlyPayQuery= new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where ")
 					.append(" obj.date='")
-					.append(mysqldf1.format(checkDate))
+					.append(checkDate)
 					.append("' and obj.batchdate='")
 					.append(batchDateFrom)
 					.append("' and obj.batchdateTo='")
@@ -168,10 +169,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<HourlyPayrollInvoiceDetails> hourlyPayrollInvoiceDetailsList = genericDAO.executeSimpleQuery(hourlyPayQuery.toString());
 			if (hourlyPayrollInvoiceDetailsList == null || hourlyPayrollInvoiceDetailsList.isEmpty()) {
-				return "Hourly pay not found for selected criteria";
+				return "Unable to revert - Hourly pay not found for selected criteria";
 			}
 			if (hourlyPayrollInvoiceDetailsList.size() > 1) {
-				return "More than one Hourly pay found for selected criteria";
+				return "Unable to revert - More than one Hourly pay found for selected criteria";
 			} 
 			HourlyPayrollInvoiceDetails hourlyPayrollInvoiceDetails = hourlyPayrollInvoiceDetailsList.get(0);
 			
@@ -186,10 +187,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<HourlyPayrollInvoice> hourlyPayrollInvoiceList = genericDAO.findByCriteria(HourlyPayrollInvoice.class, criterias);
 			if (hourlyPayrollInvoiceList == null || hourlyPayrollInvoiceList.isEmpty()) {
-				return "Hourly pay not found for selected criteria";
+				return "Unable to revert - Hourly pay header not found for selected criteria";
 			}
 			if (hourlyPayrollInvoiceList.size() > 1) {
-				return "More than one Hourly pay found for selected criteria";
+				return "Unable to revert - More than one Hourly pay header found for selected criteria";
 			} 
 			HourlyPayrollInvoice hourlyPayrollInvoice = hourlyPayrollInvoiceList.get(0);
 			
@@ -205,14 +206,14 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (revertMisc) {
 				hourlyPayrollInvoiceDetails.setMiscAmount(hourlyPayrollInvoiceDetails.getMiscAmount() - miscAmt);
 				hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - miscAmt);
-				
 			}
 			
-			hourlyPayrollInvoiceDetails.setModifiedBy(getUser(request).getId());
+			Long userId = getUser(request).getId();
+			hourlyPayrollInvoiceDetails.setModifiedBy(userId);
 			hourlyPayrollInvoiceDetails.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(hourlyPayrollInvoiceDetails);
 			
-			hourlyPayrollInvoice.setModifiedBy(getUser(request).getId());
+			hourlyPayrollInvoice.setModifiedBy(userId);
 			hourlyPayrollInvoice.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(hourlyPayrollInvoice);
 			
@@ -237,7 +238,7 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		
 			StringBuilder weeklyPayQuery= new StringBuilder("select obj from WeeklyPayDetail obj where ")
 					.append(" obj.checkDate='")
-					.append(mysqldf1.format(checkDate))
+					.append(checkDate)
 					.append("' and obj.payRollBatch='")
 					.append(batchDateTo)
 					.append("' and obj.company=")
@@ -251,10 +252,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<WeeklyPayDetail> weeklyPayDetailList = genericDAO.executeSimpleQuery(weeklyPayQuery.toString());
 			if (weeklyPayDetailList == null || weeklyPayDetailList.isEmpty()) {
-				return "Salary pay not found for selected criteria";
+				return "Unable to revert - Salary pay not found for selected criteria";
 			}
 			if (weeklyPayDetailList.size() > 1) {
-				return "More than one Salary pay found for selected criteria";
+				return "Unable to revert - More than one Salary pay found for selected criteria";
 			} 
 			WeeklyPayDetail weeklyPayDetail = weeklyPayDetailList.get(0);
 			
@@ -268,10 +269,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<WeeklyPay> weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
 			if (weeklyPayList == null || weeklyPayList.isEmpty()) {
-				return "Salary pay not found for selected criteria";
+				return "Unable to revert - Salary pay not found for selected criteria";
 			}
 			if (weeklyPayList.size() > 1) {
-				return "More than one Salary pay found for selected criteria";
+				return "Unable to revert - More than one Salary pay found for selected criteria";
 			} 
 			WeeklyPay weeklyPay = weeklyPayList.get(0);
 			
@@ -287,14 +288,14 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			if (revertMisc) {
 				weeklyPayDetail.setMiscAmount(weeklyPayDetail.getMiscAmount() - miscAmt);
 				weeklyPayDetail.setTotalAmount(weeklyPayDetail.getTotalAmount() - miscAmt);
-				
 			}
 			
-			weeklyPayDetail.setModifiedBy(getUser(request).getId());
+			Long userId = getUser(request).getId();
+			weeklyPayDetail.setModifiedBy(userId);
 			weeklyPayDetail.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(weeklyPayDetail);
 			
-			weeklyPay.setModifiedBy(getUser(request).getId());
+			weeklyPay.setModifiedBy(userId);
 			weeklyPay.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(weeklyPay);
 			
@@ -342,17 +343,17 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<DriverPay> driverPayList = genericDAO.executeSimpleQuery(driverPayQuery.toString());
 			if (driverPayList == null || driverPayList.isEmpty()) {
-				return "Driver pay not found for selected criteria";
+				return "Unable to revert - Driver pay not found for selected criteria";
 			}
 			if (driverPayList.size() > 1) {
-				return "More than one Driver pay found for selected criteria";
+				return "Unable to revert - More than one Driver pay found for selected criteria";
 			} 
 			DriverPay driverPay = driverPayList.get(0);
 			
 			Map<String, Object> criterias = new HashMap<String, Object>();
 			criterias.put("company", driverPay.getCompany());
 			criterias.put("payRollBatch", driverPay.getPayRollBatch());
-			criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
+			//criterias.put("billBatchFrom", driverPay.getBillBatchDateFrom());
 			criterias.put("billBatchTo", driverPay.getBillBatchDateTo());
 			if (driverPay.getTerminal() != null) {
 				criterias.put("terminal", driverPay.getTerminal());
@@ -360,10 +361,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			
 			List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
 			if (driverPayrollList == null || driverPayrollList.isEmpty()) {
-				return "Driver pay not found for selected criteria";
+				return "Unable to revert - Driver pay header not found for selected criteria";
 			}
 			if (driverPayrollList.size() > 1) {
-				return "More than one Driver pay found for selected criteria";
+				return "Unable to revert - More than one Driver pay header found for selected criteria";
 			} 
 			DriverPayroll driverPayroll = driverPayrollList.get(0);
 			
@@ -378,10 +379,10 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 			}
 			List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
 			if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
-				return "Driver pay not found for selected criteria";
+				return "Unable to revert - Driver pay freeze wrapper not found for selected criteria";
 			}
 			if (driverPayFreezeWrapperList.size() > 1) {
-				return "More than one Driver pay found for selected criteria";
+				return "Unable to revert - More than one Driver pay freeze wrapper found for selected criteria";
 			} 
 			DriverPayFreezWrapper driverPayFreezWrapper = driverPayFreezeWrapperList.get(0);
 			
@@ -421,15 +422,16 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 				}
 			}
 			
-			driverPay.setModifiedBy(getUser(request).getId());
+			Long userId = getUser(request).getId();
+			driverPay.setModifiedBy(userId);
 			driverPay.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(driverPay);
 			
-			driverPayroll.setModifiedBy(getUser(request).getId());
+			driverPayroll.setModifiedBy(userId);
 			driverPayroll.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(driverPayroll);
 			
-			driverPayFreezWrapper.setModifiedBy(getUser(request).getId());
+			driverPayFreezWrapper.setModifiedBy(userId);
 			driverPayFreezWrapper.setModifiedAt(Calendar.getInstance().getTime());
 			genericDAO.saveOrUpdate(driverPayFreezWrapper);
 			

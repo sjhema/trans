@@ -1217,14 +1217,21 @@ public class TicketController extends CRUDController<Ticket> {
 		}
 		
 		String mode = request.getParameter("mode");
-		if (StringUtils.equals("REVERT", mode)) {
+		if (StringUtils.equals(Ticket.REVERT_MODE, mode)) {
 			String revertMsg = processRevert(commaSperatedID, request);
+			if (StringUtils.contains(revertMsg, "success")) {
+				request.getSession().setAttribute("msg", "Tickets reverted successfully");
+			} else {
+				request.getSession().removeAttribute("bulkeditids");
+				request.getSession().setAttribute("error", revertMsg);
+				return "redirect:list.do";
+			}
 		}
 		
 		String ticketQuery = "select obj from Ticket obj where obj.ticketStatus=2 and obj.id in ("+commaSperatedID+")";
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
 		
-		if(tickets.size() > 0 && !tickets.isEmpty() && !StringUtils.equals("REVERT", mode)) {
+		if(tickets.size() > 0 && !tickets.isEmpty() && !StringUtils.equals(Ticket.REVERT_MODE, mode)) {
 			request.getSession().removeAttribute("bulkeditids");
 			request.getSession().setAttribute("error",
 			"Some tickets are invoiced. Select only Available tickets. Contact Admin for Invoiced ticket update.");
@@ -1242,12 +1249,12 @@ public class TicketController extends CRUDController<Ticket> {
 		String ticketQuery = "select obj from Ticket obj where obj.id in ("+ticketIds+")";
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
 		if (tickets == null || tickets.isEmpty()) {
-			return "No ticktes found for specified criteria";
+			return "No Ticktes found for specified criteria";
 		}
 		
 		for (Ticket aTicket : tickets) {
 			aTicket.setPayRollBatch(null);
-			aTicket.setPayRollStatus(0);
+			aTicket.setPayRollStatus(1);
 			//aTicket.setDriverPayRate(null);
 			
 			aTicket.setModifiedBy(getUser(request).getId());
@@ -1255,7 +1262,7 @@ public class TicketController extends CRUDController<Ticket> {
 			genericDAO.saveOrUpdate(aTicket);
 		}
 		
-		return "Reverted successfully";
+		return "Tickets Reverted successfully";
 	} 
 	
 	

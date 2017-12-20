@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
@@ -25,8 +26,14 @@ import com.primovision.lutransport.model.Location;
 @Entity
 @Table(name="employeebonus")
 public class EmployeeBonus extends AbstractBaseModel{
+	@Transient
+	public static String REVERT_MODE = "REVERT";
 	
 	private static final long serialVersionUID = 1L;
+	
+	@Transient
+	private String mode = StringUtils.EMPTY;
+	
     @ManyToOne
 	@JoinColumn(name="employee_id")
 	protected Driver driver;
@@ -343,6 +350,14 @@ public class EmployeeBonus extends AbstractBaseModel{
 	}
 	
 	
-	
+	@Transient
+	public String getMode() {
+		return mode;
+	}
+
+	@Transient
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
 	
 }

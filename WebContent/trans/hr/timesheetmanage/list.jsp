@@ -1,4 +1,14 @@
 <%@include file="/common/taglibs.jsp"%>
+
+<script type="text/javascript">
+function confirmAddToPrev(id) {
+	if (!confirm("Do you want to add to previous timesheet?")) {
+		return;
+	}
+	
+	document.location = "${ctx}/hr/timesheetmanage/edit.do?id=" + id + "&mode=ADD_TO_PREV";
+}
+</script>
 <h3>
 	<primo:label code="Manage TimeSheet" />
 </h3>
@@ -98,8 +108,8 @@
 		<primo:textcolumn headerText="Total Hrs" dataField="hoursworkedInweekRoundedValue" />
 		<primo:textcolumn headerText="Category" dataField="catagory.name" />
 		<primo:anchorcolumn headerText="Copy"  linkUrl="/hr/timesheetmanage/copy.do?id={id}" linkText="Copy"/>
-		<primo:anchorcolumn headerText="Add To Prev"  linkUrl="/hr/timesheetmanage/edit.do?id={id}&mode=ADD_TO_PREV" linkText="Add To Prev"/>
-		
+		<primo:anchorcolumn headerText="Add To Prev" linkUrl="javascript:confirmAddToPrev('{id}')" linkText="Add To Prev"/>
+			
 		<%-- <primo:textcolumn headerText="Sign In" dataField="signintime" />
 		<primo:textcolumn headerText="Sing Out" dataField="signouttime" /> --%>
 		

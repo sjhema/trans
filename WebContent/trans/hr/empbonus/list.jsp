@@ -1,6 +1,12 @@
 <%@include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
-
+function confirmRevert(id) {
+	if (!confirm("Do you want to revert the selected Bonus record?")) {
+		return;
+	}
+	
+	document.location = "${ctx}/hr/empbonus/edit.do?id=" + id + "&mode=REVERT";
+}
 /**
  * Function for Editable Date
  */
@@ -159,7 +165,7 @@ function formatDate(){
 			<primo:datecolumn headerText="Payroll Batch" dataField="payRollBatch"
 			dataFormat="MM-dd-yyyy" />
 			<primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
-			<primo:anchorcolumn headerText="RVT PAY" linkUrl="/hr/empbonus/edit.do?id={id}&mode=REVERT" linkText="RVT PAY" dataField=""/>                            
+			<primo:anchorcolumn headerText="RVT PAY" linkUrl="javascript:confirmRevert('{id}')" linkText="RVT PAY"/>
 			
 			<%-- <primo:textcolumn headerText="Bonus Type" dataField="bonustype.typename" />
 			<primo:datecolumn headerText="Amount" dataField="bonusamount" /> --%>

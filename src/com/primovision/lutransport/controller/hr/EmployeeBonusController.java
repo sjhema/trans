@@ -49,6 +49,7 @@ import com.primovision.lutransport.model.hr.EmpBonusTypesList;
 //import com.primovision.lutransport.model.hr.Driver;
 import com.primovision.lutransport.model.hr.EmployeeBonus;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hr.HourlyPayrollInvoice;
 import com.primovision.lutransport.model.hr.LeaveType;
 import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.Ptodapplication;
@@ -56,6 +57,9 @@ import com.primovision.lutransport.model.hrreport.DriverPay;
 import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPayWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPayroll;
+import com.primovision.lutransport.model.hrreport.HourlyPayrollInvoiceDetails;
+import com.primovision.lutransport.model.hrreport.WeeklyPay;
+import com.primovision.lutransport.model.hrreport.WeeklyPayDetail;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.HrReportService;
@@ -68,6 +72,7 @@ import com.primovision.lutransport.service.HrReportService;
 @RequestMapping("/hr/empbonus")
 public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+	public static SimpleDateFormat mysqldf1 = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public EmployeeBonusController() {
 	
@@ -170,11 +175,36 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	@Override
 	public String edit2(ModelMap model, HttpServletRequest request) {
-		// TODO Auto-generated method stub
-		
 		String mode = request.getParameter("mode");
-		if (StringUtils.equals("REVERT", mode)) {
+		if (StringUtils.equals(EmployeeBonus.REVERT_MODE, mode)) {
 			String revertMsg = processRevert(model, request);
+			if (StringUtils.contains(revertMsg, "success")) {
+				request.getSession().setAttribute("msg", "Payroll reverted successfully");
+			} else {
+				request.getSession().setAttribute("error", revertMsg);
+				return "redirect:list.do";
+			}
+			
+			setupCreate(model, request);
+			
+			EmployeeBonus bonus = (EmployeeBonus) model.get("modelObject");
+			
+			StringBuffer bonusTypeBuffer = new StringBuffer();
+			double amount = 0.0;
+			for (EmpBonusTypesList bonusTypesList : bonus.getBonusTypesLists()){
+				bonusTypeBuffer.append(bonusTypesList.getBonusType().getTypename());
+				bonusTypeBuffer.append(",");
+				amount += bonusTypesList.getBonusamount();
+			}
+			if (bonusTypeBuffer.length() > 0) {
+				int i = bonusTypeBuffer.lastIndexOf(",");
+				bonusTypeBuffer.deleteCharAt(i);
+			}
+			bonus.setAmounts(amount);
+			bonus.setBonustypes(bonusTypeBuffer.toString());
+			 
+			bonus.setMode(EmployeeBonus.REVERT_MODE);
+			return urlContext+"/revertbonus";
 		}
 		
 		String id=request.getParameter("id");
@@ -184,7 +214,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	private String processRevert(ModelMap model, HttpServletRequest request) {
 		EmployeeBonus empBonus = (EmployeeBonus) model.get("modelObject");
 		if (empBonus.getPayRollBatch() == null || empBonus.getPayRollStatus() == 1) {
-			return StringUtils.EMPTY;
+			return "Nothing to revert";
 		}
 		
 		Driver driver = empBonus.getDriver();
@@ -200,11 +230,154 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		}
 	}
 	
-	private String processRevertForHourly(HttpServletRequest request, EmployeeBonus empBonus) {
+	private String processRevertForHourly(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Driver driver = empBonusObj.getDriver();
+		String driverFullName = driver.getFullName();
+
+		String checkDate = mysqldf1.format(empBonusObj.getPayRollBatch());
+		String batchDateFrom = mysqldf1.format(empBonusObj.getBatchFrom());
+		String batchDateTo = mysqldf1.format(empBonusObj.getBatchTo());
+		
+		String company = String.valueOf(empBonusObj.getCompany().getId());
+		String terminal = empBonusObj.getTerminal() == null ? StringUtils.EMPTY 
+				: String.valueOf(empBonusObj.getTerminal().getId());
+		
+		StringBuilder hourlyPayQuery= new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where ")
+				.append(" obj.date='")
+				.append(checkDate)
+				.append("' and obj.batchdate='")
+				.append(batchDateFrom)
+				.append("' and obj.batchdateTo='")
+				.append(batchDateTo)
+				.append("' and obj.companyLoc=")
+				.append(company);
+		if (StringUtils.isNotEmpty(driverFullName)){
+			hourlyPayQuery.append(" and driver='").append(driverFullName).append("'");
+		}
+		if (StringUtils.isNotEmpty(terminal)) {
+			hourlyPayQuery.append(" and obj.terminalLoc="+terminal);
+		} else {
+			hourlyPayQuery.append(" and obj.terminalLoc="+null);
+		}
+		
+		List<HourlyPayrollInvoiceDetails> hourlyPayrollInvoiceDetailsList = genericDAO.executeSimpleQuery(hourlyPayQuery.toString());
+		if (hourlyPayrollInvoiceDetailsList == null || hourlyPayrollInvoiceDetailsList.isEmpty()) {
+			return "Unable to revert - Hourly pay not found for selected criteria";
+		}
+		if (hourlyPayrollInvoiceDetailsList.size() > 1) {
+			return "Unable to revert - More than one Hourly pay found for selected criteria";
+		} 
+		HourlyPayrollInvoiceDetails hourlyPayrollInvoiceDetails = hourlyPayrollInvoiceDetailsList.get(0);
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("company", hourlyPayrollInvoiceDetails.getCompany());
+		criterias.put("payrollinvoicedate", hourlyPayrollInvoiceDetails.getDate());
+		criterias.put("billBatchFrom", hourlyPayrollInvoiceDetails.getBatchdate());
+		criterias.put("billBatchTo", hourlyPayrollInvoiceDetails.getBatchdateTo());
+		if (hourlyPayrollInvoiceDetails.getTerminal() != null) {
+			criterias.put("terminal", hourlyPayrollInvoiceDetails.getTerminal());
+		}
+		
+		List<HourlyPayrollInvoice> hourlyPayrollInvoiceList = genericDAO.findByCriteria(HourlyPayrollInvoice.class, criterias);
+		if (hourlyPayrollInvoiceList == null || hourlyPayrollInvoiceList.isEmpty()) {
+			return "Unable to revert - Hourly pay header not found for selected criteria";
+		}
+		if (hourlyPayrollInvoiceList.size() > 1) {
+			return "Unable to revert - More than one Hourly pay header found for selected criteria";
+		} 
+		HourlyPayrollInvoice hourlyPayrollInvoice = hourlyPayrollInvoiceList.get(0);
+		
+		revert(empBonusObj, request);
+		
+		Double bonusAmt = empBonusObj.getBonustype().getAmount();
+		hourlyPayrollInvoice.setSumtotalamount(hourlyPayrollInvoice.getSumtotalamount() - bonusAmt);
+		
+		hourlyPayrollInvoiceDetails.setBonusAmounts(hourlyPayrollInvoiceDetails.getBonusAmounts() - bonusAmt);
+		hourlyPayrollInvoiceDetails.setSumamount(hourlyPayrollInvoiceDetails.getSumamount() - bonusAmt);
+		hourlyPayrollInvoiceDetails.setSumOfTotVacSicBonus(hourlyPayrollInvoiceDetails.getSumOfTotVacSicBonus() - bonusAmt);
+		
+		Long userId = getUser(request).getId();
+		hourlyPayrollInvoiceDetails.setModifiedBy(userId);
+		hourlyPayrollInvoiceDetails.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(hourlyPayrollInvoiceDetails);
+		
+		hourlyPayrollInvoice.setModifiedBy(userId);
+		hourlyPayrollInvoice.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(hourlyPayrollInvoice);
+		
 		return "Payroll Reverted successfully";
 	}
 	
-	private String processRevertForSalary(HttpServletRequest request, EmployeeBonus empBonus) {
+	private String processRevertForSalary(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Driver driver = empBonusObj.getDriver();
+		String driverFullName = driver.getFullName();
+
+		String checkDate = mysqldf1.format(empBonusObj.getPayRollBatch());
+		//String batchDateFrom = mysqldf1.format(miscAmtObj.getBatchFrom());
+		String batchDateTo = mysqldf1.format(empBonusObj.getBatchTo());
+		
+		String company = String.valueOf(empBonusObj.getCompany().getId());
+		String terminal = empBonusObj.getTerminal() == null ? StringUtils.EMPTY 
+				: String.valueOf(empBonusObj.getTerminal().getId());
+		
+		StringBuilder weeklyPayQuery= new StringBuilder("select obj from WeeklyPayDetail obj where ")
+				.append(" obj.checkDate='")
+				.append(checkDate)
+				.append("' and obj.payRollBatch='")
+				.append(batchDateTo)
+				.append("' and obj.company=")
+				.append(company);
+		if (StringUtils.isNotEmpty(driverFullName)){
+			weeklyPayQuery.append(" and driver='").append(driverFullName).append("'");
+		}
+		if (StringUtils.isNotEmpty(terminal)) {
+			weeklyPayQuery.append(" and obj.terminal="+terminal);
+		} 
+		
+		List<WeeklyPayDetail> weeklyPayDetailList = genericDAO.executeSimpleQuery(weeklyPayQuery.toString());
+		if (weeklyPayDetailList == null || weeklyPayDetailList.isEmpty()) {
+			return "Unable to revert - Salary pay not found for selected criteria";
+		}
+		if (weeklyPayDetailList.size() > 1) {
+			return "Unable to revert - More than one Salary pay found for selected criteria";
+		} 
+		WeeklyPayDetail weeklyPayDetail = weeklyPayDetailList.get(0);
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		criterias.put("company", weeklyPayDetail.getCompany());
+		criterias.put("checkDate", weeklyPayDetail.getCheckDate());
+		criterias.put("payRollBatch", weeklyPayDetail.getPayRollBatch());
+		if (weeklyPayDetail.getTerminal() != null) {
+			criterias.put("terminal", weeklyPayDetail.getTerminal());
+		}
+		
+		List<WeeklyPay> weeklyPayList = genericDAO.findByCriteria(WeeklyPay.class, criterias);
+		if (weeklyPayList == null || weeklyPayList.isEmpty()) {
+			return "Unable to revert - Salary pay not found for selected criteria";
+		}
+		if (weeklyPayList.size() > 1) {
+			return "Unable to revert - More than one Salary pay found for selected criteria";
+		} 
+		WeeklyPay weeklyPay = weeklyPayList.get(0);
+		
+		revert(empBonusObj, request);
+		
+		Double bonusAmt = empBonusObj.getBonustype().getAmount();
+		weeklyPay.setSumAmount(weeklyPay.getSumAmount() - bonusAmt);
+		weeklyPay.setSumTotal(weeklyPay.getSumTotal() - bonusAmt);
+		
+		weeklyPayDetail.setBonusAmount(weeklyPayDetail.getBonusAmount() - bonusAmt);
+		weeklyPayDetail.setTotalAmount(weeklyPayDetail.getTotalAmount() - bonusAmt);
+		
+		Long userId = getUser(request).getId();
+		weeklyPayDetail.setModifiedBy(userId);
+		weeklyPayDetail.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(weeklyPayDetail);
+		
+		weeklyPay.setModifiedBy(userId);
+		weeklyPay.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(weeklyPay);
+		
 		return "Payroll Reverted successfully";
 	}
 	
@@ -213,11 +386,12 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		String driverFullName = driver.getFullName();
 
 		String checkDate = sdf.format(empBonusObj.getPayRollBatch());
-		//String batchDateFrom = sdf.format(miscAmtObj.getBatchFrom());
+		//String batchDateFrom = sdf.format(empBonusObj.getBatchFrom());
 		String batchDateTo = sdf.format(empBonusObj.getBatchTo());
 		
 		String company = String.valueOf(empBonusObj.getCompany().getId());
-		String terminal = String.valueOf(empBonusObj.getTerminal().getId());
+		String terminal = empBonusObj.getTerminal() == null ? StringUtils.EMPTY 
+				: String.valueOf(empBonusObj.getTerminal().getId());
 		
 		StringBuilder driverPayQuery = new StringBuilder("select obj from DriverPay obj where 1=1");
 		if (StringUtils.isNotEmpty(driverFullName)){
@@ -244,8 +418,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		List<DriverPay> driverPayList = genericDAO.executeSimpleQuery(driverPayQuery.toString());
 		if (driverPayList == null || driverPayList.isEmpty()) {
-			return "Driver pay not found for selected criteria";
+			return "Unable to revert - Driver pay not found for selected criteria";
 		}
+		if (driverPayList.size() > 1) {
+			return "Unable to revert - More than one Driver pay found for selected criteria";
+		} 
 		DriverPay driverPay = driverPayList.get(0);
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
@@ -259,8 +436,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		List<DriverPayroll> driverPayrollList = genericDAO.findByCriteria(DriverPayroll.class, criterias);
 		if (driverPayrollList == null || driverPayrollList.isEmpty()) {
-			return "Driver pay not found for selected criteria";
+			return "Unable to revert - Driver pay header not found for selected criteria";
 		}
+		if (driverPayrollList.size() > 1) {
+			return "Unable to revert - More than one Driver pay header found for selected criteria";
+		} 
 		DriverPayroll driverPayroll = driverPayrollList.get(0);
 		
 		criterias.clear();
@@ -274,8 +454,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		}
 		List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
 		if (driverPayFreezeWrapperList == null || driverPayFreezeWrapperList.isEmpty()) {
-			return "Driver pay not found for selected criteria";
+			return "Unable to revert - Driver pay freeze wrapper not found for selected criteria";
 		}
+		if (driverPayFreezeWrapperList.size() > 1) {
+			return "Unable to revert - More than one Driver pay freeze wrapper found for selected criteria";
+		} 
 		DriverPayFreezWrapper driverPayFreezWrapper = driverPayFreezeWrapperList.get(0);
 		
 		revert(empBonusObj, request);
@@ -295,15 +478,16 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 			driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - bonusAmt);
 		}
 		
-		driverPay.setModifiedBy(getUser(request).getId());
+		Long userId = getUser(request).getId();
+		driverPay.setModifiedBy(userId);
 		driverPay.setModifiedAt(Calendar.getInstance().getTime());
 		genericDAO.saveOrUpdate(driverPay);
 		
-		driverPayroll.setModifiedBy(getUser(request).getId());
+		driverPayroll.setModifiedBy(userId);
 		driverPayroll.setModifiedAt(Calendar.getInstance().getTime());
 		genericDAO.saveOrUpdate(driverPayroll);
 		
-		driverPayFreezWrapper.setModifiedBy(getUser(request).getId());
+		driverPayFreezWrapper.setModifiedBy(userId);
 		driverPayFreezWrapper.setModifiedAt(Calendar.getInstance().getTime());
 		genericDAO.saveOrUpdate(driverPayFreezWrapper);
 		
@@ -1798,11 +1982,46 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	
-	
+	public String saveRevert(HttpServletRequest request, EmployeeBonus entity,
+			BindingResult bindingResult, ModelMap model) {
+		setupCreate(model, request);
+		
+		if(entity.getDriver()==null){
+			bindingResult.rejectValue("driver", "error.select.option",null, null);
+		}
+		
+		if(entity.getCategory()==null){
+			bindingResult.rejectValue("category", "error.select.option",null, null);
+		}
+		if(entity.getCompany()==null){
+			bindingResult.rejectValue("company", "error.select.option",null, null);
+		}
+		if(entity.getTerminal()==null){
+			bindingResult.rejectValue("terminal", "error.select.option",null, null);
+		}
+		if(entity.getBatchFrom()==null){
+			bindingResult.rejectValue("batchFrom", "error.select.option",null, null);
+		}
+		if(entity.getBatchTo()==null){
+			bindingResult.rejectValue("batchTo", "error.select.option", null, null);
+		}
+		
+		beforeSave(request, entity, model);
+		genericDAO.saveOrUpdate(entity);
+		
+		request.getSession().setAttribute("msg", "Bonus details saved successfully");
+		 
+		return "redirect:list.do";
+	}
 	
 	@Override
 	public String save(HttpServletRequest request,@ModelAttribute("modelObject") EmployeeBonus entity,
 			BindingResult bindingResult, ModelMap model) {
+		String mode = request.getParameter("mode");
+		if (StringUtils.equals("REVERT", mode)) {
+			return saveRevert(request, entity, bindingResult, model);
+		}
+		
 		boolean check=false;
 		if(entity.getId()!=null){
 			check=true;
@@ -1925,10 +2144,10 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> company=new ArrayList<Location>();
  				
- 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
- 				driverQuery += (request.getParameter("driver") + "'");
- 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
- 				Driver driver = driverList.get(0);
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				//driverQuery += (request.getParameter("driver") + "'");
+ 				//List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				//Driver driver = driverList.get(0);
  				
  				company.add(driver.getCompany());
  				Gson gson = new Gson();
@@ -1948,10 +2167,10 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> terminal=new ArrayList<Location>();
  				
- 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
- 				driverQuery += (request.getParameter("driver") + "'");
- 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
- 				Driver driver = driverList.get(0);
+ 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				//driverQuery += (request.getParameter("driver") + "'");
+ 				//List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				//Driver driver = driverList.get(0);
  				
  				terminal.add(driver.getTerminal());
  				Gson gson = new Gson();
