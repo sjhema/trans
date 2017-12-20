@@ -231,6 +231,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	private String processRevertForHourly(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Double bonusAmt = 0.0;
+		for (EmpBonusTypesList bonusTypesList : empBonusObj.getBonusTypesLists()) {
+			bonusAmt += bonusTypesList.getBonusamount();
+		}
+		
 		Driver driver = empBonusObj.getDriver();
 		String driverFullName = driver.getFullName();
 
@@ -289,7 +294,6 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		revert(empBonusObj, request);
 		
-		Double bonusAmt = empBonusObj.getBonustype().getAmount();
 		hourlyPayrollInvoice.setSumtotalamount(hourlyPayrollInvoice.getSumtotalamount() - bonusAmt);
 		
 		hourlyPayrollInvoiceDetails.setBonusAmounts(hourlyPayrollInvoiceDetails.getBonusAmounts() - bonusAmt);
@@ -309,6 +313,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	private String processRevertForSalary(HttpServletRequest request, EmployeeBonus empBonusObj) {
+		Double bonusAmt = 0.0;
+		for (EmpBonusTypesList bonusTypesList : empBonusObj.getBonusTypesLists()) {
+			bonusAmt += bonusTypesList.getBonusamount();
+		}
+		
 		Driver driver = empBonusObj.getDriver();
 		String driverFullName = driver.getFullName();
 
@@ -366,7 +375,6 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		
 		revert(empBonusObj, request);
 		
-		Double bonusAmt = empBonusObj.getBonustype().getAmount();
 		weeklyPay.setSumAmount(weeklyPay.getSumAmount() - bonusAmt);
 		weeklyPay.setSumTotal(weeklyPay.getSumTotal() - bonusAmt);
 		
@@ -386,7 +394,11 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	private String processRevertForDriver(HttpServletRequest request, EmployeeBonus empBonusObj) {
-		Double bonusAmt = empBonusObj.getBonustype().getAmount();
+		Double bonusAmt = 0.0;
+		for (EmpBonusTypesList bonusTypesList : empBonusObj.getBonusTypesLists()) {
+			bonusAmt += bonusTypesList.getBonusamount();
+		}
+		
 		Driver driver = empBonusObj.getDriver();
 		String driverFullName = driver.getFullName();
 
