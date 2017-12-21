@@ -43,6 +43,7 @@ import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.BonusType;
 import com.primovision.lutransport.model.hr.Eligibility;
 import com.primovision.lutransport.model.hr.EmpBonusTypesList;
@@ -212,6 +213,12 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 	}
 	
 	private String processRevert(ModelMap model, HttpServletRequest request) {
+		User user = getUser(request);
+		Long roleId = user.getRole().getId();
+		if (roleId != 1 && roleId != 7) {
+			return "You are not authorized to revert";
+		}
+		
 		EmployeeBonus empBonus = (EmployeeBonus) model.get("modelObject");
 		if (empBonus.getPayRollBatch() == null || empBonus.getPayRollStatus() == 1) {
 			return "Unable to revert - Employee bonus not in paid status";
@@ -473,7 +480,7 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		if (driverPay.getTerminal() != null) {
 			criterias.put("terminal", driverPay.getTerminal());
 		}
-		criterias.put("bonusAmount", bonusAmt);
+		//criterias.put("bonusAmount", bonusAmt);
 		criterias.put("isMainRow", "yes");
 		
 		List<DriverPayFreezWrapper> driverPayFreezeWrapperList = genericDAO.findByCriteria(DriverPayFreezWrapper.class, criterias);
@@ -496,16 +503,24 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 				&& driverPayFreezWrapper.getBonusAmount() != 0.0) {
 			driverPayFreezWrapper.setBonusAmount(driverPayFreezWrapper.getBonusAmount() - bonusAmt);
 		}
-		driverPayFreezWrapper.setBonusTypeName0(null);
-		driverPayFreezWrapper.setBonusAmount0(0.0);
-		driverPayFreezWrapper.setBonusTypeName1(null);
-		driverPayFreezWrapper.setBonusAmount1(0.0);
-		driverPayFreezWrapper.setBonusTypeName2(null);
-		driverPayFreezWrapper.setBonusAmount2(0.0);
-		driverPayFreezWrapper.setBonusTypeName3(null);
-		driverPayFreezWrapper.setBonusAmount3(0.0);
-		driverPayFreezWrapper.setBonusTypeName4(null);
-		driverPayFreezWrapper.setBonusAmount4(0.0);
+		
+		String bonusDesc = empBonusObj.getBonustype().getTypename();
+		if (StringUtils.equals(bonusDesc, driverPayFreezWrapper.getBonusTypeName0())) {
+			driverPayFreezWrapper.setBonusTypeName0(null);
+			driverPayFreezWrapper.setBonusAmount0(0.0);
+		} else if (StringUtils.equals(bonusDesc, driverPayFreezWrapper.getBonusTypeName1())) {
+			driverPayFreezWrapper.setBonusTypeName1(null);
+			driverPayFreezWrapper.setBonusAmount1(0.0);
+		} else if (StringUtils.equals(bonusDesc, driverPayFreezWrapper.getBonusTypeName2())) {
+			driverPayFreezWrapper.setBonusTypeName2(null);
+			driverPayFreezWrapper.setBonusAmount2(0.0);
+		} else if (StringUtils.equals(bonusDesc, driverPayFreezWrapper.getBonusTypeName3())) {
+			driverPayFreezWrapper.setBonusTypeName3(null);
+			driverPayFreezWrapper.setBonusAmount3(0.0);
+		} else if (StringUtils.equals(bonusDesc, driverPayFreezWrapper.getBonusTypeName4())) {
+			driverPayFreezWrapper.setBonusTypeName4(null);
+			driverPayFreezWrapper.setBonusAmount4(0.0);
+		} 
 		if (driverPayFreezWrapper.getTotalAmount() != null
 				&& driverPayFreezWrapper.getTotalAmount() != 0.0) {
 			driverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount() - bonusAmt);

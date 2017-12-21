@@ -153,8 +153,10 @@ public class UploadHourlyPayrollRunController extends CRUDController<HourlyPayro
 			List<HourlyPayrollInvoiceDetails> datas=null;
 			List<HourlyPayrollInvoiceDetails> datas1= new ArrayList<HourlyPayrollInvoiceDetails>();
 			params.put("date", new SimpleDateFormat("yyyy-MM-dd").format(runinvoice.getPayrollinvoicedate()));
-			params.put("batchdate",new SimpleDateFormat("yyyy-MM-dd").format(runinvoice.getBillBatchFrom()));
-			params.put("batchdateTo",new SimpleDateFormat("yyyy-MM-dd").format(runinvoice.getBillBatchTo()));		
+			/*/params.put("batchdate",new SimpleDateFormat("yyyy-MM-dd").format(runinvoice.getBillBatchFrom()));
+			params.put("batchdateTo",new SimpleDateFormat("yyyy-MM-dd").format(runinvoice.getBillBatchTo()));/*/
+			params.put("payRollBatchFrom",runinvoice.getBillBatchFrom());
+			params.put("payRollBatchTo",runinvoice.getBillBatchTo());
 			
 			if(runinvoice.getCompanyLoc()!=null)
 				params.put("company",runinvoice.getCompanyLoc().getName());

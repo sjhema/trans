@@ -94,6 +94,13 @@ public class TimeSheetManageController extends CRUDController<TimeSheet> {
 	public String edit2(ModelMap model, HttpServletRequest request) {
 		String mode = request.getParameter("mode");
 		if (StringUtils.equals(TimeSheet.ADD_TO_PREV_MODE, mode)) {
+			User user = getUser(request);
+			Long roleId = user.getRole().getId();
+			if (roleId != 1 && roleId != 7) {
+				request.getSession().setAttribute("error", "You are not authorized to add to previous");
+				return "redirect:list.do";
+			}
+			
 			TimeSheet origEntity = (TimeSheet) model.get("modelObject");
 			if (origEntity.getHourlypayrollinvoiceDate() == null) {
 				request.getSession().setAttribute("error", "Unable to add - Timesheet not in paid status");

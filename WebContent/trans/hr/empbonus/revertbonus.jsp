@@ -447,23 +447,20 @@ function getComTermCat(){
 	<form:hidden path="mode" id="mode" />
 	<table width="100%" id="form-table" cellspacing="1" cellpadding="5" >
 		<tr class="table-heading">
-			<td colspan="4"><b><primo:label code="Add/Update Employee Bonus"/></b></td>
+			<td colspan="4"><b><primo:label code="Revert Employee Bonus"/></b></td>
 		</tr>
 		<tr>
+		<%--
 		<td class="form-left"><primo:label code="Employee" /><span class="errorMessage"></span></td>
 		<td align="${left}">${modelObject.driver.fullName}</td>
-		
-		
 		<td class="form-left"><primo:label code="Category" /><span
 				class="errorMessage"></span></td>
 		<td align="${left}">${modelObject.category.name}</td>
-			
 		</tr>
 		<tr>
 		<td class="form-left"><primo:label code="Company" /><span
 				class="errorMessage"></span></td>
 		<td align="${left}">${modelObject.company.name}</td>
-		
 		<td class="form-left"><primo:label code="Terminal" /><span
 				class="errorMessage"></span></td>
 		<td align="${left}">${modelObject.terminal.name}</td>
@@ -473,6 +470,53 @@ function getComTermCat(){
 		<td>${modelObject.bonustypes}</td>
 		<td class="form-left" ><primo:label code="Amount" /><span
 				class="errorMessage"></span></td>
+			<td align="${left}">${modelObject.amounts}</td>
+		</tr>
+		--%>
+		
+		<tr>
+		<td class="form-left"><primo:label code="Employee" /><span class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="driver" id="empId" onchange="javascript:getComTermCat()">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
+				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
+			</td>
+		
+		
+		<td class="form-left"><primo:label code="Category" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="category" id="categoryid">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${categories}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="category" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+		<td class="form-left"><primo:label code="Company" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="company" id="companyid">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${companies}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="company" cssClass="errorMessage" />
+			</td>
+		
+		<td class="form-left"><primo:label code="Terminal" /><span
+				class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="terminal" id="terminalid">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="terminal" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Bonus Type" /><span class="errorMessage"></span></td>
+			<td>${modelObject.bonustypes}</td>
+			<td class="form-left" ><primo:label code="Amount" /><span
+					class="errorMessage"></span></td>
 			<td align="${left}">${modelObject.amounts}</td>
 		</tr>
 		

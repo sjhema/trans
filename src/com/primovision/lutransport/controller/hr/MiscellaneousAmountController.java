@@ -43,6 +43,7 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Terminal;
 import com.primovision.lutransport.model.Ticket;
+import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.equipment.VehicleLoan;
 import com.primovision.lutransport.model.hr.BonusType;
@@ -110,6 +111,12 @@ public class MiscellaneousAmountController extends CRUDController<MiscellaneousA
 		}
 		
 		private String processRevert(ModelMap model, HttpServletRequest request) {
+			User user = getUser(request);
+			Long roleId = user.getRole().getId();
+			if (roleId != 1 && roleId != 7) {
+				return "You are not authorized to revert";
+			}
+			
 			MiscellaneousAmount miscAmt = (MiscellaneousAmount) model.get("modelObject");
 			if (miscAmt.getPayRollBatch() == null || miscAmt.getPayRollStatus() == 1) {
 				return "Unable to revert - Miscellaneous pay not in paid status";

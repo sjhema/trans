@@ -105,8 +105,17 @@ public class TimeSheet extends AbstractBaseModel {
 	@Column(name="hourly_payroll_invoice_number")
 	protected String hourlypayrollinvoiceNumber;
 	
+	@Column(name="notes")
+	protected String notes;
 	
-	
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
 	public Integer getHourlypayrollstatus() {
 		return hourlypayrollstatus;
 	}

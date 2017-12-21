@@ -95,6 +95,7 @@ public class HrReportServiceImpl implements HrReportService {
 	
 	public static SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
 	public static SimpleDateFormat mysqldf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static SimpleDateFormat mysqldf1 = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Autowired
 	private GenericDAO genericDAO;
@@ -5272,7 +5273,13 @@ public class HrReportServiceImpl implements HrReportService {
 					timesheet.setHourlypayrollstatus(2);
 				}
 				billing.setDate(payrollinvoicedate);
-				billing.setBatchdate(batchdateFrom);
+				//billing.setBatchdate(batchdateFrom);
+				
+				String batchDateStr = billing.getBatchdate();
+				Date batchDateObj = sdf.parse(batchDateStr);
+				batchDateStr = mysqldf1.format(batchDateObj);
+				billing.setBatchdate(batchDateStr);
+				
 				billing.setBatchdateTo(batchdateTo);
 				billing.setPayRollBatchFrom(batchDateFrom);
 				billing.setPayRollBatchTo(batchDateTo);
@@ -7253,8 +7260,15 @@ public class HrReportServiceImpl implements HrReportService {
 		params.put("terminalLoc",invoice.getTerminal());
 		
 		
-		StringBuilder hourlyDeleteQuery= new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where  obj.date='").append( new SimpleDateFormat("yyyy-MM-dd").format(invoice.getPayrollinvoicedate())).append("' and obj.batchdate='");
-		hourlyDeleteQuery.append(new SimpleDateFormat("yyyy-MM-dd").format(invoice.getBillBatchFrom())).append("' and obj.batchdateTo='").append(new SimpleDateFormat("yyyy-MM-dd").format(invoice.getBillBatchTo())).append("' and obj.companyLoc=").append(invoice.getCompanyLoc().getId());
+		StringBuilder hourlyDeleteQuery= new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where  obj.date='")
+				.append( new SimpleDateFormat("yyyy-MM-dd").format(invoice.getPayrollinvoicedate()))
+				//.append("' and obj.batchdate='");
+				.append("' and obj.payRollBatchFrom='");
+		hourlyDeleteQuery.append(new SimpleDateFormat("yyyy-MM-dd").format(invoice.getBillBatchFrom()))
+		//.append("' and obj.batchdateTo='")
+		.append("' and obj.payRollBatchTo='")
+		.append(new SimpleDateFormat("yyyy-MM-dd").format(invoice.getBillBatchTo()))
+		.append("' and obj.companyLoc=").append(invoice.getCompanyLoc().getId());
 		if(invoice.getTerminal()!=null)
 			hourlyDeleteQuery.append(" and obj.terminalLoc="+invoice.getTerminal().getId());
 		else

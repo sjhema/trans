@@ -2657,7 +2657,13 @@ function formatDate6(){
 		  </tr>
 	  </c:if>
 	  
-	  
+	  <tr>
+  <td class="form-left"><primo:label code="Notes" /><span
+				class="errorMessage"></span></td>
+	<td align="${left}" colspan="5">
+				<form:textarea path="notes" rows="2" cols="69"/>    	
+			</td>
+</tr>
 	
 		
 	<tr><td colspan="2"></td></tr>
