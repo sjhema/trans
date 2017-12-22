@@ -290,7 +290,7 @@ function formatDate3(){
 }
 function getComTermCat(){
 	var employeselected=document.getElementById("empId");
-	var driver=employeselected.options[employeselected.selectedIndex].value;
+	var driver=employeselected.options[employeselected.selectedIndex].text;
   	jQuery.ajax({
 		url:'${ctx}/hr/empbonus/ajax.do?action=findDCompany&driver='+driver, 
 		success: function( data ) {
@@ -341,7 +341,7 @@ function getComTermCat(){
 		}
 			
 		}); 
-	jQuery.ajax({
+	/*jQuery.ajax({
 		url:'${ctx}/hr/empbonus/ajax.do?action=findhireex&driver='+driver,
 		success: function( data ) {
 			var listData=jQuery.parseJSON(data);
@@ -350,23 +350,10 @@ function getComTermCat(){
 		    document.getElementById("datepicker").value=dateHired;
 			 document.getElementById("experience").value=exp;
 		}
-	});	
+	});	*/
 
 	  }
-      function getref(){
-    	  var employeselected=document.getElementById("ref");
-    		var driver=employeselected.options[employeselected.selectedIndex].value;
-    		jQuery.ajax({
-    			url:'${ctx}/hr/empbonus/ajax.do?action=findref&driver='+driver,
-    			success: function( data ) {
-    				var listData=jQuery.parseJSON(data);
-    				var dateHired=listData[0];
-    				
-    			    document.getElementById("datepicker1").value=dateHired;
-    				
-    			}
-    		});
-      }
+	  
       function getamount(){
     	  var bonusselected=document.getElementById("btype");
   		var bonus=bonusselected.options[bonusselected.selectedIndex].value;
@@ -380,61 +367,6 @@ function getComTermCat(){
 				
 			}
 		});
-      }
-      function getticket(){
-    	  var catselected=document.getElementById("categoryid");
-    		var cat=catselected.options[catselected.selectedIndex].value;
-    		var p1=document.getElementById("datepicker2").value;
-    		var p2=document.getElementById("datepicker3").value;
-    		var employeselected=document.getElementById("empId");
-    		var driver=employeselected.options[employeselected.selectedIndex].value;
-    		//alert(cat);
-    		if(cat!=2){
-    			alert("Please select Category as Driver")
-    		}else if(p1==""){
-    			alert("Please Enter Payroll Batch Date From")
-    		}else if(p2==""){
-    			alert("Please Enter Payroll Batch Date To")
-    		}
-    		else{
-    			
-    	 	jQuery.ajax({
-    			url:'${ctx}/hr/empbonus/ajax.do?action=findticket&p1='+p1+'&p2='+p2+'&empid='+driver, 
-    			 beforeSend: function(){
-    			        $('#imag').show();
-    			    },
-    			    complete: function(){
-    			        $('#imag').hide();
-    			    },
-    			success: function( data ) {
-    				var listData=jQuery.parseJSON(data);
-    				var table;
-    				var count=0;
-    				table = '<table class="datagrid" width="100%"><tr><th>Origin</th><th>Destination</th><th>Load Count</th></tr>';
-    				var t="even";
-    				for (var i = 0; i <listData.length; i++) {
-    					var list=listData[i];
-    					if(t=="even"){
-    					table+='<tr class="even">';
-    					t="odd";
-    					}else{
-    						table+='<tr class="odd">';
-    						t="even";
-    					}
-    					table += '<td>'+list.origin+'</td>'+'<td>'+list.destination+'</td>'+'<td>'+list.count+'</td>';
-    					count+=list.count;
-    					table+='</tr>';
-    					}
-    				
-    				table+='<tr><td></td><td><b>Total</b></td></td><td><b>'+count+'</b></td>'
-    				table+='</table>'
-    				
-    				$("#divtable").html(table);
-    			}
-    				
-    			});
-    		}
-    	 	
       }
  
 </script>
@@ -480,6 +412,7 @@ function getComTermCat(){
 					<form:option value="">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
+					
 				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
 			</td>
 		
@@ -513,13 +446,20 @@ function getComTermCat(){
 			</td>
 		</tr>
 		<tr>
-			<td class="form-left"><primo:label code="Bonus Type" /><span class="errorMessage"></span></td>
-			<td>${modelObject.bonustypes}</td>
-			<td class="form-left" ><primo:label code="Amount" /><span
-					class="errorMessage"></span></td>
-			<td align="${left}">${modelObject.amounts}</td>
-		</tr>
+		<td class="form-left"><primo:label code="Bonus Type" /><span class="errorMessage">*</span></td>
+		<td><form:select cssClass="flat" path="bonustype" id="btype" onchange="javascript:getamount()">
+					<form:option value="">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${bonustypes}" itemValue="id" itemLabel="typename" />
+				</form:select> <br> <form:errors path="bonustype" cssClass="errorMessage" />
+			</td>
 		
+		<td class="form-left" ><primo:label code="Amount" /><span
+				class="errorMessage">*</span></td>
+			<td align="${left}"><form:input id="amounts" path="amounts" cssClass="flat"/> 
+			<br> <form:errors path="amounts" cssClass="errorMessage" /></td>
+			
+		</tr>
 	<%-- 	<tr>
 		<td class="form-left"><primo:label code="Refferal" /><span class="errorMessage">*</span></td>
 		<td><form:select cssClass="flat" path="refferal" id="ref" onchange="javascript:getref()">
@@ -551,7 +491,13 @@ function getComTermCat(){
 			<br> <form:errors path="batchTo" cssClass="errorMessage" /></td>
 			
 		</tr>
-		
+		 <tr>
+  <td class="form-left"><primo:label code="Notes" /><span
+				class="errorMessage"></span></td>
+	<td align="${left}" colspan="5">
+				<form:textarea path="notes" rows="2" cols="69"/>    	
+			</td>
+</tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>&nbsp;</td>

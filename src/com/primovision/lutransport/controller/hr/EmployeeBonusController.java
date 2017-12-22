@@ -191,18 +191,28 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 			EmployeeBonus bonus = (EmployeeBonus) model.get("modelObject");
 			
 			StringBuffer bonusTypeBuffer = new StringBuffer();
+			StringBuffer notesBuffer = new StringBuffer();
 			double amount = 0.0;
 			for (EmpBonusTypesList bonusTypesList : bonus.getBonusTypesLists()){
 				bonusTypeBuffer.append(bonusTypesList.getBonusType().getTypename());
 				bonusTypeBuffer.append(",");
+				
+				notesBuffer.append(bonusTypesList.getNote());
+				notesBuffer.append(",");
+				
 				amount += bonusTypesList.getBonusamount();
 			}
 			if (bonusTypeBuffer.length() > 0) {
 				int i = bonusTypeBuffer.lastIndexOf(",");
 				bonusTypeBuffer.deleteCharAt(i);
 			}
+			if (notesBuffer.length() > 0) {
+				int i = notesBuffer.lastIndexOf(",");
+				notesBuffer.deleteCharAt(i);
+			}
 			bonus.setAmounts(amount);
 			bonus.setBonustypes(bonusTypeBuffer.toString());
+			bonus.setNotes(notesBuffer.toString());
 			 
 			bonus.setMode(EmployeeBonus.REVERT_MODE);
 			return urlContext+"/revertbonus";
@@ -2037,7 +2047,6 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		if(entity.getDriver()==null){
 			bindingResult.rejectValue("driver", "error.select.option",null, null);
 		}
-		
 		if(entity.getCategory()==null){
 			bindingResult.rejectValue("category", "error.select.option",null, null);
 		}
@@ -2053,9 +2062,47 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
 		if(entity.getBatchTo()==null){
 			bindingResult.rejectValue("batchTo", "error.select.option", null, null);
 		}
+		if(entity.getBonustype()==null){
+			bindingResult.rejectValue("bonustype", "error.select.option", null, null);
+		}
+		if(entity.getAmounts()==null){
+			bindingResult.rejectValue("amounts", "error.select.option", null, null);
+		}
+		
+		try {
+			getValidator().validate(entity, bindingResult);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			log.warn("Error in validation :" + e);
+		}
+		if (bindingResult.hasErrors()) {
+			setupCreate(model, request);
+			return urlContext+"/revertbonus";
+		}
+		
+		Driver driver = entity.getDriver();
+		if (driver != null){
+			entity.setEmpnumber(driver.getStaffId());
+			if (driver.getDateHired()!= null){
+				 entity.setDateHired(driver.getDateHired());
+			 } else{
+				 entity.setDateHired(driver.getDateReHired());
+			 }
+		}
 		
 		beforeSave(request, entity, model);
 		genericDAO.saveOrUpdate(entity);
+		
+		List<EmpBonusTypesList> empBonusTypesList = entity.getBonusTypesLists();
+		EmpBonusTypesList anEmpBonusTypesList = empBonusTypesList.get(0);
+		anEmpBonusTypesList.setBonusType(entity.getBonustype());
+		anEmpBonusTypesList.setBonusamount(entity.getAmounts());
+		anEmpBonusTypesList.setNote(entity.getNotes());
+		
+		Long userId = getUser(request).getId();
+		anEmpBonusTypesList.setModifiedBy(userId);
+		anEmpBonusTypesList.setModifiedAt(Calendar.getInstance().getTime());
+		genericDAO.saveOrUpdate(anEmpBonusTypesList);
 		
 		request.getSession().setAttribute("msg", "Bonus details saved successfully");
 		 
@@ -2192,10 +2239,10 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> company=new ArrayList<Location>();
  				
- 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
- 				//driverQuery += (request.getParameter("driver") + "'");
- 				//List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
- 				//Driver driver = driverList.get(0);
+ 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				driverQuery += (request.getParameter("driver") + "'");
+ 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				Driver driver = driverList.get(0);
  				
  				company.add(driver.getCompany());
  				Gson gson = new Gson();
@@ -2215,10 +2262,10 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<Location> terminal=new ArrayList<Location>();
  				
- 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
- 				//driverQuery += (request.getParameter("driver") + "'");
- 				//List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
- 				//Driver driver = driverList.get(0);
+ 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				driverQuery += (request.getParameter("driver") + "'");
+ 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				Driver driver = driverList.get(0);
  				
  				terminal.add(driver.getTerminal());
  				Gson gson = new Gson();
@@ -2238,7 +2285,10 @@ public class EmployeeBonusController extends CRUDController<EmployeeBonus> {
  		if("findDCategory".equalsIgnoreCase(action)){
  			if(!StringUtils.isEmpty(request.getParameter("driver"))){
  				List<EmployeeCatagory> category=new ArrayList<EmployeeCatagory>();
- 				Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				//Driver driver=genericDAO.getById(Driver.class,Long.parseLong(request.getParameter("driver")));
+ 				driverQuery += (request.getParameter("driver") + "'");
+ 				List<Driver> driverList = genericDAO.executeSimpleQuery(driverQuery);
+ 				Driver driver = driverList.get(0);
  				category.add(driver.getCatagory());
  				Gson gson = new Gson();
  				return gson.toJson(category);
