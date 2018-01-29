@@ -100,16 +100,16 @@ function formatDate(dateElemId) {
 			<td colspan="4"><b><primo:label code="Injury Report" /></b></td>
 	    </tr>
 	   <tr>
-			<td align="${left}" class="first"><primo:label code="Insurance Company"/></td>
+	   		<td align="${left}" class="first"><primo:label code="Company"/></td>
 			<td align="${left}">
-				<select id="insuranceCompany" name="insuranceCompany" style="min-width:154px; max-width:154px">
+				<select id="driverCompany" name="driverCompany" style="min-width:154px; max-width:154px">
 					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${insuranceCompanies}" var="anInsuranceCompany">
+					<c:forEach items="${companies}" var="aCompany">
 						<c:set var="selected" value=""/>
-						<c:if test="${sessionScope.searchCriteria.searchMap['insuranceCompany'] == anInsuranceCompany.id}">
+						<c:if test="${sessionScope.searchCriteria.searchMap['driverCompany'] == aCompany.id}">
 							<c:set var="selected" value="selected"/>
 						</c:if>
-						<option value="${anInsuranceCompany.id}" ${selected}>${anInsuranceCompany.name}</option>
+						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
 					</c:forEach>
 				</select>
 			</td>
@@ -128,6 +128,19 @@ function formatDate(dateElemId) {
 			</td>
 	   	</tr>
 		<tr>
+			<td align="${left}" class="first"><primo:label code="Insurance Company"/></td>
+			<td align="${left}">
+				<select id="insuranceCompany" name="insuranceCompany" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${insuranceCompanies}" var="anInsuranceCompany">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['insuranceCompany'] == anInsuranceCompany.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${anInsuranceCompany.id}" ${selected}>${anInsuranceCompany.name}</option>
+					</c:forEach>
+				</select>
+			</td>
 			<td align="${left}" class="first"><primo:label code="Claim No."/></td>
 			<td align="${left}">
 				<select id="claimNumber" name="claimNumber" style="min-width:154px; max-width:154px">

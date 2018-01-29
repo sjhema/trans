@@ -36,6 +36,7 @@ import com.primovision.lutransport.core.util.DateUtil;
 import com.primovision.lutransport.core.util.MathUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.model.BillingRate;
+import com.primovision.lutransport.model.ChangedTicket;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Invoice;
 import com.primovision.lutransport.model.Location;
@@ -79,6 +80,7 @@ import com.primovision.lutransport.model.hrreport.SalaryDetail;
 import com.primovision.lutransport.model.hrreport.TimeSheetInput;
 import com.primovision.lutransport.model.hrreport.TimeSheetWrapper;
 import com.primovision.lutransport.model.hrreport.TimeSheetWrapperDetail;
+import com.primovision.lutransport.model.hrreport.UpdatedDriverPay;
 import com.primovision.lutransport.model.hrreport.WeeklyPay;
 import com.primovision.lutransport.model.hrreport.WeeklyPayDetail;
 import com.primovision.lutransport.model.hrreport.WeeklypayWrapper;
@@ -1863,10 +1865,59 @@ public class HrReportServiceImpl implements HrReportService {
 		
 		wrapper.setDriverPayRateDataMap(driverPayRateMap);
 		
+		boolean isSummmary = StringUtils.contains(sum, "true") ? true : false;
+		updateChangedInfo(wrapper, isSummmary);
 		
 		return wrapper;
 	}
 
+	private void updateChangedInfo(DriverPayWrapper wrapper, boolean isSummary) {
+		List<DriverPay> driverPayList = wrapper.getDriverPays();
+		if (driverPayList == null || driverPayList.isEmpty()) {
+			return;
+		}
+		
+		for (DriverPay aDriverPay : driverPayList) {
+			updateChangedAmount(aDriverPay, wrapper, isSummary);
+		}
+	}
+	
+	private void updateChangedAmount(DriverPay aDriverPay, DriverPayWrapper wrapper, boolean isSummary) {
+		aDriverPay.setTransportationAmountDiff(0.0);
+		List<UpdatedDriverPay> updatedDriverPayList = retrieveUpdatedDriverPay(aDriverPay);
+		if (updatedDriverPayList == null || updatedDriverPayList.isEmpty()) {
+			return;
+		}
+		
+		UpdatedDriverPay updatedDriverPay = updatedDriverPayList.get(0);
+		Double changedAmount = updatedDriverPay.getAmount();
+		
+		aDriverPay.setUpdatedDriverPayAmount(changedAmount);
+		aDriverPay.setUpdatedDriverPayNoOfLoads(updatedDriverPay.getNoOfLoad());
+		aDriverPay.setUpdatedDriverPayNotes(updatedDriverPay.getNotes());
+		
+		aDriverPay.setTransportationAmountDiff(changedAmount);
+		
+		/*if (isSummary) {
+			aDriverPay.setAmount(aDriverPay.getAmount() + changedAmount);
+		}*/
+		
+		aDriverPay.setTotalAmount(aDriverPay.getTotalAmount() + changedAmount);
+		
+		wrapper.setSumAmount(wrapper.getSumAmount() + changedAmount);
+		wrapper.setSumTotal(wrapper.getSumTotal() + changedAmount);
+	}
+	
+	private List<UpdatedDriverPay> retrieveUpdatedDriverPay(DriverPay aDriverPay) {
+		String query = "select obj from UpdatedDriverPay obj where obj.updatedStatus="+UpdatedDriverPay.UPDATED_STATUS_IN_PROCESS
+				+ " and obj.driverName='"+aDriverPay.getDrivername()+"'"
+				+ " and obj.company.name='"+aDriverPay.getCompanyname()+"'";
+		if (StringUtils.isNotEmpty(aDriverPay.getTerminalname())) {
+			query += " and obj.terminal.name='"+aDriverPay.getTerminalname()+"'";
+		}
+		List<UpdatedDriverPay> updatedDriverPayList = genericDAO.executeSimpleQuery(query);
+		return updatedDriverPayList;
+	}
 	
 	///***********************************************************////
 	///***********************************************************////
@@ -4090,7 +4141,7 @@ public class HrReportServiceImpl implements HrReportService {
 		//System.out.println("sumOftotAmount====="+wrapper.getSumtotalAmount()+"\n");
 		return wrapper;
 	}
-
+	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void saveDriverPayData(HttpServletRequest request,
@@ -4287,6 +4338,15 @@ public class HrReportServiceImpl implements HrReportService {
 		 		genericDAO.saveOrUpdate(payroll);		 
 	    }
 		 
+		 StringBuffer updatedPayQuery = new StringBuffer("update UpdatedDriverPay t set t.updatedStatus="+UpdatedDriverPay.UPDATED_STATUS_PROCESSED
+				 + ",t.payRollBatch='"+mysqldf.format(payrollbatch)+"'" 
+		 		 + " where 1=1 and t.updatedStatus="+UpdatedDriverPay.UPDATED_STATUS_IN_PROCESS);
+		 updatedPayQuery.append(" and t.driverName in ("+driverNames+")");
+		 updatedPayQuery.append(" and t.company="+company);
+		 StringBuffer changedTicketsQuery = new StringBuffer("update ChangedTicket t set t.changedStatus="+ChangedTicket.CHANGED_STATUS_PROCESSED
+				 + ",t.newPayRollBatch='"+mysqldf.format(payrollbatch)+"'" 
+				 + " where 1=1 and t.changedStatus="+ChangedTicket.CHANGED_STATUS_IN_PROCESS);
+		 //changedTicketsQuery.append(" and t.driverCompany="+company);
 		 
 		 StringBuffer query=new StringBuffer("update Ticket t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1" );
 		 StringBuffer ptodquery=new StringBuffer("update Ptodapplication t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1 and t.category=2");
@@ -4296,6 +4356,8 @@ public class HrReportServiceImpl implements HrReportService {
 		 StringBuffer reimAmountquery=new StringBuffer("update MiscellaneousAmount t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1 and t.miscNotes='Reimbursement'" );
 		 StringBuffer quarterBonusquery=new StringBuffer("update MiscellaneousAmount t set t.payRollStatus=2,t.payRollBatch='"+mysqldf.format(payrollbatch)+"' where 1=1 and  t.payRollStatus=1 and t.miscType='Quarter Bonus'" );
 		 if(!StringUtils.isEmpty(company) && !StringUtils.isEmpty(driverid)){
+			 changedTicketsQuery.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
+			 
 			 query.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
 			 ptodquery.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
         	 holidayquery.append(" and t.company="+company);
@@ -4305,6 +4367,8 @@ public class HrReportServiceImpl implements HrReportService {
         	 quarterBonusquery.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
          }
          else if(!StringUtils.isEmpty(company) && StringUtils.isEmpty(driverid)){
+          changedTicketsQuery.append(" and t.driver in ("+driverIds+")");
+      		 
         	 query.append(" and t.driver in (").append(driverIds).append(")");
         	 ptodquery.append(" and t.driver in (").append(driverIds).append(")");
         	 holidayquery.append(" and t.company in (").append(company).append(")");
@@ -4314,7 +4378,9 @@ public class HrReportServiceImpl implements HrReportService {
         	 quarterBonusquery.append(" and t.driver in (").append(driverIds).append(")");
          }
          
-         if(!StringUtils.isEmpty(driverid)){        	
+         if(!StringUtils.isEmpty(driverid)){  
+         	changedTicketsQuery.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
+         	
         	 query.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
 			 ptodquery.append(" and t.driver in ("+driverIdsWithCompanySelected+")");
         	 //holidayquery.append(" and t.company="+company);
@@ -4343,6 +4409,9 @@ public class HrReportServiceImpl implements HrReportService {
 			quarterBonusquery.append(" and t.batchTo<='"+tobatch+"'");
 		}
 		 if(!StringUtils.isEmpty(terminal)){
+			 updatedPayQuery.append(" and t.terminal="+terminal);
+			 changedTicketsQuery.append(" and t.terminal="+terminal);
+			 
 	            query.append(" and t.terminal="+terminal);
 	            ptodquery.append(" and t.terminal="+terminal);
 				holidayquery.append(" and t.terminal="+terminal);
@@ -4393,6 +4462,9 @@ public class HrReportServiceImpl implements HrReportService {
 		  genericDAO.getEntityManager().createQuery(miscAmountquery.toString()).executeUpdate();
 		  genericDAO.getEntityManager().createQuery(reimAmountquery.toString()).executeUpdate();
 		  genericDAO.getEntityManager().createQuery(quarterBonusquery.toString()).executeUpdate();
+		  
+		  genericDAO.getEntityManager().createQuery(updatedPayQuery.toString()).executeUpdate();
+		  genericDAO.getEntityManager().createQuery(changedTicketsQuery.toString()).executeUpdate();
 		  
 		  for (Map.Entry<Long, Double> entry : wrapper.getDriverPayRateDataMap().entrySet())
 			{
@@ -4446,7 +4518,16 @@ public class HrReportServiceImpl implements HrReportService {
 			
 		}
 		
-		
+		 StringBuffer updatedPayQuery = new StringBuffer("update UpdatedDriverPay t set t.updatedStatus="
+				 + UpdatedDriverPay.UPDATED_STATUS_IN_PROCESS
+				 + ",t.payRollBatch=null" 
+		 		 + " where 1=1 and t.updatedStatus="+UpdatedDriverPay.UPDATED_STATUS_PROCESSED);
+		 updatedPayQuery.append(" and t.driverName in ("+driverNames+")");
+		 StringBuffer changedTicketsQuery = new StringBuffer("update ChangedTicket t set t.changedStatus="
+				 + ChangedTicket.CHANGED_STATUS_IN_PROCESS
+				 + ",t.newPayRollBatch=null" 
+				 + " where 1=1 and t.changedStatus="+ChangedTicket.CHANGED_STATUS_PROCESSED);
+		 //changedTicketsQuery.append(" and t.driverCompany="+payroll.getCompany().getId());
 		
 		 StringBuffer query=new StringBuffer("update Ticket t set t.payRollStatus=1,t.payRollBatch=null,t.driverPayRate=null where 1=1 and  t.payRollStatus=2" );
 		 StringBuffer ptodquery=new StringBuffer("update Ptodapplication t set t.payRollStatus=1,t.payRollBatch=null where 1=1 and  t.payRollStatus=2 and t.category=2");
@@ -4459,6 +4540,9 @@ public class HrReportServiceImpl implements HrReportService {
 		 
 		 
 		 if(payroll.getCompany()!=null){
+			 updatedPayQuery.append(" and t.company="+payroll.getCompany().getId());
+			 changedTicketsQuery.append(" and t.driver in ("+driverIds+")");
+			 
 			 query.append(" and t.driver in ("+driverIds+")");
 			 ptodquery.append(" and t.driver in (").append(driverIds).append(")");
 			 holidayquery.append(" and t.company="+payroll.getCompany().getId());
@@ -4486,6 +4570,9 @@ public class HrReportServiceImpl implements HrReportService {
 			quarterAmountquery.append("and t.batchTo<='"+mysqldf.format(payroll.getBillBatchTo())+"'");
 		}
 		 if(payroll.getTerminal()!=null){
+			 updatedPayQuery.append(" and t.terminal="+payroll.getTerminal().getId());
+			 changedTicketsQuery.append(" and t.terminal="+payroll.getTerminal().getId());
+			 
 	            query.append(" and t.terminal="+payroll.getTerminal().getId());
 	            ptodquery.append(" and t.terminal="+payroll.getTerminal().getId());
 				holidayquery.append(" and t.terminal="+payroll.getTerminal().getId());
@@ -4495,6 +4582,9 @@ public class HrReportServiceImpl implements HrReportService {
 				quarterAmountquery.append(" and t.terminal="+payroll.getTerminal().getId());
 	     }
 		 if(payroll.getPayRollBatch()!=null){
+			 updatedPayQuery.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
+			 changedTicketsQuery.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
+			 
 			 query.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
 			 ptodquery.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
 			 holidayquery.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
@@ -4504,6 +4594,8 @@ public class HrReportServiceImpl implements HrReportService {
 			 quarterAmountquery.append(" and t.payRollBatch='"+mysqldf.format(payroll.getPayRollBatch())+"'");
 		 }
 		 
+		 genericDAO.getEntityManager().createQuery(updatedPayQuery.toString()).executeUpdate();
+		 genericDAO.getEntityManager().createQuery(changedTicketsQuery.toString()).executeUpdate();
 		 
 		genericDAO.getEntityManager().createQuery(query.toString()).executeUpdate();
 		genericDAO.getEntityManager().createQuery(ptodquery.toString()).executeUpdate();
@@ -8516,6 +8608,10 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount());
 				}else
 					detail.setTransportDriverAmount(0.0);
+				if (driverPay.getTransportationAmountDiff() != null && driverPay.getTransportationAmountDiff() != 0.0) {
+					detail.setTransportDriverAmount(detail.getTransportDriverAmount() + driverPay.getTransportationAmountDiff());
+				}
+				
 				detail.setBonusAmount(driverPay.getBonusAmount());
 				detail.setHolidayAmount(driverPay.getHolidayAmount());
 				
@@ -8566,6 +8662,10 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount());
 				}else
 					detail.setTransportDriverAmount(0.0);
+				if (driverPay.getTransportationAmountDiff() != null && driverPay.getTransportationAmountDiff() != 0.0) {
+					detail.setTransportDriverAmount(detail.getTransportDriverAmount() + driverPay.getTransportationAmountDiff());
+				}
+				
 				detail.setBonusAmount(driverPay.getBonusAmount());
 				detail.setHolidayAmount(driverPay.getHolidayAmount());
 				
@@ -8662,6 +8762,10 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount());
 				}else
 					detail.setTransportDriverAmount(0.0);
+				if (driverPay.getTransportationAmountDiff() != null && driverPay.getTransportationAmountDiff() != 0.0) {
+					detail.setTransportDriverAmount(detail.getTransportDriverAmount() + driverPay.getTransportationAmountDiff());
+				}
+				
 				detail.setBonusAmount(driverPay.getBonusAmount());
 				detail.setHolidayAmount(driverPay.getHolidayAmount());
 				
@@ -8809,6 +8913,10 @@ public class HrReportServiceImpl implements HrReportService {
 						detail.setTransportDriverAmount(driverPay.getTransportationAmount());
 				}else
 					detail.setTransportDriverAmount(0.0);
+				if (driverPay.getTransportationAmountDiff() != null && driverPay.getTransportationAmountDiff() != 0.0) {
+					detail.setTransportDriverAmount(detail.getTransportDriverAmount() + driverPay.getTransportationAmountDiff());
+				}
+				
 				detail.setBonusAmount(driverPay.getBonusAmount());
 				detail.setHolidayAmount(driverPay.getHolidayAmount());
 				
@@ -9252,6 +9360,7 @@ public class HrReportServiceImpl implements HrReportService {
 			detail.setCategory("Driver");
 			detail.setCompanyname(pay.getCompanyname());
 			detail.setAmount(pay.getTransportationAmount());
+			detail.setTransportationAmountDiff(pay.getTransportationAmountDiff());
 			// Bereavement change - driver
 			detail.setBereavementAmount(pay.getBereavementAmount());
 			detail.setVacationAmount(pay.getVacationAmount());

@@ -15,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Location;
 
@@ -115,6 +117,9 @@ public class DriverPayFreezWrapper extends AbstractBaseModel{
 	Double transportationAmount = 0.0;
 	
 	@Column 
+	Double transportationAmountDiff = 0.0;
+	
+	@Column 
 	Double subTotalAmount = 0.0;
 	
 	@Column 
@@ -202,6 +207,9 @@ public class DriverPayFreezWrapper extends AbstractBaseModel{
 	Double transAmountSpc = 0.0;	
 	
 	@Transient
+	Double transAmountDiffSpc = 0.0;
+	
+	@Transient
 	Double probdeductionAmountSpc = 0.0;
 	
 	@Transient
@@ -235,6 +243,12 @@ public class DriverPayFreezWrapper extends AbstractBaseModel{
 	@Transient
 	Double quarterAmountSpc = 0.0;
 	
+	@Transient
+	String updatedDriverPayNotes = StringUtils.EMPTY;
+	@Transient
+	Integer updatedDriverPayNoOfLoads = 0;
+	@Transient
+	Double updatedDriverPayAmount=0.0;
 	
 	// Bereavement change - driver
 	@Transient
@@ -968,6 +982,49 @@ public class DriverPayFreezWrapper extends AbstractBaseModel{
 	public String getIsMainRow() {
 		return isMainRow;
 	}
+	public Double getTransportationAmountDiff() {
+		return transportationAmountDiff;
+	}
+	public void setTransportationAmountDiff(Double transportationAmountDiff) {
+		this.transportationAmountDiff = transportationAmountDiff;
+	}
 	
+	@Transient
+	public Double getTransAmountDiffSpc() {
+		return transAmountDiffSpc;
+	}
+	@Transient
+	public void setTransAmountDiffSpc(Double transAmountDiffSpc) {
+		this.transAmountDiffSpc = transAmountDiffSpc;
+	}
 	
+	@Transient
+	public String getUpdatedDriverPayNotes() {
+		return updatedDriverPayNotes;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayNotes(String updatedDriverPayNotes) {
+		this.updatedDriverPayNotes = updatedDriverPayNotes;
+	}
+	
+	@Transient
+	public Double getUpdatedDriverPayAmount() {
+		return updatedDriverPayAmount;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayAmount(Double updatedDriverPayAmount) {
+		this.updatedDriverPayAmount = updatedDriverPayAmount;
+	}
+
+	@Transient
+	public Integer getUpdatedDriverPayNoOfLoads() {
+		return updatedDriverPayNoOfLoads;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayNoOfLoads(Integer updatedDriverPayNoOfLoads) {
+		this.updatedDriverPayNoOfLoads = updatedDriverPayNoOfLoads;
+	}
 }

@@ -35,6 +35,9 @@ public class Ticket extends AbstractBaseModel {
 	@Transient
 	public static Integer AUTO_CREATED_YES = 1;
 
+	@Transient
+	private String mode = StringUtils.EMPTY;
+	
 	@NotNull
 	@Column(name = "load_date")
 	protected Date loadDate;
@@ -179,8 +182,6 @@ public class Ticket extends AbstractBaseModel {
 	
 	@Column(name="autoCreated")
 	private Integer autoCreated;
-	
-	
 	
 	public Integer getAutoCreated() {
 		return autoCreated;
@@ -593,6 +594,15 @@ public class Ticket extends AbstractBaseModel {
 		} else {
 			return trailer.getUnitNum();
 		}
+	}
+	
+	@Transient
+	public String getMode() {
+		return mode;
+	}
+	@Transient
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 
 	@Override

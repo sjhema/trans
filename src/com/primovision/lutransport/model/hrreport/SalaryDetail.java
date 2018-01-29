@@ -14,6 +14,8 @@ public class SalaryDetail {
 	
 	private Double amount=0.0;
 	
+	private Double transportationAmountDiff=0.0;
+	
 	private Double sickPersonalAmount=0.0;
 	
 	private Double vacationAmount=0.0;
@@ -155,6 +157,14 @@ public class SalaryDetail {
 
 	public void setBereavementAmount(Double bereavementAmount) {
 		this.bereavementAmount = bereavementAmount;
+	}
+
+	public Double getTransportationAmountDiff() {
+		return transportationAmountDiff;
+	}
+
+	public void setTransportationAmountDiff(Double transportationAmountDiff) {
+		this.transportationAmountDiff = transportationAmountDiff;
 	}
 
 }

@@ -34,8 +34,6 @@ public class DriverPayWrapper {
 	List<DriverPay> driverPays=null;
 	
 	List<String> list = new ArrayList<String>();
-
-	
 	
 	public Map<String, Integer> getTotolcounts() {
 		return totolcounts;
@@ -182,5 +180,4 @@ public class DriverPayWrapper {
 	public void setDriverPayRateDataMap(Map<Long, Double> driverPayRateDataMap) {
 		this.driverPayRateDataMap = driverPayRateDataMap;
 	}
-
 }

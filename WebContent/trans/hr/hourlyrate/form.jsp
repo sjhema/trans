@@ -383,6 +383,12 @@
 					id="datepicker" onblur="return formatDate();" /> <br> <form:errors
 					path="validTo" cssClass="errorMessage" /></td>
 		</tr>
+		<tr>
+		  	<td class="form-left"><primo:label code="Notes" /><span class="errorMessage"></span></td>
+			<td align="${left}" colspan="5">
+				<form:textarea path="notes" rows="2" cols="69"/>    	
+			</td>
+		</tr>
 
 		<tr><td>&nbsp;</td>
 			<td align="${left}" colspan="2"><input type="submit"

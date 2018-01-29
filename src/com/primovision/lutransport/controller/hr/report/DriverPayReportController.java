@@ -34,10 +34,12 @@ import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.MathUtil;
 import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
+import com.primovision.lutransport.model.ChangedTicket;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.Ticket;
+import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.BonusType;
 import com.primovision.lutransport.model.hr.EmpBonusTypesList;
 //import com.primovision.lutransport.model.hr.Driver;
@@ -47,10 +49,12 @@ import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.HolidayType;
 import com.primovision.lutransport.model.hr.MiscellaneousAmount;
 import com.primovision.lutransport.model.hr.Ptodapplication;
+import com.primovision.lutransport.model.hrreport.ChangedDriverPayFreezWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPay;
 import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
 import com.primovision.lutransport.model.hrreport.DriverPayWrapper;
 import com.primovision.lutransport.model.hrreport.PayChexDetail;
+import com.primovision.lutransport.model.hrreport.UpdatedDriverPay;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.service.DynamicReportService;
 import com.primovision.lutransport.service.HrReportService;
@@ -109,12 +113,35 @@ public class DriverPayReportController extends BaseController{
 		return "hr/report/driverpay";
 	}
 	
+	/*private List<ChangedTicket> retrieveRevertedTickets(DriverPay aDriverPay) {
+		String query = "select obj from ChangedTicket obj where obj.changedStatus="+ChangedTicket.CHANGED_STATUS_IN_PROCESS
+				+ " and obj.driver.fullName='"+aDriverPay.getDrivername()+"'"
+				+ " and obj.driverCompany.name='"+aDriverPay.getCompanyname()+"'"
+				+ " and obj.terminal.name='"+aDriverPay.getTerminalname()+"'";
+		List<ChangedTicket> changedTicketList = genericDAO.executeSimpleQuery(query);
+		return changedTicketList;
+	}*/
+	
+	/*private List<ChangedDriverPayFreezWrapper> retrieveRevertedDriverPayFreez(ChangedTicket aChangedTicket) {
+		String query = "select obj from ChangedDriverPayFreezWrapper obj where obj.changedStatus="+ChangedDriverPayFreezWrapper.CHANGED_STATUS_REVERTED
+				+ " and obj.drivername='"+aChangedTicket.getDriver().getFullName()+"'"
+				+ " and obj.company="+aChangedTicket.getCompanyLocation().getId()
+				+ " and obj.terminal="+aChangedTicket.getTerminal().getId()
+				+ " and obj.origin='"+aChangedTicket.getOrigin().getName()+"'"
+				+ " and obj.destination='"+aChangedTicket.getDestination().getName()+"'"
+				+ " and obj.payRollBatch = '" + aChangedTicket.getPayRollBatch() + "'"
+				+ " and obj.billBatchDateTo = '" + aChangedTicket.getBillBatch() + "'";
+		List<ChangedDriverPayFreezWrapper> changedDriverPayFreezWrapperList = genericDAO.executeSimpleQuery(query);
+		return changedDriverPayFreezWrapperList;
+	}*/
 	
 	protected Map<String,Object> generateData(SearchCriteria criteria,
 			HttpServletRequest request) throws ParseException {
 		Map<String,Object> data = new HashMap<String,Object>();
 		Map<String,Object> params = new HashMap<String,Object>();
 		DriverPayWrapper wrapper=generateDriverPayRoll(criteria);
+		
+		String sum = (String) criteria.getSearchMap().get("summary");
 		
 		//
 		List<String> holidayExceptionDriverNameList = (List<String>)criteria.getSearchMap().get("holidayexpdriversmul");
@@ -130,7 +157,7 @@ public class DriverPayReportController extends BaseController{
 		}	
 		
 		String driversmul=(String)criteria.getSearchMap().get("driversmul");
-		 String sum= (String) criteria.getSearchMap().get("summary");
+		 //String sum= (String) criteria.getSearchMap().get("summary");
 		 String specialDetails= (String) criteria.getSearchMap().get("specdetail");
 		String payrollDate=(String) criteria.getSearchMap().get("payrollDate");
 		String driverid1=(String) criteria.getSearchMap().get("driver");
@@ -579,6 +606,7 @@ public class DriverPayReportController extends BaseController{
 		 						driverPayFreezObj.setSumTotal(MathUtil.roundUp(wrapper.getSumTotal(),2));						
 		 						driverPayFreezObj.setTotalAmount(MathUtil.roundUp(driverPay.getTotalAmount(),2));
 		 						driverPayFreezObj.setTransportationAmount(0.00);
+		 						driverPayFreezObj.setTransportationAmountDiff(0.00);
 		 						driverPayFreezObj.setSubTotalAmount(0.00);
 		 						driverPayFreezObj.setVacationAmount(0.00);
 		 						// Bereavement change - driver
@@ -1046,16 +1074,23 @@ public class DriverPayReportController extends BaseController{
 						parameter3.add(MathUtil.roundUp(transportationamount,2));
 						
 						
-						
+						Double transportationAmountDiff = (driverPay.getTransportationAmountDiff() == null ? 0.0 : driverPay.getTransportationAmountDiff());
 						if(StringUtils.contains(specialDetails, "true")){
 							driverPay.setTransAmountSpc(MathUtil.roundUp(transportationamount,2));
+							driverPay.setTransAmountDiffSpc(MathUtil.roundUp(transportationAmountDiff,2));
 							driverPay.setProbdeductionAmountSpc(MathUtil.roundUp(deductionAmount,2));
-							driverPay.setSubTotalAmountSpc(MathUtil.roundUp((driverPay.getTransAmountSpc()-driverPay.getProbdeductionAmountSpc()),2));
+							driverPay.setSubTotalAmountSpc(MathUtil.roundUp((driverPay.getTransAmountSpc()
+									-driverPay.getProbdeductionAmountSpc())
+									+driverPay.getTransAmountDiffSpc(),2));
 							driverPay.setMiscAmountSpc(MathUtil.roundUp(miscamt,2));
 							driverPay.setBonusAmountSpc(MathUtil.roundUp(bonusAmount,2));
 							driverPay.setPtodAmountSpc(MathUtil.roundUp(sickParsonalAmount,2));
 							driverPay.setHolidayAmountSpc(MathUtil.roundUp(holidayAmount,2));
-							driverPay.setTotalAmountSpc(MathUtil.roundUp(((driverPay.getTransAmountSpc()+driverPay.getPtodAmountSpc()+driverPay.getBonusAmountSpc()+driverPay.getHolidayAmountSpc()+driverPay.getMiscAmountSpc())-driverPay.getProbdeductionAmountSpc()),2));
+							driverPay.setTotalAmountSpc(MathUtil.roundUp(((driverPay.getTransAmountSpc()
+									+driverPay.getPtodAmountSpc()+driverPay.getBonusAmountSpc()
+									+driverPay.getHolidayAmountSpc()+driverPay.getMiscAmountSpc())
+									-driverPay.getProbdeductionAmountSpc())
+									+driverPay.getTransAmountDiffSpc(),2));
 							driverPay.setVacationAmountSpc(MathUtil.roundUp(vacationAmount,2));
 							// Bereavement change - driver
 							driverPay.setBereavementAmountSpc(MathUtil.roundUp(bereavementAmount,2));
@@ -1127,14 +1162,24 @@ public class DriverPayReportController extends BaseController{
 						driverPayFreezObj.setSeqNum(driverPay.getSeqNum());
 						driverPayFreezObj.setSickParsonalAmount(MathUtil.roundUp(sickParsonalAmount,2));						
 						driverPayFreezObj.setSickPersonalAmount(MathUtil.roundUp(sickParsonalAmount,2));											
-						driverPayFreezObj.setTransportationAmount(MathUtil.roundUp(transportationamount,2));						
-						driverPayFreezObj.setSubTotalAmount(MathUtil.roundUp((driverPayFreezObj.getTransportationAmount()-driverPayFreezObj.getProbationDeductionAmount()),2));
+						driverPayFreezObj.setTransportationAmount(MathUtil.roundUp(transportationamount,2));
+						driverPayFreezObj.setTransportationAmountDiff(MathUtil.roundUp(driverPay.getTransportationAmountDiff(),2));
+						driverPayFreezObj.setSubTotalAmount(MathUtil.roundUp(
+								(driverPayFreezObj.getTransportationAmount()
+										-driverPayFreezObj.getProbationDeductionAmount()
+										+driverPayFreezObj.getTransportationAmountDiff()),2));
 						driverPayFreezObj.setVacationAmount(MathUtil.roundUp(vacationAmount,2));
 						// Bereavement change - driver
 						driverPayFreezObj.setBereavementAmount(MathUtil.roundUp(bereavementAmount,2));
 						driverPayFreezObj.setTotalRowCount(wrapper.getTotalRowCount());
 						driverPayFreezObj.setSumAmount(MathUtil.roundUp(wrapper.getSumAmount(),2));						
-						driverPayFreezObj.setTotalAmount(MathUtil.roundUp((driverPayFreezObj.getTransportationAmount()-driverPayFreezObj.getProbationDeductionAmount())+driverPayFreezObj.getMiscAmount()+driverPayFreezObj.getSickParsonalAmount()+driverPayFreezObj.getHolidayAmount()+driverPayFreezObj.getBonusAmount(),2));
+						driverPayFreezObj.setTotalAmount(MathUtil.roundUp((
+								driverPayFreezObj.getTransportationAmount()
+								-driverPayFreezObj.getProbationDeductionAmount())
+								+driverPayFreezObj.getMiscAmount()
+								+driverPayFreezObj.getSickParsonalAmount()+driverPayFreezObj.getHolidayAmount()
+								+driverPayFreezObj.getBonusAmount()
+								+driverPayFreezObj.getTransportationAmountDiff(),2));
 						driverPayFreezObj.setSumTotal(MathUtil.roundUp(wrapper.getSumTotal(),2));	
 						driverPayFreezObj.setPayRollBatchString(wrapper.getPayRollBatch());
  						driverPayFreezObj.setBillBatchDateFromString(wrapper.getBatchDateFrom());
@@ -1249,13 +1294,101 @@ public class DriverPayReportController extends BaseController{
 		   		params.put("payRollBatch", wrapper.getPayRollBatch());
 		   		data.put("data", wrapper.getDriverPays());
 		   		params.put("sumAmount", wrapper.getSumAmount());
-		           
+		
 		data.put("params", params);
 		data.put("driverfreez",driverPayFreezObjList);
 		
 		setList(wrapper.getList());
 		return data;
 	}
+	
+	/*private List<DriverPayFreezWrapper> addChangedDriverPayFreezInfo(List<ChangedTicket> changedTicketList, DriverPayWrapper wrapper) {
+		List<DriverPayFreezWrapper> driverPayFreezWrapperList = new ArrayList<DriverPayFreezWrapper>();
+		if (changedTicketList == null || changedTicketList.isEmpty()) {
+			return driverPayFreezWrapperList;
+		}
+		
+		for (ChangedTicket aChangedTicket : changedTicketList) {
+			List<ChangedDriverPayFreezWrapper> changedDriverPayFreezWrapperList = retrieveRevertedDriverPayFreez(aChangedTicket);
+			if (changedDriverPayFreezWrapperList == null || changedDriverPayFreezWrapperList.isEmpty()) {
+				continue;
+			}
+			ChangedDriverPayFreezWrapper aChangedDriverPayFreezWrapper = changedDriverPayFreezWrapperList.get(0);
+			
+			DriverPayFreezWrapper driverPayFreezObj = new DriverPayFreezWrapper();
+			map(driverPayFreezObj, aChangedDriverPayFreezWrapper, wrapper);
+			driverPayFreezWrapperList.add(driverPayFreezObj);
+		}
+		return driverPayFreezWrapperList;
+	}
+	
+	private void map(DriverPayFreezWrapper driverPayFreezObj, 
+			ChangedDriverPayFreezWrapper changedDriverPayFreezWrapper, DriverPayWrapper wrapper) {
+		driverPayFreezObj.setAmount(changedDriverPayFreezWrapper.getAmount());						
+		driverPayFreezObj.setBonusAmount(0.00);		 												
+		driverPayFreezObj.setDeductionAmount(0.00);
+		driverPayFreezObj.setDestination(changedDriverPayFreezWrapper.getDestination());
+		driverPayFreezObj.setDrivername(changedDriverPayFreezWrapper.getDrivername());
+		driverPayFreezObj.setHolidayAmount(0.00);		 						
+		driverPayFreezObj.setMiscAmount(0.00);
+		driverPayFreezObj.setMiscamt(0.0);		 						
+		driverPayFreezObj.setMiscnote(StringUtils.EMPTY);		 						
+		driverPayFreezObj.setNoOfLoad(changedDriverPayFreezWrapper.getNoOfLoad());
+		driverPayFreezObj.setNumberOfSickDays(0);
+		driverPayFreezObj.setNumberOfVactionDays(0);
+		driverPayFreezObj.setOrigin(changedDriverPayFreezWrapper.getOrigin());						
+		driverPayFreezObj.setProbationDeductionAmount(0.00);
+		driverPayFreezObj.setQuatarAmount(0.00);
+		driverPayFreezObj.setQutarNotes(StringUtils.EMPTY);
+		driverPayFreezObj.setRate(changedDriverPayFreezWrapper.getRate());
+		driverPayFreezObj.setReimburseAmount(0.00);
+		driverPayFreezObj.setReimburseAmt(0.00);
+		driverPayFreezObj.setIsMainRow("yes");
+		driverPayFreezObj.setReimburseNotes(StringUtils.EMPTY);
+		driverPayFreezObj.setSeqNum(changedDriverPayFreezWrapper.getSeqNum());
+		driverPayFreezObj.setSickParsonalAmount(0.00);
+		driverPayFreezObj.setSickPersonalAmount(0.00);
+		driverPayFreezObj.setSumTotal(MathUtil.roundUp(changedDriverPayFreezWrapper.getSumTotal(),2));						
+		driverPayFreezObj.setTotalAmount(MathUtil.roundUp(changedDriverPayFreezWrapper.getTotalAmount(),2));
+		driverPayFreezObj.setTransportationAmount(0.00);
+		driverPayFreezObj.setSubTotalAmount(0.00);
+		driverPayFreezObj.setVacationAmount(0.00);
+		driverPayFreezObj.setBereavementAmount(0.00);
+		driverPayFreezObj.setTotalRowCount(changedDriverPayFreezWrapper.getTotalRowCount());
+		driverPayFreezObj.setSumAmount(MathUtil.roundUp(changedDriverPayFreezWrapper.getSumAmount(),2));
+		driverPayFreezObj.setPayRollBatchString(wrapper.getPayRollBatch());
+		driverPayFreezObj.setBillBatchDateFromString(wrapper.getBatchDateFrom());
+		driverPayFreezObj.setBillBatchDateToString(wrapper.getBatchDateTo());
+		
+		try {
+			Date batchFrom = null;
+			if (!StringUtils.isEmpty(wrapper.getBatchDateFrom())) {
+				batchFrom = new SimpleDateFormat("MM-dd-yyyy").parse(wrapper.getBatchDateFrom());
+			   driverPayFreezObj.setBillBatchDateFrom(batchFrom);
+			}
+			Date batchto = null;
+			if (!StringUtils.isEmpty(wrapper.getBatchDateTo())){
+				 batchto = new SimpleDateFormat("MM-dd-yyyy").parse(wrapper.getBatchDateTo()); 
+				 driverPayFreezObj.setBillBatchDateTo(batchto);
+			}
+			Date payrollbatch = null;
+			if (!StringUtils.isEmpty(wrapper.getPayRollBatch())){
+				 payrollbatch = new SimpleDateFormat("MM-dd-yyyy").parse(wrapper.getPayRollBatch()); 
+				 driverPayFreezObj.setPayRollBatch(payrollbatch);
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		if (wrapper.getCompanylocation() != null){
+			 driverPayFreezObj.setCompany(wrapper.getCompanylocation());
+			 driverPayFreezObj.setCompanyname(wrapper.getCompanylocation().getName());
+		}
+		
+		driverPayFreezObj.setTerminalname(changedDriverPayFreezWrapper.getTerminalname());
+		driverPayFreezObj.setTerminal(changedDriverPayFreezWrapper.getTerminal());
+	}*/
+	
 	public DriverPayWrapper generateDriverPayRoll(SearchCriteria criteria){
 		return hrReportService.generateDriverPayReport(criteria);
 	}

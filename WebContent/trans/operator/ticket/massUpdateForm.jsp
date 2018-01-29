@@ -612,6 +612,7 @@ function formatDate2(){
 <form:form action="updatebulkeditdata.do" name="ticketForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
+	<form:hidden path="mode" id="mode" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Common Information" />
@@ -882,6 +883,14 @@ function formatDate2(){
 			<td  align="${left}">
 				<form:input path="landfillTons" cssClass="flat" style="min-width:150px; max-width:150px"/> <br> 
 				<form:errors path="landfillTons" cssClass="errorMessage"  />
+			</td>
+		</tr>
+		<tr class="table-heading">
+			<td colspan="4"><b>Notes</b></td>
+		</tr>
+		<tr>
+			<td align="${left}" colspan="4">
+				<form:textarea path="notes" rows="3" cols="90"/>    	
 			</td>
 		</tr>
 		<tr><td colspan="2"></td></tr>

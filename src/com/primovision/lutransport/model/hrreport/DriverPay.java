@@ -27,6 +27,13 @@ public class DriverPay extends AbstractBaseModel{
 	@Transient
 	String destination = "";
 	
+	@Transient
+	String updatedDriverPayNotes = StringUtils.EMPTY;
+	@Transient
+	Integer updatedDriverPayNoOfLoads = 0;
+	@Transient
+	Double updatedDriverPayAmount=0.0;
+	
 	@Column(name="driver")
 	String drivername="";
 	
@@ -99,6 +106,9 @@ public class DriverPay extends AbstractBaseModel{
 	Double transportationAmount = 0.0;
 	
 	@Column 
+	Double transportationAmountDiff = 0.0;
+	
+	@Column 
 	Double probationDeductionAmount = 0.0;
 	
 	@Column
@@ -115,7 +125,8 @@ public class DriverPay extends AbstractBaseModel{
 	
 	
 	
-	
+	@Transient
+	Double transAmountDiffSpc = 0.0;
 	
 	@Transient
 	Double transAmountSpc = 0.0;	
@@ -489,6 +500,53 @@ public class DriverPay extends AbstractBaseModel{
 	@Transient
 	public void setForceNewPaychexSeqNum(String forceNewPaychexSeqNum) {
 		this.forceNewPaychexSeqNum = forceNewPaychexSeqNum;
+	}
+
+	@Transient
+	public String getUpdatedDriverPayNotes() {
+		return updatedDriverPayNotes;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayNotes(String updatedDriverPayNotes) {
+		this.updatedDriverPayNotes = updatedDriverPayNotes;
+	}
+	
+	@Transient
+	public Double getUpdatedDriverPayAmount() {
+		return updatedDriverPayAmount;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayAmount(Double updatedDriverPayAmount) {
+		this.updatedDriverPayAmount = updatedDriverPayAmount;
+	}
+
+	@Transient
+	public Integer getUpdatedDriverPayNoOfLoads() {
+		return updatedDriverPayNoOfLoads;
+	}
+
+	@Transient
+	public void setUpdatedDriverPayNoOfLoads(Integer updatedDriverPayNoOfLoads) {
+		this.updatedDriverPayNoOfLoads = updatedDriverPayNoOfLoads;
+	}
+	
+	@Transient
+	public Double getTransAmountDiffSpc() {
+		return transAmountDiffSpc;
+	}
+	@Transient
+	public void setTransAmountDiffSpc(Double transAmountDiffSpc) {
+		this.transAmountDiffSpc = transAmountDiffSpc;
+	}
+
+	public Double getTransportationAmountDiff() {
+		return transportationAmountDiff;
+	}
+
+	public void setTransportationAmountDiff(Double transportationAmountDiff) {
+		this.transportationAmountDiff = transportationAmountDiff;
 	}
 }
 

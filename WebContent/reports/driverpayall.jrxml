@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="driverpay" pageWidth="1425" pageHeight="595" columnWidth="1385" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="driverpay" pageWidth="1525" pageHeight="595" columnWidth="1485" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="500"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="totalRowCount" class="java.lang.Integer"/>
 	<parameter name="sumTotal" class="java.lang.Double"/>
@@ -30,6 +30,7 @@
 	<field name="reimburseAmount" class="java.lang.Double"/>
 	<field name="quatarAmount" class="java.lang.Double"/>
 	<field name="bereavementAmount" class="java.lang.Double"/>
+	<field name="transportationAmountDiff" class="java.lang.Double"/>
 	<variable name="vacationSum" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{vacationAmount}]]></variableExpression>
 	</variable>
@@ -43,7 +44,7 @@
 		<variableExpression><![CDATA[$F{holidayAmount}]]></variableExpression>
 	</variable>
 	<variable name="variable1" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{amount}]]></variableExpression>
+		<variableExpression><![CDATA[$F{amount}+$F{transportationAmountDiff}]]></variableExpression>
 	</variable>
 	<variable name="probtotalamt" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{probationDeductionAmount}]]></variableExpression>
@@ -72,6 +73,9 @@
 	<variable name="grandTotalAmountSum" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{totalAmount}+$F{vacationAmount}+$F{quatarAmount}+$F{bereavementAmount}]]></variableExpression>
 	</variable>
+	<variable name="variable6" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{transportationAmountDiff}]]></variableExpression>
+	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -81,7 +85,7 @@
 	<pageHeader>
 		<band height="73" splitType="Stretch">
 			<staticText>
-				<reportElement mode="Opaque" x="278" y="0" width="829" height="19" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="328" y="0" width="829" height="19" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -196,7 +200,7 @@
 	<columnHeader>
 		<band height="50" splitType="Stretch">
 			<staticText>
-				<reportElement mode="Opaque" x="427" y="18" width="106" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="522" y="18" width="106" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -238,7 +242,7 @@
 				<text><![CDATA[Terminal]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="693" y="18" width="85" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="788" y="18" width="85" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -252,7 +256,7 @@
 				<text><![CDATA[Sick/Personal Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="852" y="18" width="106" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="947" y="18" width="106" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -266,7 +270,7 @@
 				<text><![CDATA[Total Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="610" y="18" width="83" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="705" y="18" width="83" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -280,7 +284,7 @@
 				<text><![CDATA[Bonus Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="778" y="18" width="74" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="873" y="18" width="74" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -294,7 +298,7 @@
 				<text><![CDATA[Holiday Amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="341" y="18" width="86" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="436" y="18" width="86" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -308,7 +312,7 @@
 				<text><![CDATA[Probation Deduction]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="958" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1053" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -336,7 +340,7 @@
 				<text><![CDATA[Transportation Amt.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1299" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1394" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -364,7 +368,7 @@
 				<text><![CDATA[Load Count]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="533" y="18" width="77" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="628" y="18" width="77" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -378,7 +382,7 @@
 				<text><![CDATA[Misc. Amt.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1040" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1135" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -392,7 +396,7 @@
 				<text><![CDATA[Quarter Bonus Amt.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1122" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1217" y="18" width="82" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -406,7 +410,7 @@
 				<text><![CDATA[Bereavement amount]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1204" y="18" width="95" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1299" y="18" width="95" height="32" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#000000"/>
 					<topPen lineWidth="1.0" lineColor="#000000"/>
@@ -419,12 +423,26 @@
 				</textElement>
 				<text><![CDATA[Grand Total]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="341" y="18" width="95" height="32" forecolor="#000000" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Transportation Amt Diff.]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="427" y="0" width="106" height="20"/>
+				<reportElement x="522" y="0" width="106" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -433,7 +451,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{amount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{amount}+$F{transportationAmountDiff})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="1" y="0" width="116" height="20"/>
@@ -460,7 +478,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{terminalname}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="693" y="0" width="85" height="20"/>
+				<reportElement x="788" y="0" width="85" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -472,7 +490,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{sickPersonalAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="852" y="0" width="106" height="20"/>
+				<reportElement x="947" y="0" width="106" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -484,7 +502,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totalAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="610" y="0" width="83" height="20"/>
+				<reportElement x="705" y="0" width="83" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -496,7 +514,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{bonusAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="341" y="0" width="86" height="20"/>
+				<reportElement x="436" y="0" width="86" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -508,7 +526,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["-$"+new java.text.DecimalFormat("###0.00").format($F{probationDeductionAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="778" y="0" width="74" height="20"/>
+				<reportElement x="873" y="0" width="74" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -520,7 +538,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{holidayAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="958" y="0" width="82" height="20"/>
+				<reportElement x="1053" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -544,7 +562,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{transportationAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1299" y="0" width="82" height="20"/>
+				<reportElement x="1394" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -568,7 +586,7 @@
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{noOfLoad}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="533" y="0" width="77" height="20"/>
+				<reportElement x="628" y="0" width="77" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -580,7 +598,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{miscAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1040" y="0" width="82" height="20"/>
+				<reportElement x="1135" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -592,7 +610,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{quatarAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1122" y="0" width="82" height="20"/>
+				<reportElement x="1217" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -604,7 +622,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{bereavementAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1204" y="0" width="95" height="20"/>
+				<reportElement x="1299" y="0" width="95" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -614,6 +632,18 @@
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totalAmount}+$F{vacationAmount}+$F{quatarAmount}+$F{bereavementAmount})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="0" width="95" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{transportationAmountDiff})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -626,7 +656,7 @@
 	<summary>
 		<band height="42" splitType="Stretch">
 			<textField>
-				<reportElement x="427" y="0" width="106" height="20"/>
+				<reportElement x="522" y="0" width="106" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -647,7 +677,7 @@
 				<text><![CDATA[Total]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="693" y="0" width="85" height="20"/>
+				<reportElement x="788" y="0" width="85" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -661,7 +691,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{sickSum})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="341" y="0" width="86" height="20"/>
+				<reportElement x="436" y="0" width="86" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -675,7 +705,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["-$"+new java.text.DecimalFormat("###0.00").format($V{probtotalamt})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="610" y="0" width="83" height="20"/>
+				<reportElement x="705" y="0" width="83" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -689,7 +719,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{bonusSum})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="778" y="0" width="74" height="20"/>
+				<reportElement x="873" y="0" width="74" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -703,7 +733,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{holidaySum})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="852" y="0" width="106" height="20"/>
+				<reportElement x="947" y="0" width="106" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -717,7 +747,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{sumtotalAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="958" y="0" width="82" height="20"/>
+				<reportElement x="1053" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -745,7 +775,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{variable3})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1299" y="0" width="82" height="20"/>
+				<reportElement x="1394" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -773,7 +803,7 @@
 				<textFieldExpression class="java.lang.Integer"><![CDATA[$V{totalLoadCount}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="533" y="0" width="77" height="20"/>
+				<reportElement x="628" y="0" width="77" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -787,7 +817,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{variable2})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1040" y="0" width="82" height="20"/>
+				<reportElement x="1135" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -801,7 +831,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{variable5})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1122" y="0" width="82" height="20"/>
+				<reportElement x="1217" y="0" width="82" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -815,7 +845,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{sumOfBereavementAmounts})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1204" y="0" width="95" height="20"/>
+				<reportElement x="1299" y="0" width="95" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -827,6 +857,20 @@
 					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{grandTotalAmountSum})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="341" y="0" width="95" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($V{variable6})]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

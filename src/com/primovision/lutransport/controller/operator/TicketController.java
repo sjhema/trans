@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,7 @@ import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.core.util.TicketUtils;
 import com.primovision.lutransport.model.BillingRate;
+import com.primovision.lutransport.model.ChangedTicket;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -58,6 +60,9 @@ import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.Employee;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hrreport.ChangedDriverPayFreezWrapper;
+import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
+import com.primovision.lutransport.model.hrreport.UpdatedDriverPay;
 import com.primovision.lutransport.service.DateUpdateService;
 import com.primovision.lutransport.service.ReportService;
 
@@ -1202,7 +1207,7 @@ public class TicketController extends CRUDController<Ticket> {
 	
 	
 	@RequestMapping("/bulkedit.do")
-	public String bulkEdit(ModelMap model, HttpServletRequest request,@RequestParam("id") String[] ids){
+	public String bulkEdit(ModelMap model, HttpServletRequest request,@RequestParam("id") String[] ids) {
 		request.getSession().setAttribute("bulkeditids", ids);		
 		String[] ticketIDs = (String[])request.getSession().getAttribute("bulkeditids");
 		
@@ -1218,9 +1223,9 @@ public class TicketController extends CRUDController<Ticket> {
 		
 		String mode = request.getParameter("mode");
 		if (StringUtils.equals(Ticket.REVERT_MODE, mode)) {
-			String revertMsg = processRevert(commaSperatedID, request);
+			String revertMsg = validateCanBeReverted(commaSperatedID, request);
 			if (StringUtils.contains(revertMsg, "success")) {
-				request.getSession().setAttribute("msg", "Tickets reverted successfully");
+				//request.getSession().setAttribute("msg", "Tickets can be Reverted - validation check successful");
 			} else {
 				request.getSession().removeAttribute("bulkeditids");
 				request.getSession().setAttribute("error", revertMsg);
@@ -1239,13 +1244,18 @@ public class TicketController extends CRUDController<Ticket> {
 		}
 		else{
 			setupCreate(model, request);
+			
 			Ticket ticket = getEntityInstance();
+			if (StringUtils.equals(Ticket.REVERT_MODE, mode)) {
+				ticket.setMode(Ticket.REVERT_MODE);
+			}
+			
 			model.addAttribute("modelObject", ticket);		
 			return urlContext + "/massUpdateForm";
 		}
 	}
 	
-	private String processRevert(String ticketIds, HttpServletRequest request) {
+	private String validateCanBeReverted(String ticketIds, HttpServletRequest request) {
 		String ticketQuery = "select obj from Ticket obj where obj.id in ("+ticketIds+")";
 		List<Ticket> tickets = genericDAO.executeSimpleQuery(ticketQuery);
 		if (tickets == null || tickets.isEmpty()) {
@@ -1258,19 +1268,192 @@ public class TicketController extends CRUDController<Ticket> {
 			}
 		}
 		
-		for (Ticket aTicket : tickets) {
-			aTicket.setPayRollBatch(null);
-			aTicket.setPayRollStatus(1);
-			//aTicket.setDriverPayRate(null);
-			
-			aTicket.setModifiedBy(getUser(request).getId());
-			aTicket.setModifiedAt(Calendar.getInstance().getTime());
-			genericDAO.saveOrUpdate(aTicket);
-		}
-		
-		return "Tickets Reverted successfully";
+		return "Tickets can be Reverted - validation check successful";
 	} 
 	
+	private String processRevert(String commaSperatedTicketIds, Long userId, Ticket entity) {
+		if (entity.getDriver() == null && entity.getOrigin() == null && entity.getDestination() == null) {
+			return "Change either Driver or Origin/Destination";
+		}
+		if (entity.getDriver() != null && (entity.getOrigin() != null || entity.getDestination() != null)) {
+			return "Change either Driver or Origin/Destination (not both)";
+		}
+		
+		String ticketQuery = "select obj from Ticket obj where obj.id in ("+commaSperatedTicketIds+")";
+		List<Ticket> ticketsList = genericDAO.executeSimpleQuery(ticketQuery);
+		List<ChangedTicket> changedTicketsList = createChangedTickets(ticketsList, userId, entity);
+		
+		String result = createUpdatedDriverPay(changedTicketsList, userId);
+		if (!StringUtils.contains(result, "Success")) {
+			return result;
+		}
+		
+		return "Successfully updated changed info";
+	}
+	
+	private List<ChangedTicket> createChangedTickets(List<Ticket> ticketList, Long userId, Ticket entity) {
+		List<ChangedTicket> changedTicketsList = new ArrayList<ChangedTicket>();
+		for (Ticket aTicket : ticketList) {
+			ChangedTicket changedTicket = new ChangedTicket();
+			changedTicket.setCreatedAt(Calendar.getInstance().getTime());
+			changedTicket.setCreatedBy(userId);
+
+			User user = genericDAO.getById(User.class, userId);
+			changedTicket.setEnteredBy(user.getName());
+			
+			map(changedTicket, aTicket);
+			
+			changedTicket.setNewDriver(entity.getDriver());
+			changedTicket.setNewOrigin(entity.getOrigin());
+			changedTicket.setNewDestination(entity.getDestination());
+			changedTicket.setNewNotes(entity.getNotes());
+			changedTicket.setNewBillBatch(entity.getBillBatch());
+			
+			if (changedTicket.getNewOrigin() != null || changedTicket.getNewDestination() != null) {
+				Double newPayRate = deduceNewDriverPayRate(changedTicket);
+				aTicket.setDriverPayRate(newPayRate);
+				genericDAO.saveOrUpdate(aTicket);
+				
+				changedTicket.setNewDriverPayRate(newPayRate);
+			}
+			
+			genericDAO.saveOrUpdate(changedTicket);
+			changedTicketsList.add(changedTicket);
+		}
+		
+		return changedTicketsList;
+	}
+	
+	private Double deduceNewDriverPayRate(ChangedTicket aChangedTicket) {
+		Double newPayRate = 0.0;
+		List<DriverPayRate> oldRateList = retrieveDriverPayRate(aChangedTicket, 
+				aChangedTicket.getOrigin().getId(),
+				aChangedTicket.getDestination().getId());
+		List<DriverPayRate> newRateList = retrieveDriverPayRate(aChangedTicket, 
+				(aChangedTicket.getNewOrigin() != null ? aChangedTicket.getNewOrigin().getId()
+						: aChangedTicket.getOrigin().getId()),
+				(aChangedTicket.getNewDestination() != null ? aChangedTicket.getNewDestination().getId()
+						: aChangedTicket.getDestination().getId()));
+		if (oldRateList == null || oldRateList.isEmpty() || newRateList == null || newRateList.isEmpty()) {
+			return newPayRate;
+		}
+		DriverPayRate oldRateObj = oldRateList.get(0);
+		DriverPayRate newRateObj = newRateList.get(0);
+		
+		double oldTicketRate = aChangedTicket.getDriverPayRate().doubleValue();
+		if (oldRateObj.getPayRate() != null && oldTicketRate == oldRateObj.getPayRate()) {
+			newPayRate = newRateObj.getPayRate();
+		} else if (oldRateObj.getNightPayRate() != null && oldTicketRate == oldRateObj.getNightPayRate()) {
+			newPayRate = newRateObj.getNightPayRate();
+		} else if (oldRateObj.getSundayRateFactor() != null && oldTicketRate == (oldRateObj.getPayRate() * oldRateObj.getSundayRateFactor())) {
+			newPayRate = (newRateObj.getPayRate() * newRateObj.getSundayRateFactor());
+		} else if (oldRateObj.getProbationRate() != null && oldTicketRate == oldRateObj.getProbationRate()
+				&& newRateObj.getProbationRate() != null) {
+			newPayRate = newRateObj.getProbationRate();
+		}
+		return newPayRate;
+	}
+	
+	private List<DriverPayRate> retrieveDriverPayRate(ChangedTicket aChangedTicket, Long origin, Long destination) {
+		String query = "Select obj from DriverPayRate obj where 1=1 "
+				+ " and obj.catagory=2"
+				+ " and obj.company="+aChangedTicket.getDriverCompany().getId()
+				+ " and obj.terminal="+aChangedTicket.getTerminal().getId()
+				+ " and obj.transferStation="+origin
+				+ " and obj.landfill="+destination
+				+ " and obj.validFrom <= '" + aChangedTicket.getUnloadDate() + "'"
+				+ " and obj.validTo >= '" + aChangedTicket.getUnloadDate() + "'";
+		List<DriverPayRate> rateList = genericDAO.executeSimpleQuery(query);
+		return rateList;
+	}
+	
+	private String createUpdatedDriverPay(List<ChangedTicket> changedTicketList, Long userId) {
+		Map<Long, List<ChangedTicket>> groupedTicketMap = groupTicketsByDriver(changedTicketList);
+		Set<Long> keys = groupedTicketMap.keySet();
+		for (Long aKey : keys) {
+			UpdatedDriverPay updatedDriverPay = new UpdatedDriverPay();
+			updatedDriverPay.setCreatedBy(userId);
+			updatedDriverPay.setCreatedAt(Calendar.getInstance().getTime());
+			updatedDriverPay.setUpdatedStatus(UpdatedDriverPay.UPDATED_STATUS_IN_PROCESS);
+			
+			List<ChangedTicket> groupedTicketList = groupedTicketMap.get(aKey);
+			ChangedTicket aChangedTicket = groupedTicketList.get(0);
+			boolean revertPay = true;
+			if (aChangedTicket.getNewOrigin() != null || aChangedTicket.getNewDestination() != null) {
+				revertPay = false;
+			} 
+			
+			Double amount = 0.0;
+			for (ChangedTicket aLoopTicket : groupedTicketList) {
+				Double loopAmount = 0.0;
+				if (revertPay) {
+					loopAmount = -(aLoopTicket.getDriverPayRate());
+				} else {
+					loopAmount = (aLoopTicket.getNewDriverPayRate() - aLoopTicket.getDriverPayRate());
+				}
+				
+				amount += (loopAmount);
+			}
+			updatedDriverPay.setAmount(amount);
+			updatedDriverPay.setNoOfLoad(groupedTicketList.size());
+			
+			map(updatedDriverPay, aChangedTicket);
+			genericDAO.saveOrUpdate(updatedDriverPay);
+		}
+		
+		return "Successfully saved UpdatedDriverPay";
+	}
+	
+	private void map(UpdatedDriverPay updatedDriverPay, ChangedTicket aTicket) {
+		updatedDriverPay.setDriverName(aTicket.getDriver().getFullName());
+		updatedDriverPay.setCompany(aTicket.getDriverCompany());
+		updatedDriverPay.setTerminal(aTicket.getTerminal());
+		updatedDriverPay.setBillBatchDateFrom(aTicket.getBillBatch());
+		updatedDriverPay.setBillBatchDateTo(aTicket.getBillBatch());
+		updatedDriverPay.setNotes(aTicket.getNewNotes());
+	}
+	
+	private Map<Long, List<ChangedTicket>> groupTicketsByDriver(List<ChangedTicket> changedTicketList) {
+		Map<Long, List<ChangedTicket>> groupedTicketMap = new HashMap<Long, List<ChangedTicket>>();
+		for (ChangedTicket aChangedTicket : changedTicketList) {
+			Long driver = aChangedTicket.getDriver().getId();
+			List<ChangedTicket> groupedTicketList = groupedTicketMap.get(driver);
+			if (groupedTicketList == null) {
+				groupedTicketList = new ArrayList<ChangedTicket>();
+				groupedTicketMap.put(driver, groupedTicketList);
+			}
+			groupedTicketList.add(aChangedTicket);
+		}
+		return groupedTicketMap;
+	}
+	
+	private String createChangedDriverPayFreezed(List<Ticket> ticketList, Long userId) {
+		for (Ticket aTicket : ticketList) {
+			String freezeQuery = "Select obj from DriverPayFreezWrapper obj where "
+					+ " obj.origin = '" + aTicket.getOrigin().getName() + "'"
+					+ " and obj.destination = '" + aTicket.getDestination().getName() + "'"
+					+ " and obj.drivername = '" + aTicket.getDriver().getFullName() + "'"
+					+ " and obj.company="+aTicket.getDriverCompany().getId()
+					+ " and obj.terminal="+aTicket.getTerminal().getId()
+					+ " and obj.payRollBatch = '" + aTicket.getPayRollBatch() + "'"
+					+ " and obj.billBatchDateTo = '" + aTicket.getBillBatch() + "'";
+			List<DriverPayFreezWrapper> freezeList = genericDAO.executeSimpleQuery(freezeQuery);
+			if (freezeList == null || freezeList.size() == 0) {
+				return "Driver Pay Freez Wrapper not found";
+				
+			}
+			if (freezeList.size() > 1) {
+				return "More than one Driver Pay Freez Wrapper not found";
+			}
+			DriverPayFreezWrapper aDriverPayFreezWrapper = freezeList.get(0);
+			
+			ChangedDriverPayFreezWrapper changedDriverPayFreezWrapper = new ChangedDriverPayFreezWrapper();
+			map(changedDriverPayFreezWrapper, aDriverPayFreezWrapper, userId);
+			genericDAO.saveOrUpdate(changedDriverPayFreezWrapper);
+		}
+		
+		return "Successfully saved ChangedDriverPayFreezWrapper";
+	}
 	
 	@RequestMapping("/prPendingYes.do")
 	public String prPendingYes(ModelMap model, HttpServletRequest request,@RequestParam("id") String[] ids){		
@@ -1401,6 +1584,9 @@ public class TicketController extends CRUDController<Ticket> {
 	public String updateBulklyEditedTikets(HttpServletRequest request,
 			@ModelAttribute("modelObject") Ticket entity,
 			BindingResult bindingResult, ModelMap model) {
+		Long userId = getUser(request).getId();
+		
+		boolean revertMode = (StringUtils.equals(Ticket.REVERT_MODE, entity.getMode()) ? true : false) ;
 		
 		StringBuffer ticketupdatequery = new StringBuffer("update Ticket set ");
 		boolean doNotAddComma = true;
@@ -1821,6 +2007,29 @@ public class TicketController extends CRUDController<Ticket> {
 			ticketupdatequery.append("vehicle=").append(entity.getVehicle().getId());
 		}
 		
+		if (StringUtils.isNotEmpty(entity.getNotes())) {
+			if(doNotAddComma){
+				doNotAddComma = false;
+			}
+			else{
+				ticketupdatequery.append(",");
+			}
+			ticketupdatequery.append("notes='").append(entity.getNotes()).append("'");
+		}
+		
+		if (revertMode) {
+			if (entity.getOrigin() == null && entity.getDestination() == null) {
+				if (doNotAddComma) {
+					doNotAddComma = false;
+				} else {
+					ticketupdatequery.append(",");
+				}
+				ticketupdatequery.append(" payRollBatch=null,");
+				ticketupdatequery.append(" payRollStatus=1,");
+				ticketupdatequery.append(" driverPayRate=0.0");
+			}
+		}
+		
 		String[] ticketIDs = (String[])request.getSession().getAttribute("bulkeditids");
 		
 		String commaSperatedID = "";
@@ -1833,19 +2042,166 @@ public class TicketController extends CRUDController<Ticket> {
 			}
 		}
 		
-		
 		ticketupdatequery.append(" where id in (").append(commaSperatedID).append(")");
 		
-		if(!doNotAddComma)
+		String successMsg = "Tickets Updated Successfully";
+		if(!doNotAddComma) {
+			if (revertMode) {
+				String result = processRevert(commaSperatedID, userId, entity);
+				if (!StringUtils.contains(result, "Success")) {
+					cleanUp(request);
+					request.getSession().removeAttribute("bulkeditids");
+					setupCreate(model, request);
+					request.getSession().setAttribute("error", result);
+					return "redirect:list.do";
+				} else {
+					successMsg = "Tickets Reverted Successfully";
+				}
+			}
+			
 			genericDAO.executeSimpleUpdateQuery(ticketupdatequery.toString());
+		}
+		
 		cleanUp(request);
 		// return to list
 		request.getSession().removeAttribute("bulkeditids");
 		setupCreate(model, request);
-		request.getSession().setAttribute("msg",
-				"Tickets Updated Successfully");
+		request.getSession().setAttribute("msg", successMsg);
 		
 			return "redirect:list.do";		
+	}
+	
+	private void map(ChangedDriverPayFreezWrapper changedDriverPayFreezWrapper, 
+			DriverPayFreezWrapper driverPayFreezWrapper, Long userId) {
+		changedDriverPayFreezWrapper.setAmount(driverPayFreezWrapper.getAmount());
+		changedDriverPayFreezWrapper.setBaseId(driverPayFreezWrapper.getId());
+		changedDriverPayFreezWrapper.setBereavementAmount(driverPayFreezWrapper.getBereavementAmount());
+		changedDriverPayFreezWrapper.setBillBatchDate(driverPayFreezWrapper.getBillBatchDate());
+		changedDriverPayFreezWrapper.setBillBatchDateFrom(driverPayFreezWrapper.getBillBatchDateFrom());
+		changedDriverPayFreezWrapper.setBillBatchDateFromString(driverPayFreezWrapper.getBillBatchDateFromString());
+		changedDriverPayFreezWrapper.setBillBatchDateTo(driverPayFreezWrapper.getBillBatchDateTo());
+		changedDriverPayFreezWrapper.setBillBatchDateToString(driverPayFreezWrapper.getBillBatchDateToString());
+		changedDriverPayFreezWrapper.setBonusAmount(driverPayFreezWrapper.getBonusAmount());
+		changedDriverPayFreezWrapper.setBonusAmount0(driverPayFreezWrapper.getBonusAmount0());
+		changedDriverPayFreezWrapper.setBonusAmount1(driverPayFreezWrapper.getBonusAmount1());
+		changedDriverPayFreezWrapper.setBonusAmount2(driverPayFreezWrapper.getBonusAmount2());
+		changedDriverPayFreezWrapper.setBonusAmount3(driverPayFreezWrapper.getBonusAmount3());
+		changedDriverPayFreezWrapper.setBonusAmount4(driverPayFreezWrapper.getBonusAmount4());
+		changedDriverPayFreezWrapper.setBonusNotes(driverPayFreezWrapper.getBonusNotes());
+		changedDriverPayFreezWrapper.setBonusNotes0(driverPayFreezWrapper.getBonusNotes0());
+		changedDriverPayFreezWrapper.setBonusNotes1(driverPayFreezWrapper.getBonusNotes1());
+		changedDriverPayFreezWrapper.setBonusNotes2(driverPayFreezWrapper.getBonusNotes2());
+		changedDriverPayFreezWrapper.setBonusNotes3(driverPayFreezWrapper.getBonusNotes3());
+		changedDriverPayFreezWrapper.setBonusNotes4(driverPayFreezWrapper.getBonusNotes4());
+		changedDriverPayFreezWrapper.setBonusTypeName(driverPayFreezWrapper.getBonusTypeName());
+		changedDriverPayFreezWrapper.setBonusTypeName0(driverPayFreezWrapper.getBonusTypeName0());
+		changedDriverPayFreezWrapper.setBonusTypeName1(driverPayFreezWrapper.getBonusTypeName1());
+		changedDriverPayFreezWrapper.setBonusTypeName2(driverPayFreezWrapper.getBonusTypeName2());
+		changedDriverPayFreezWrapper.setBonusTypeName3(driverPayFreezWrapper.getBonusTypeName3());
+		changedDriverPayFreezWrapper.setBonusTypeName4(driverPayFreezWrapper.getBonusTypeName4());
+		changedDriverPayFreezWrapper.setChangedStatus(ChangedDriverPayFreezWrapper.CHANGED_STATUS_IN_PROCESS);
+		changedDriverPayFreezWrapper.setCompany(driverPayFreezWrapper.getCompany());
+		changedDriverPayFreezWrapper.setCompanyname(driverPayFreezWrapper.getCompanyname());
+		changedDriverPayFreezWrapper.setCreatedAt(Calendar.getInstance().getTime());
+		changedDriverPayFreezWrapper.setCreatedBy(userId);
+		changedDriverPayFreezWrapper.setDeductionAmount(driverPayFreezWrapper.getDeductionAmount());
+		changedDriverPayFreezWrapper.setDestination(driverPayFreezWrapper.getDestination());
+		changedDriverPayFreezWrapper.setDrivername(driverPayFreezWrapper.getDrivername());
+		changedDriverPayFreezWrapper.setHolidayAmount(driverPayFreezWrapper.getHolidayAmount());
+		changedDriverPayFreezWrapper.setHolidaydateFrom(driverPayFreezWrapper.getHolidaydateFrom());
+		changedDriverPayFreezWrapper.setHolidaydateTo(driverPayFreezWrapper.getHolidaydateTo());
+		changedDriverPayFreezWrapper.setHolidayname(driverPayFreezWrapper.getHolidayname());
+		changedDriverPayFreezWrapper.setIsMainRow(driverPayFreezWrapper.getIsMainRow());
+		changedDriverPayFreezWrapper.setMiscAmount(driverPayFreezWrapper.getMiscAmount());
+		changedDriverPayFreezWrapper.setMiscamt(driverPayFreezWrapper.getMiscamt());
+		changedDriverPayFreezWrapper.setMiscamt0(driverPayFreezWrapper.getMiscamt0());
+		changedDriverPayFreezWrapper.setMiscamt1(driverPayFreezWrapper.getMiscamt1());
+		changedDriverPayFreezWrapper.setMiscamt2(driverPayFreezWrapper.getMiscamt2());
+		changedDriverPayFreezWrapper.setMiscamt3(driverPayFreezWrapper.getMiscamt3());
+		changedDriverPayFreezWrapper.setMiscamt4(driverPayFreezWrapper.getMiscamt4());
+		changedDriverPayFreezWrapper.setMiscamt5(driverPayFreezWrapper.getMiscamt5());
+		changedDriverPayFreezWrapper.setMiscnote(driverPayFreezWrapper.getMiscnote());
+		changedDriverPayFreezWrapper.setMiscnote0(driverPayFreezWrapper.getMiscnote0());
+		changedDriverPayFreezWrapper.setMiscnote1(driverPayFreezWrapper.getMiscnote1());
+		changedDriverPayFreezWrapper.setMiscnote2(driverPayFreezWrapper.getMiscnote2());
+		changedDriverPayFreezWrapper.setMiscnote3(driverPayFreezWrapper.getMiscnote3());
+		changedDriverPayFreezWrapper.setMiscnote4(driverPayFreezWrapper.getMiscnote4());
+		changedDriverPayFreezWrapper.setMiscnote5(driverPayFreezWrapper.getMiscnote5());
+		changedDriverPayFreezWrapper.setNoOfLoad(driverPayFreezWrapper.getNoOfLoad());
+		changedDriverPayFreezWrapper.setNoOfLoadtotal(driverPayFreezWrapper.getNoOfLoadtotal());
+		changedDriverPayFreezWrapper.setNumberOfSickDays(driverPayFreezWrapper.getNumberOfSickDays());
+		changedDriverPayFreezWrapper.setNumberOfVactionDays(driverPayFreezWrapper.getNumberOfVactionDays());
+		changedDriverPayFreezWrapper.setOrigin(driverPayFreezWrapper.getOrigin());
+		changedDriverPayFreezWrapper.setPayRollBatch(driverPayFreezWrapper.getPayRollBatch());
+		changedDriverPayFreezWrapper.setPayRollBatchString(driverPayFreezWrapper.getPayRollBatchString());
+		changedDriverPayFreezWrapper.setProbationDeductionAmount(driverPayFreezWrapper.getProbationDeductionAmount());
+		changedDriverPayFreezWrapper.setQuatarAmount(driverPayFreezWrapper.getQuatarAmount());
+		changedDriverPayFreezWrapper.setQutarAmt(driverPayFreezWrapper.getQutarAmt());
+		changedDriverPayFreezWrapper.setQutarNotes(driverPayFreezWrapper.getQutarNotes());
+		changedDriverPayFreezWrapper.setRate(driverPayFreezWrapper.getRate());
+		changedDriverPayFreezWrapper.setReimburseAmount(driverPayFreezWrapper.getReimburseAmount());
+		changedDriverPayFreezWrapper.setReimburseAmt(driverPayFreezWrapper.getReimburseAmt());
+		changedDriverPayFreezWrapper.setReimburseNotes(driverPayFreezWrapper.getReimburseNotes());
+		changedDriverPayFreezWrapper.setSeqNum(driverPayFreezWrapper.getSeqNum());
+		changedDriverPayFreezWrapper.setSickParsonalAmount(driverPayFreezWrapper.getSickParsonalAmount());
+		changedDriverPayFreezWrapper.setSickPersonalAmount(driverPayFreezWrapper.getSickPersonalAmount());
+		changedDriverPayFreezWrapper.setSubTotalAmount(driverPayFreezWrapper.getSubTotalAmount());
+		changedDriverPayFreezWrapper.setStatus(driverPayFreezWrapper.getStatus());
+		changedDriverPayFreezWrapper.setSubTotalAmount(driverPayFreezWrapper.getSubTotalAmount());
+		changedDriverPayFreezWrapper.setSumAmount(driverPayFreezWrapper.getSumAmount());
+		changedDriverPayFreezWrapper.setSumTotal(driverPayFreezWrapper.getSumTotal());
+		changedDriverPayFreezWrapper.setTerminal(driverPayFreezWrapper.getTerminal());
+		changedDriverPayFreezWrapper.setTerminalname(driverPayFreezWrapper.getTerminalname());
+		changedDriverPayFreezWrapper.setTotalAmount(driverPayFreezWrapper.getTotalAmount());
+		changedDriverPayFreezWrapper.setTotalRowCount(driverPayFreezWrapper.getTotalRowCount());
+		changedDriverPayFreezWrapper.setTransportationAmount(driverPayFreezWrapper.getTransportationAmount());
+		changedDriverPayFreezWrapper.setVacationAmount(driverPayFreezWrapper.getVacationAmount());
+	}
+	
+	private void map(ChangedTicket changedTicket, Ticket ticket) {
+		changedTicket.setAutoCreated(ticket.getAutoCreated());
+		changedTicket.setBaseTicketId(ticket.getId());
+		changedTicket.setBillBatch(ticket.getBillBatch());
+		changedTicket.setChangedStatus(ChangedTicket.CHANGED_STATUS_IN_PROCESS);
+		changedTicket.setCompanyLocation(ticket.getCompanyLocation());
+		changedTicket.setCustomer(ticket.getCustomer());
+		changedTicket.setDestination(ticket.getDestination());
+		changedTicket.setDestinationTicket(ticket.getDestinationTicket());
+		changedTicket.setDriver(ticket.getDriver());
+		changedTicket.setDriverCompany(ticket.getDriverCompany());
+		changedTicket.setDriverPayRate(ticket.getDriverPayRate());
+		changedTicket.setGallons(ticket.getGallons());
+		changedTicket.setInvoiceDate(ticket.getInvoiceDate());
+		changedTicket.setInvoiceNumber(ticket.getInvoiceNumber());
+		changedTicket.setLandfillGross(ticket.getLandfillGross());
+		changedTicket.setLandfillNet(ticket.getLandfillNet());
+		changedTicket.setLandfillTare(ticket.getLandfillTare());
+		changedTicket.setLandfillTimeIn(ticket.getLandfillTimeIn());
+		changedTicket.setLandfillTimeOut(ticket.getLandfillTimeOut());
+		changedTicket.setLandfillTons(ticket.getLandfillTons());
+		changedTicket.setLoadDate(ticket.getLoadDate());
+		changedTicket.setNotes(ticket.getNotes());
+		changedTicket.setOrigin(ticket.getOrigin());
+		changedTicket.setOriginTicket(ticket.getOriginTicket());
+		changedTicket.setPaperVerifiedStatus(ticket.getPaperVerifiedStatus());
+		changedTicket.setPayRollBatch(ticket.getPayRollBatch());
+		changedTicket.setPayRollStatus(ticket.getPayRollStatus());
+		changedTicket.setStatus(ticket.getStatus());
+		changedTicket.setSubcontractor(ticket.getSubcontractor());
+		changedTicket.setTerminal(ticket.getTerminal());
+		changedTicket.setTicketStatus(ticket.getTicketStatus());
+		changedTicket.setTrailer(ticket.getTrailer());
+		changedTicket.setTransferGross(ticket.getTransferGross());
+		changedTicket.setTransferNet(ticket.getTransferNet());
+		changedTicket.setTransferTare(ticket.getTransferTare());
+		changedTicket.setTransferTimeIn(ticket.getTransferTimeIn());
+		changedTicket.setTransferTimeOut(ticket.getTransferTimeOut());
+		changedTicket.setTransferTons(ticket.getTransferTons());
+		changedTicket.setUnloadDate(ticket.getUnloadDate());
+		changedTicket.setVehicle(ticket.getVehicle());
+		changedTicket.setVoucherDate(ticket.getVoucherDate());
+		changedTicket.setVoucherNumber(ticket.getVoucherNumber());
+		changedTicket.setVoucherStatus(ticket.getVoucherStatus());
 	}
 	
 	private void checkAndRemoveSubContractorCriteria(SearchCriteria criteria) {

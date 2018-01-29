@@ -649,7 +649,7 @@ function formatDate3(){
 			|| sessionScope.userInfo.role.id == 10 || sessionScope.userInfo.id == 295}">
 			<img src="/trans/images/edit.png" border="0" title="BULK EDIT" class="toolbarButton"> 
 			<a href="javascript:;"  onclick="editMultipleData()">BULK EDIT</a>&nbsp;&nbsp;
-			<%-- <a href="javascript:;"  onclick="processRevert()">REVERT PAY</a>&nbsp;&nbsp;--%>
+			<a href="javascript:;"  onclick="processRevert()">REVERT PAY</a>&nbsp;&nbsp;
 		    <a href="javascript:;"  onclick="payrollPendingYes()">PR Pend. - YES</a>&nbsp;&nbsp;
 			 <a href="javascript:;"  onclick="payrollPendingNo()">PR Pend. - NO</a>&nbsp;&nbsp;
 		</c:if>

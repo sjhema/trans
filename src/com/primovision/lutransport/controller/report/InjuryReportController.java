@@ -30,6 +30,7 @@ import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.core.util.MimeUtil;
 
 import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.injury.Injury;
@@ -74,6 +75,10 @@ public class InjuryReportController extends BaseController {
 		criterias.clear();
 		model.addAttribute("injuries", genericDAO.findByCriteria(Injury.class, criterias, "claimNumber asc", false));
 		
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
 		String query = "select distinct(obj.fullName) from Driver obj order by obj.fullName";
 		model.addAttribute("driverNames", genericDAO.executeSimpleQuery(query));
 		
@@ -82,6 +87,7 @@ public class InjuryReportController extends BaseController {
 	
 	private Map<String, Object> performSearch(SearchCriteria criteria, String overrideInjuryStatus,
 			Boolean searchNotInInjuryStatus) {
+		String driverCompany = (String) criteria.getSearchMap().get("driverCompany");
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
 		
@@ -106,6 +112,9 @@ public class InjuryReportController extends BaseController {
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Injury obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
 		
+		if (StringUtils.isNotEmpty(driverCompany)) {
+			whereClause.append(" and obj.driverCompany.id=" + driverCompany);
+		}
 		if (StringUtils.isNotEmpty(insuranceCompany)) {
 			whereClause.append(" and obj.insuranceCompany.id=" + insuranceCompany);
 		}
