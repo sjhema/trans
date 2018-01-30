@@ -3625,8 +3625,8 @@ public class HrReportServiceImpl implements HrReportService {
 		query.append("select obj from Ptodapplication obj where 1=1");
 		query.append(" and obj.driver = " + employee);
 		query.append(" and obj.leavetype = " + leaveType);
-		query.append(" and obj.batchdate >= '" + mysqldf1.format(searchDateFrom)+"'");
-		query.append(" and obj.batchdate <= '" + mysqldf.format(searchDateTo)+"'");
+		query.append(" and obj.payRollBatch >= '" + mysqldf1.format(searchDateFrom)+"'");
+		query.append(" and obj.payRollBatch <= '" + mysqldf.format(searchDateTo)+"'");
 		
 		List<Ptodapplication> ptodapplicationList = genericDAO.executeSimpleQuery(query.toString()); 
 		return ptodapplicationList;
@@ -3750,8 +3750,10 @@ public class HrReportServiceImpl implements HrReportService {
 			}
 			Date effectiveFromDate = leaveCurrentBalance.getDateEffectiveFrom();
 			
+			/*List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
+					effectiveFromDate, searchDateTo);*/
 			List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
-					effectiveFromDate, searchDateTo);
+					searchDateFrom, searchDateTo);
 			
 			Double daysPaid = 0.0;
 			Double daysPaidOut = 0.0;
