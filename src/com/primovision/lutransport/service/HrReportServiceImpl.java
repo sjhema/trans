@@ -3750,10 +3750,10 @@ public class HrReportServiceImpl implements HrReportService {
 			}
 			Date effectiveFromDate = leaveCurrentBalance.getDateEffectiveFrom();
 			
-			/*List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
-					effectiveFromDate, searchDateTo);*/
 			List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
-					searchDateFrom, searchDateTo);
+					effectiveFromDate, searchDateTo);
+			/*List<Ptodapplication> ptodapplicationList = retrievePtodApplication(employeeId, leaveType,
+					searchDateFrom, searchDateTo);*/
 			
 			Double daysPaid = 0.0;
 			Double daysPaidOut = 0.0;
