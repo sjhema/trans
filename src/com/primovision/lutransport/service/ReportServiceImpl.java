@@ -209,7 +209,8 @@ public class ReportServiceImpl implements ReportService {
 		
 		if (!StringUtils.isEmpty(origin) && !StringUtils.isEmpty(destination)) {
 			String rateQuery = "select obj from BillingRate obj where obj.transferStation="
-					+ origin + " and obj.landfill=" + destination;
+					+ origin + " and obj.landfill=" + destination
+					+ " order by obj.validTo desc";
 			List<BillingRate> fs = genericDAO.executeSimpleQuery(rateQuery);
 			BillingRate billingRate = null;
 			if (fs != null && fs.size() > 0) {
