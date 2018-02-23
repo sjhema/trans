@@ -3943,8 +3943,8 @@ throw new Exception("origin and destindation is empty");
 		return finalSubConIds.substring(0, finalSubConIds.length()-1);
 	}
 	
-	private String retrieveNoGPSVehicleIds(String companyIds) {
-		String query = "select obj from NoGPSVehicle obj where 1=1";
+	private String retrieveNoGPSVehicleIds(IFTAReportInput input) {
+		/*String query = "select obj from NoGPSVehicle obj where 1=1";
 		if (StringUtils.isNotEmpty(companyIds)) {
 			String companyCondn = " AND (obj.vehicle.owner.id in (" + companyIds + "))";
 			query += companyCondn;
@@ -3959,6 +3959,75 @@ throw new Exception("origin and destindation is empty");
 		String noGPSVehicleIds = StringUtils.EMPTY;
 		for (NoGPSVehicle aNoGPS : noGPSList) {
 			noGPSVehicleIds += String.valueOf(aNoGPS.getVehicle().getId()) + ",";
+		}
+		return noGPSVehicleIds.substring(0, noGPSVehicleIds.length()-1);*/
+		
+		String company = input.getCompany();
+		String periodFrom = input.getPeriodFrom();
+		String periodTo = input.getPeriodTo();
+		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
+		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
+		
+		StringBuffer query = new StringBuffer("select obj from MileageLog obj  where 1=1");
+		
+		if (!StringUtils.isEmpty(company)){
+			query.append(" and  obj.company in (" + company + ")");
+		}
+        
+      if (!StringUtils.isEmpty(periodFrom)) {
+        	try {
+				query.append(" and obj.period >='"+mysqldf.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+        
+      if (!StringUtils.isEmpty(periodTo)){
+        	try {
+				query.append(" and obj.period <='"+mysqldf.format(mileageSearchDateFormat.parse(periodTo))+"'");
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+      }
+      
+      if (StringUtils.isNotEmpty(lastInStateFrom) && StringUtils.isNotEmpty(lastInStateTo)) {
+      	/*lastInStateFrom += " 00:00:00";
+      	lastInStateTo += " 23:59:59";*/
+        	
+      	query.append(" and obj.lastInState >='"+lastInStateFrom+"'");
+			query.append(" and obj.lastInState <='"+lastInStateTo+"'");
+			
+			/*query.append(" and  obj.lastInState between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");*/
+		}
+      
+      String serviceTruckCondnOp = "!=";
+      String modelServiceTruck = "Service Truck";
+      query.append(" and obj.unit.model " + serviceTruckCondnOp + " '"+modelServiceTruck+"'");
+		
+      System.out.println("\nquery=mileageLog=>" + query + "\n");
+		List<MileageLog> retrievedMileageLogList = genericDAO.executeSimpleQuery(query.toString());
+		if (retrievedMileageLogList == null || retrievedMileageLogList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String gpsVehicleIds = StringUtils.EMPTY;
+		for (MileageLog aMileageLog : retrievedMileageLogList) {
+			gpsVehicleIds += String.valueOf(aMileageLog.getUnit().getId()) + ",";
+		}
+		gpsVehicleIds = gpsVehicleIds.substring(0, gpsVehicleIds.length()-1);
+		
+		String vehicleQuery = "select obj from Vehicle obj where obj.type=1 and obj.activeStatus=1" 
+	   		+ " and obj.id not in ("+gpsVehicleIds+")"
+	   		+ " and obj.unit != 0";
+		List<Vehicle> noGpsVehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		if (noGpsVehicleList == null || noGpsVehicleList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String noGPSVehicleIds = StringUtils.EMPTY;
+		for (Vehicle aVehicle : noGpsVehicleList) {
+			noGPSVehicleIds += String.valueOf(aVehicle.getId()) + ",";
 		}
 		return noGPSVehicleIds.substring(0, noGPSVehicleIds.length()-1);
 	}
@@ -4072,7 +4141,7 @@ throw new Exception("origin and destindation is empty");
 	public IFTAReportWrapper generateNoGPSMileageLogData(SearchCriteria searchCriteria, IFTAReportInput input) {
 		String companyIds = input.getCompany();
 		
-		String noGPSVehicleIds = retrieveNoGPSVehicleIds(companyIds);
+		String noGPSVehicleIds = retrieveNoGPSVehicleIds(input);
 		if (StringUtils.isEmpty(noGPSVehicleIds)) {
 			return null;
 		}
