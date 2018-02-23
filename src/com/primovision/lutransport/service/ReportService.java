@@ -70,4 +70,5 @@ public interface ReportService {
 	public IFTAReportWrapper generateMPGData(SearchCriteria searchCriteria, IFTAReportInput iftaReportInput);
 
 	public MileageLogReportWrapper generateOwnerOpSubConMileageLogData(SearchCriteria criteria, MileageLogReportInput input);
+	public IFTAReportWrapper generateNoGPSMileageLogData(SearchCriteria criteria, IFTAReportInput input);
 }

@@ -47,6 +47,7 @@ import com.primovision.lutransport.model.Invoice;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.MileageLog;
+import com.primovision.lutransport.model.NoGPSVehicle;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.SubcontractorInvoice;
@@ -3764,17 +3765,19 @@ throw new Exception("origin and destindation is empty");
 			iftaReportList.add(anIFTAReport);
 		}
 		
-		Iterator<Map.Entry<String, FuelLog>> itr = aggreateFuelLogMap.entrySet().iterator();
-		while (itr.hasNext()) {
-			Map.Entry<String, FuelLog> pair = itr.next();
-			FuelLog aFuelLog = pair.getValue();
-			
-			IFTAReport anIFTAReport = new IFTAReport();
-			anIFTAReport.setCompanyName(aFuelLog.getVehicleCompany());
-			anIFTAReport.setUnitNum(aFuelLog.getUnits());
-			anIFTAReport.setGallons(aFuelLog.getGallons());
-			
-			iftaReportList.add(anIFTAReport);
+		if (!mileageLogReportInput.isServiceTruck()) {
+			Iterator<Map.Entry<String, FuelLog>> itr = aggreateFuelLogMap.entrySet().iterator();
+			while (itr.hasNext()) {
+				Map.Entry<String, FuelLog> pair = itr.next();
+				FuelLog aFuelLog = pair.getValue();
+				
+				IFTAReport anIFTAReport = new IFTAReport();
+				anIFTAReport.setCompanyName(aFuelLog.getVehicleCompany());
+				anIFTAReport.setUnitNum(aFuelLog.getUnits());
+				anIFTAReport.setGallons(aFuelLog.getGallons());
+				
+				iftaReportList.add(anIFTAReport);
+			}
 		}
 		
 		Collections.sort(iftaReportList, new Comparator<IFTAReport>() {
@@ -3854,6 +3857,11 @@ throw new Exception("origin and destindation is empty");
 		mileageLogReportInput.setFirstInStateTo(iftaReportInput.getFirstInStateTo());
 		mileageLogReportInput.setLastInStateFrom(iftaReportInput.getLastInStateFrom());
 		mileageLogReportInput.setLastInStateTo(iftaReportInput.getLastInStateTo());
+		
+		if (StringUtils.equals(MileageLogReportInput.REPORT_TYPE_SERVICE_TRUCK_MPG, 
+				iftaReportInput.getReportType())) {
+			mileageLogReportInput.setServiceTruck(true);
+		}
 	}
 
 	private Map<String, FuelLog> aggregateFuelLogByCompanyState(List<FuelLog> srcFuelLogList) {
@@ -3933,6 +3941,26 @@ throw new Exception("origin and destindation is empty");
 			finalSubConIds += String.valueOf(aSubContractor.getId()) + ",";
 		}
 		return finalSubConIds.substring(0, finalSubConIds.length()-1);
+	}
+	
+	private String retrieveNoGPSVehicleIds(String companyIds) {
+		String query = "select obj from NoGPSVehicle obj where 1=1";
+		if (StringUtils.isNotEmpty(companyIds)) {
+			String companyCondn = " AND (obj.vehicle.owner.id in (" + companyIds + "))";
+			query += companyCondn;
+		}
+		query += " order by obj.vehicle.unitNum asc";
+		
+		List<NoGPSVehicle> noGPSList = genericDAO.executeSimpleQuery(query);
+		if (noGPSList == null || noGPSList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		String noGPSVehicleIds = StringUtils.EMPTY;
+		for (NoGPSVehicle aNoGPS : noGPSList) {
+			noGPSVehicleIds += String.valueOf(aNoGPS.getVehicle().getId()) + ",";
+		}
+		return noGPSVehicleIds.substring(0, noGPSVehicleIds.length()-1);
 	}
 	
 	@Override
@@ -4040,6 +4068,152 @@ throw new Exception("origin and destindation is empty");
 		return wrapper;
 	}
 	
+	@Override
+	public IFTAReportWrapper generateNoGPSMileageLogData(SearchCriteria searchCriteria, IFTAReportInput input) {
+		String companyIds = input.getCompany();
+		
+		String noGPSVehicleIds = retrieveNoGPSVehicleIds(companyIds);
+		if (StringUtils.isEmpty(noGPSVehicleIds)) {
+			return null;
+		}
+		
+		String periodFrom = input.getPeriodFrom();
+		String periodTo = input.getPeriodTo();
+		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
+		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
+		
+		StringBuffer query = new StringBuffer("select obj from Ticket obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from Ticket obj where 1=1");
+		
+		if (!StringUtils.isEmpty(companyIds)){
+			query.append(" and obj.driverCompany.id in (" + companyIds + ")");
+			countQuery.append(" and obj.driverCompany.id in (" + companyIds + ")");
+		}
+		
+		if (!StringUtils.isEmpty(noGPSVehicleIds)){
+			query.append(" and obj.vehicle.id in (" + noGPSVehicleIds + ")");
+			countQuery.append(" and  obj.vehicle.id in (" + noGPSVehicleIds + ")");
+		}
+		
+      if (StringUtils.isNotEmpty(periodFrom) && StringUtils.isNotEmpty(periodTo)) {
+        	try {
+        		String periodFromDateStr = mysqldf.format(mileageSearchDateFormat.parse(periodFrom));
+        		String periodToDateStr = mysqldf.format(determineMonthEndDate(mileageSearchDateFormat.parse(periodTo)));
+				String dateCondn = " and ( (obj.unloadDate >='"+periodFromDateStr+"'"
+									  + "        and obj.unloadDate <='"+periodToDateStr+"')";
+				/*dateCondn +=       "    OR (obj.loadDate >='"+periodFromDateStr+"'"
+							 +        "        and obj.loadDate <='"+periodToDateStr+"')"*/
+				dateCondn		  +=     ")";
+				query.append(dateCondn);
+				countQuery.append(dateCondn);
+        	} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+      
+      if (StringUtils.isNotEmpty(lastInStateFrom) && StringUtils.isNotEmpty(lastInStateTo)) {
+      	/*lastInStateFrom += " 00:00:00";
+      	lastInStateTo += " 23:59:59";*/
+      	
+      	String dateCondn = " and ( (obj.unloadDate >='"+lastInStateFrom+"'"
+      						  + "        and obj.unloadDate <='"+lastInStateTo+"')";
+      	/*dateCondn +=       "    OR (obj.loadDate >='"+lastInStateFrom+"'"
+      				 +        "        and obj.loadDate <='"+lastInStateTo+"')"*/
+      	dateCondn        +=     ")";
+      	query.append(dateCondn);
+      	countQuery.append(dateCondn);
+       
+			/*query.append(" and  obj.unloadDate between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");
+			countQuery.append(" and  obj.unloadDate between '" + lastInStateFrom
+					+ "' and '" + lastInStateTo + "'");*/
+		}
+      
+      /*query.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
+      countQuery.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
+     */
+      
+		System.out.println("\nquery=noGPSonmileageLog=>" + query + "\n");
+		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();
+		searchCriteria.setRecordCount(recordCount.intValue());
+		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
+
+		List<Ticket> ticketList = (List<Ticket>) genericDAO
+			.getEntityManager()
+			.createQuery(query.toString())
+			.setMaxResults(searchCriteria.getPageSize())
+			.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
+			.getResultList();
+		
+		Map<String, LocationDistance> locationDistanceMap = retrieveAllLocationDistance();
+		List<MileageLog> aggregateMileageLogList = new ArrayList<MileageLog>();
+		double totalMiles = 0.0;
+		for (Ticket aTicket : ticketList) {
+			Double miles = retrieveLocationDistance(locationDistanceMap, aTicket);
+			totalMiles += miles;
+			
+			MileageLog aReturnMileageLog = new MileageLog();
+			map(aReturnMileageLog, aTicket, miles);
+			aggregateMileageLogList.add(aReturnMileageLog);
+		}
+		
+		aggregateMileageLogList = aggregateMileageLogByUnit(aggregateMileageLogList);
+		
+		FuelLogReportInput fuelLogReportInput = new FuelLogReportInput();
+		map(fuelLogReportInput, searchCriteria, input);
+		fuelLogReportInput.setReportType(FuelLogReportInput.REPORT_TYPE_FUEL_TRUCK);
+		
+		FuelLogReportWrapper fuelLogReportWrapper = generateFuellogData(searchCriteria, fuelLogReportInput, false);
+		Map<String, FuelLog> aggreateFuelLogMap = aggregateFuelLogByUnit(fuelLogReportWrapper.getFuellog());
+		
+		List<IFTAReport> iftaReportList = new ArrayList<IFTAReport>();
+		for (MileageLog aMileageLog : aggregateMileageLogList) {
+			IFTAReport anIFTAReport = new IFTAReport();
+			anIFTAReport.setCompanyName(aMileageLog.getCompany().getName());
+			anIFTAReport.setUnitNum(aMileageLog.getUnitNum());
+			anIFTAReport.setMiles(aMileageLog.getMiles());
+			
+			String key = aMileageLog.getUnitNum();
+			FuelLog aFuelLog = aggreateFuelLogMap.get(key);
+			if (aFuelLog != null) {
+				anIFTAReport.setGallons(aFuelLog.getGallons());
+				
+				if (anIFTAReport.getMiles() != null && anIFTAReport.getGallons() != null) {
+					Double mpg = anIFTAReport.getMiles()/anIFTAReport.getGallons();
+					anIFTAReport.setMpg(mpg);
+				}
+				
+				aggreateFuelLogMap.remove(key);
+			}
+			
+			iftaReportList.add(anIFTAReport);
+		}
+		
+		Collections.sort(iftaReportList, new Comparator<IFTAReport>() {
+			@Override
+         public int compare(IFTAReport lhs, IFTAReport rhs) {
+         	Integer lhsUnitNumInt = new Integer(lhs.getUnitNum());
+         	Integer rhsUnitNumInt = new Integer(rhs.getUnitNum());
+				return (lhsUnitNumInt > rhsUnitNumInt) ? 1 : (lhsUnitNumInt < rhsUnitNumInt ) ? -1 : 0;
+         }
+     });
+		
+		IFTAReportWrapper anIFTAReportWrapper = new IFTAReportWrapper();
+		anIFTAReportWrapper.setCompanies(companyIds);
+		anIFTAReportWrapper.setPeriodFrom(periodFrom);
+		anIFTAReportWrapper.setPeriodTo(periodTo);
+		anIFTAReportWrapper.setLastInStateFrom(lastInStateFrom);
+		anIFTAReportWrapper.setLastInStateTo(lastInStateTo);
+		anIFTAReportWrapper.setTotalMiles(totalMiles);
+		anIFTAReportWrapper.setTotalRows(ticketList.size());
+		anIFTAReportWrapper.setTotalGallons(fuelLogReportWrapper.getTotalGallons());
+		anIFTAReportWrapper.setIftaReportList(iftaReportList);
+		
+		cleanMileageLogReportSearchCriteria(searchCriteria);
+		
+		return anIFTAReportWrapper;
+	}
+	
 	private Date determineMonthEndDate(Date date) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
@@ -4048,7 +4222,12 @@ throw new Exception("origin and destindation is empty");
 	}
 	
 	private void map(MileageLog aMilageLog, Ticket aTicket, Double miles) {
-		aMilageLog.setSubcontractorStr(aTicket.getSubcontractor().getName());
+		if (aTicket.getSubcontractor() != null) {
+			aMilageLog.setSubcontractorStr(aTicket.getSubcontractor().getName());
+		}
+		if (aTicket.getVehicle() != null) {
+			aMilageLog.setUnitNum(String.valueOf(aTicket.getVehicle().getUnit().intValue()));
+		}
 		aMilageLog.setCompany(aTicket.getDriverCompany());
 		aMilageLog.setMiles(miles);
 	}
@@ -4179,9 +4358,13 @@ throw new Exception("origin and destindation is empty");
 		}
       
       // Mileage log service model change - 5th Jul 2017
+      String serviceTruckCondnOp = "!=";
+      if (input.isServiceTruck()) {
+      	serviceTruckCondnOp = "=";
+      }
       String modelServiceTruck = "Service Truck";
-      query.append(" and obj.unit.model != '"+modelServiceTruck+"'");
-		countQuery.append(" and obj.unit.model != '"+modelServiceTruck+"'");
+      query.append(" and obj.unit.model " + serviceTruckCondnOp + " '"+modelServiceTruck+"'");
+		countQuery.append(" and obj.unit.model " + serviceTruckCondnOp + " '"+modelServiceTruck+"'");
 
       query.append(" order by obj.company.name asc, obj.state.name asc, obj.unitNum asc, obj.period desc");
       countQuery.append(" order by obj.period desc");

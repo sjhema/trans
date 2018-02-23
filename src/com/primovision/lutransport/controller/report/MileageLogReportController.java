@@ -157,6 +157,47 @@ public class MileageLogReportController extends BaseController {
 		return data;
 	}
 	
+	private Map<String, Object> generateNoGPSMileageLogData(SearchCriteria searchCriteria, HttpServletRequest request, IFTAReportInput input) {
+		IFTAReportWrapper wrapper = generateNoGPSMileageLogReport(searchCriteria, input);
+		if (wrapper == null) {
+			return null;
+		}
+		
+		Map<String,Object> data = new HashMap<String,Object>();
+		Map<String,Object> params = new HashMap<String,Object>();
+		 
+		params.put("totalRows", wrapper.getTotalRows());
+		params.put("totalMiles", wrapper.getTotalMiles());
+		params.put("totalGallons", wrapper.getTotalGallons());
+		
+		String companies = "-";
+		if (!StringUtils.isEmpty(wrapper.getCompanies())) {
+			companies = retrieveCompanyNames(wrapper.getCompanies());
+		}
+		params.put("companies", companies);
+		
+		String states = "-";
+		if (!StringUtils.isEmpty(wrapper.getStates())) {
+			states = retrieveStateNames(wrapper.getStates());
+		}
+		params.put("states", states);
+		
+		String period = "-";
+		if (StringUtils.isNotEmpty(wrapper.getPeriodFrom()) && StringUtils.isNotEmpty(wrapper.getPeriodTo())) {
+			period = wrapper.getPeriodFrom() + " - " + wrapper.getPeriodTo();
+		} else if (StringUtils.isNotEmpty(wrapper.getLastInStateFrom()) && StringUtils.isNotEmpty(wrapper.getLastInStateTo())) {
+			period = wrapper.getLastInStateFrom() + " - " + wrapper.getLastInStateTo();
+		}
+		params.put("period", period);
+		
+		//populateDrillDownReportParams(params, request);
+		  
+		data.put("data", wrapper.getIftaReportList());
+		data.put("params", params);
+		  
+		return data;
+	}
+	
 	private Map<String,Object> generateIFTAData(SearchCriteria searchCriteria, HttpServletRequest request, IFTAReportInput input) {
 		IFTAReportWrapper wrapper = generateIFTAReport(searchCriteria, input);
 		
@@ -285,6 +326,10 @@ public class MileageLogReportController extends BaseController {
 		return reportService.generateOwnerOpSubConMileageLogData(searchCriteria, input);
 	}
 	
+	public IFTAReportWrapper generateNoGPSMileageLogReport(SearchCriteria searchCriteria, IFTAReportInput input) {
+		return reportService.generateNoGPSMileageLogData(searchCriteria, input);
+	}
+	
 	public IFTAReportWrapper generateIFTAReport(SearchCriteria searchCriteria, IFTAReportInput input) {
 		return reportService.generateIFTAData(searchCriteria, input);
 	}
@@ -390,6 +435,68 @@ public class MileageLogReportController extends BaseController {
 			response.setContentType(MimeUtil.getContentType(type));
 			
 			String reportType = "ownerOpSubConMileageReport";
+			if (!type.equals("html")) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename="+reportType+"." + type);
+			}
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String, Object>) datas.get("params");
+			List<MileageLog> mielageLogList = (List<MileageLog>) datas.get("data");
+			
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
+					mielageLogList, params, request);
+			request.setAttribute("jasperPrint", jasperPrint);
+			
+			return "reportuser/report/mileagelogreport/"+type+reportType;
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "error";
+		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/noGPSSearch.do")
+	public String noGPSSearch(ModelMap model, HttpServletRequest request, HttpServletResponse response,
+			@ModelAttribute("modelObject") MileageLogReportInput input, 
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+      System.out.println("\nMileageLogReportController==noGPSSearch()==type===>"+type+"\n"); 
+		
+      populateSearchCriteria(request, request.getParameterMap());
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+      
+      Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		String p = request.getParameter("p");
+		if (p == null) {
+			request.getSession().setAttribute("input", input);
+		}
+		
+		MileageLogReportInput input1 = (MileageLogReportInput)request.getSession().getAttribute("input");
+		try {
+			IFTAReportInput iftaReportInput = new IFTAReportInput();
+			if (p == null) {
+				map(iftaReportInput, input);
+		   } else {
+				map(iftaReportInput, input1);
+			}
+			
+			Map<String, Object> datas = generateNoGPSMileageLogData(criteria, request, iftaReportInput);
+			if (datas == null) {
+				request.getSession().setAttribute("error", "No Vehicles without GPS found!!");
+				return "reportuser/report/mileageLogReport";
+			}
+			
+		   if (StringUtils.isEmpty(type)) {
+				type = "html";
+		   }
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			String reportType = "noGPSReport";
 			if (!type.equals("html")) {
 				response.setHeader("Content-Disposition",
 						"attachment;filename="+reportType+"." + type);
@@ -582,15 +689,19 @@ public class MileageLogReportController extends BaseController {
 			response.setContentType(MimeUtil.getContentType(type));
 			
 			String reportType = "mpgReport";
+			String reportFileName = "mpgReport";
+			if (StringUtils.equals(MileageLogReportInput.REPORT_TYPE_SERVICE_TRUCK_MPG, input.getReportType())) {
+				reportFileName = "serviceTruckMpgReport";
+			}
 			
 			if (!type.equals("html")) {
-				response.setHeader("Content-Disposition", "attachment;filename="+reportType+"." + type);
+				response.setHeader("Content-Disposition", "attachment;filename="+reportFileName+"." + type);
 			}
 			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Map params = (Map)datas.get("params");
 			
-			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportType,
+			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile(reportFileName,
 					(List)datas.get("data"), params, request);
 			request.setAttribute("jasperPrint", jasperPrint);
 			
@@ -806,7 +917,66 @@ public class MileageLogReportController extends BaseController {
 		try {
 			Map<String, Object> datas = generateMPGData(criteria, request, iftaReportInput);
 			
-			String reportType = "mpgReport";
+			String reportFileName = "mpgReport";
+			if (StringUtils.equals(MileageLogReportInput.REPORT_TYPE_SERVICE_TRUCK_MPG, input.getReportType())) {
+				reportFileName = "serviceTruckMpgReport";
+			}
+			
+			if (StringUtils.isEmpty(type)) {
+				type = "xlsx";
+			}
+			if (!type.equals("html") && !(type.equals("print"))) {
+				response.setHeader("Content-Disposition",
+						"attachment;filename="+reportFileName+"." + type);
+			}
+			response.setContentType(MimeUtil.getContentType(type));
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Map<String, Object> params = (Map<String, Object>)datas.get("params");
+			
+			if (type.equals("pdf")) {
+				out = dynamicReportService.generateStaticReport(reportFileName+"pdf",
+						(List)datas.get("data"), params, type, request);
+			} else if (type.equals("csv")) {
+				out = dynamicReportService.generateStaticReport(reportFileName+"csv",
+						(List)datas.get("data"), params, type, request);
+			} else {
+				out = dynamicReportService.generateStaticReport(reportFileName,
+						(List)datas.get("data"), params, type, request);
+			}
+		
+			out.writeTo(response.getOutputStream());
+			out.close();
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+			request.getSession().setAttribute("errors", e.getMessage());
+			return "report.error";
+		}
+	}
+	
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/noGPSExport.do")
+	public String noGPSExport(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(required = false, value = "type") String type,
+			@RequestParam(required = false, value = "jrxml") String jrxml) {
+		System.out.println("\nmileageLogReportController==noGPSExport()==type===>"+type+"\n");
+		
+		Map imagesMap = new HashMap();
+		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(15000);
+		criteria.setPage(0);
+		
+		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
+		IFTAReportInput iftaReportInput = new IFTAReportInput();
+		map(iftaReportInput, input);
+		try {
+			Map<String, Object> datas = generateNoGPSMileageLogData(criteria, request, iftaReportInput);
+			
+			String reportType = "noGPSReport";
 			
 			if (StringUtils.isEmpty(type)) {
 				type = "xlsx";

@@ -4,6 +4,7 @@ public class MileageLogReportInput {
 	public static final String REPORT_TYPE_TOTALS = "TOTALS";
 	public static final String REPORT_TYPE_DETAILS = "DETAILS";
 	public static final String REPORT_TYPE_IFTA = "IFTA";
+	public static final String REPORT_TYPE_SERVICE_TRUCK_MPG = "SERVICE_TRUCK_MPG";
 	
 	private String periodFrom;
 	private String periodTo;
@@ -21,6 +22,8 @@ public class MileageLogReportInput {
 	private String drillDownUnit;
 	
 	private String reportType;
+	
+	private boolean serviceTruck = false;
 	
 	public String getReportType() {
 		return reportType;
@@ -108,5 +111,11 @@ public class MileageLogReportInput {
 	}
 	public void setSubcontractor(String subcontractor) {
 		this.subcontractor = subcontractor;
+	}
+	public boolean isServiceTruck() {
+		return serviceTruck;
+	}
+	public void setServiceTruck(boolean serviceTruck) {
+		this.serviceTruck = serviceTruck;
 	}
 }

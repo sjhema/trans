@@ -35,6 +35,18 @@ function processOwnerOpSubConReport() {
 	document.forms[0].submit();
 }
 
+function processNoGPSReport() {
+	document.forms[0].elements["reportType"].value = 'NO_GPS';
+	document.forms[0].action='noGPSSearch.do'
+	document.forms[0].submit();
+}
+
+function processServiceTruckMPGReport() {
+	document.forms[0].elements["reportType"].value = 'SERVICE_TRUCK_MPG';
+	document.forms[0].action='mpgSearch.do'
+	document.forms[0].submit();
+}
+
 $(function() {
 	$("#periodFrom").datepicker( {
         changeMonth: true,
@@ -255,6 +267,12 @@ $(document).ready(function() {
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input type="button"
 					onclick="javascript:processOwnerOpSubConReport()" value="Owner Operator Miles" />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processNoGPSReport()" value="No GPS - MPG" />
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button"
+					onclick="javascript:processServiceTruckMPGReport()" value="Service Truck - MPG" />
 			</td>
 		</tr>
 	</table>

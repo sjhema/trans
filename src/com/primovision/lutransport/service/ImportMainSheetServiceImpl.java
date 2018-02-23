@@ -60,6 +60,8 @@ import com.primovision.lutransport.model.FuelDiscount;
 import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.LocationDistance;
+import com.primovision.lutransport.model.LocationPair;
 import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
@@ -72,6 +74,7 @@ import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
 import com.primovision.lutransport.model.VehicleTollTag;
 import com.primovision.lutransport.model.WMInvoice;
+import com.primovision.lutransport.model.WMLocation;
 import com.primovision.lutransport.model.WMTicket;
 import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.accident.AccidentCause;
@@ -263,6 +266,127 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		criterias.put("type", locationType);
 		criterias.put("name", locationName);
 		return genericDAO.findByCriteria(Location.class, criterias, "name", false);
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importLoadMiles(InputStream is, Long createdBy) throws Exception {
+		List<LocationDistance> locationDistanceList = new ArrayList<LocationDistance>();
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount == 1) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				boolean fatalRecordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				LocationDistance locationDistance = null;
+				try {
+					String originName = ((String) getCellValue(row.getCell(3)));
+					if (StringUtils.equals("END_OF_DATA", originName)) {
+						break;
+					}
+					
+					locationDistance = new LocationDistance();
+					
+					List<Location> originList = retrieveLocationData(1, originName);
+					if (originList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Transfer Station,");
+					} else {
+						locationDistance.setOrigin(originList.get(0));
+					}
+					
+					String destinationName = ((String) getCellValue(row.getCell(4)));
+					List<Location> destinationList = retrieveLocationData(2, destinationName);
+					if (destinationList.isEmpty()) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Landfill,");
+					} else {
+						locationDistance.setDestination(destinationList.get(0));
+					}
+
+					Double miles = row.getCell(5).getNumericCellValue();
+					if (miles == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Miles,");
+					} else {
+						locationDistance.setMiles(miles);
+					}
+					
+					if (checkDuplicate(locationDistance)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Duplicate record,");
+					}
+				} catch (Exception ex) {
+					recordError = true;
+					fatalRecordError = true;
+					recordErrorMsg.append("Error while processing record, Line: " + recordCount);
+				}
+				
+				if (recordError) {
+					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+					errorList.add(msgPreffix 
+							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					errorCount++;
+				} 
+				
+				if (!fatalRecordError) {
+					locationDistanceList.add(locationDistance);
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + locationDistanceList.size());
+			if (!locationDistanceList.isEmpty()) {
+				for (LocationDistance aLocationDistance : locationDistanceList) {
+					aLocationDistance.setStatus(1);
+					aLocationDistance.setCreatedBy(createdBy);
+					aLocationDistance.setCreatedAt(Calendar.getInstance().getTime());
+					
+					genericDAO.saveOrUpdate(aLocationDistance);
+				}
+			}
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Location Distancedata: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	private boolean checkDuplicate(LocationDistance entity) {
+		Location origin = entity.getOrigin();
+		Location destination = entity.getDestination();
+		if (origin == null || destination == null) {
+			return false;
+		}
+		
+		String query = "select count(obj) from LocationDistance obj where 1=1"
+				+ " and obj.origin.id=" + origin.getId()
+				+ " and obj.destination.id=" + destination.getId();
+		 Long recordCount = (Long) genericDAO.getEntityManager().createQuery(
+				 query.toString()).getSingleResult(); 
+		 return (recordCount > 0);
 	}
 	
 	@Override
@@ -2248,11 +2372,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							currentWMTicket.setWmHaulingCompany(wmHaulingCompanyStr);
 							
 							if (StringUtils.equals(WMTicket.DESTINATION_TICKET_TYPE, currentWMTicket.getTicketType())) {
-								List<Location> derivedOriginList = retrieveLocationDataByQualifier(1, "haulingName", 
+								/*List<Location> derivedOriginList = retrieveLocationDataByQualifier(1, "haulingName", 
 										wmHaulingCompanyStr);
 								if (derivedOriginList != null && !derivedOriginList.isEmpty()) {
 									currentWMTicket.setOrigin(derivedOriginList.get(0));
-								} 
+								}*/
+								
+								List<WMLocation> wmLocationList = retrieveWMLocationByName(wmHaulingCompanyStr, 1);
+								if (wmLocationList != null && !wmLocationList.isEmpty()) {
+									currentWMTicket.setOrigin(wmLocationList.get(0).getLocation());
+								}
 							}
 						} 
 					}
@@ -2347,8 +2476,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					TicketUtils.calculateNetAndTons(currentWMTicket);
 					
 					if (checkDuplicateWMTicket(currentWMTicket)) {
-						recordError = true;
-						recordErrorMsg.append("Duplicate WM Ticket, ");
+						/*recordError = true;
+						recordErrorMsg.append("Duplicate WM Ticket, ");*/
+						continue;
 					}
 					
 					if (recordError) {
@@ -2366,14 +2496,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_TICKET_ALREADY_EXISTS);
 						genericDAO.saveOrUpdate(currentWMTicket);
 						
-						recordError = true;
+						/*recordError = true;
 						errorList.add("Line " + recordCount + ": " + "Ticket already exists" + "<br/>");
-						errorCount++;
+						errorCount++;*/
 						
 						continue;
 					}
 					
-					WMTicket destinationTicketCopy = checkAndSetUpAsDestinationWMTicket(currentWMTicket);
+					StringBuffer errorMsgBuff = new StringBuffer();
+					WMTicket destinationTicketCopy = checkAndSetUpAsDestinationWMTicket(currentWMTicket, errorMsgBuff);
+					if (errorMsgBuff.length() != 0) {
+						recordError = true;
+						errorList.add("Line " + recordCount + ": " + errorMsgBuff.toString() + "<br/>");
+						errorCount++;
+						continue;
+					}
 					
 					TripSheet tripSheet = retrieveMatchingTripsheet(currentWMTicket);
 					if (tripSheet == null) {
@@ -2385,9 +2522,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 							genericDAO.saveOrUpdate(destinationTicketCopy);
 						}
 						
-						recordError = true;
+						/*recordError = true;
 						errorList.add("Line " + recordCount + ": " + "Did not find matching Trip sheet.  WM Ticket is saved for further processing." + "<br/>");
-						errorCount++;
+						errorCount++;*/
 						
 						continue;
 					}
@@ -2482,20 +2619,27 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return errorList;
 	}
 	
-	private WMTicket checkAndSetUpAsDestinationWMTicket(WMTicket wmTicket) {
+	private WMTicket checkAndSetUpAsDestinationWMTicket(WMTicket wmTicket, StringBuffer errorMsgBuff) {
 		if (!StringUtils.equals(WMTicket.ORIGIN_TICKET_TYPE, wmTicket.getTicketType())) {
-			return null;
-		}
-		long originId = wmTicket.getOrigin().getId().longValue();
-		if (originId != 67l // Varick I Transfer 
-				&& originId != 70l) { // Waverly Transfer 
 			return null;
 		}
 		
 		if (StringUtils.isEmpty(wmTicket.getWmDestination())) {
 			return null;
 		}
-		List<Location> derivedDestinationList = retrieveLocationDataByQualifier(2, "haulingName", 
+		
+		long originId = wmTicket.getOrigin().getId().longValue();
+		List<LocationPair> locationPairList = retrieveLocationPairForOrigin(originId);
+		if (locationPairList == null || locationPairList.isEmpty()) {
+			return null;
+		}
+		
+		/*if (originId != 67l // Varick I Transfer 
+				&& originId != 70l) { // Waverly Transfer 
+			return null;
+		}*/
+		
+		/*List<Location> derivedDestinationList = retrieveLocationDataByQualifier(2, "haulingName", 
 				wmTicket.getWmDestination());
 		if (derivedDestinationList == null || derivedDestinationList.isEmpty()) {
 			return null;
@@ -2505,6 +2649,25 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				&& derivedDestination.getId() != 82l // Reco Landfill
 				&& derivedDestination.getId() != 384l // Chesapeake Landfill
 			   && derivedDestination.getId() != 379l) { // Shamrock Landfill
+			return null;
+		}*/
+		
+		List<WMLocation> wmLocationList = retrieveWMLocationByName(wmTicket.getWmDestination(), 2);
+		if (wmLocationList == null || wmLocationList.isEmpty()) {
+			errorMsgBuff.append("Destination not found");
+			return null;
+		}
+		Location derivedDestination = wmLocationList.get(0).getLocation();
+		long derivedDestinationId = derivedDestination.getId().longValue();
+		
+		boolean copyAsDest = false;
+		for (LocationPair aLocationPair : locationPairList) {
+			if (derivedDestinationId == aLocationPair.getDestination().getId().longValue()) {
+				copyAsDest = true;
+				break;
+			}
+		}
+		if (!copyAsDest) {
 			return null;
 		}
 		
@@ -2586,7 +2749,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		}
 		
-		if (StringUtils.contains(originName, Location.FORGE_TRANSFER_STATION)) { 
+		List<WMLocation> wmLocationList = retrieveWMLocationByName(originName, 1);
+		if (wmLocationList == null || wmLocationList.isEmpty()) {
+			return null;
+		} else {
+			return wmLocationList.get(0).getLocation();
+		}
+		
+		/*if (StringUtils.contains(originName, Location.FORGE_TRANSFER_STATION)) { 
 			originName = Location.FORGE_TRANSFER_STATION;
 		} else if (StringUtils.contains(originName, Location.PHILADELPHIA_TRANSFER_STATION)) { 
 			originName = Location.PHILADELPHIA_TRANSFER_STATION;
@@ -2605,7 +2775,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			return null;
 		} else {
 			return originList.get(0);
-		}
+		}*/
 	}
 	
 	private Location retrieveDestinationForWM(HSSFSheet sheet) {
@@ -2744,6 +2914,23 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		List<TripSheet> tripSheetList = genericDAO.executeSimpleQuery(query);
 		return (tripSheetList == null || tripSheetList.isEmpty()) ? null : tripSheetList.get(0);
+	}
+	
+	private List<LocationPair> retrieveLocationPairForOrigin(Long originId) {
+		String query = "select obj from LocationPair obj where";
+		query += (" obj.origin=" + originId);
+		
+		List<LocationPair> locationPairList = genericDAO.executeSimpleQuery(query);
+		return locationPairList;
+	}
+	
+	private List<WMLocation> retrieveWMLocationByName(String wmLocationName, int type) {
+		String query = "select obj from WMLocation obj where";
+		query += (" obj.wmLocationName='" + wmLocationName + "'");
+		query += (" and obj.location.type=" + type);
+		
+		List<WMLocation> wmLocationList = genericDAO.executeSimpleQuery(query);
+		return wmLocationList;
 	}
 	
 	@Override

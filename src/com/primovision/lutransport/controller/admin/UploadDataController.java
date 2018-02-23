@@ -120,6 +120,11 @@ public class UploadDataController extends BaseController {
 		return "admin/uploaddata/wmTicket";
 	}
 	
+	@RequestMapping("/loadMiles.do")
+	public String loadMiles(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		return "admin/uploaddata/loadMiles";
+	}
+	
 	@RequestMapping("/vehiclepermit.do")
 	public String vehiclepermit(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -628,6 +633,45 @@ public class UploadDataController extends BaseController {
 		}
 		
 		return "admin/uploaddata/subcontractorrate";
+	}
+	
+	@RequestMapping("/loadMiles/upload.do")
+	public String saveLoadMiles(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@RequestParam("dataFile") MultipartFile file) {
+		try {
+			if (StringUtils.isEmpty(file.getOriginalFilename())) {
+			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			    return "admin/uploaddata/loadMiles";
+		   }
+			
+			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+			if (!(ext.equalsIgnoreCase(".xls"))) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .xls!!");
+          	return "admin/uploaddata/loadMiles";
+			}
+			
+			InputStream is = file.getInputStream();
+			Long createdBy = getUser(request).getId();
+			System.out.println("\nimportMainSheetService.importLoadMiles(is)\n");
+			List<String> str = importMainSheetService.importLoadMiles(is, createdBy);
+			if (str.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded all load miles records");
+			} else {
+				model.addAttribute("errorList", str);
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to import :===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading!!");
+			return "admin/uploaddata/loadMiles";
+		}
+		
+		return "admin/uploaddata/loadMiles";
 	}
 	
 	@RequestMapping("/wmTicket/upload.do")
