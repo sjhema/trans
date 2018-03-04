@@ -9,6 +9,34 @@
 			<td colspan="4"><b><primo:label code="Search Accidents" /></b></td>
 		</tr>
 		<tr>
+			<td align="${left}" class="first"><primo:label code="Company"/></td>
+			<td align="${left}">
+				<select id="driverCompany" name="driverCompany" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${companies}" var="aCompany">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['driverCompany'] == aCompany.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${aCompany.id}" ${selected}>${aCompany.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Employee"/></td>
+			<td align="${left}">
+				<select id="driver" name="driver" style="min-width:154px; max-width:154px">
+					<option value="">-----<primo:label code="Please Select" />-----</option>
+					<c:forEach items="${driverNames}" var="aDriverName">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['driver'] == aDriverName}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+						<option value="${aDriverName}" ${selected}>${aDriverName}</option>
+					</c:forEach>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Insurance Company"/></td>
 			<td align="${left}">
 				<select id="insuranceCompany" name="insuranceCompany" style="min-width:154px; max-width:154px">
@@ -39,19 +67,6 @@
 			</td>
 	   	</tr>
 		<tr>
-			<td align="${left}" class="first"><primo:label code="Employee"/></td>
-			<td align="${left}">
-				<select id="driver" name="driver" style="min-width:154px; max-width:154px">
-					<option value="">-----<primo:label code="Please Select" />-----</option>
-					<c:forEach items="${driverNames}" var="aDriverName">
-						<c:set var="selected" value=""/>
-						<c:if test="${sessionScope.searchCriteria.searchMap['driver'] == aDriverName}">
-							<c:set var="selected" value="selected"/>
-						</c:if>
-						<option value="${aDriverName}" ${selected}>${aDriverName}</option>
-					</c:forEach>
-				</select>
-			</td>
 			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
 			<td align="${left}">
 				<select id="subcontractor" name="subcontractor" style="min-width:154px; max-width:154px">
