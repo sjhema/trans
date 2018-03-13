@@ -157,8 +157,8 @@ public class MileageLogReportController extends BaseController {
 		return data;
 	}
 	
-	private Map<String, Object> generateNoGPSMileageLogData(SearchCriteria searchCriteria, HttpServletRequest request, IFTAReportInput input) {
-		IFTAReportWrapper wrapper = generateNoGPSMileageLogReport(searchCriteria, input);
+	private Map<String, Object> generateNoGPSMileageLogMPGData(SearchCriteria searchCriteria, HttpServletRequest request, IFTAReportInput input) {
+		IFTAReportWrapper wrapper = generateNoGPSMileageLogMPGReport(searchCriteria, input);
 		if (wrapper == null) {
 			return null;
 		}
@@ -326,8 +326,8 @@ public class MileageLogReportController extends BaseController {
 		return reportService.generateOwnerOpSubConMileageLogData(searchCriteria, input);
 	}
 	
-	public IFTAReportWrapper generateNoGPSMileageLogReport(SearchCriteria searchCriteria, IFTAReportInput input) {
-		return reportService.generateNoGPSMileageLogData(searchCriteria, input);
+	public IFTAReportWrapper generateNoGPSMileageLogMPGReport(SearchCriteria searchCriteria, IFTAReportInput input) {
+		return reportService.generateNoGPSMileageLogMPGData(searchCriteria, input);
 	}
 	
 	public IFTAReportWrapper generateIFTAReport(SearchCriteria searchCriteria, IFTAReportInput input) {
@@ -485,7 +485,7 @@ public class MileageLogReportController extends BaseController {
 				map(iftaReportInput, input1);
 			}
 			
-			Map<String, Object> datas = generateNoGPSMileageLogData(criteria, request, iftaReportInput);
+			Map<String, Object> datas = generateNoGPSMileageLogMPGData(criteria, request, iftaReportInput);
 			if (datas == null) {
 				request.getSession().setAttribute("error", "No Vehicles without GPS found!!");
 				return "reportuser/report/mileageLogReport";
@@ -974,7 +974,7 @@ public class MileageLogReportController extends BaseController {
 		IFTAReportInput iftaReportInput = new IFTAReportInput();
 		map(iftaReportInput, input);
 		try {
-			Map<String, Object> datas = generateNoGPSMileageLogData(criteria, request, iftaReportInput);
+			Map<String, Object> datas = generateNoGPSMileageLogMPGData(criteria, request, iftaReportInput);
 			
 			String reportType = "noGPSReport";
 			

@@ -127,7 +127,8 @@ $(function() {
 		<primo:datatable urlContext="operator/mileagelog" deletable="true"
 			editable="true" insertable="true" baseObjects="${list}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
-			pagingLink="search.do" multipleDelete="true" searcheable="false">
+			pagingLink="search.do" multipleDelete="true" searcheable="false"
+			exportPdf="true" exportXls="true" exportCsv="true">
 				<primo:textcolumn headerText="Period" dataField="period" dataFormat="MM-yyyy" />
 				<primo:textcolumn headerText="Company" dataField="company.name"/>
 				<primo:textcolumn headerText="State" dataField="state.name" />

@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,16 +27,18 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
-
+import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
+import com.primovision.lutransport.model.accident.Accident;
 
 @Controller
 @RequestMapping("/operator/mileagelog")
@@ -75,13 +80,8 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		setupCreate(model, request);
 		populateSearchCriteria(request, request.getParameterMap());
 	}
-
-	@Override
-	public String search2(ModelMap model, HttpServletRequest request) {
-		setupList(model, request);
-		
-		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");			
-		
+	
+	private List<MileageLog> performSearch(SearchCriteria criteria) {
 		String company = (String) criteria.getSearchMap().get("company.id");
 		String state = (String) criteria.getSearchMap().get("state.id");
 		String truck = (String) criteria.getSearchMap().get("unit.id");
@@ -89,27 +89,24 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		String periodTo = (String) criteria.getSearchMap().get("periodTo");
 		
 		StringBuffer query = new StringBuffer("select obj from MileageLog obj  where 1=1");
-		StringBuffer countquery = new StringBuffer("select count(obj) from MileageLog obj where 1=1");
+		StringBuffer countQuery = new StringBuffer("select count(obj) from MileageLog obj where 1=1");
+		StringBuffer whereClause = new StringBuffer();
 		
 		if (!StringUtils.isEmpty(company)) {
-			query.append(" and obj.company=" + company);
-			countquery.append(" and obj.company=" + company);
+			whereClause.append(" and obj.company=" + company);
 		}
 		
 		if (!StringUtils.isEmpty(state)) {
-			query.append(" and obj.state=" + state);
-			countquery.append(" and obj.state=" + state);
+			whereClause.append(" and obj.state=" + state);
 		}
 		
 		if (!StringUtils.isEmpty(truck)) {
-			query.append(" and obj.unit=" + truck);
-			countquery.append(" and obj.unit=" + truck);
+			whereClause.append(" and obj.unit=" + truck);
 		}
         
       if (!StringUtils.isEmpty(periodFrom)) {
         	try {
-				query.append(" and obj.period >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
-				countquery.append(" and obj.period >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
+        		whereClause.append(" and obj.period >='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodFrom))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -117,38 +114,103 @@ public class MileageLogController extends CRUDController<MileageLog> {
         
       if (!StringUtils.isEmpty(periodTo)) {
         	try {
-				query.append(" and obj.period <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
-				countquery.append(" and obj.period <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
+        		whereClause.append(" and obj.period <='"+dbDateFormat.format(mileageSearchDateFormat.parse(periodTo))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
       }
 
-     query.append(" order by obj.period desc");
-     countquery.append(" order by obj.period desc");
+      query.append(whereClause);
+      countQuery.append(whereClause);
+      
+      query.append(" order by obj.period desc");
 		
-     Long recordCount = (Long) genericDAO.getEntityManager().createQuery(
-        		countquery.toString()).getSingleResult();        
+     Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
      criteria.setRecordCount(recordCount.intValue());
 		
-     model.addAttribute("list", genericDAO.getEntityManager().createQuery(query.toString())
+     List<MileageLog> mileageLogList = 
+   		  genericDAO.getEntityManager().createQuery(query.toString())
 				.setMaxResults(criteria.getPageSize())
 				.setFirstResult(criteria.getPage() * criteria.getPageSize())
-				.getResultList());
-     return urlContext + "/list";
+				.getResultList();
+		return mileageLogList;
+	}
+
+	@Override
+	public String search2(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		
+		List<MileageLog> mileageLogList = performSearch(criteria);
+		model.addAttribute("list", mileageLogList);
+		
+		return urlContext + "/list";
 	}
 	
 	@Override
 	public String list(ModelMap model, HttpServletRequest request) {
 		setupList(model, request);
 		
-		/*SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		criteria.setPageSize(25);
-		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria));
 		
-		return urlContext + "/list";*/
+		List<MileageLog> mileageLogList = performSearch(criteria);
+		model.addAttribute("list", mileageLogList);
 		
-		return search2(model, request);
+		return urlContext + "/list";
+	}
+	
+	private List<MileageLog> searchForExport(ModelMap model, HttpServletRequest request) {
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		int origPage = criteria.getPage();
+		int origPageSize = criteria.getPageSize();
+		
+		criteria.setPage(0);
+		criteria.setPageSize(15000);
+		
+		List<MileageLog> mileageLogList = performSearch(criteria);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(origPageSize);
+		
+		return mileageLogList;
+	}
+	
+	@Override
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		String reportName = "mileageLogReport";
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html")) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
+		}
+		
+		List<MileageLog> mileageLogList = searchForExport(model, request);
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		List columnPropertyList = (List)request.getSession().getAttribute("columnPropertyList");
+		ByteArrayOutputStream out = null;
+		try {
+			out = dynamicReportService.exportReport(reportName, type, getEntityClass(), mileageLogList,
+						columnPropertyList, request);
+			/*out = dynamicReportService.generateStaticReport(reportName,
+					mileageLogList, params, type, request);*/
+			out.writeTo(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+					out = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@Override

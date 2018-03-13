@@ -51,9 +51,23 @@
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 		pagingLink="search.do" multipleDelete="false" searcheable="false"
 		exportPdf="true" exportXls="true" exportCsv="true">
+		<primo:textcolumn headerText="Company" dataField="company.name"/>
 		<primo:textcolumn headerText="Origin" dataField="origin.name"/>	
+		<primo:textcolumn headerText="Origin State" dataField="originState.code"/>	
 		<primo:textcolumn headerText="Destination" dataField="destination.name"/>
-		<primo:textcolumn headerText="Miles" dataField="miles"/>
+		<primo:textcolumn headerText="Destination State" dataField="destnState.code"/>
+		<primo:textcolumn headerText="Total Miles" dataField="miles"/>
+		<primo:textcolumn headerText="NY Miles" dataField="nyMiles"/>
+		<primo:textcolumn headerText="NJ Miles" dataField="njMiles"/>
+		<primo:textcolumn headerText="PA Miles" dataField="paMiles"/>
+		<primo:textcolumn headerText="MD Miles" dataField="mdMiles"/>
+		<primo:textcolumn headerText="VA Miles" dataField="vaMiles"/>
+		<primo:textcolumn headerText="DE Miles" dataField="deMiles"/>
+		<primo:textcolumn headerText="WV Miles" dataField="wvMiles"/>
+		<primo:textcolumn headerText="Wash DC Miles" dataField="dcMiles"/>
+		<primo:textcolumn headerText="IL Miles" dataField="ilMiles"/>
+		<primo:textcolumn headerText="FL Miles" dataField="flMiles"/>
+		<primo:textcolumn headerText="CT Miles" dataField="ctMiles"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

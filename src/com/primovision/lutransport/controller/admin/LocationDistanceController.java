@@ -36,6 +36,7 @@ import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.State;
 
 
 @Controller
@@ -53,6 +54,7 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 	   
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
+		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
 	}
 	
 	@Override
@@ -65,6 +67,12 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 		criterias.put("type", 2);
 		criterias.put("id!",91l);
 		model.addAttribute("destinations", genericDAO.findByCriteria(Location.class, criterias, "name", false));
+		
+		criterias.clear();
+		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
+		
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name",false));
 	}
 	
 	@Override
@@ -223,14 +231,14 @@ public class LocationDistanceController extends CRUDController<LocationDistance>
 		List<LocationDistance> locationDistanceList = searchForExport(model, request);
 		Map<String, Object> params = new HashMap<String, Object>();
 		
-		//List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+		List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
 		ByteArrayOutputStream out = null;
 		try {
-			/*out = dynamicReportService.exportReport(
-						urlContext + "Report", type, getEntityClass(), injuryList,
-						columnPropertyList, request);*/
-			out = dynamicReportService.generateStaticReport(reportName,
-					locationDistanceList, params, type, request);
+			out = dynamicReportService.exportReport(
+					reportName, type, getEntityClass(), locationDistanceList,
+						columnPropertyList, request);
+			/*out = dynamicReportService.generateStaticReport(reportName,
+					locationDistanceList, params, type, request);*/
 			out.writeTo(response.getOutputStream());
 		} catch (IOException e) {
 			e.printStackTrace();

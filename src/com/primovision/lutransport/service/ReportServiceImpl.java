@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -49,6 +50,7 @@ import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.NoGPSVehicle;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.SubcontractorInvoice;
 import com.primovision.lutransport.model.SubcontractorRate;
@@ -57,6 +59,7 @@ import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
 import com.primovision.lutransport.model.WMInvoice;
+import com.primovision.lutransport.model.WMInvoiceVerification;
 import com.primovision.lutransport.model.driver.DriverFuelLog;
 import com.primovision.lutransport.model.report.Billing;
 import com.primovision.lutransport.model.report.BillingHistoryInput;
@@ -4019,7 +4022,8 @@ throw new Exception("origin and destindation is empty");
 		
 		String vehicleQuery = "select obj from Vehicle obj where obj.type=1 and obj.activeStatus=1" 
 	   		+ " and obj.id not in ("+gpsVehicleIds+")"
-	   		+ " and obj.unit != 0";
+	   		+ " and obj.unit != 0"
+	   		+ " and obj.model " + serviceTruckCondnOp + " '"+modelServiceTruck+"'";
 		List<Vehicle> noGpsVehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
 		if (noGpsVehicleList == null || noGpsVehicleList.isEmpty()) {
 			return StringUtils.EMPTY;
@@ -4118,7 +4122,7 @@ throw new Exception("origin and destindation is empty");
 		wrapper.setLastInStateFrom(lastInStateFrom);
 		wrapper.setLastInStateTo(lastInStateTo);
 		
-		Map<String, LocationDistance> locationDistanceMap = retrieveAllLocationDistance();
+		Map<String, List<LocationDistance>> locationDistanceMap = retrieveAllLocationDistance();
 		List<MileageLog> returnMileageLogList = new ArrayList<MileageLog>();
 		double totalMiles = 0.0;
 		for (Ticket aTicket : ticketList) {
@@ -4137,8 +4141,8 @@ throw new Exception("origin and destindation is empty");
 		return wrapper;
 	}
 	
-	@Override
-	public IFTAReportWrapper generateNoGPSMileageLogData(SearchCriteria searchCriteria, IFTAReportInput input) {
+	private List<Ticket> retrieveNoGPSVehicleTickets(IFTAReportInput input,
+			String company, String state, String truck) {
 		String companyIds = input.getCompany();
 		
 		String noGPSVehicleIds = retrieveNoGPSVehicleIds(input);
@@ -4152,16 +4156,22 @@ throw new Exception("origin and destindation is empty");
 		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
 		
 		StringBuffer query = new StringBuffer("select obj from Ticket obj where 1=1");
-		StringBuffer countQuery = new StringBuffer("select count(obj) from Ticket obj where 1=1");
+		query.append(" and obj.subcontractor is null");
 		
-		if (!StringUtils.isEmpty(companyIds)){
-			query.append(" and obj.driverCompany.id in (" + companyIds + ")");
-			countQuery.append(" and obj.driverCompany.id in (" + companyIds + ")");
+		String companyToBeUsed = companyIds;
+		if (!StringUtils.isEmpty(company)){
+			companyToBeUsed = company;
+		}
+		if (!StringUtils.isEmpty(companyToBeUsed)) {
+			query.append(" and obj.driverCompany.id in (" + companyToBeUsed + ")");
 		}
 		
 		if (!StringUtils.isEmpty(noGPSVehicleIds)){
 			query.append(" and obj.vehicle.id in (" + noGPSVehicleIds + ")");
-			countQuery.append(" and  obj.vehicle.id in (" + noGPSVehicleIds + ")");
+		}
+		
+		if (!StringUtils.isEmpty(truck)){
+			query.append(" and obj.vehicle.unit in (" + truck + ")");
 		}
 		
       if (StringUtils.isNotEmpty(periodFrom) && StringUtils.isNotEmpty(periodTo)) {
@@ -4174,7 +4184,6 @@ throw new Exception("origin and destindation is empty");
 							 +        "        and obj.loadDate <='"+periodToDateStr+"')"*/
 				dateCondn		  +=     ")";
 				query.append(dateCondn);
-				countQuery.append(dateCondn);
         	} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -4190,31 +4199,26 @@ throw new Exception("origin and destindation is empty");
       				 +        "        and obj.loadDate <='"+lastInStateTo+"')"*/
       	dateCondn        +=     ")";
       	query.append(dateCondn);
-      	countQuery.append(dateCondn);
        
 			/*query.append(" and  obj.unloadDate between '" + lastInStateFrom
-					+ "' and '" + lastInStateTo + "'");
-			countQuery.append(" and  obj.unloadDate between '" + lastInStateFrom
 					+ "' and '" + lastInStateTo + "'");*/
 		}
       
       /*query.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
-      countQuery.append(" order by obj.subcontractor.name asc, obj.driverCompany.name asc, obj.unloadDate desc");
-     */
+      */
       
-		System.out.println("\nquery=noGPSonmileageLog=>" + query + "\n");
-		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();
-		searchCriteria.setRecordCount(recordCount.intValue());
-		System.out.println("\nrecordCount=>" + recordCount.intValue() + "\n");
-
-		List<Ticket> ticketList = (List<Ticket>) genericDAO
-			.getEntityManager()
-			.createQuery(query.toString())
-			.setMaxResults(searchCriteria.getPageSize())
-			.setFirstResult(searchCriteria.getPage() * searchCriteria.getPageSize())
-			.getResultList();
+		System.out.println("\nquery=noGPSnmileageLog Ticket=>" + query + "\n");
+		return genericDAO.executeSimpleQuery(query.toString());
+	}
+	
+	@Override
+	public IFTAReportWrapper generateNoGPSMileageLogMPGData(SearchCriteria searchCriteria, IFTAReportInput input) {
+		List<Ticket> ticketList = retrieveNoGPSVehicleTickets(input, null, null, null);
+		if (ticketList == null || ticketList.isEmpty()) {
+			return null;
+		}
 		
-		Map<String, LocationDistance> locationDistanceMap = retrieveAllLocationDistance();
+		Map<String, List<LocationDistance>> locationDistanceMap = retrieveAllLocationDistance();
 		List<MileageLog> aggregateMileageLogList = new ArrayList<MileageLog>();
 		double totalMiles = 0.0;
 		for (Ticket aTicket : ticketList) {
@@ -4265,14 +4269,14 @@ throw new Exception("origin and destindation is empty");
          	Integer rhsUnitNumInt = new Integer(rhs.getUnitNum());
 				return (lhsUnitNumInt > rhsUnitNumInt) ? 1 : (lhsUnitNumInt < rhsUnitNumInt ) ? -1 : 0;
          }
-     });
+      });
 		
 		IFTAReportWrapper anIFTAReportWrapper = new IFTAReportWrapper();
-		anIFTAReportWrapper.setCompanies(companyIds);
-		anIFTAReportWrapper.setPeriodFrom(periodFrom);
-		anIFTAReportWrapper.setPeriodTo(periodTo);
-		anIFTAReportWrapper.setLastInStateFrom(lastInStateFrom);
-		anIFTAReportWrapper.setLastInStateTo(lastInStateTo);
+		anIFTAReportWrapper.setCompanies(input.getCompany());
+		anIFTAReportWrapper.setPeriodFrom(input.getPeriodFrom());
+		anIFTAReportWrapper.setPeriodTo(input.getPeriodTo());
+		anIFTAReportWrapper.setLastInStateFrom(ReportDateUtil.getToDate(input.getLastInStateFrom()));
+		anIFTAReportWrapper.setLastInStateTo( ReportDateUtil.getToDate(input.getLastInStateTo()));
 		anIFTAReportWrapper.setTotalMiles(totalMiles);
 		anIFTAReportWrapper.setTotalRows(ticketList.size());
 		anIFTAReportWrapper.setTotalGallons(fuelLogReportWrapper.getTotalGallons());
@@ -4294,27 +4298,35 @@ throw new Exception("origin and destindation is empty");
 		if (aTicket.getSubcontractor() != null) {
 			aMilageLog.setSubcontractorStr(aTicket.getSubcontractor().getName());
 		}
+		
 		if (aTicket.getVehicle() != null) {
 			aMilageLog.setUnitNum(String.valueOf(aTicket.getVehicle().getUnit().intValue()));
 		}
+		
 		aMilageLog.setCompany(aTicket.getDriverCompany());
+		
 		aMilageLog.setMiles(miles);
 	}
 	
-	private Map<String, LocationDistance> retrieveAllLocationDistance() {
+	private Map<String, List<LocationDistance>> retrieveAllLocationDistance() {
 		String query = "select obj from LocationDistance obj order by obj.origin.name asc, obj.destination.name asc";
 		List<LocationDistance> locationDistanceList = genericDAO.executeSimpleQuery(query);
 		
-		Map<String, LocationDistance> locationDistanceMap = new HashMap<String, LocationDistance>();
+		Map<String, List<LocationDistance>> locationDistanceMap = new HashMap<String, List<LocationDistance>>();
 		for (LocationDistance aLocationDistance : locationDistanceList) {
 			String key = aLocationDistance.getOrigin().getId().longValue() + "|" 
 						+ aLocationDistance.getDestination().getId().longValue();
-			locationDistanceMap.put(key, aLocationDistance);
+			List<LocationDistance> groupedLocationDistanceList = locationDistanceMap.get(key);
+			if (groupedLocationDistanceList == null) {
+				groupedLocationDistanceList = new ArrayList<LocationDistance>();
+				locationDistanceMap.put(key, groupedLocationDistanceList);
+			}
+			groupedLocationDistanceList.add(aLocationDistance);
 		}
 		return locationDistanceMap;
 	}
 	
-	private Double retrieveLocationDistance(Map<String, LocationDistance> locationDistanceMap, Ticket ticket) {
+	private Double retrieveLocationDistance(Map<String, List<LocationDistance>> locationDistanceMap, Ticket ticket) {
 		Double zeroMiles = new Double(0.0);
 		Location origin = ticket.getOrigin();
 		Location destination = ticket.getDestination();
@@ -4323,12 +4335,28 @@ throw new Exception("origin and destindation is empty");
 		}
 		
 		String key = origin.getId().longValue() + "|" + destination.getId().longValue();
-		LocationDistance aLocationDistance = locationDistanceMap.get(key);
-		if (aLocationDistance == null) {
+		List<LocationDistance> locationDistanceList = locationDistanceMap.get(key);
+		if (locationDistanceList == null) {
 			return zeroMiles;
 		} else {
-			return aLocationDistance.getMiles();
+			Double miles = new Double(0.0);
+			for (LocationDistance aLocationDistance : locationDistanceList) {
+				miles += aLocationDistance.getMiles();
+			}
+			return miles;
 		}
+	}
+	
+	private List<LocationDistance> retrieveAllLocationDistance(Map<String, List<LocationDistance>> locationDistanceMap, Ticket ticket) {
+		Location origin = ticket.getOrigin();
+		Location destination = ticket.getDestination();
+		if (origin == null || destination == null) {
+			return null;
+		}
+		
+		String key = origin.getId().longValue() + "|" + destination.getId().longValue();
+		List<LocationDistance> locationDistanceList = locationDistanceMap.get(key);
+		return locationDistanceList;
 	}
 	
 	private Double retrieveLocationDistance(Ticket ticket) {
@@ -4470,12 +4498,227 @@ throw new Exception("origin and destindation is empty");
 		}
 		wrapper.setTotalMiles(totalMiles);
 		
+		if (!input.isServiceTruck()) {
+			List<MileageLog> noGPSMileageLogList = generateNoGPSMileageLogData(searchCriteria, input, company, state, truck);
+			if (noGPSMileageLogList != null && !noGPSMileageLogList.isEmpty()) {
+				wrapper.setTotalRows(wrapper.getTotalRows() + noGPSMileageLogList.size());
+				
+				double noGPSTotalMiles = 0.0;
+				for (MileageLog aNoGPSMileageLog : noGPSMileageLogList) {
+					noGPSTotalMiles += aNoGPSMileageLog.getMiles();
+				}
+				wrapper.setTotalMiles(wrapper.getTotalMiles() + noGPSTotalMiles);
+				
+				returnMileageLogList.addAll(noGPSMileageLogList);
+				sort(returnMileageLogList);
+			}
+		}
+		
 		if (MileageLogReportInput.REPORT_TYPE_TOTALS.equals(input.getReportType())) {
 			returnMileageLogList = aggregateMileageLogByCompanyState(returnMileageLogList);
 		}
 		
 		wrapper.setMileageLogList(returnMileageLogList);
 		return wrapper;
+	}
+	
+	private void sort(List<MileageLog> mileageLogList) {
+		if (mileageLogList == null || mileageLogList.isEmpty()) {
+			return;
+		}
+		
+		Comparator<MileageLog> companyComparator = new Comparator<MileageLog>() {
+			@Override
+			public int compare(MileageLog o1, MileageLog o2) {
+				if (o1.getCompany() == null || o2.getCompany() == null) {
+					return 0;
+				}
+				return o1.getCompany().getName().compareTo(o2.getCompany().getName());
+			}
+		};
+		
+		Comparator<MileageLog> stateComparator = new Comparator<MileageLog>() {
+			@Override
+			public int compare(MileageLog o1, MileageLog o2) {
+				if (o1.getState() == null || o2.getState() == null) {
+					return 0;
+				}
+				return o1.getState().getCode().compareTo(o2.getState().getCode());
+			}
+		};
+		
+		Comparator<MileageLog> unitComparator = new Comparator<MileageLog>() {
+			@Override
+			public int compare(MileageLog o1, MileageLog o2) {
+				if (StringUtils.isEmpty(o1.getUnitNum()) || StringUtils.isEmpty(o2.getUnitNum())) {
+					return 0;
+				}
+				return o1.getUnitNum().compareTo(o2.getUnitNum());
+			}
+		};
+	        
+		Comparator<MileageLog> periodComparator = new Comparator<MileageLog>() {
+			@Override
+			public int compare(MileageLog o1, MileageLog o2) {
+				if (o1.getPeriod() == null || o2.getPeriod() == null) {
+					return 0;
+				}
+				return o2.getPeriod().compareTo(o1.getPeriod());
+			}
+		};  
+		
+		ComparatorChain chain = new ComparatorChain(); 
+		chain.addComparator(companyComparator);
+		chain.addComparator(stateComparator);			
+		chain.addComparator(unitComparator);
+		chain.addComparator(periodComparator);
+		
+		Collections.sort(mileageLogList, chain);
+	}
+	
+	private void map(IFTAReportInput iftaReportInput, MileageLogReportInput mileageLogReportInput) {
+		iftaReportInput.setCompany(mileageLogReportInput.getCompany());
+		iftaReportInput.setState(mileageLogReportInput.getState());
+		iftaReportInput.setUnit(mileageLogReportInput.getUnit());
+		
+		iftaReportInput.setPeriodFrom(mileageLogReportInput.getPeriodFrom());
+		iftaReportInput.setPeriodTo(mileageLogReportInput.getPeriodTo());
+		
+		iftaReportInput.setReportType(mileageLogReportInput.getReportType());
+		
+		iftaReportInput.setFirstInStateFrom(mileageLogReportInput.getFirstInStateFrom());
+		iftaReportInput.setFirstInStateTo(mileageLogReportInput.getFirstInStateTo());
+		iftaReportInput.setLastInStateFrom(mileageLogReportInput.getLastInStateFrom());
+		iftaReportInput.setLastInStateTo(mileageLogReportInput.getLastInStateTo());
+	}
+	
+	private List<MileageLog> generateNoGPSMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input,
+			String company, String state, String truck) {
+		IFTAReportInput iftaReportInput = new IFTAReportInput();
+		map(iftaReportInput, input);
+		List<Ticket> ticketList = retrieveNoGPSVehicleTickets(iftaReportInput, company, state, truck);
+		if (ticketList == null || ticketList.isEmpty()) {
+			return null;
+		}
+		
+		Map<String, List<LocationDistance>> locationDistanceMap = retrieveAllLocationDistance();
+		List<MileageLog> aggregateMileageLogList = new ArrayList<MileageLog>();
+		for (Ticket aTicket : ticketList) {
+			List<LocationDistance> locationDistanceList = retrieveAllLocationDistance(locationDistanceMap, aTicket);
+			if (locationDistanceList == null || locationDistanceList.isEmpty()) {
+				continue;
+			}
+			
+			mapAndAdd(aggregateMileageLogList, locationDistanceList.get(0), aTicket, state);
+		}
+		
+		return aggregateMileageLogList;
+	}
+	
+	private VehiclePermit retrieveVehiclePermit(Ticket aTicket) {
+		if (aTicket.getVehicle() == null || aTicket.getUnloadDate() == null) {
+			return null;
+		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String dateStr = dateFormat.format(aTicket.getUnloadDate());
+		
+		String query = "select obj from VehiclePermit obj where obj.status=1"
+				+ " and obj.issueDate <= '" + dateStr + "'"
+				+ " and obj.expirationDate > '" + dateStr + "'"
+				+ " and obj.vehicle.unitNum = " + aTicket.getVehicle().getUnitNum();
+		List<VehiclePermit> permits = genericDAO.executeSimpleQuery(query);
+		if (permits != null && !permits.isEmpty()) {
+			return permits.get(0);
+		} else {
+			return null;
+		}
+	}
+	
+	private void mapAndAdd(List<MileageLog> mileageLogList, LocationDistance aLocationDistance, Ticket aTicket,
+			String searchState) {
+		String permitNumber = StringUtils.EMPTY;
+		VehiclePermit permit = retrieveVehiclePermit(aTicket);
+		if (permit != null) {
+			permitNumber = permit.getPermitNumber();
+		}
+		
+		Date period = aTicket.getUnloadDate();
+		
+		State searchStateObj = null;
+		if (StringUtils.isNotEmpty(searchState)) {
+			searchStateObj = genericDAO.getById(State.class, Long.valueOf(searchState));
+		}
+		
+		Double nyMiles = aLocationDistance.getNyMiles();
+		mapAndAdd(mileageLogList, aTicket, nyMiles, "NY", permitNumber, period, searchStateObj);
+		
+		Double njMiles = aLocationDistance.getNjMiles();
+		mapAndAdd(mileageLogList, aTicket, njMiles, "NJ", permitNumber, period, searchStateObj);
+		
+		Double paMiles = aLocationDistance.getPaMiles();
+		mapAndAdd(mileageLogList, aTicket, paMiles, "PA", permitNumber, period, searchStateObj);
+	
+		Double mdMiles = aLocationDistance.getMdMiles();
+		mapAndAdd(mileageLogList, aTicket, mdMiles, "MD", permitNumber, period, searchStateObj);
+		
+		Double vaMiles = aLocationDistance.getVaMiles();
+		mapAndAdd(mileageLogList, aTicket, vaMiles, "VA", permitNumber, period, searchStateObj);
+		
+		Double deMiles = aLocationDistance.getDeMiles();
+		mapAndAdd(mileageLogList, aTicket, deMiles, "DE", permitNumber, period, searchStateObj);
+		
+		Double wvMiles = aLocationDistance.getWvMiles();
+		mapAndAdd(mileageLogList, aTicket, wvMiles, "WV", permitNumber, period, searchStateObj);
+		
+		Double dcMiles = aLocationDistance.getDcMiles();
+		mapAndAdd(mileageLogList, aTicket, dcMiles, "DC", permitNumber, period, searchStateObj);
+		
+		Double ilMiles = aLocationDistance.getIlMiles();
+		mapAndAdd(mileageLogList, aTicket, ilMiles, "IL", permitNumber, period, searchStateObj);
+		
+		Double flMiles = aLocationDistance.getFlMiles();
+		mapAndAdd(mileageLogList, aTicket, flMiles, "FL", permitNumber, period, searchStateObj);
+		
+		Double ctMiles = aLocationDistance.getCtMiles();
+		mapAndAdd(mileageLogList, aTicket, ctMiles, "CT", permitNumber, period, searchStateObj);
+	}
+	
+	private void mapAndAdd(List<MileageLog> mileageLogList, Ticket aTicket, Double miles, String state, String permitNumber, Date period,
+			State searchStateObj) {
+		if (miles == null || miles.doubleValue() == 0.0) {
+			return;
+		}
+		
+		if (searchStateObj != null) {
+			if (!StringUtils.equals(state, searchStateObj.getCode())) {
+				return;
+			}
+		}
+		
+		MileageLog aReturnMileageLog = new MileageLog();
+		map(aReturnMileageLog, aTicket, miles);
+		aReturnMileageLog.setState(retrieveState(state));
+		aReturnMileageLog.setVehiclePermitNumber(permitNumber);
+		
+		aReturnMileageLog.setPeriod(period);
+		String periodStr = StringUtils.EMPTY;
+		if (period != null) {
+			periodStr = mileageReportDateFormat.format(period);
+		}
+		aReturnMileageLog.setPeriodStr(periodStr);
+		
+		//aReturnMileageLog.setFirstInState(period);
+		//aReturnMileageLog.setLastInState(period);
+		
+		mileageLogList.add(aReturnMileageLog);
+	}
+	
+	private State retrieveState(String code) {
+		String query = "select obj from State obj "
+				+ " where obj.code='" + code + "'";
+		List<State> stateList = genericDAO.executeSimpleQuery(query);
+		return stateList.get(0);
 	}
 	
 	private void copy(MileageLog srcMileageLog, MileageLog destMileageLog) {
@@ -4492,7 +4735,10 @@ throw new Exception("origin and destindation is empty");
 		destMileageLog.setFirstInState(srcMileageLog.getFirstInState());
 		destMileageLog.setLastInState(srcMileageLog.getLastInState());
 		
-		String periodStr = mileageReportDateFormat.format(srcMileageLog.getPeriod());
+		String periodStr = StringUtils.EMPTY;
+		if (srcMileageLog.getPeriod() != null) {
+			periodStr = mileageReportDateFormat.format(srcMileageLog.getPeriod());
+		}
 		destMileageLog.setPeriodStr(periodStr);
 	}
 	
