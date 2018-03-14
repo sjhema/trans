@@ -107,7 +107,7 @@ $(function() {
 						<c:if test="${sessionScope.searchCriteria.searchMap['unit.id'] == anUnit.id}">
 							<c:set var="selected" value="selected"/>
 						</c:if>
-							<option value="${anUnit.id}" ${selected}>${anUnit.unit}</option>
+							<option value="${anUnit.unit}" ${selected}>${anUnit.unit}</option>
 					</c:forEach>
 				</select>
 			</td>

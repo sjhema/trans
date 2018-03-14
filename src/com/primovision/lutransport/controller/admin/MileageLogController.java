@@ -101,7 +101,7 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		}
 		
 		if (!StringUtils.isEmpty(truck)) {
-			whereClause.append(" and obj.unit=" + truck);
+			whereClause.append(" and obj.unitNum=" + truck);
 		}
         
       if (!StringUtils.isEmpty(periodFrom)) {

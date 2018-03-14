@@ -4016,12 +4016,14 @@ throw new Exception("origin and destindation is empty");
 		
 		String gpsVehicleIds = StringUtils.EMPTY;
 		for (MileageLog aMileageLog : retrievedMileageLogList) {
-			gpsVehicleIds += String.valueOf(aMileageLog.getUnit().getId()) + ",";
+			//gpsVehicleIds += String.valueOf(aMileageLog.getUnit().getId()) + ",";
+			gpsVehicleIds += aMileageLog.getUnitNum() + ",";
 		}
 		gpsVehicleIds = gpsVehicleIds.substring(0, gpsVehicleIds.length()-1);
 		
 		String vehicleQuery = "select obj from Vehicle obj where obj.type=1 and obj.activeStatus=1" 
-	   		+ " and obj.id not in ("+gpsVehicleIds+")"
+	   		//+ " and obj.id not in ("+gpsVehicleIds+")"
+	   		+ " and obj.unit not in ("+gpsVehicleIds+")"
 	   		+ " and obj.unit != 0"
 	   		+ " and obj.model " + serviceTruckCondnOp + " '"+modelServiceTruck+"'";
 		List<Vehicle> noGpsVehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
@@ -4152,6 +4154,7 @@ throw new Exception("origin and destindation is empty");
 		
 		String periodFrom = input.getPeriodFrom();
 		String periodTo = input.getPeriodTo();
+		String unit = input.getUnit();
 		String lastInStateFrom = ReportDateUtil.getToDate(input.getLastInStateFrom());
 		String lastInStateTo = ReportDateUtil.getToDate(input.getLastInStateTo());
 		
@@ -4170,8 +4173,12 @@ throw new Exception("origin and destindation is empty");
 			query.append(" and obj.vehicle.id in (" + noGPSVehicleIds + ")");
 		}
 		
-		if (!StringUtils.isEmpty(truck)){
-			query.append(" and obj.vehicle.unit in (" + truck + ")");
+		String unitToBeUsed = unit;
+		if (!StringUtils.isEmpty(truck)) {
+			unitToBeUsed = truck;
+		}
+		if (!StringUtils.isEmpty(unitToBeUsed)){
+			query.append(" and obj.vehicle.unit in (" + unitToBeUsed + ")");
 		}
 		
       if (StringUtils.isNotEmpty(periodFrom) && StringUtils.isNotEmpty(periodTo)) {
@@ -4380,22 +4387,27 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input) {
+		boolean drilldown = false;
+		
 		String company = input.getCompany();
 		String drillDownCompany = input.getDrillDownCompany();
 		if (StringUtils.isNotEmpty(drillDownCompany)) {
 			company = drillDownCompany;
+			drilldown = true;
 		}
 		
 		String state = input.getState();
 		String drillDownState = input.getDrillDownState();
 		if (StringUtils.isNotEmpty(drillDownState)) {
 			state = drillDownState;
+			drilldown = true;
 		}
 		
 		String truck = input.getUnit();
 		String drillDownTruck = input.getDrillDownUnit();
 		if (StringUtils.isNotEmpty(drillDownTruck)) {
 			truck = drillDownTruck;
+			drilldown = true;
 		}
 		
 		String periodFrom = input.getPeriodFrom();
@@ -4501,6 +4513,11 @@ throw new Exception("origin and destindation is empty");
 		if (!input.isServiceTruck()) {
 			List<MileageLog> noGPSMileageLogList = generateNoGPSMileageLogData(searchCriteria, input, company, state, truck);
 			if (noGPSMileageLogList != null && !noGPSMileageLogList.isEmpty()) {
+				if (MileageLogReportInput.REPORT_TYPE_DETAILS.equals(input.getReportType())
+						&& !drilldown) {
+					noGPSMileageLogList = aggregateMileageLogByCompanyStateUnit(noGPSMileageLogList);
+				}
+				
 				wrapper.setTotalRows(wrapper.getTotalRows() + noGPSMileageLogList.size());
 				
 				double noGPSTotalMiles = 0.0;
@@ -4778,6 +4795,34 @@ throw new Exception("origin and destindation is empty");
 		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
 		for (MileageLog aSrcMileageLog : srcMileageLogList) {
 			String key = aSrcMileageLog.getCompany().getName() + "|" + aSrcMileageLog.getState().getName();
+			
+			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
+			if (aggregateMileageLog == null) {
+				aggreateMileageLogMap.put(key, aSrcMileageLog);
+			} else {
+				Double aggregateMiles = aggregateMileageLog.getMiles() + aSrcMileageLog.getMiles();
+				aggregateMileageLog.setMiles(aggregateMiles);
+			}
+		}
+		
+		SortedSet<String> sortedKeys = new TreeSet<String>(aggreateMileageLogMap.keySet());
+		for (String aKey : sortedKeys) {
+			aggreateMileageLogList.add(aggreateMileageLogMap.get(aKey));
+		}
+		
+		return aggreateMileageLogList;
+	}
+	
+	private List<MileageLog> aggregateMileageLogByCompanyStateUnit(List<MileageLog> srcMileageLogList) {
+		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
+		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
+			return aggreateMileageLogList;
+		}
+		
+		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
+		for (MileageLog aSrcMileageLog : srcMileageLogList) {
+			String key = aSrcMileageLog.getCompany().getName() + "|" + aSrcMileageLog.getState().getName()
+					+ "|" + aSrcMileageLog.getUnitNum();
 			
 			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
 			if (aggregateMileageLog == null) {
