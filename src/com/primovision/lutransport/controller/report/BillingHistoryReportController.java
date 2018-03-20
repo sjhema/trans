@@ -162,6 +162,8 @@ public class BillingHistoryReportController extends BaseController {
 		params.put("sumNet", wrapper.getSumNet());
 		params.put("sumAmount", wrapper.getSumAmount());
 		params.put("sumFuelSurcharge", wrapper.getSumFuelSurcharge());
+		populateParams(params, input);
+		
 		data.put("data", wrapper.getBillings());		
 		data.put("params", params);
 		return data;
@@ -193,13 +195,14 @@ public class BillingHistoryReportController extends BaseController {
 		if(StringUtils.contains(sum, "true")){
 			Map<String,Object> params= new HashMap<String,Object>();
 			//List<Summary> summarylist=new ArrayList<Summary>();			           
-			List<Summary> list=reportService.generateSummaryNew(criteria, input);
-			if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+			//List<Summary> list=reportService.generateSummaryNew(criteria, input);
+			List<Summary> list = generateSummaryNew(criteria, params, input);
+			/*if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
 				params.put("batchDateFrom",input.getBatchDateFrom());
 			}
 			if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 				params.put("batchDateTo",input.getBatchDateTo());
-			}
+			}*/
 			
 			// Truck driver report
 			StringBuffer requestUrl = request.getRequestURL();
@@ -262,7 +265,33 @@ public class BillingHistoryReportController extends BaseController {
 
 	}
 	
+	private List<Summary> generateSummaryNew(SearchCriteria criteria, Map<String,Object> params, 
+			BillingHistoryInput input) {
+		List<Summary> list = reportService.generateSummaryNew(criteria, input);
+		populateParams(params, input);
+		return list;
+	}
 	
+	private void populateParams(Map<String,Object> params, BillingHistoryInput input) {
+		if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+			params.put("batchDateFrom",input.getBatchDateFrom());
+		}
+		if (!StringUtils.isEmpty(input.getBatchDateTo())) {
+			params.put("batchDateTo", input.getBatchDateTo());
+		}
+		if (!StringUtils.isEmpty(input.getLoadedFrom())) {
+			params.put("loadedFrom", input.getLoadedFrom());
+		}
+		if (!StringUtils.isEmpty(input.getLoadedTo())) {
+			params.put("loadedTo", input.getLoadedTo());
+		}
+		if (!StringUtils.isEmpty(input.getUnloadedFrom())) {
+			params.put("unloadedFrom", input.getUnloadedFrom());
+		}
+		if (!StringUtils.isEmpty(input.getUnloadedTo())) {
+			params.put("unloadedTo", input.getUnloadedTo());
+		}
+	}
 	
 	/**
 	 * Generic method to export report based on the filter criteria.
@@ -297,13 +326,14 @@ public class BillingHistoryReportController extends BaseController {
 	 			//List<Summary> summarylist=new ArrayList<Summary>();
 	 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 	 			try{
-	 			List<Summary> list=reportService.generateSummaryNew(criteria, input);
-	 			if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+	 				//List<Summary> list=reportService.generateSummaryNew(criteria, input);
+	 				List<Summary> list = generateSummaryNew(criteria, params, input);
+	 			/*if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
 					params.put("batchDateFrom",input.getBatchDateFrom());
 				}
 				if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 					params.put("batchDateTo",input.getBatchDateTo());
-				}
+				}*/
 	 			/*for(Object obj:list){						
 					Object[] objArry=(Object[]) obj;
 					Summary summary=new Summary();				
@@ -439,12 +469,12 @@ public class BillingHistoryReportController extends BaseController {
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		
-		if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
+		/*if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
 			params.put("batchDateFrom", input.getBatchDateFrom());
 		}
 		if (!StringUtils.isEmpty(input.getBatchDateTo())) {
 			params.put("batchDateTo", input.getBatchDateTo());
-		}
+		}*/
 		
 		params.put("company", company);
 		params.put("origin", origin);
@@ -456,7 +486,8 @@ public class BillingHistoryReportController extends BaseController {
      	
 		ByteArrayOutputStream out = null;
 		try {
-			List<Summary> summaryList = reportService.generateSummaryNew(criteria, input);
+			//List<Summary> summaryList = reportService.generateSummaryNew(criteria, input);
+			List<Summary> summaryList = generateSummaryNew(criteria, params, input);
 			
 			response.setContentType(MimeUtil.getContentType(type));
 			if (!type.equals("html") && !(type.equals("print"))) {
