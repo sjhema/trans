@@ -3383,13 +3383,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		String baseQuery = "select obj from WMInvoice obj where obj.ticket=" + wmInvoice.getTicket();
-		String originQuery = baseQuery + " and obj.origin=" + wmInvoice.getOrigin().getId();
-		String destinationQuery = baseQuery + " and obj.destination=" + wmInvoice.getDestination().getId();
+		String originQuery = /*baseQuery + */ " and obj.origin=" + wmInvoice.getOrigin().getId();
+		String destinationQuery = /*baseQuery + */ " and obj.destination=" + wmInvoice.getDestination().getId();
 		
-		List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(originQuery);
+		/*List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(originQuery);
 		if (wmInvoiceList == null || wmInvoiceList.isEmpty()) {
 			wmInvoiceList = genericDAO.executeSimpleQuery(destinationQuery);
-		}
+		}*/
+		List<WMInvoice> wmInvoiceList = genericDAO.executeSimpleQuery(baseQuery + originQuery + destinationQuery);
 		return ((wmInvoiceList == null || wmInvoiceList.isEmpty()) ? null : wmInvoiceList.get(0));
 	}
 	
