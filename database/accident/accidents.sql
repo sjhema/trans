@@ -195,3 +195,6 @@ ADD CONSTRAINT `accident_subcon_fk`
   ALTER TABLE `lutransport`.`accident` 
 ADD COLUMN `reimbursement` DOUBLE NULL DEFAULT NULL AFTER `subcontractor`;
 
+UPDATE `lutransport`.`business_object` SET `URL`='/admin/accident/accidentmaint/list.do?rst=1,/admin/accident/accidentmaint/create.do,/admin/accident/accidentmaint/edit.do,/admin/accident/accidentmaint/delete.do,/admin/accident/accidentmaint/save.do,/admin/accident/accidentmaint/search.do,/admin/accident/accidentmaint/export.do,/admin/accident/accidentmaint/ajax.do,/admin/accident/accidentmaint/copy.do,/admin/accident/accidentmaint/print.do,/admin/accident/accidentmaint/uploadvideo/start.do,/admin/accident/accidentmaint/uploadvideo/download.do,/admin/accident/accidentmaint/uploadvideo/save.do' WHERE `ID`='300144';
+
+

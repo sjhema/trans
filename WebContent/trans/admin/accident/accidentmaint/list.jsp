@@ -1,5 +1,69 @@
 <%@include file="/common/taglibs.jsp"%>
 
+<script type="text/javascript">
+function processDownloadVideo(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesVideoExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'false') {
+       			alert("No video uploaded for the selected accident");
+       			return;
+       		}
+       		
+       		document.location = "${ctx}/admin/accident/accidentmaint/uploadvideo/download.do?id=" + id;
+		}
+	});
+}
+
+function processUploadVideo(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesVideoExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'true') {
+       			if (confirm("Do you want to replace the video already uploaded?")) {
+       				uploadVideo(id);
+           		}
+       		} else {
+       			uploadVideo(id);
+       		}
+		}
+	});
+}
+
+function uploadVideo(id) {
+	document.location = "${ctx}/admin/accident/accidentmaint/uploadvideo/start.do?id=" + id;
+}
+
+function processDeleteVideo(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesVideoExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'false') {
+       			alert("No video uploaded for the selected accident");
+       			return;
+       		}
+       		
+       		if (confirm("Do you want to Delete the selected video?")) {
+       			deleteVideo(id);
+       		}
+		}
+	});
+}
+
+function deleteVideo(id) {
+	$.ajax({
+  		url: "ajax.do?action=deleteVideo" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		alert(responseData);
+		}
+	});
+}
+</script>
+
 <h3>
 	<primo:label code="Manage Accidents" />
 </h3>
@@ -168,7 +232,10 @@
         <primo:textcolumn headerText="Citn." dataField="citation"/>
         <primo:textcolumn headerText="Tow" dataField="towed"/>
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
-    </primo:datatable>
+        <primo:anchorcolumn headerText="Up Vid" linkUrl="javascript:processUploadVideo('{id}');" linkText="Up Vid"/>
+		<primo:anchorcolumn headerText="Down Vid" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Vid"/>
+		<primo:anchorcolumn headerText="Del Vid" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Del Vid"/>
+	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
 
