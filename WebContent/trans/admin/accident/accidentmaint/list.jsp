@@ -232,9 +232,9 @@ function deleteVideo(id) {
         <primo:textcolumn headerText="Citn." dataField="citation"/>
         <primo:textcolumn headerText="Tow" dataField="towed"/>
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
-        <primo:anchorcolumn headerText="Up Vid" linkUrl="javascript:processUploadVideo('{id}');" linkText="Up Vid"/>
-		<primo:anchorcolumn headerText="Down Vid" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Vid"/>
-		<primo:anchorcolumn headerText="Del Vid" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Del Vid"/>
+        <primo:anchorcolumn headerText="Upload Video" linkUrl="javascript:processUploadVideo('{id}');" linkText="Upload Video"/>
+		<primo:anchorcolumn headerText="Down Video" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Video"/>
+		<primo:anchorcolumn headerText="Delete Video" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Delete Video"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
