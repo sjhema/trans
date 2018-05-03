@@ -21,6 +21,8 @@ public class MileageLogReportInput {
 	private String drillDownCompany;
 	private String drillDownUnit;
 	
+	private String gps;
+	
 	private String reportType;
 	
 	private boolean serviceTruck = false;
@@ -117,5 +119,11 @@ public class MileageLogReportInput {
 	}
 	public void setServiceTruck(boolean serviceTruck) {
 		this.serviceTruck = serviceTruck;
+	}
+	public String getGps() {
+		return gps;
+	}
+	public void setGps(String gps) {
+		this.gps = gps;
 	}
 }

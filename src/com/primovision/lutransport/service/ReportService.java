@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import com.primovision.lutransport.model.Invoice;
+import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubcontractorInvoice;
 import com.primovision.lutransport.model.Ticket;
@@ -70,5 +71,8 @@ public interface ReportService {
 	public IFTAReportWrapper generateMPGData(SearchCriteria searchCriteria, IFTAReportInput iftaReportInput);
 
 	public MileageLogReportWrapper generateOwnerOpSubConMileageLogData(SearchCriteria criteria, MileageLogReportInput input);
+	
 	public IFTAReportWrapper generateNoGPSMileageLogMPGData(SearchCriteria criteria, IFTAReportInput input);
+	public List<MileageLog> generateNoGPSMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input,
+				String company, String state, String truck); 
 }

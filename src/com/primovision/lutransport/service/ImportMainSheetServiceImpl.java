@@ -21,6 +21,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -63,6 +65,7 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.LocationPair;
 import com.primovision.lutransport.model.MileageLog;
+import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
@@ -90,6 +93,7 @@ import com.primovision.lutransport.model.injury.InjuryIncidentType;
 import com.primovision.lutransport.model.injury.InjuryToType;
 import com.primovision.lutransport.model.insurance.InsuranceCompany;
 import com.primovision.lutransport.model.insurance.InsuranceCompanyRep;
+import com.primovision.lutransport.model.report.MileageLogReportInput;
 
 @Transactional(readOnly = true)
 public class ImportMainSheetServiceImpl implements ImportMainSheetService {
@@ -101,6 +105,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
 	private static SimpleDateFormat dateFormat2 = new SimpleDateFormat("HH:mm");
+	
+	public static SimpleDateFormat mileageSearchDateFormat = new SimpleDateFormat("MMMMM yyyy");
+	
 	@Autowired
 	protected GenericDAO genericDAO;
 
@@ -3306,10 +3313,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					+ ". Number of records being loaded: " + mileageLogList.size());
 			if (!mileageLogList.isEmpty()) {
 				for (MileageLog aMileageLog : mileageLogList) {
+					aMileageLog.setGps("Y");
+					
 					aMileageLog.setCreatedBy(createdBy);
 					aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
 					genericDAO.saveOrUpdate(aMileageLog);
 				}
+				
+				uploadNoGPSMileageLogData(period, createdBy);
 			}
 		} catch (Exception ex) {
 			errorList.add("Not able to upload XL!!! Please try again.");
@@ -3317,6 +3328,75 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 		
 		return errorList;
+	}
+	
+	private List<MileageLog> aggregateMileageLogByUnitState(List<MileageLog> srcMileageLogList) {
+		List<MileageLog> aggreateMileageLogList = new ArrayList<MileageLog>();
+		if (srcMileageLogList == null || srcMileageLogList.isEmpty()) {
+			return aggreateMileageLogList;
+		}
+		
+		Map<String, MileageLog> aggreateMileageLogMap = new HashMap<String, MileageLog>();
+		for (MileageLog aSrcMileageLog : srcMileageLogList) {
+			String key = aSrcMileageLog.getUnitNum() + "|" + aSrcMileageLog.getState().getName();
+			
+			MileageLog aggregateMileageLog = aggreateMileageLogMap.get(key);
+			if (aggregateMileageLog == null) {
+				aggreateMileageLogMap.put(key, aSrcMileageLog);
+			} else {
+				Double aggregateMiles = aggregateMileageLog.getMiles() + aSrcMileageLog.getMiles();
+				aggregateMileageLog.setMiles(aggregateMiles);
+				
+				if (aSrcMileageLog.getFirstInState().before((aggregateMileageLog.getFirstInState()))) {
+					aggregateMileageLog.setFirstInState(aSrcMileageLog.getFirstInState());
+				}
+				if (aSrcMileageLog.getLastInState().after((aggregateMileageLog.getLastInState()))) {
+					aggregateMileageLog.setLastInState(aSrcMileageLog.getLastInState());
+				}
+			}
+		}
+		
+		SortedSet<String> sortedKeys = new TreeSet<String>(aggreateMileageLogMap.keySet());
+		for (String aKey : sortedKeys) {
+			aggreateMileageLogList.add(aggreateMileageLogMap.get(aKey));
+		}
+		
+		return aggreateMileageLogList;
+	}
+	
+	private void uploadNoGPSMileageLogData(Date period, Long createdBy) {
+		List<MileageLog> noGPSMileageLogList = retrieveNoGPSMileageLogData(period);
+		if (noGPSMileageLogList == null || noGPSMileageLogList.isEmpty()) {
+			return;
+		}
+		
+		for (MileageLog aMileageLog : noGPSMileageLogList) {
+			aMileageLog.setPeriod(period);
+			
+			if (checkDuplicate(aMileageLog)) {
+				continue;
+			}
+			
+			aMileageLog.setGps("N");
+			
+			aMileageLog.setCreatedBy(createdBy);
+			aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
+			
+			genericDAO.saveOrUpdate(aMileageLog);
+		}
+	}
+	
+	private List<MileageLog> retrieveNoGPSMileageLogData(Date period) {
+		MileageLogReportInput input =  new MileageLogReportInput();
+		String periodStr = mileageSearchDateFormat.format(period);
+		input.setPeriodFrom(periodStr);
+		input.setPeriodTo(periodStr);
+		
+		List<MileageLog> noGPSMileageLogList = reportService.generateNoGPSMileageLogData(null, input,
+				null, null, null);
+		
+		List<MileageLog> aggregateMileageLogList = aggregateMileageLogByUnitState(noGPSMileageLogList);
+		return aggregateMileageLogList;
 	}
 	
 	private VehiclePermit retrieveVehiclePermit(MileageLog mileageLog) {

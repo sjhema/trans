@@ -59,6 +59,10 @@ CREATE TABLE `lutransport`.`mileage_log` (
   CONSTRAINT `FK_MILEAGE_LOG_UNIT_VEHICLE_ID` FOREIGN KEY (`unit`) REFERENCES `vehicle` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ALTER TABLE `lutransport`.`mileage_log` 
+ADD COLUMN `gps` VARCHAR(45) NULL DEFAULT 'Y' COMMENT '' AFTER `vehicle_permit_number`;
+
+update mileage_log set gps = 'Y';
 --  
 ALTER TABLE `lutransport`.`state` 
 ADD COLUMN `long_name` VARCHAR(100) NULL DEFAULT NULL COMMENT '' AFTER `country`;

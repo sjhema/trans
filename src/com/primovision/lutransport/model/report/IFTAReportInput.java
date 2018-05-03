@@ -4,6 +4,9 @@ public class IFTAReportInput {
 	public static final String REPORT_TYPE_IFTA = "IFTA";
 	public static final String REPORT_TYPE_MPG = "MPG";
 	
+	public static final String REPORT_FOR_GPS = "Y";
+	public static final String REPORT_FOR_NO_GPS = "N";
+	
 	private String periodFrom;
 	private String periodTo;
 	private String state;
@@ -14,6 +17,8 @@ public class IFTAReportInput {
 	private String firstInStateTo;
 	private String lastInStateFrom;
 	private String lastInStateTo;
+	
+	private String gps;
 	
 	private String reportType;
 	
@@ -79,5 +84,11 @@ public class IFTAReportInput {
 	}
 	public void setLastInStateTo(String lastInStateTo) {
 		this.lastInStateTo = lastInStateTo;
+	}
+	public String getGps() {
+		return gps;
+	}
+	public void setGps(String gps) {
+		this.gps = gps;
 	}
 }

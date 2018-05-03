@@ -60,6 +60,9 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 	@Column(name="groups")
    private String groups;
 	
+	@Column(name="gps")
+   private String gps;
+	
 	@ManyToOne
 	@JoinColumn(name="vehicle_permit")
 	private VehiclePermit vehiclePermit;
@@ -167,6 +170,14 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 
 	public void setVin(String vin) {
 		this.vin = vin;
+	}
+
+	public String getGps() {
+		return gps;
+	}
+
+	public void setGps(String gps) {
+		this.gps = gps;
 	}
 
 	@Transient
