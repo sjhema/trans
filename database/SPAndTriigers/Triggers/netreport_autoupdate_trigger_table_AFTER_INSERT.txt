@@ -1,0 +1,6 @@
+CREATE DEFINER=`root`@`%` TRIGGER `lutransport`.`netreport_autoupdate_trigger_table_AFTER_INSERT`
+ AFTER INSERT ON `netreport_autoupdate_trigger_table` 
+ FOR EACH ROW
+BEGIN
+call DriverMobileEntryProc();
+END
