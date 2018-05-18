@@ -3,4 +3,6 @@ CREATE DEFINER=`root`@`%` TRIGGER `lutransport`.`netreport_autoupdate_trigger_ta
  FOR EACH ROW
 BEGIN
 call DriverMobileEntryProc();
+call CompanyNetReportProc();
+call TrailerNetReportProc();
 END
