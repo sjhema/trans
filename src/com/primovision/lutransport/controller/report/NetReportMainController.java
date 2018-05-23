@@ -40,7 +40,7 @@ public class NetReportMainController extends BaseController{
 		DateMidnight beginningOfNextMonth = now.plusMonths(1).withDayOfMonth(1);
 		DateMidnight endOfCurrentMonth = beginningOfNextMonth.minusDays(1);
 		
-		
+		String formatDateNow = sdf.format(now.toDate());
 		String formatDate1 = sdf.format(beginningOfLastMonth.toDate());
 		String formatDate2 = sdf.format(beginningOfNextMonth.toDate());
 		String formatDate3 = sdf.format(endOfCurrentMonth.toDate());
@@ -55,11 +55,11 @@ public class NetReportMainController extends BaseController{
 		netReportAutoUpdateObj.setToDate(formatDate3);
 		
 		long startTime = System.currentTimeMillis();
-		System.out.println("Now inserting into net report trigger 1 table");
+		System.out.println(formatDateNow + " -> Now inserting into net report trigger 1 table");
 		genericDAO.saveOrUpdate(netReportAutoUpdateObj);	
 		long endTime = System.currentTimeMillis();
-		System.out.println("After inserting into net report trigger 1 table");
-		System.out.println("Time taken: " + (endTime-startTime)/1000); 
+		System.out.println(formatDateNow + " -> After inserting into net report trigger 1 table.  Time taken: "
+				+ (endTime-startTime)/1000);
 		
 		/*
 		
@@ -215,7 +215,7 @@ public class NetReportMainController extends BaseController{
 		DateMidnight beginningOfNextMonth = now.plusMonths(1).withDayOfMonth(1);
 		DateMidnight endOfCurrentMonth = beginningOfNextMonth.minusDays(1);
 		
-		
+		String formatDateNow = sdf.format(now.toDate());
 		String formatDate1 = sdf.format(beginningOfLastMonth.toDate());
 		String formatDate2 = sdf.format(beginningOfNextMonth.toDate());
 		String formatDate3 = sdf.format(endOfCurrentMonth.toDate());
@@ -230,11 +230,11 @@ public class NetReportMainController extends BaseController{
 		netReportAutoUpdateObj.setToDate(formatDate3);
 		
 		long startTime = System.currentTimeMillis();
-		System.out.println("Now inserting into net report trigger 2 table");
+		System.out.println(formatDateNow + " -> Now inserting into net report trigger 2 table");
 		genericDAO.saveOrUpdate(netReportAutoUpdateObj);
 		long endTime = System.currentTimeMillis();
-		System.out.println("After inserting into net report trigger 2 table");
-		System.out.println("Time taken: " + (endTime-startTime)/1000); 
+		System.out.println(formatDateNow + " -> After inserting into net report trigger 2 table.  Time taken: "
+				+ (endTime-startTime)/1000);
 	}
 	
 	
