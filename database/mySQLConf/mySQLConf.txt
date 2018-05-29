@@ -1,0 +1,109 @@
+New server before updating to same as old server:
+
+[root@javaapp logs]# cat /etc/my.cnf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+[root@javaapp logs]#
+
+-----
+Old server:
+
+[root@lutransport ~]# cat /etc/my.cnf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+max_connections = 800
+max_user_connections = 800
+key_buffer = 10M
+myisam_sort_buffer_size = 64M
+join_buffer_size = 1M
+read_buffer_size = 512K
+sort_buffer_size = 512K
+tmp_table_size = 64M
+table_open_cache=2048
+thread_cache_size = 5
+max_heap_table_size = 64M
+read_rnd_buffer_size = 512K
+bulk_insert_buffer_size = 20M
+query_cache_limit = 4M
+query_cache_size = 50M
+query_cache_type = 1
+query_prealloc_size = 65536
+query_alloc_block_size = 131072
+interactive_timeout = 28800
+wait_timeout = 28800
+max_allowed_packet = 1024M
+innodb_buffer_pool_size=400M
+innodb_file_per_table=1
+innodb_log_buffer_size=10M
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+----
+
+New - mysql  Ver 14.14 Distrib 5.1.73, for redhat-linux-gnu (x86_64) using readline 5.1
+Old - mysql  Ver 14.14 Distrib 5.5.36, for Linux (x86_64) using readline 5.1
+
+--
+
+New 
+root     22947     1  0 May28 ?        00:00:00 /bin/sh /usr/bin/mysqld_safe --datadir=/var/lib/mysql --socket=/var/lib/mysql/mysql.sock --pid-file=/var/run/mysqld/mysqld.pid --basedir=/usr --user=mysql
+mysql    23049 22947 10 May28 ?        02:10:05 /usr/libexec/mysqld --basedir=/usr --datadir=/var/lib/mysql --user=mysql --log-error=/var/log/mysqld.log --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/lib/mysql/mysql.sock
+
+
+Old
+root      1678     1  0  2017 ?        00:00:00 /bin/sh /usr/bin/mysqld_safe --datadir=/var/lib/mysql --pid-file=/var/lib/mysql/lutransport.pid
+mysql     2149  1678  3  2017 ?        6-08:51:40 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib64/mysql/plugin --user=mysql --log-error=/var/log/mysqld.log --pid-file=/var/lib/mysql/lutransport.pid --socket=/var/lib/mysql/mysql.sock
+
+---
+Extra plugin dir in old mysql:
+[root@lutransport ~]# ll /usr/lib64/mysql/plugin
+total 476
+-rwxr-xr-x. 1 root root  13718 Jan 14  2014 adt_null.so
+-rwxr-xr-x. 1 root root  25671 Jan 14  2014 auth.so
+-rwxr-xr-x. 1 root root  12936 Jan 14  2014 auth_socket.so
+-rwxr-xr-x. 1 root root  23543 Jan 14  2014 auth_test_plugin.so
+-rwxr-xr-x. 1 root root    227 Jan 14  2014 daemon_example.ini
+drwxr-xr-x. 2 root root   4096 Feb 10  2014 debug
+-rwxr-xr-x. 1 root root  29135 Jan 14  2014 libdaemon_example.so
+-rwxr-xr-x. 1 root root  17955 Jan 14  2014 mypluglib.so
+-rwxr-xr-x. 1 root root  17775 Jan 14  2014 qa_auth_client.so
+-rwxr-xr-x. 1 root root  24012 Jan 14  2014 qa_auth_interface.so
+-rwxr-xr-x. 1 root root  13190 Jan 14  2014 qa_auth_server.so
+-rwxr-xr-x. 1 root root 179558 Jan 14  2014 semisync_master.so
+-rwxr-xr-x. 1 root root  96090 Jan 14  2014 semisync_slave.so
+-------------
+
+New server apache:
+[lut-java@javaapp logs]$ ps -eaf | grep java
+root      1473     1  0 May07 ?        00:00:07 /sbin/dhclient -H javaapp -1 -q -lf /var/lib/dhclient/dhclient-eth0.leases -pf /var/run/dhclient-eth0.pid eth0
+lut-java 14365     1  4 06:23 ?        00:01:31 /home/lut-java/java/jdk1.6.0_26//bin/java -Djava.util.logging.config.file=/home/lut-java/apache/apache-tomcat-7.0.26/conf/logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -XX:+UseConcMarkSweepGC -Xms1g -Xmx8g -XX:MaxPermSize=1g -XX:+UseConcMarkSweepGC -Djava.endorsed.dirs=/home/lut-java/apache/apache-tomcat-7.0.26/endorsed -classpath /home/lut-java/apache/apache-tomcat-7.0.26/bin/bootstrap.jar:/home/lut-java/apache/apache-tomcat-7.0.26/bin/tomcat-juli.jar -Dcatalina.base=/home/lut-java/apache/apache-tomcat-7.0.26 -Dcatalina.home=/home/lut-java/apache/apache-tomcat-7.0.26 -Djava.io.tmpdir=/home/lut-java/apache/apache-tomcat-7.0.26/temp org.apache.catalina.startup.Bootstrap start
+
+Old server apache:
+[root@lutransport logs]# ps -eaf | grep java
+root      9602     1 99 07:06 pts/3    00:00:18 /usr/bin/java -Djava.util.logging.config.file=/usr/share/apache-tomcat-7.0.26/conf/logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -XX:+UseConcMarkSweepGC -Xms1g -Xmx8g -XX:MaxPermSize=1g -XX:+UseConcMarkSweepGC -Djava.endorsed.dirs=/usr/share/apache-tomcat-7.0.26/endorsed -classpath /usr/share/apache-tomcat-7.0.26/bin/bootstrap.jar:/usr/share/apache-tomcat-7.0.26/bin/tomcat-juli.jar -Dcatalina.base=/usr/share/apache-tomcat-7.0.26 -Dcatalina.home=/usr/share/apache-tomcat-7.0.26 -Djava.io.tmpdir=/usr/share/apache-tomcat-7.0.26/temp org.apache.catalina.startup.Bootstrap start
+--
+
+https://downloads.mysql.com/archives/community/
+Prod version: 5.5.36
+OS: Linux Generic
+
+---
+
+Disabling query cache:
+https://stackoverflow.com/questions/16043943/how-to-disable-mysql-query-caching
+
