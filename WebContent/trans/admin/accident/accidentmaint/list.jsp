@@ -232,6 +232,9 @@ function deleteVideo(id) {
         <primo:textcolumn headerText="Citn." dataField="citation"/>
         <primo:textcolumn headerText="Tow" dataField="towed"/>
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
+        <primo:textcolumn headerText="Claim Rep" dataField="claimRep.name"/>
+        <primo:textcolumn headerText="Phone" dataField="claimRep.phone"/>
+        <primo:textcolumn headerText="Email" dataField="claimRep.email"/>
         <primo:anchorcolumn headerText="Upload Video" linkUrl="javascript:processUploadVideo('{id}');" linkText="Upload Video"/>
 		<primo:anchorcolumn headerText="Down Video" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Video"/>
 		<primo:anchorcolumn headerText="Delete Video" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Delete Video"/>

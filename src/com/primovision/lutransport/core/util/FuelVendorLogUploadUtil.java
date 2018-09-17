@@ -58,6 +58,11 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_AL_WARREN = "Al Warren Oil Co.";
 	private static String VENDOR_JAMES_RIVER_PETROLEUM = "James River Petroleu";
 	private static String VENDOR_BALTIMORE_COUNTY_WB = "Baltimore County WB";
+	private static String VENDOR_MANSFIELD_OIL_COMPANY = "Mansfield Oil Comp";
+	private static String VENDOR_ONSITE_FUEL = "On-Site";
+	private static String VENDOR_ONSITE_FUEL_TAMPA = "On-Site Fuel - Tampa";
+	private static String VENDOR_ONSITE_FUEL_SARASOTA = "On-Site - Sarasota";
+	private static String VENDOR_ONSITE_FUEL_CLEARWATER = "On-Site - Clearwater";
 	
 	static String expectedDateFormatStr = "MM/dd/yy";
 	static SimpleDateFormat expectedDateFormat = new SimpleDateFormat(expectedDateFormatStr);
@@ -123,6 +128,10 @@ public class FuelVendorLogUploadUtil {
 		mapForAlWarrenOil(expectedColumnList);
 		mapForJamesRiverPetroleum(expectedColumnList);
 		mapForBaltimoreCountyWB(expectedColumnList);
+		mapForMansfieldOilCompany(expectedColumnList);
+		mapForOnSiteFuel(expectedColumnList, VENDOR_ONSITE_FUEL_TAMPA);
+		mapForOnSiteFuel(expectedColumnList, VENDOR_ONSITE_FUEL_SARASOTA);
+		mapForOnSiteFuel(expectedColumnList, VENDOR_ONSITE_FUEL_CLEARWATER);
 	}
 
 	public static boolean isConversionRequired(Long fuelvendor) {
@@ -156,7 +165,15 @@ public class FuelVendorLogUploadUtil {
 				// James River Petroleum
 				|| fuelVendorId == 27l
 				// Baltimore County WB
-				|| fuelVendorId == 14l) {
+				|| fuelVendorId == 14l
+				// Mansfield Oil
+				|| fuelVendorId == 28l
+				// On-Site Fuel Tampa
+				|| fuelVendorId == 29l
+				// On-Site Fuel Sarasota
+				|| fuelVendorId == 32l
+				// On-Site Fuel Clearwater
+				|| fuelVendorId == 33l) {
 			return true;
 		} else {
 			return false;
@@ -199,6 +216,54 @@ public class FuelVendorLogUploadUtil {
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), StringUtils.EMPTY);
 		vendorToFuelLogMapping.put(VENDOR_BALTIMORE_COUNTY_WB, actualColumnMap);
+	}
+	
+	private static void mapForMansfieldOilCompany(LinkedList<String> expectedColumnList) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+		
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Vehicle");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "ProductDescription");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Gallons"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "AmountDue");
+		vendorToFuelLogMapping.put(VENDOR_MANSFIELD_OIL_COMPANY, actualColumnMap);
+	}
+	
+	private static void mapForOnSiteFuel(LinkedList<String> expectedColumnList, String onsiteSubGroup) {
+		LinkedHashMap<String, String> actualColumnMap = new LinkedHashMap<String, String>();
+		int expectedColumnStartIndex = 2;
+	
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Refuel Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Refuel Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Vehicle Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Quantity"); 
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Cost");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total Cost");
+		vendorToFuelLogMapping.put(onsiteSubGroup, actualColumnMap);
 	}
 	
 	private static void mapForTCH(LinkedList<String> expectedColumnList) {
@@ -735,6 +800,10 @@ public class FuelVendorLogUploadUtil {
 			vendorName = VENDOR_JAMES_RIVER_PETROLEUM;
 		} else if (StringUtils.equals(vendorName, VENDOR_BALTIMORE_COUNTY_WB)) {
 			vendorName = VENDOR_BALTIMORE_COUNTY_WB;
+		} else if (StringUtils.equals(vendorName, VENDOR_MANSFIELD_OIL_COMPANY)) {
+			vendorName = VENDOR_MANSFIELD_OIL_COMPANY;
+		} else if (StringUtils.contains(vendorName, VENDOR_ONSITE_FUEL)) {
+			//noop
 		} 
 		return vendorName;
 	}
@@ -776,6 +845,10 @@ public class FuelVendorLogUploadUtil {
 			formatCellValueForJamesRiverPetroleum(genericDAO, wb, cell, oneCellValue, VENDOR_JAMES_RIVER_PETROLEUM, vendorId);
 		} else if (StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)) { 
 			formatCellValueForBaltimoreCountyWB(genericDAO, wb, cell, oneCellValue, VENDOR_BALTIMORE_COUNTY_WB, vendorId);
+		} else if (StringUtils.equals(vendor, VENDOR_MANSFIELD_OIL_COMPANY)) { 
+			formatCellValueForMansfieldOilComp(genericDAO, wb, cell, oneCellValue, VENDOR_MANSFIELD_OIL_COMPANY, vendorId);
+		} else if (StringUtils.contains(vendor, VENDOR_ONSITE_FUEL)) { 
+			formatCellValueForOnsiteFuel(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} 
 	}
 
@@ -795,7 +868,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -826,13 +899,87 @@ public class FuelVendorLogUploadUtil {
 		} /*else if (columnIndex == 5) { // Transaction time - Does not reach here bcos gets processed as date
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} */else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Card number 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
 			cell.setCellValue("DSL");
 		} else if (columnIndex == 12) {
 			cell.setCellValue("MD");
+		} else if (columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+	}
+	
+	private static void formatCellValueForMansfieldOilComp(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // Transaction time - Does not reach here bcos gets processed as date
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 9) { // Card number 
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
+		} else if (columnIndex == 10) {
+			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 11) {
+			cell.setCellValue("Tampa");
+		} else if (columnIndex == 12) {
+			cell.setCellValue("FL");
+		} else if (columnIndex == 13) { // gallons
+			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
+			setCellValueFeeFormat(wb, cell, oneCellValue, vendor);
+		} else {
+			cell.setCellValue(oneCellValue.toString().toUpperCase());
+		}
+	}
+	
+	private static void formatCellValueForOnsiteFuel(GenericDAO genericDAO, HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor, Long vendorId) throws ParseException {
+		if (oneCellValue == null) {
+			cell.setCellValue(StringUtils.EMPTY);
+			return;
+		} 
+		
+		int columnIndex = cell.getColumnIndex();
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { 
+			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 3) {
+			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 6) {
+			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 5) { // Transaction time - Does not reach here bcos gets processed as date
+			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 7 || columnIndex == 8) {
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
+		} else if (columnIndex == 9) { // Card number 
+			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
+		} else if (columnIndex == 10) {
+			cell.setCellValue("DSL");
+		} else if (columnIndex == 11) {
+			if (vendorId == 29l) {
+				cell.setCellValue("Tampa");
+			} else if (vendorId == 32l) {
+				cell.setCellValue("Sarasota");
+			} else if (vendorId == 33l) {
+				cell.setCellValue("Clearwater");
+			}
+		} else if (columnIndex == 12) {
+			cell.setCellValue("FL");
 		} else if (columnIndex == 13) { // gallons
 			setCellValueDoubleFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex > 13 && columnIndex < 19) { // Fee
@@ -858,7 +1005,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -890,7 +1037,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -922,7 +1069,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -954,7 +1101,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 6) {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -986,7 +1133,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 6) {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1018,7 +1165,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 6) {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1054,7 +1201,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 8) { // Driver first name
 			cell.setCellValue("Unknown VA");
 		} */else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // Cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1090,7 +1237,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 10) {
 			setCellValueFuelTypeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 12) {
@@ -1120,7 +1267,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 13) {  // else if (oneCellValue instanceof Double || columnIndex == 13) { // gallons
@@ -1148,7 +1295,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1179,7 +1326,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) { // transaction time 
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1209,7 +1356,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5) {
 			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
-			setCellValueDriverFormat(wb, cell, oneCellValue);
+			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) {
 			setCellValueFuelCardFormat(genericDAO, wb, cell, oneCellValue, vendor, vendorId);
 		} else if (columnIndex == 10) {
@@ -1276,7 +1423,9 @@ public class FuelVendorLogUploadUtil {
 				||(StringUtils.replace(vendor, "- ", StringUtils.EMPTY).contains(VENDOR_QUICK_FUEL_TANK))
 				|| StringUtils.equals(vendor, VENDOR_PSS_GROUP_CORP)
 				|| StringUtils.equals(vendor, VENDOR_AL_WARREN)
-				|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM)) {
+				|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM)
+				|| StringUtils.equals(vendor, VENDOR_MANSFIELD_OIL_COMPANY)
+				|| StringUtils.contains(vendor, VENDOR_ONSITE_FUEL)) {
 			if (StringUtils.isEmpty(cardNumber)) {
 				cell.setCellValue("EXCLUDE_ERROR_CHECK");
 			} else {
@@ -1298,7 +1447,7 @@ public class FuelVendorLogUploadUtil {
 		}
 	}
 	
-	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue) {
+	private static void setCellValueDriverFormat(HSSFWorkbook wb, Cell cell, Object oneCellValue, String vendor) {
 		int columnIndex = cell.getColumnIndex();
 		String driverName = oneCellValue.toString();
 		
@@ -1341,8 +1490,20 @@ public class FuelVendorLogUploadUtil {
 			} else {
 				nameArr = lastNameCellValue.split("\\ ");
 				if (nameArr.length > 1) {
-					cell.setCellValue(nameArr[0]); // firstname
-					lastNameCell.setCellValue(StringUtils.substringAfter(lastNameCellValue, " ")); // lastname can have spaces
+					//cell.setCellValue(nameArr[0]); // firstname
+					//lastNameCell.setCellValue(StringUtils.substringAfter(lastNameCellValue, " ")); // lastname can have spaces
+					String firstName = StringUtils.EMPTY;
+					String lastName = StringUtils.EMPTY;
+					if (StringUtils.contains(vendor, VENDOR_ONSITE_FUEL)) {
+						firstName = StringUtils.substringAfter(lastNameCellValue, " ");
+						lastName = nameArr[0];
+					} else {
+						firstName = nameArr[0];
+						lastName = StringUtils.substringAfter(lastNameCellValue, " ");
+					}
+					
+					cell.setCellValue(firstName);
+					lastNameCell.setCellValue(lastName);
 				} else {
 					cell.setCellValue(StringUtils.EMPTY);
 				}
@@ -1363,7 +1524,8 @@ public class FuelVendorLogUploadUtil {
 		String actualFuelType = oneCellValue.toString().trim();
 		if (actualFuelType.equalsIgnoreCase("ULSD") || actualFuelType.equalsIgnoreCase("S") 
 				|| actualFuelType.equalsIgnoreCase("Ultra Low Su") || actualFuelType.equalsIgnoreCase("ULSD CLEAR")
-				|| actualFuelType.equalsIgnoreCase("2 - #2 ULSD CLEAR")) {
+				|| actualFuelType.equalsIgnoreCase("2 - #2 ULSD CLEAR")
+				|| actualFuelType.equalsIgnoreCase("ULS #2")) {
 			cell.setCellValue("DSL");
 		} else if (actualFuelType.equalsIgnoreCase("FUEL")) {
 			cell.setCellValue("Regular");
@@ -1481,7 +1643,8 @@ public class FuelVendorLogUploadUtil {
 			}
 		} else if (columnIndex == 5 && 
 				(StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)
-						|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM))) { // Txn time
+						|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM)
+						|| StringUtils.contains(vendor, VENDOR_ONSITE_FUEL))) { // Txn time
 			String specifiedTxnTime = convertToExpectedTimeFormat(dateStr, vendorDateFormat);
 			cell.setCellValue(specifiedTxnTime);
 			return;
