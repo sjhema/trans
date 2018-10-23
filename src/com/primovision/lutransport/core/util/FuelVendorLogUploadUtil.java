@@ -60,7 +60,7 @@ public class FuelVendorLogUploadUtil {
 	private static String VENDOR_BALTIMORE_COUNTY_WB = "Baltimore County WB";
 	private static String VENDOR_MANSFIELD_OIL_COMPANY = "Mansfield Oil Comp";
 	private static String VENDOR_ONSITE_FUEL = "On-Site";
-	private static String VENDOR_ONSITE_FUEL_TAMPA = "On-Site Fuel - Tampa";
+	private static String VENDOR_ONSITE_FUEL_TAMPA = "On-Site - Tampa";
 	private static String VENDOR_ONSITE_FUEL_SARASOTA = "On-Site - Sarasota";
 	private static String VENDOR_ONSITE_FUEL_CLEARWATER = "On-Site - Clearwater";
 	
