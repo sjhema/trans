@@ -153,13 +153,13 @@ public class TollCompanyTagUploadUtil {
 		int expectedColumnStartIndex = 2;
 		
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Friendly Name");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Friendly Name");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TOLL TAG # / PLATE #");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TOLL TAG # / PLATE #");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Driver Name");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Transaction Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Transaction Date");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "TRANSACTION DATE");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "TRANSACTION TIME");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Amount Charged");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "AMOUNT");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
 		//actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Unit #");
 		tollCompanyToTollTagMapping.put(TOLL_COMPANY_SUN_PASS, actualColumnMap);
