@@ -1,7 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.stereotype.Controller;
@@ -25,22 +25,20 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
-import com.primovision.lutransport.model.BillingRate;
+import com.primovision.lutransport.core.util.ReportDateUtil;
+
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.DriverFuelCard;
 import com.primovision.lutransport.model.FuelCard;
-import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelVendor;
-import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.Vehicle;
-import com.primovision.lutransport.model.equipment.EquipmentReportOutput;
-import com.primovision.lutransport.model.hr.EmployeeCatagory;
 
 @Controller
 @RequestMapping("/admin/driverfuelcard")
@@ -293,6 +291,98 @@ public class DriverFuelCardController extends CRUDController<DriverFuelCard>{
 		//return super.save(request, entity, bindingResult, model);
 	}
 	
+	@RequestMapping("/bulkedit.do")
+	public String bulkEdit(ModelMap model, HttpServletRequest request,@RequestParam("id") String[] ids) {
+		if (ids.length <= 0) {
+			request.getSession().removeAttribute("bulkeditids");
+			request.getSession().setAttribute("error", "Please select driver fuel cards to bulk edit");
+			return "redirect:list.do";
+		}
+		request.getSession().setAttribute("bulkeditids", ids);
+		
+		setupCreate(model, request);
+		
+		DriverFuelCard driverFuelCard = getEntityInstance();
+		model.addAttribute("modelObject", driverFuelCard);		
+		return urlContext + "/massUpdateForm";
+	}
+	
+	@RequestMapping("/cancelbulkedit.do")
+	public String cancelBulkEdit(ModelMap model, HttpServletRequest request){
+		request.getSession().removeAttribute("bulkeditids");				
+		return "redirect:list.do";
+	}
+	
+	@RequestMapping(value="/updatebulkeditdata.do", method=RequestMethod.POST)
+	public String updateBulklyEditedFuelCards(HttpServletRequest request,
+			@ModelAttribute("modelObject") DriverFuelCard entity,
+			BindingResult bindingResult, ModelMap model) {
+		String[] ids = (String[])request.getSession().getAttribute("bulkeditids");
+		if (ids.length <= 0) {
+			cleanUp(request);
+			
+			request.getSession().removeAttribute("bulkeditids");
+			request.getSession().setAttribute("error", "No driver fuel cards selected to bulk edit");
+			return "redirect:list.do";
+		}
+		
+		StringBuffer driverFuelCardUpdateQuery = new StringBuffer("update DriverFuelCard set ");
+		boolean doNotAddComma = true;
+		
+		Date validTo = entity.getValidTo();
+		if (validTo != null){
+			if (doNotAddComma){
+				doNotAddComma = false;
+			} else {
+				driverFuelCardUpdateQuery.append(", ");
+			}
+			
+			driverFuelCardUpdateQuery.append("validTo='").append(ReportDateUtil.oracleFormatter.format(validTo)).append("'");
+		}
+		
+		Integer status = entity.getStatus();
+		if (status != null && status != -1) {
+			if (doNotAddComma){
+				doNotAddComma = false;
+			} else {
+				driverFuelCardUpdateQuery.append(", ");
+			}
+			
+			driverFuelCardUpdateQuery.append("status = " + status.intValue());
+		}
+		
+		if (doNotAddComma) {
+			cleanUp(request);
+			
+			request.getSession().removeAttribute("bulkeditids");
+			request.getSession().setAttribute("error", "No data entered to do bulk edit");
+			return "redirect:list.do";
+		}
+		
+		Long userId = getUser(request).getId();
+		driverFuelCardUpdateQuery.append(", modifiedBy = " + userId.intValue());
+		
+		Date currentDate = new Date();
+		driverFuelCardUpdateQuery.append(", modifiedAt='").append(ReportDateUtil.oracleFormatter.format(currentDate)).append("'");
+		
+		String commaSeparatedIds = StringUtils.EMPTY;
+		for (String aDriverFuelCardId : ids) {
+			commaSeparatedIds += (aDriverFuelCardId + ",");
+		}
+		commaSeparatedIds = commaSeparatedIds.substring(0, commaSeparatedIds.length()-1);
+		
+		driverFuelCardUpdateQuery.append(" where id in (").append(commaSeparatedIds).append(")");
+		
+		genericDAO.executeSimpleUpdateQuery(driverFuelCardUpdateQuery.toString());
+		
+		cleanUp(request);
+		
+		request.getSession().removeAttribute("bulkeditids");
+		String successMsg = "Driver fuel cards updated Successfully";
+		request.getSession().setAttribute("msg", successMsg);
+		
+		return "redirect:list.do";		
+	}
 	
 	protected String processAjaxRequest(HttpServletRequest request,
 			String action, Model model) {
