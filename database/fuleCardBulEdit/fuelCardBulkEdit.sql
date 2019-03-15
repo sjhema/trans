@@ -1,1 +1,3 @@
 UPDATE `lutransport`.`business_object` SET `URL`='/admin/driverfuelcard/bulkedit.do,/admin/driverfuelcard/cancelbulkedit.do,/admin/driverfuelcard/updatebulkeditdata.do,/admin/driverfuelcard/ajax.do,/admin/driverfuelcard/search.do,/admin/driverfuelcard/create.do,/admin/driverfuelcard/list.do,/admin/driverfuelcard/save.do,/admin/driverfuelcard/edit.do,/admin/driverfuelcard/delete.do' WHERE `ID`='1205';
+
+UPDATE `lutransport`.`business_object` SET `URL`='/admin/fuelcard/bulkedit.do,/admin/fuelcard/cancelbulkedit.do,/admin/fuelcard/updatebulkeditdata.do,/admin/fuelcard/search.do,/admin/fuelcard/create.do,/admin/fuelcard/list.do,/admin/fuelcard/save.do,/admin/fuelcard/edit.do,/admin/fuelcard/delete.do' WHERE `ID`='1204';

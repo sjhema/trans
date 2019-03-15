@@ -142,6 +142,34 @@ function formatDate1(){
 	 }
    }
 }
+
+function editMultipleData() {
+	var fuelVendor = document.getElementById('fuelvendor').value;
+	if (fuelVendor == "") {
+		alert("Please search by fuel vendor");
+		return;
+	}
+	
+	var inputs = document.getElementsByName("id");
+	var submitForm = false;
+	for (var i = 0; i < inputs.length; i++) {
+		if (inputs[i].checked == true) {
+			submitForm = true;
+		}
+	}
+	
+	if (!submitForm) {
+		alert("Please select at least one record");
+		return;
+	}
+	
+	if (!confirm("Do you want to bulk edit selected records?")) {
+		return;
+	}
+	
+	document.deleteForm.action = "bulkedit.do";
+	document.deleteForm.submit();
+}
 </script>
 <h3>
 	<primo:label code="Manage Fuel Cards" />
@@ -216,13 +244,24 @@ function formatDate1(){
 		</tr>
 	</table>
 </form:form>
+
+<table width="100%">
+	<tr>
+		<td align="left" colspan="3">		
+		<img src="/trans/images/edit.png" border="0" title="BULK EDIT" class="toolbarButton"> 
+			<a href="javascript:;" onclick="editMultipleData()">BULK EDIT</a>
+		</td>
+	
+	</tr>
+</table>
+
 <br />
-<form:form name="delete.do" id="serviceForm">
+<form:form name="deleteForm" id="deleteForm">
 	<primo:datatable urlContext="admin/fuelcard" deletable="true"
 		editable="true" exportPdf="true" exportXls="true"
 		exportCsv="true" insertable="true" baseObjects="${list}"
 		searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
-		pagingLink="search.do" multipleDelete="false" searcheable="false">
+		pagingLink="search.do" multipleDelete="true" searcheable="false">
 		<primo:textcolumn width="100px" headerText="Fuel Vendor" dataField="fuelvendor.name" />
 		<primo:textcolumn width="100px" headerText="Fuel Card Number" dataField="fuelcardNum" />
 		<primo:textcolumn headerText="Valid From" dataField="validFrom" dataFormat="MM-dd-yyyy"/>
