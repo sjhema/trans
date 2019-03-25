@@ -2,6 +2,7 @@ package com.primovision.lutransport.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -3173,10 +3174,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		
 		int recordCount = 0;
 		int errorCount = 0;
+		int recordsToBeSkipped = 6;
+		DecimalFormat milesFormat = new DecimalFormat("#.0");
 		try {
 			POIFSFileSystem fs = new POIFSFileSystem(is);
 			HSSFWorkbook wb = new HSSFWorkbook(fs);
-			HSSFSheet sheet = wb.getSheetAt(0);
+			HSSFSheet sheet = wb.getSheetAt(1);
 			
 			Iterator rows = sheet.rowIterator();
 			while (rows.hasNext()) {
@@ -3184,7 +3187,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				
 				recordCount++;
 				System.out.println("Processing record No: " + recordCount);
-				if (recordCount == 1) {
+				/*if (recordCount == 1) {
+					continue;
+				}*/
+				if (recordCount <= recordsToBeSkipped) {
 					continue;
 				}
 				
@@ -3193,20 +3199,19 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				StringBuffer recordErrorMsg = new StringBuffer();
 				MileageLog mileageLog = null;
 				try {
-					String unit = ((String) getCellValue(row.getCell(0)));
+					String unit = ((String) getCellValue(row.getCell(0), true));
 					if (StringUtils.equals("END_OF_DATA", unit)) {
 						break;
 					}
 					
-					String stateStr = ((String) getCellValue(row.getCell(2)));
-					if (StringUtils.equals("Total", stateStr)) {
+					String stateStr = ((String) getCellValue(row.getCell(1), true));
+					/*if (StringUtils.equals("Total", stateStr)) {
 						continue;
-					}
+					}*/
 					
 					mileageLog = new MileageLog();
 					
-					String firstInStateStr = ((String) getCellValue(row.getCell(4)));
-					Date firstInState = processFirstInState(firstInStateStr);
+					Date firstInState = (Date) getCellValue(row.getCell(3), true);
 					if (firstInState == null) {
 						recordError = true;
 						fatalRecordError = true;
@@ -3215,8 +3220,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						mileageLog.setFirstInState(firstInState);
 					}
 					
-					String lastInStateStr = ((String) getCellValue(row.getCell(5)));
-					Date lastInState = processLastInState(lastInStateStr);
+					Date lastInState = (Date) getCellValue(row.getCell(4), true);
 					if (lastInState == null) {
 						recordError = true;
 						fatalRecordError = true;
@@ -3233,10 +3237,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					} else {
 						mileageLog.setUnitNum(unit);
 						mileageLog.setUnit(vehicle);
+						mileageLog.setVin(vehicle.getVinNumber());
 						mileageLog.setCompany(vehicle.getOwner());
 					}
 					
-					State state = retrieveState(stateStr);
+					State state = retrieveStateByCode(stateStr);
 					if (state == null) {
 						recordError = true;
 						fatalRecordError = true;
@@ -3245,17 +3250,19 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						mileageLog.setState(state);
 					}
 					
-					String miles = ((String) getCellValue(row.getCell(3)));
+					String miles = ((String) getCellValue(row.getCell(7), true));
 					Double milesDbl = processMiles(miles, resetMiles);
 					if (milesDbl == null) {
 						recordError = true;
 						fatalRecordError = true;
 						recordErrorMsg.append("Miles,");
 					} else {
-						mileageLog.setMiles(milesDbl);
+						String formattedMilesStr = milesFormat.format(milesDbl.doubleValue());
+						Double formattedMiles = new Double(formattedMilesStr);
+						mileageLog.setMiles(formattedMiles);
 					}
 					
-					String vin = ((String) getCellValue(row.getCell(7)));
+					/*String vin = ((String) getCellValue(row.getCell(7)));
 					if (!validateVin(vin)) {
 						recordError = true;
 						fatalRecordError = true;
@@ -3266,7 +3273,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					
 					String groups = ((String) getCellValue(row.getCell(6)));
 					groups = StringUtils.isEmpty(groups) ? StringUtils.EMPTY : groups;
-					mileageLog.setGroups(groups);
+					mileageLog.setGroups(groups);*/
 					
 					mileageLog.setPeriod(period);
 					
@@ -3580,7 +3587,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 	}
 	
-	private State retrieveState(String stateLongName) {
+	private State retrieveStateByLongName(String stateLongName) {
 		if (StringUtils.isEmpty(stateLongName)) {
 			return null;
 		}
@@ -7641,9 +7648,16 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			
 			switch(cell.getCachedFormulaResultType()) {
             case HSSFCell.CELL_TYPE_NUMERIC:
-                System.out.println("Last evaluated as: " + cell.getNumericCellValue());
+                /*System.out.println("Last evaluated as: " + cell.getNumericCellValue());
                 result = cell.getNumericCellValue();
-                break;
+                break;*/
+            	if (DateUtil.isCellDateFormatted(cell)) {
+      				result = cell.getDateCellValue();
+      			} else {
+      				result = cell.getNumericCellValue();
+      			}
+      			System.out.println("Numeric cell value == " + result);
+      			break;
             case HSSFCell.CELL_TYPE_STRING:
                 System.out.println("Last evaluated as \"" + cell.getRichStringCellValue() + "\"");
                 result = cell.getRichStringCellValue();
