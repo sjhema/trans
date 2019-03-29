@@ -3203,6 +3203,9 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					if (StringUtils.equals("END_OF_DATA", unit)) {
 						break;
 					}
+					if (!StringUtils.isNumeric(unit)) {
+						continue;
+					}
 					
 					String stateStr = ((String) getCellValue(row.getCell(1), true));
 					/*if (StringUtils.equals("Total", stateStr)) {
@@ -3306,7 +3309,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				if (recordError) {
 					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
 					errorList.add(msgPreffix 
-							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+							+ "Line " + (recordCount+1) + ": " + recordErrorMsg.toString() + "<br/>");
 					errorCount++;
 				} 
 				
