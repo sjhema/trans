@@ -62,6 +62,68 @@ function deleteVideo(id) {
 		}
 	});
 }
+
+function processDownloadPdf(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesPdfExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'false') {
+       			alert("No pdf uploaded for the selected accident");
+       			return;
+       		}
+       		
+       		document.location = "${ctx}/admin/accident/accidentmaint/uploadpdf/download.do?id=" + id;
+		}
+	});
+}
+
+function processUploadPdf(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesPdfExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'true') {
+       			if (confirm("Do you want to replace the pdf already uploaded?")) {
+       				uploadPdf(id);
+           		}
+       		} else {
+       			uploadPdf(id);
+       		}
+		}
+	});
+}
+
+function uploadPdf(id) {
+	document.location = "${ctx}/admin/accident/accidentmaint/uploadpdf/start.do?id=" + id;
+}
+
+function processDeletePdf(id) {
+	$.ajax({
+  		url: "ajax.do?action=doesPdfExist" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		if (responseData == 'false') {
+       			alert("No pdf uploaded for the selected accident");
+       			return;
+       		}
+       		
+       		if (confirm("Do you want to Delete the selected pdf?")) {
+       			deletePdf(id);
+       		}
+		}
+	});
+}
+
+function deletePdf(id) {
+	$.ajax({
+  		url: "ajax.do?action=deletePdf" + "&id=" + id,
+       	type: "GET",
+       	success: function(responseData, textStatus, jqXHR) {
+       		alert(responseData);
+		}
+	});
+}
 </script>
 
 <h3>
@@ -238,6 +300,9 @@ function deleteVideo(id) {
         <primo:anchorcolumn headerText="Upload Video" linkUrl="javascript:processUploadVideo('{id}');" linkText="Upload Video"/>
 		<primo:anchorcolumn headerText="Down Video" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Video"/>
 		<primo:anchorcolumn headerText="Delete Video" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Delete Video"/>
+		<primo:anchorcolumn headerText="Upload Pdf" linkUrl="javascript:processUploadPdf('{id}');" linkText="Upload Pdf"/>
+		<primo:anchorcolumn headerText="Down Pdf" linkUrl="javascript:processDownloadPdf('{id}');" linkText="Down Pdf"/>
+		<primo:anchorcolumn headerText="Delete Pdf" linkUrl="javascript:processDeletePdf('{id}');" linkText="Delete Pdf"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
