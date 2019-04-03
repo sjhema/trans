@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="accidentsNotReported" pageWidth="2630" pageHeight="600" orientation="Landscape" columnWidth="2590" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="788"/>
+	<property name="ireport.x" value="1691"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="driver" class="java.lang.String"/>
 	<parameter name="incidentDateRange" class="java.lang.String"/>
@@ -663,7 +663,7 @@
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{totalCost} == null ? "" : new java.text.DecimalFormat("###,##0.00").format($F{totalCost})]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="2181" y="0" width="390" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>

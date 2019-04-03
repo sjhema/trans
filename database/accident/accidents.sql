@@ -200,4 +200,10 @@ UPDATE `lutransport`.`business_object` SET `URL`='/admin/accident/accidentmaint/
 UPDATE `lutransport`.`business_object` 
 SET `URL`='/admin/accident/accidentmaint/list.do?rst=1,/admin/accident/accidentmaint/create.do,/admin/accident/accidentmaint/edit.do,/admin/accident/accidentmaint/delete.do,/admin/accident/accidentmaint/save.do,/admin/accident/accidentmaint/search.do,/admin/accident/accidentmaint/export.do,/admin/accident/accidentmaint/ajax.do,/admin/accident/accidentmaint/copy.do,/admin/accident/accidentmaint/print.do,/admin/accident/accidentmaint/uploadvideo/start.do,/admin/accident/accidentmaint/uploadvideo/download.do,/admin/accident/accidentmaint/uploadvideo/save.do,/admin/accident/accidentmaint/uploadpdf/start.do,/admin/accident/accidentmaint/uploadpdf/download.do,/admin/accident/accidentmaint/uploadpdf/save.do' WHERE `ID`='300144';
 
+-----
+INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
+VALUES ('300147', '/admin/accident/insurancecompanyrep/list.do?rst=1', 'Manage Insurance Company Rep', '3', 'Manage Insurance Company Rep', 
+'/admin/accident/insurancecompanyrep/list.do?rst=1,/admin/accident/insurancecompanyrep/create.do,/admin/accident/insurancecompanyrep/edit.do,/admin/accident/insurancecompanyrep/delete.do,/admin/accident/insurancecompanyrep/save.do,/admin/accident/insurancecompanyrep/search.do,/admin/accident/insurancecompanyrep/export.do', '1', '7', '0', '30015', '/1/30015/300147/');
 
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '300147', '1'); -- ADMIN
