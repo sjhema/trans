@@ -207,3 +207,16 @@ VALUES ('300147', '/admin/accident/insurancecompanyrep/list.do?rst=1', 'Manage I
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300147', '1'); -- ADMIN
+
+----
+ALTER TABLE `lutransport`.`accident` 
+ADD COLUMN `video1` VARCHAR(10) NULL DEFAULT 'N' COMMENT '' AFTER `reimbursement`,
+ADD COLUMN `pdf1` VARCHAR(10) NULL DEFAULT 'N' COMMENT '' AFTER `video1`;
+
+---
+update accident set video1 = "Y"
+where id in
+(470, 475, 497, 502, 504, 508, 510, 514, 515, 516, 525, 528, 537, 634, 635, 636, 637, 639, 641, 644, 646, 647, 659, 663, 706, 707, 711, 713, 721, 728, 733, 
+734, 735, 736, 737, 739, 740, 742, 746, 751, 759, 763, 764, 765, 768, 772, 777, 781, 787, 796, 798, 803, 804, 807, 813, 816, 819, 824, 833)
+---
+

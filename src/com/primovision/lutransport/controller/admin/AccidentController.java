@@ -47,7 +47,7 @@ import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
 import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.core.util.MimeUtil;
-
+import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -537,6 +537,11 @@ public class AccidentController extends CRUDController<Accident> {
 			String filePath = constructVideoFilePath(entity.getId());
 			File dest = new File(filePath);
 			file.transferTo(dest);
+			
+			entity.setVideo1("Y");
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			entity.setModifiedBy(getUser(request).getId());
+			genericDAO.saveOrUpdate(entity);
 		} catch (Exception e) {
 			errorList.add("Error occured while uploading file");
 			return;
@@ -688,6 +693,11 @@ public class AccidentController extends CRUDController<Accident> {
 			String filePath = constructPdfFilePath(entity.getId());
 			File dest = new File(filePath);
 			file.transferTo(dest);
+			
+			entity.setPdf1("Y");
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			entity.setModifiedBy(getUser(request).getId());
+			genericDAO.saveOrUpdate(entity);
 		} catch (Exception e) {
 			errorList.add("Error occured while uploading file");
 			return;
@@ -817,6 +827,12 @@ public class AccidentController extends CRUDController<Accident> {
 		
 		boolean status = file.delete();
 		if (status) {
+			Accident entity = genericDAO.getById(Accident.class, id);
+			entity.setVideo1("N");
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			entity.setModifiedBy(getUser(request).getId());
+			genericDAO.saveOrUpdate(entity);
+			
 			return "Successfully deleted the video";
 		} else {
 			return "Error occured while deleting the video";
@@ -841,6 +857,12 @@ public class AccidentController extends CRUDController<Accident> {
 		
 		boolean status = file.delete();
 		if (status) {
+			Accident entity = genericDAO.getById(Accident.class, id);
+			entity.setPdf1("N");
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			entity.setModifiedBy(getUser(request).getId());
+			genericDAO.saveOrUpdate(entity);
+			
 			return "Successfully deleted the pdf";
 		} else {
 			return "Error occured while deleting the pdf";

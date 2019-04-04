@@ -143,6 +143,28 @@ public class Accident extends AbstractBaseModel {
 	
 	@Column(name="total_cost")
 	private Double totalCost;
+	
+	@Column(name="video1")
+	private String video1 = "N";
+	
+	@Column(name="pdf1")
+	private String pdf1 = "N";
+	
+	public String getVideo1() {
+		return video1;
+	}
+
+	public void setVideo1(String video1) {
+		this.video1 = video1;
+	}
+
+	public String getPdf1() {
+		return pdf1;
+	}
+
+	public void setPdf1(String pdf1) {
+		this.pdf1 = pdf1;
+	}
 
 	public Date getIncidentDate() {
 		return incidentDate;
