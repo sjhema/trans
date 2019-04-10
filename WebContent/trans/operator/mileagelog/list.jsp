@@ -139,6 +139,7 @@ $(function() {
 				<primo:textcolumn headerText="First In State" dataField="firstInState" dataFormat="MM-dd-yyyy"/>
 				<primo:textcolumn headerText="Last In State" dataField="lastInState" dataFormat="MM-dd-yyyy"/>
 				<primo:textcolumn headerText="Groups" dataField="groups"/>
+				<primo:textcolumn headerText="Source" dataField="source"/>
 		</primo:datatable>
 		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 	</form:form>

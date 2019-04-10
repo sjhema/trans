@@ -101,6 +101,7 @@ public class InjuryController extends CRUDController<Injury> {
 	}
 	
 	private List<Injury> performSearch(SearchCriteria criteria) {
+		String driverCompany = (String) criteria.getSearchMap().get("driverCompany");
 		String insuranceCompany = (String) criteria.getSearchMap().get("insuranceCompany");
 		String driver = (String) criteria.getSearchMap().get("driver");
 		
@@ -116,6 +117,9 @@ public class InjuryController extends CRUDController<Injury> {
 		StringBuffer countQuery = new StringBuffer("select count(obj) from Injury obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
 		
+		if (StringUtils.isNotEmpty(driverCompany)) {
+			whereClause.append(" and obj.driverCompany.id=" + driverCompany);
+		}
 		if (StringUtils.isNotEmpty(insuranceCompany)) {
 			whereClause.append(" and obj.insuranceCompany.id=" + insuranceCompany);
 		}
@@ -231,6 +235,9 @@ public class InjuryController extends CRUDController<Injury> {
 		criterias.put("dataType", "INJURY_STATUS");
 		model.addAttribute("statuses", genericDAO.findByCriteria(StaticData.class, criterias, "dataText", false));
 		
+		criterias.clear();
+		criterias.put("type", 3);
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 	}
 
 

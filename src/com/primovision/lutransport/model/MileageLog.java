@@ -16,6 +16,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @Table(name = "mileage_log")
 public class MileageLog extends AbstractBaseModel implements ReportModel {
+	public static final String SOURCE_OLD_GPS = "OLD_GPS";
+	public static final String SOURCE_NEW_GPS = "NEW_GPS";
+	public static final String SOURCE_OLD_NEW_GPS = "OLD_NEW_GPS";
+	public static final String SOURCE_TICKET = "TICKET";
+	
 	@NotNull
 	@Column(name="period")
 	private Date period;
@@ -62,6 +67,9 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 	
 	@Column(name="gps")
    private String gps;
+	
+	@Column(name="source")
+   private String source;
 	
 	@ManyToOne
 	@JoinColumn(name="vehicle_permit")
@@ -178,6 +186,14 @@ public class MileageLog extends AbstractBaseModel implements ReportModel {
 
 	public void setGps(String gps) {
 		this.gps = gps;
+	}
+	
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 	@Transient

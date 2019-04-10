@@ -39,6 +39,7 @@ import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelSurcharge;
 import com.primovision.lutransport.model.FuelVendor;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.MileageLog;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.Trailer;
 import com.primovision.lutransport.model.Vehicle;
@@ -551,7 +552,8 @@ public class UploadDataController extends BaseController {
 			HttpServletResponse response, ModelMap model,
 			@RequestParam("period") String periodStr,
 			@RequestParam("resetMiles") Double resetMiles,
-			@RequestParam("dataFile") MultipartFile file) {
+			@RequestParam("dataFile") MultipartFile file,
+			@RequestParam("source") String source) {
 		try {
 			if (StringUtils.isEmpty(file.getOriginalFilename())) {
 			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
@@ -570,11 +572,16 @@ public class UploadDataController extends BaseController {
 			InputStream is = file.getInputStream();
 			Long createdBy = getUser(request).getId();
 			System.out.println("\nimportMainSheetService.importMileageLogMainSheet(is)\n");
-			List<String> str = importMainSheetService.importMileageLogMainSheet(is, period, resetMiles, createdBy);
-			if (str.isEmpty()) {
+			List<String> msgList = null;
+			if (StringUtils.equals(MileageLog.SOURCE_OLD_GPS, source)) {
+				msgList = importMainSheetService.importOldGPSMileageLogMainSheet(is, period, resetMiles, createdBy);
+			} else {
+				msgList = importMainSheetService.importMileageLogMainSheet(is, period, resetMiles, createdBy);
+			}
+			if (msgList.isEmpty()) {
 				model.addAttribute("msg", "Successfully uploaded all mileage records");
 			} else {
-				model.addAttribute("errorList", str);
+				model.addAttribute("errorList", msgList);
 			}
 		} catch (Exception ex) {
 			log.warn("Unable to import :===>>>>>>>>>" + ex);

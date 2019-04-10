@@ -63,7 +63,13 @@ ALTER TABLE `lutransport`.`mileage_log`
 ADD COLUMN `gps` VARCHAR(45) NULL DEFAULT 'Y' COMMENT '' AFTER `vehicle_permit_number`;
 
 update mileage_log set gps = 'Y';
---  
+-- 
+ALTER TABLE `lutransport`.`mileage_log` 
+ADD COLUMN `source` VARCHAR(45) NULL COMMENT '' AFTER `gps`;
+
+update lutransport.mileage_log
+ set source = 'OLD_GPS' where period != '2019-03-01'
+--
 ALTER TABLE `lutransport`.`state` 
 ADD COLUMN `long_name` VARCHAR(100) NULL DEFAULT NULL COMMENT '' AFTER `country`;
 
@@ -95,5 +101,7 @@ UPDATE `lutransport`.`state` SET `long_name`='Colorado' WHERE `id`='12';
 UPDATE `lutransport`.`state` SET `long_name`='Iowa' WHERE `id`='22';
 UPDATE `lutransport`.`state` SET `long_name`='Nebraska' WHERE `id`='34';
 UPDATE `lutransport`.`state` SET `long_name`='Utah' WHERE `id`='51';
+
+
 
 

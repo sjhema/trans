@@ -53,6 +53,7 @@ import com.primovision.lutransport.core.dao.GenericDAO;
 import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.core.util.MathUtil;
 import com.primovision.lutransport.core.util.TicketUtils;
+import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.DriverFuelCard;
@@ -3166,11 +3167,32 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return stateList.get(0);
 	}
 	
+	private boolean checkOldGPSMileageLoaded(Date period) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String periodStr = dateFormat.format(period);
+		
+		String query = "select obj from MileageLog obj where obj.source='OLD_GPS'"
+				+ " and obj.period = '" + periodStr + "'";
+		List<MileageLog> mileageLogs = genericDAO.executeSimpleQuery(query);
+		if (mileageLogs != null && !mileageLogs.isEmpty()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception {
-		List<MileageLog> mileageLogList = new ArrayList<MileageLog>();
+	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, 
+			Long createdBy) throws Exception {
 		List<String> errorList = new ArrayList<String>();
+		if (!checkOldGPSMileageLoaded(period)) {
+			String errorMsg = "Please upload old mileage first";
+			errorList.add(errorMsg);
+			return errorList;
+		}
+		
+		List<MileageLog> mileageLogList = new ArrayList<MileageLog>();
 		
 		int recordCount = 0;
 		int errorCount = 0;
@@ -3295,10 +3317,21 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
-					if (checkDuplicate(mileageLog)) {
-						recordError = true;
-						fatalRecordError = true;
-						recordErrorMsg.append("Duplicate record,");
+					MileageLog existingMileageLog = checkDuplicate(mileageLog); 
+					if (existingMileageLog != null) {
+						if (!StringUtils.equals(MileageLog.SOURCE_OLD_GPS, existingMileageLog.getSource())) {
+							recordError = true;
+							fatalRecordError = true;
+							recordErrorMsg.append("Duplicate record,");
+						} else {
+							Double consolidatedMiles = existingMileageLog.getMiles() + mileageLog.getMiles();
+							existingMileageLog.setMiles(consolidatedMiles);
+							existingMileageLog.setLastInState(mileageLog.getLastInState());
+							existingMileageLog.setSource(MileageLog.SOURCE_OLD_NEW_GPS);
+							existingMileageLog.setModifiedAt(Calendar.getInstance().getTime());
+							existingMileageLog.setModifiedBy(createdBy);
+							mileageLog = existingMileageLog;
+						}
 					}
 				} catch (Exception ex) {
 					recordError = true;
@@ -3323,14 +3356,183 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					+ ". Number of records being loaded: " + mileageLogList.size());
 			if (!mileageLogList.isEmpty()) {
 				for (MileageLog aMileageLog : mileageLogList) {
+					if (aMileageLog.getCreatedBy() == null) {
+						aMileageLog.setGps("Y");
+						aMileageLog.setSource(MileageLog.SOURCE_NEW_GPS);
+						
+						aMileageLog.setCreatedBy(createdBy);
+						aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
+					}
+					
+					genericDAO.saveOrUpdate(aMileageLog);
+				}
+				
+				uploadNoGPSMileageLogData(period, createdBy);
+			}
+		} catch (Exception ex) {
+			errorList.add("Not able to upload XL!!! Please try again.");
+			log.warn("Error while importing Mileage log: " + ex);
+		}
+		
+		return errorList;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<String> importOldGPSMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception {
+		List<MileageLog> mileageLogList = new ArrayList<MileageLog>();
+		List<String> errorList = new ArrayList<String>();
+		
+		int recordCount = 0;
+		int errorCount = 0;
+		try {
+			POIFSFileSystem fs = new POIFSFileSystem(is);
+			HSSFWorkbook wb = new HSSFWorkbook(fs);
+			HSSFSheet sheet = wb.getSheetAt(0);
+			
+			Iterator rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				HSSFRow row = (HSSFRow) rows.next();
+				
+				recordCount++;
+				System.out.println("Processing record No: " + recordCount);
+				if (recordCount == 1) {
+					continue;
+				}
+				
+				boolean recordError = false;
+				boolean fatalRecordError = false;
+				StringBuffer recordErrorMsg = new StringBuffer();
+				MileageLog mileageLog = null;
+				try {
+					String unit = ((String) getCellValue(row.getCell(0)));
+					if (StringUtils.equals("END_OF_DATA", unit)) {
+						break;
+					}
+					
+					String stateStr = ((String) getCellValue(row.getCell(2)));
+					if (StringUtils.equals("Total", stateStr)) {
+						continue;
+					}
+					
+					mileageLog = new MileageLog();
+					
+					String firstInStateStr = ((String) getCellValue(row.getCell(4)));
+					Date firstInState = processFirstInState(firstInStateStr);
+					if (firstInState == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("First in State,");
+					} else {
+						mileageLog.setFirstInState(firstInState);
+					}
+					
+					String lastInStateStr = ((String) getCellValue(row.getCell(5)));
+					Date lastInState = processLastInState(lastInStateStr);
+					if (lastInState == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Last in State,");
+					} else {
+						mileageLog.setLastInState(lastInState);
+					}
+					
+					Vehicle vehicle = retrieveVehicle(unit, lastInState);
+					if (vehicle == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Unit,");
+					} else {
+						mileageLog.setUnitNum(unit);
+						mileageLog.setUnit(vehicle);
+						mileageLog.setCompany(vehicle.getOwner());
+					}
+					
+					State state = retrieveStateByLongName(stateStr);
+					if (state == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("State,");
+					} else {
+						mileageLog.setState(state);
+					}
+					
+					String miles = ((String) getCellValue(row.getCell(3)));
+					Double milesDbl = processMiles(miles, resetMiles);
+					if (milesDbl == null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Miles,");
+					} else {
+						mileageLog.setMiles(milesDbl);
+					}
+					
+					String vin = ((String) getCellValue(row.getCell(7)));
+					if (!validateVin(vin)) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("VIN,");
+					} else {
+						mileageLog.setVin(vin);
+					}
+					
+					String groups = ((String) getCellValue(row.getCell(6)));
+					groups = StringUtils.isEmpty(groups) ? StringUtils.EMPTY : groups;
+					mileageLog.setGroups(groups);
+					
+					mileageLog.setPeriod(period);
+					
+					VehiclePermit vehiclePermit = retrieveVehiclePermit(mileageLog);
+					if (vehiclePermit != null && StringUtils.isNotEmpty(vehiclePermit.getPermitNumber())) {
+						mileageLog.setVehiclePermit(vehiclePermit);
+						mileageLog.setVehiclePermitNumber(vehiclePermit.getPermitNumber());
+					} else {
+						mileageLog.setVehiclePermit(null);
+						mileageLog.setVehiclePermitNumber(StringUtils.EMPTY);
+						
+						if (mileageLog.getState() != null 
+								&& StringUtils.equals("NY", mileageLog.getState().getCode())) {
+							recordError = true;
+							recordErrorMsg.append("Could not determine vehicle permit,");
+						}
+					}
+					
+					MileageLog existingMileageLog = checkDuplicate(mileageLog); 
+					if (existingMileageLog != null) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Duplicate record,");
+					}
+				} catch (Exception ex) {
+					recordError = true;
+					fatalRecordError = true;
+					recordErrorMsg.append("Error while processing record,");
+				}
+				
+				if (recordError) {
+					String msgPreffix = fatalRecordError ? "Record NOT loaded->" : "Record LOADED, but has errors->";
+					errorList.add(msgPreffix 
+							+ "Line " + recordCount + ": " + recordErrorMsg.toString() + "<br/>");
+					errorCount++;
+				} 
+				
+				if (!fatalRecordError) {
+					mileageLogList.add(mileageLog);
+				}
+			}
+			
+			System.out.println("Done processing...Total record count: " + recordCount 
+					+ ". Error count: " + errorCount
+					+ ". Number of records being loaded: " + mileageLogList.size());
+			if (!mileageLogList.isEmpty()) {
+				for (MileageLog aMileageLog : mileageLogList) {
 					aMileageLog.setGps("Y");
+					aMileageLog.setSource(MileageLog.SOURCE_OLD_GPS);
 					
 					aMileageLog.setCreatedBy(createdBy);
 					aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
 					genericDAO.saveOrUpdate(aMileageLog);
 				}
-				
-				uploadNoGPSMileageLogData(period, createdBy);
 			}
 		} catch (Exception ex) {
 			errorList.add("Not able to upload XL!!! Please try again.");
@@ -3383,11 +3585,13 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		for (MileageLog aMileageLog : noGPSMileageLogList) {
 			aMileageLog.setPeriod(period);
 			
-			if (checkDuplicate(aMileageLog)) {
+			MileageLog existingMileageLog = checkDuplicate(aMileageLog); 
+			if (existingMileageLog != null) {
 				continue;
 			}
 			
 			aMileageLog.setGps("N");
+			aMileageLog.setSource(MileageLog.SOURCE_TICKET);
 			
 			aMileageLog.setCreatedBy(createdBy);
 			aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
@@ -3431,10 +3635,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 	}
 	
-	private boolean checkDuplicate(MileageLog aMileageLog) {
+	private MileageLog checkDuplicate(MileageLog aMileageLog) {
 		if (aMileageLog.getPeriod() == null || aMileageLog.getState() == null
 				|| StringUtils.isEmpty(aMileageLog.getUnitNum())) {
-			return false;
+			return null;
 		}
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -3443,8 +3647,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 				+ " and obj.state=" + aMileageLog.getState().getId()
 				+ " and obj.unitNum='" + aMileageLog.getUnitNum() + "'";
 		
-		List<MileageLog> mileageLogList = genericDAO.executeSimpleQuery(query);
-		return !mileageLogList.isEmpty();
+		List<MileageLog> existingMileageLogList = genericDAO.executeSimpleQuery(query);
+		if (existingMileageLogList != null && !existingMileageLogList.isEmpty()) {
+			return existingMileageLogList.get(0);
+		} else {
+			return null;
+		}
 	}
 	
 	private boolean checkDuplicateWMTicket(WMTicket wmTicket) {

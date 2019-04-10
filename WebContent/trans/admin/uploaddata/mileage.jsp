@@ -18,18 +18,21 @@
 		}
 	}
 	
-	function submitUploadform() {	
+	function submitUploadform(source) {	
 		var period = document.getElementById("period");
 		var dataFile = document.getElementById("dataFile");
 		var resetMiles = document.getElementById("resetMiles");
 		
+		var mileageErrorDiv = document.getElementById("mileageErrorDiv");
 		if (period.value == "") {
-			document.getElementById("mileageErrorDiv").innerHTML="Please choose a period for upload!";
+			mileageErrorDiv.innerHTML="Please choose a period for upload!";
 		} else if (dataFile.value == "") {
-			document.getElementById("mileageErrorDiv").innerHTML="Please choose a file to upload!";
+			mileageErrorDiv.innerHTML="Please choose a file to upload!";
 		} else if (resetMiles.value == "") {
-			document.getElementById("mileageErrorDiv").innerHTML="Please enter reset miles!";
+			mileageErrorDiv.innerHTML="Please enter reset miles!";
 		} else {
+			var sourceElem = document.getElementById("source");
+			sourceElem.value = source;
 			document.forms["mileageUploadForm"].submit();
 		}
 	}
@@ -59,6 +62,7 @@
 
 <br/>
 <form:form action="${ctx}/uploadData/mileagelog/upload.do" method="post" name="mileageUploadForm" enctype="multipart/form-data" modelAttribute="modelObject">
+<input type="hidden" id="source" name="source"/>
 <table id="form-table" width="100%" cellspacing="1" cellpadding="5">
 	<tr class="table-heading">
 		<td colspan="4"><b><primo:label code="Upload Mileage" /></b></td>
@@ -82,7 +86,9 @@
 		</td>
 	</tr>
 	<tr>
-		<td><input type="button" value="Upload" onclick="javascript:submitUploadform();"/></td>
+		<td colspan="2"><input type="button" value="Upload Old Mileage" onclick="javascript:submitUploadform('OLD_GPS');"/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" value="Upload New Mileage" onclick="javascript:submitUploadform('NEW_GPS');"/></td>
 	</tr>
 </table>
 </form:form>

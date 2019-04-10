@@ -18,7 +18,9 @@ public interface ImportMainSheetService {
 	public List<LinkedList<Object>> importTollCompanySpecificTollTag(InputStream is,
 			LinkedHashMap<String, String> tollCompanySpecificColumns, Long tollCompanyId) throws Exception;
 	
+	public List<String> importOldGPSMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception;
 	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, Long createdBy) throws Exception;
+	
 	public List<String> importSubcontractorRateMainSheet(InputStream is, Date validFrom, Date validTo, Long createdBy) throws Exception;
 	public List<String> importEmployeeMainSheet(InputStream is, Long createdBy) throws Exception;
 	public List<String> importWMTickets(InputStream is, String locationType, String destinationLocation, Long createdBy) throws Exception;
