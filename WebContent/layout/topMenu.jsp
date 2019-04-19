@@ -26,7 +26,8 @@ if (menuTree!=null) {
 			   || businessObject.getId()==30013
 			   || businessObject.getId()==40012 // Invoicing
 			   || businessObject.getId()==30014 // Injury
-			   || businessObject.getId()==30015) { // Accidents
+			   || businessObject.getId()==30015 // Accidents
+			   || businessObject.getId()==30016) { // Citations
 			
 				if (hierarchy.contains("/"+businessObject.getId()+"/")) {
 				cssClass="selected";

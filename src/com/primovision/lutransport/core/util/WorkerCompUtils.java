@@ -357,6 +357,27 @@ public class WorkerCompUtils {
 		return (vehicleList == null || vehicleList.isEmpty()) ? null : vehicleList.get(0);
 	}
 	
+	public static Vehicle retrieveVehicleForUnit(String unit, Integer type, Date transactionDate, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(unit) || !StringUtils.isNumeric(unit) || type == null) {
+			return null;
+		}
+		
+		String vehicleQuery = "Select obj from Vehicle obj where obj.unit=" + unit;
+		if (transactionDate != null) {
+			String transactionDateStr = requiredDateFormat.format(transactionDate);
+			vehicleQuery += (" and obj.validFrom <='"
+					+ transactionDateStr + "' and obj.validTo >= '" + transactionDateStr + "'");
+		}	
+		if (type != null) {
+			vehicleQuery += (" and obj.type = " + type.intValue());
+		}
+		vehicleQuery += " order by obj.id DESC";
+		
+		System.out.println("******************** Vehicle query is " + vehicleQuery);
+		List<Vehicle> vehicleList = genericDAO.executeSimpleQuery(vehicleQuery);
+		return (vehicleList == null || vehicleList.isEmpty()) ? null : vehicleList.get(0);
+	}
+	
 	public static List<Location> retrieveCompanyTerminal(String companyTerminalName, GenericDAO genericDAO) {
 		if (StringUtils.isEmpty(companyTerminalName)) {
 			return null;
