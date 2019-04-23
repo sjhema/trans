@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.Driver;
@@ -47,6 +48,12 @@ public class Violation extends AbstractBaseModel {
 	@ManyToOne
 	@JoinColumn(name="roadside_inspection")
 	private RoadsideInspection roadsideInspection;
+	
+	@Column(name="docs")
+	private String docs = "N";
+	
+	@Transient
+	String[] fileList;
 
 	public Vehicle getTruck() {
 		return truck;
@@ -118,5 +125,23 @@ public class Violation extends AbstractBaseModel {
 
 	public void setOutOfService(String outOfService) {
 		this.outOfService = outOfService;
+	}
+
+	public String getDocs() {
+		return docs;
+	}
+
+	public void setDocs(String docs) {
+		this.docs = docs;
+	}
+
+	@Transient
+	public String[] getFileList() {
+		return fileList;
+	}
+
+	@Transient
+	public void setFileList(String[] fileList) {
+		this.fileList = fileList;
 	}
 }

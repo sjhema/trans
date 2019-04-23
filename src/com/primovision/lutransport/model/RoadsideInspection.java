@@ -45,6 +45,9 @@ public class RoadsideInspection extends AbstractBaseModel {
 	@Column(name="citation")
 	private String citation;
 	
+	@Column(name="docs")
+	private String docs = "N";
+	
 	@Transient
 	private String violationId;
 	
@@ -119,6 +122,14 @@ public class RoadsideInspection extends AbstractBaseModel {
 
 	public void setInspectionLevel(String inspectionLevel) {
 		this.inspectionLevel = inspectionLevel;
+	}
+
+	public String getDocs() {
+		return docs;
+	}
+
+	public void setDocs(String docs) {
+		this.docs = docs;
 	}
 
 	@Transient

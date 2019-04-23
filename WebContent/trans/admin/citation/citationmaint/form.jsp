@@ -132,7 +132,7 @@ function formatDate(dateElemId) {
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${drivers}" itemValue="id" itemLabel="fullName"/>
 				</form:select> 
-				<br> <form:errors path="driver" cssClass="errorMessage" />
+				<br><form:errors path="driver" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Company" /><span class="errorMessage">*</span></td>
 			<td>
@@ -140,7 +140,7 @@ function formatDate(dateElemId) {
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${companies}" itemValue="id" itemLabel="name"/>
 				</form:select> 
-				<br> <form:errors path="company" cssClass="errorMessage" />
+				<br><form:errors path="company" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
@@ -150,7 +150,7 @@ function formatDate(dateElemId) {
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${trucks}" itemValue="unitNum" itemLabel="unitNum"/>
 				</form:select> 
-				<br> <form:errors path="truck.unitNum" cssClass="errorMessage" />
+				<br><form:errors path="truck.unitNum" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Trailer" /><span class="errorMessage">*</span></td>
 			<td>
@@ -158,7 +158,7 @@ function formatDate(dateElemId) {
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${trailers}" itemValue="unitNum" itemLabel="unitNum"/>
 				</form:select> 
-				<br> <form:errors path="trailer.unitNum" cssClass="errorMessage" />
+				<br><form:errors path="trailer.unitNum" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
@@ -175,7 +175,8 @@ function formatDate(dateElemId) {
 		<tr>
 		    <td class="form-left"><primo:label code="Violation Type" /><span class="errorMessage">*</span></td>
 			<td align="${left}" colspan="5">
-				<form:textarea path="violationType" rows="2" cols="75"/>    	
+				<form:textarea path="violationType" rows="2" cols="75"/>
+				<br><form:errors path="violationType" cssClass="errorMessage" />   	
 			</td>
 		</tr>
 		<tr><td colspan="2"></td></tr>

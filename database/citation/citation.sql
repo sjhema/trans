@@ -33,7 +33,7 @@ VALUES (now(), '1', '30016', '1'); -- ADMIN
 
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300161', '/admin/citation/citationmaint/list.do?rst=1', 'Manage Citations', '3', 'Manage Citations', 
-'/admin/citation/citationmaint/list.do?rst=1,/admin/citation/citationmaint/create.do,/admin/citation/citationmaint/edit.do,/admin/citation/citationmaint/delete.do,/admin/citation/citationmaint/save.do,/admin/citation/citationmaint/search.do,/admin/citation/citationmaint/export.do,/admin/citation/citationmaint/ajax.do', '1', '1', '0', '30016', '/1/30016/300161/');
+'/admin/citation/citationmaint/list.do?rst=1,/admin/citation/citationmaint/create.do,/admin/citation/citationmaint/edit.do,/admin/citation/citationmaint/delete.do,/admin/citation/citationmaint/save.do,/admin/citation/citationmaint/search.do,/admin/citation/citationmaint/export.do,/admin/citation/citationmaint/ajax.do,/admin/citation/citationmaint/managedocs/start.do,/admin/citation/citationmaint/managedocs/uploaddoc.do,/admin/citation/citationmaint/managedocs/downloaddoc.do,/admin/citation/citationmaint/managedocs/deletedoc.do', '1', '1', '0', '30016', '/1/30016/300161/');
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '300161', '1'); -- ADMIN
@@ -71,6 +71,16 @@ ADD CONSTRAINT `VIO_ROAD_INSP_FK`
   FOREIGN KEY (`roadside_inspection`)
   REFERENCES `lutransport`.`roadside_inspection` (`id`);
   
+UPDATE `lutransport`.`business_object` 
+SET `URL`='/admin/citation/citationmaint/list.do?rst=1,/admin/citation/citationmaint/create.do,/admin/citation/citationmaint/edit.do,/admin/citation/citationmaint/delete.do,/admin/citation/citationmaint/save.do,/admin/citation/citationmaint/search.do,/admin/citation/citationmaint/export.do,/admin/citation/citationmaint/ajax.do,/admin/citation/citationmaint/managedocs/start.do,/admin/citation/citationmaint/managedocs/uploaddoc.do,/admin/citation/citationmaint/managedocs/downloaddoc.do,/admin/citation/citationmaint/managedocs/deletedoc.do' 
+WHERE `ID`='300161';
+
+ALTER TABLE `lutransport`.`violation` 
+ADD COLUMN `docs` VARCHAR(10) NOT NULL DEFAULT 'N' AFTER `out_of_service`;
+
+ALTER TABLE `lutransport`.`roadside_inspection` 
+ADD COLUMN `docs` VARCHAR(10) NOT NULL DEFAULT 'N' AFTER `inspection_level`;
+  
 -------*****----
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300162', '/admin/roadsideinspec/roadsideinspecmaint/list.do?rst=1', 'Manage Roadside Inspections', '3', 'Manage Roadside Inspections', 
@@ -87,5 +97,5 @@ VALUES ('30109', '/reportuser/report/bonusqualifn/start.do', 'Bonus Qualificatio
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '30109', '1'); -- ADMIN
----***---
+ ---***---
 
