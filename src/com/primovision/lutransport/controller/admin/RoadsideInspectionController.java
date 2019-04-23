@@ -118,7 +118,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		}
 	   if (StringUtils.isNotEmpty(inspectionDateFrom)){
         	try {
-        		whereClause.append(" and obj.roadsideInspection.inspectionDateFrom >='"+sdf.format(dateFormat.parse(inspectionDateFrom))+"'");
+        		whereClause.append(" and obj.roadsideInspection.inspectionDate >='"+sdf.format(dateFormat.parse(inspectionDateFrom))+"'");
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -126,7 +126,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		}
       if (StringUtils.isNotEmpty(inspectionDateTo)){
 	     	try {
-	     		whereClause.append(" and obj.roadsideInspection.inspectionDateTo <='"+sdf.format(dateFormat.parse(inspectionDateTo))+"'");
+	     		whereClause.append(" and obj.roadsideInspection.inspectionDate <='"+sdf.format(dateFormat.parse(inspectionDateTo))+"'");
 	     	} catch (ParseException e) {
 				e.printStackTrace();
 			}

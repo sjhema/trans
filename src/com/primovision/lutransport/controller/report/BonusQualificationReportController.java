@@ -505,7 +505,7 @@ public class BonusQualificationReportController extends BaseController {
 			whereClause.append(" and obj.company.id=" + company);
 		}
 		if (StringUtils.isNotEmpty(driver)) {
-			whereClause.append(" and obj.driver.fullName='" + driver + "'");
+			whereClause.append(" and obj.fullName='" + driver + "'");
 		} else {
 			whereClause.append(" and obj.status=1");
 		}
