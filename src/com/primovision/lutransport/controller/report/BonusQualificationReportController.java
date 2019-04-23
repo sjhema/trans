@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.primovision.lutransport.controller.BaseController;
 
 import com.primovision.lutransport.core.util.MimeUtil;
-
+import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.MileageLog;
@@ -42,6 +42,9 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Violation;
 import com.primovision.lutransport.model.accident.Accident;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
+import com.primovision.lutransport.model.hrreport.DriverPay;
+import com.primovision.lutransport.model.hrreport.WeeklyPayDetail;
 import com.primovision.lutransport.model.injury.Injury;
 import com.primovision.lutransport.model.report.BonusQualificationReport;
 import com.primovision.lutransport.model.report.BonusQualificationReportInput;
@@ -332,11 +335,11 @@ public class BonusQualificationReportController extends BaseController {
 	
 	private List<BonusQualificationReport> performBonusQualifiedSearch(SearchCriteria criteria, BonusQualificationReportInput input) {
 		String company = input.getCompany();
-		String driver = input.getDriver();
+		String driverName = input.getDriver();
 		
 		List<BonusQualificationReport> bonusQualifiedReportList = new ArrayList<BonusQualificationReport>();
 		
-		List<Driver> driverList = retrieveDrivers(company, driver);
+		List<Driver> driverList = retrieveDrivers(company, driverName);
 		if (driverList == null || driverList.isEmpty()) {
 			return bonusQualifiedReportList;
 		}
@@ -351,18 +354,41 @@ public class BonusQualificationReportController extends BaseController {
 			if (StringUtils.contains(aDriver.getFullName(), "Unknown")) {
 				continue;
 			}
-			if (!driverNamesNotQualifiedList.contains(aDriver.getFullName())) {
-				BonusQualificationReport aBonusQualifiedReport = new BonusQualificationReport();
-				aBonusQualifiedReport.setNoOfPayChecks(4);
-				
-				map(aBonusQualifiedReport, aDriver);
-				bonusQualifiedReportList.add(aBonusQualifiedReport);
+			if (driverNamesNotQualifiedList.contains(aDriver.getFullName())) {
+				continue;
 			}
+			
+			BonusQualificationReport aBonusQualifiedReport = new BonusQualificationReport();
+			
+			List<WeeklyPayDetail> payrollList = retrievePayroll(input, aDriver);
+			aBonusQualifiedReport.setNoOfPayChecks(payrollList.size());
+				
+			map(aBonusQualifiedReport, aDriver);
+			bonusQualifiedReportList.add(aBonusQualifiedReport);
 		}
 		
 		sort(bonusQualifiedReportList);
 		return bonusQualifiedReportList;
 	}
+	
+	private List<WeeklyPayDetail> retrievePayroll(BonusQualificationReportInput input, Driver driver) {
+		StringBuffer driverPayQueryBuff = new StringBuffer("select obj from DriverPay obj where 1=1");
+		driverPayQueryBuff.append(" and drivername='").append(driver.getFullName()).append("'");
+		driverPayQueryBuff.append(" and company=").append(driver.getCompany().getId());
+		
+		String fromDate = ReportDateUtil.getFromDate(input.getDateFrom());
+		driverPayQueryBuff.append(" and payRollBatch >='").append(fromDate).append("'");
+		
+		String toDate = ReportDateUtil.getFromDate(input.getDateTo());
+		driverPayQueryBuff.append(" and payRollBatch <='").append(toDate).append("'");
+		
+		driverPayQueryBuff.append(" order by obj.payRollBatch desc"); 
+	
+		List<WeeklyPayDetail> payrollList = genericDAO.executeSimpleQuery(driverPayQueryBuff.toString());
+		return payrollList;
+	}
+	
+	
 	
 	private void map(BonusQualificationReport aBonusQualifiedReport, Driver aDriver) {
 		aBonusQualifiedReport.setCompanyName(aDriver.getCompany().getName());
