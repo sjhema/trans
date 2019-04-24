@@ -17,6 +17,7 @@ public class BonusQualificationReport {
 	private String citationNo;
 	
 	private Integer noOfPayChecks;
+	private Date hiredDate;
 	
 	public String getCompanyName() {
 		return companyName;
@@ -83,5 +84,11 @@ public class BonusQualificationReport {
 	}
 	public void setNoOfPayChecks(Integer noOfPayChecks) {
 		this.noOfPayChecks = noOfPayChecks;
+	}
+	public Date getHiredDate() {
+		return hiredDate;
+	}
+	public void setHiredDate(Date hiredDate) {
+		this.hiredDate = hiredDate;
 	}
 }

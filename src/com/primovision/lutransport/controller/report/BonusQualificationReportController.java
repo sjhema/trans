@@ -362,6 +362,7 @@ public class BonusQualificationReportController extends BaseController {
 			
 			List<WeeklyPayDetail> payrollList = retrievePayroll(input, aDriver);
 			aBonusQualifiedReport.setNoOfPayChecks(payrollList.size());
+			aBonusQualifiedReport.setHiredDate(aDriver.getDateHired());
 				
 			map(aBonusQualifiedReport, aDriver);
 			bonusQualifiedReportList.add(aBonusQualifiedReport);
@@ -401,7 +402,8 @@ public class BonusQualificationReportController extends BaseController {
 		StringBuffer whereClause = new StringBuffer();
 		
 		if (StringUtils.isNotEmpty(company)) {
-			whereClause.append(" and obj.driverCompany.id=" + company);
+			//whereClause.append(" and obj.driverCompany.id=" + company);
+			whereClause.append(" and obj.driver.company.id=" + company);
 		}
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");

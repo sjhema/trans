@@ -165,7 +165,7 @@ public class CitationController extends CRUDController<Violation> {
       query.append(whereClause);
       countQuery.append(whereClause);
       
-      query.append(" order by obj.incidentDate desc");
+      query.append(" order by obj.incidentDate desc, obj.company.name asc, obj.driver.fullName asc");
       
       Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		criteria.setRecordCount(recordCount.intValue());	
@@ -222,16 +222,37 @@ public class CitationController extends CRUDController<Violation> {
 		if (entity.getIncidentDate() == null) {
 			bindingResult.rejectValue("incidentDate", "NotNull.java.lang.String", null, null);
 		}
+		
 		String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
 		if (StringUtils.isEmpty(citationNo)) {
 			bindingResult.rejectValue("citationNo", "NotNull.java.lang.String", null, null);
+		} else {
+			if (isDuplicate(entity.getId(), citationNo)) {
+				bindingResult.rejectValue("citationNo", "error.duplicate.entry", null, null);
+			}
 		}
+		
 		if (StringUtils.isEmpty(entity.getOutOfService())) {
 			bindingResult.rejectValue("outOfService", "error.select.option", null, null);
 		}
 		if (StringUtils.isEmpty(entity.getViolationType())) {
 			bindingResult.rejectValue("violationType", "NotNull.java.lang.String", null, null);
 		}
+	}
+	
+	private List<Violation> retrieveCitation(Long violationId, String citationNo) {
+		StringBuffer query = new StringBuffer("select obj from Violation obj where obj.citationNo='" + citationNo + "'");
+		if (violationId != null) {
+			query.append(" and obj.id !=" + violationId);
+		}
+		
+		List<Violation> violationList = genericDAO.executeSimpleQuery(query.toString());
+		return violationList;
+	}
+	
+	private boolean isDuplicate(Long violationId, String citationNo) {
+		List<Violation> citationList = retrieveCitation(violationId, citationNo);
+		return (citationList == null || citationList.isEmpty()) ? false : true;
 	}
 	
 	@Override

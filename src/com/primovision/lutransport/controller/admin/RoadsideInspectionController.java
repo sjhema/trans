@@ -220,9 +220,8 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 			}
 			
 			String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
-			if (StringUtils.isNotEmpty(citationNo)
-					&& StringUtils.isEmpty(entity.getViolationId())) {
-				if(isDuplicate(citationNo)) {
+			if (StringUtils.isNotEmpty(citationNo)) {
+				if (isDuplicate(entity.getViolationId(), citationNo)) {
 					bindingResult.rejectValue("citationNo", "error.duplicate.entry", null, null);
 				}
 			}
@@ -241,6 +240,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
       }
 		
 		String violationType = StringUtils.trimToEmpty(entity.getViolationType());
+		entity.setViolationType(violationType);
 		if (StringUtils.isNotEmpty(violationType)) {
 			entity.setViolation("Y");
 		} else {
@@ -254,6 +254,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		}
 		
 		String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
+		entity.setCitationNo(citationNo);
 		if (StringUtils.isNotEmpty(citationNo)) {
 			entity.setCitation("Y");
 		} else {
@@ -302,14 +303,18 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		return violationList;
 	}
 	
-	private List<Violation> retrieveCitation(String citationNo) {
+	private List<Violation> retrieveCitation(String violationId, String citationNo) {
 		StringBuffer query = new StringBuffer("select obj from Violation obj where obj.citationNo='" + citationNo + "'");
+		if (StringUtils.isNotEmpty(violationId)) {
+			query.append(" and obj.id !=" + Long.valueOf(violationId));
+		}
+		
 		List<Violation> violationList = genericDAO.executeSimpleQuery(query.toString());
 		return violationList;
 	}
 	
-	private boolean isDuplicate(String citationNo) {
-		List<Violation> citationList = retrieveCitation(citationNo);
+	private boolean isDuplicate(String violationId, String citationNo) {
+		List<Violation> citationList = retrieveCitation(violationId, citationNo);
 		return (citationList == null || citationList.isEmpty()) ? false : true;
 	}
 	

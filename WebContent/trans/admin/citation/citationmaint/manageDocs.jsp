@@ -5,8 +5,13 @@
 		var fileElem = document.getElementById("dataFile");
 		var file = fileElem.value;
 		var fileExt = file.lastIndexOf(".pdf");
+		var commaIndx = file.indexOf(",");
 		if (fileExt == -1) {    
-			alert("This File Is Not Allowed"); 
+			alert("Only pdf file is allowed"); 
+			fileElem.value = "";   
+			return false;
+		} else if (commaIndx != -1) {    
+			alert("File name cannot have commas"); 
 			fileElem.value = "";   
 			return false;
 		} else {
