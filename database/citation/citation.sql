@@ -81,7 +81,6 @@ ADD COLUMN `docs` VARCHAR(10) NOT NULL DEFAULT 'N' AFTER `out_of_service`;
 ALTER TABLE `lutransport`.`roadside_inspection` 
 ADD COLUMN `docs` VARCHAR(10) NOT NULL DEFAULT 'N' AFTER `inspection_level`;
   
--------*****----
 INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`) 
 VALUES ('300162', '/admin/roadsideinspec/roadsideinspecmaint/list.do?rst=1', 'Manage Roadside Inspections', '3', 'Manage Roadside Inspections', 
 '/admin/roadsideinspec/roadsideinspecmaint/list.do?rst=1,/admin/roadsideinspec/roadsideinspecmaint/create.do,/admin/roadsideinspec/roadsideinspecmaint/edit.do,/admin/roadsideinspec/roadsideinspecmaint/delete.do,/admin/roadsideinspec/roadsideinspecmaint/save.do,/admin/roadsideinspec/roadsideinspecmaint/search.do,/admin/roadsideinspec/roadsideinspecmaint/export.do,/admin/roadsideinspec/roadsideinspecmaint/ajax.do,/admin/roadsideinspec/roadsideinspecmaint/deleteViolation.do',
@@ -97,5 +96,18 @@ VALUES ('30109', '/reportuser/report/bonusqualifn/start.do', 'Bonus Qualificatio
 
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '30109', '1'); -- ADMIN
+ 
+ -------*****----
+ ALTER TABLE `lutransport`.`violation` 
+CHANGE COLUMN `out_of_service` `out_of_service` VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NULL COMMENT '' ;
+
+ALTER TABLE `lutransport`.`violation` 
+DROP FOREIGN KEY `FKA092E125169AD222`;
+ALTER TABLE `lutransport`.`violation` 
+CHANGE COLUMN `trailer` `trailer` BIGINT(20) NULL COMMENT '' ;
+ALTER TABLE `lutransport`.`violation` 
+ADD CONSTRAINT `FKA092E125169AD222`
+  FOREIGN KEY (`trailer`)
+  REFERENCES `lutransport`.`vehicle` (`id`);
  ---***---
 

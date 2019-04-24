@@ -152,24 +152,13 @@ function formatDate(dateElemId) {
 				</form:select> 
 				<br><form:errors path="truck.unitNum" cssClass="errorMessage" />
 			</td>
-			<td class="form-left"><primo:label code="Trailer" /><span class="errorMessage">*</span></td>
+			<td class="form-left"><primo:label code="Trailer" /><span class="errorMessage"></span></td>
 			<td>
 				<form:select cssClass="flat" path="trailer.unitNum" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
 					<form:options items="${trailers}" itemValue="unitNum" itemLabel="unitNum"/>
 				</form:select> 
 				<br><form:errors path="trailer.unitNum" cssClass="errorMessage" />
-			</td>
-		</tr>
-		<tr>
-			<td class="form-left"><primo:label code="Out Of Service" /><span class="errorMessage">*</span></td>
-			<td>	
-				<form:select cssClass="flat" path="outOfService" style="min-width:166px; max-width:166px">
-					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
-					<form:option value="Yes">Yes</form:option>
-					<form:option value="No">No</form:option>
-				</form:select> 
-				<br><form:errors path="outOfService" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>

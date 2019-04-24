@@ -201,7 +201,8 @@ public class CitationController extends CRUDController<Violation> {
 		}
 		
 		if (entity.getTrailer() == null || StringUtils.isEmpty(entity.getTrailer().getUnitNum())) {
-			bindingResult.rejectValue("trailer.unitNum", "error.select.option", null, null);
+			//bindingResult.rejectValue("trailer.unitNum", "error.select.option", null, null);
+			entity.setTrailer(null);
 		}
 		if (entity.getTrailer() != null && StringUtils.isNotEmpty(entity.getTrailer().getUnitNum())
 				&& entity.getIncidentDate() != null) {
@@ -232,9 +233,9 @@ public class CitationController extends CRUDController<Violation> {
 			}
 		}
 		
-		if (StringUtils.isEmpty(entity.getOutOfService())) {
+		/*if (StringUtils.isEmpty(entity.getOutOfService())) {
 			bindingResult.rejectValue("outOfService", "error.select.option", null, null);
-		}
+		}*/
 		if (StringUtils.isEmpty(entity.getViolationType())) {
 			bindingResult.rejectValue("violationType", "NotNull.java.lang.String", null, null);
 		}

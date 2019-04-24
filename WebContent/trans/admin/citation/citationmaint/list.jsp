@@ -72,12 +72,11 @@ function processManageDocs(id) {
 		pagingLink="search.do" multipleDelete="false" searcheable="false"
 		exportPdf="true" exportCsv="true" exportXls="true">
 	    <primo:datecolumn headerText="Date" dataField="incidentDate" dataFormat="MM-dd-yyyy" width="85px"/>
-		<primo:textcolumn headerText="Company" dataField="company.name" width="145px"/>
-		<primo:textcolumn headerText="Driver" dataField="driver.fullName" width="200px"/>
+		<primo:textcolumn headerText="Company" dataField="company.name" width="135px"/>
+		<primo:textcolumn headerText="Driver" dataField="driver.fullName" width="190px"/>
 		<primo:textcolumn headerText="Truck" dataField="truck.unitNum" width="35px"/>
 		<primo:textcolumn headerText="Trailer" dataField="trailer.unitNum" width="35px"/>
 		<primo:textcolumn headerText="Citation No" dataField="citationNo" width="140px"/>
-		<primo:textcolumn headerText="Out Of Service" dataField="outOfService" width="20px"/>
 		<primo:textcolumn headerText="Violation Type" dataField="violationType" />
 		<primo:textcolumn headerText="Pdf Uploaded" dataField="docs" width="20px"/>
 		<primo:anchorcolumn headerText="Manage Pdf" linkUrl="javascript:processManageDocs('{id}');" linkText="Manage Pdf" width="20px"/>
