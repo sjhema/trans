@@ -97,8 +97,7 @@ VALUES ('30109', '/reportuser/report/bonusqualifn/start.do', 'Bonus Qualificatio
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
  VALUES (now(), '1', '30109', '1'); -- ADMIN
  
- -------*****----
- ALTER TABLE `lutransport`.`violation` 
+ALTER TABLE `lutransport`.`violation` 
 CHANGE COLUMN `out_of_service` `out_of_service` VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NULL COMMENT '' ;
 
 ALTER TABLE `lutransport`.`violation` 
@@ -109,5 +108,6 @@ ALTER TABLE `lutransport`.`violation`
 ADD CONSTRAINT `FKA092E125169AD222`
   FOREIGN KEY (`trailer`)
   REFERENCES `lutransport`.`vehicle` (`id`);
+ -------*****----
  ---***---
 
