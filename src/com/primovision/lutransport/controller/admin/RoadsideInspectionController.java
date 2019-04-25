@@ -56,7 +56,7 @@ import com.primovision.lutransport.model.Violation;
 @RequestMapping("/admin/roadsideinspec/roadsideinspecmaint")
 public class RoadsideInspectionController extends CRUDController<RoadsideInspection> {
 	private static final String UPLOAD_DIR = "/trans/storage/roadsideinspec";
-	private static final String FILE_SUFFIX = "_citation_doc";
+	private static final String FILE_SUFFIX = "_roadsideinspec_doc";
 	
 	public RoadsideInspectionController() {
 		setUrlContext("admin/roadsideinspec/roadsideinspecmaint");
