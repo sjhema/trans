@@ -60,6 +60,9 @@ public class RoadsideInspection extends AbstractBaseModel {
 	@Transient
 	private String violationType;
 	
+	@Transient
+	String[] fileList;
+	
 	public Vehicle getTruck() {
 		return truck;
 	}
@@ -171,4 +174,15 @@ public class RoadsideInspection extends AbstractBaseModel {
 	public void setViolationId(String violationId) {
 		this.violationId = violationId;
 	}
+
+	@Transient
+	public String[] getFileList() {
+		return fileList;
+	}
+
+	@Transient
+	public void setFileList(String[] fileList) {
+		this.fileList = fileList;
+	}
+	
 }

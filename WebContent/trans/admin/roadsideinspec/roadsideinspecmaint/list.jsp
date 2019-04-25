@@ -1,6 +1,10 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <script type="text/javascript">
+function processManageDocs(id) {
+	document.location = "${ctx}/admin/roadsideinspec/roadsideinspecmaint/managedocs/start.do?id=" + id;
+}
+
 function processEdit(violationId) {
 	$.ajax({
   		url: "ajax.do?action=retrieveViolation" + "&violationId=" + violationId,
@@ -137,7 +141,9 @@ function processDelete(violationId) {
         <primo:textcolumn headerText="Citation No" dataField="citationNo" width="130px"/>
         <primo:textcolumn headerText="Insp level" dataField="roadsideInspection.inspectionLevel" width="20px"/>
         <primo:textcolumn headerText="Violation Type" dataField="violationType" />
-        <primo:imagecolumn headerText="Edit" linkUrl="javascript:processEdit('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
+        <primo:textcolumn headerText="Pdf Uploaded" dataField="roadsideInspection.docs" width="20px"/>
+		<primo:anchorcolumn headerText="Manage Pdf" linkUrl="javascript:processManageDocs('{id}');" linkText="Manage Pdf" width="20px"/>
+	 	<primo:imagecolumn headerText="Edit" linkUrl="javascript:processEdit('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
 		<primo:imagecolumn headerText="Del" linkUrl="javascript:processDelete('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center" width="25px"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>

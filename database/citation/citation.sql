@@ -109,5 +109,8 @@ ADD CONSTRAINT `FKA092E125169AD222`
   FOREIGN KEY (`trailer`)
   REFERENCES `lutransport`.`vehicle` (`id`);
  -------*****----
+ UPDATE `lutransport`.`business_object` 
+SET `URL`='/admin/roadsideinspec/roadsideinspecmaint/list.do?rst=1,/admin/roadsideinspec/roadsideinspecmaint/create.do,/admin/roadsideinspec/roadsideinspecmaint/edit.do,/admin/roadsideinspec/roadsideinspecmaint/delete.do,/admin/roadsideinspec/roadsideinspecmaint/save.do,/admin/roadsideinspec/roadsideinspecmaint/search.do,/admin/roadsideinspec/roadsideinspecmaint/export.do,/admin/roadsideinspec/roadsideinspecmaint/ajax.do,/admin/roadsideinspec/roadsideinspecmaint/deleteViolation.do,/admin/roadsideinspec/roadsideinspecmaint/managedocs/start.do,/admin/roadsideinspec/roadsideinspecmaint/managedocs/uploaddoc.do,/admin/roadsideinspec/roadsideinspecmaint/managedocs/downloaddoc.do,/admin/roadsideinspec/roadsideinspecmaint/managedocs/deletedoc.do' WHERE `ID`='300162';
+
  ---***---
 
