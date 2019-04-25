@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -329,7 +330,65 @@ public class BonusQualificationReportController extends BaseController {
 			bonusQualificationReportList.add(bonusQualificationReport);
 		}
 		
+		List<BonusQualificationReport> notQualifiedPayrollList = retrieveDriverPayRollCount(input, 4);
+		bonusQualificationReportList.addAll(notQualifiedPayrollList);
+		
+		List<Driver> newDriversHiredList = retrieveDriversHired(company, dateFrom, dateTo);
+		for (Driver newDriver : newDriversHiredList) {
+			BonusQualificationReport bonusQualificationReport = new BonusQualificationReport();
+			map(bonusQualificationReport, newDriver);
+			bonusQualificationReportList.add(bonusQualificationReport);
+		}
+		
 		sort(bonusQualificationReportList);
+		return bonusQualificationReportList;
+	}
+	
+	private List<BonusQualificationReport> retrieveDriverPayRollCount(BonusQualificationReportInput input, Integer cutoffCount) {
+		StringBuffer driverPayQueryBuff = new StringBuffer("select obj.companyname, obj.drivername, count(*) from DriverPay obj where 1=1");
+		
+		driverPayQueryBuff.append(" and company.id=").append(input.getCompany());
+		
+		String fromDate = ReportDateUtil.getFromDate(input.getDateFrom());
+		driverPayQueryBuff.append(" and payRollBatch >='").append(fromDate).append("'");
+		
+		String toDate = ReportDateUtil.getFromDate(input.getDateTo());
+		driverPayQueryBuff.append(" and payRollBatch <='").append(toDate).append("'");
+		
+		driverPayQueryBuff.append(" group by obj.companyname, obj.drivername"); 
+		driverPayQueryBuff.append(" order by obj.companyname, obj.drivername"); 
+	
+		List<BonusQualificationReport> bonusQualificationReportList = new ArrayList<BonusQualificationReport>();
+		List<WeeklyPayDetail> payrollList = genericDAO.executeSimpleQuery(driverPayQueryBuff.toString());
+		String company = StringUtils.EMPTY;
+		String driver = StringUtils.EMPTY;
+		Integer noOfPayChecks = null;
+		for (Object obj: payrollList) {
+			Object[] objArr = (Object[]) obj;
+			if (objArr == null) {
+				continue;
+			}
+				
+			if (objArr[0] != null)	{
+				company = objArr[0].toString();
+			}
+			if (objArr[1] != null)	{
+				driver = objArr[1].toString();
+			}
+			if (objArr[2] != null)	{
+				noOfPayChecks = Integer.valueOf(objArr[2].toString());
+			}
+			
+			if (cutoffCount == null
+					|| noOfPayChecks < cutoffCount) {
+				BonusQualificationReport aBonusQualificationReport = new BonusQualificationReport();
+				aBonusQualificationReport.setCompanyName(company);
+				aBonusQualificationReport.setDriverName(driver);
+				aBonusQualificationReport.setNoOfPayChecks(noOfPayChecks);
+				bonusQualificationReportList.add(aBonusQualificationReport);
+			}
+		}
+		
 		return bonusQualificationReportList;
 	}
 	
@@ -346,25 +405,34 @@ public class BonusQualificationReportController extends BaseController {
 		
 		List<BonusQualificationReport> bonusNotQualifiedReportList = performBonusNotQualifiedSearch(criteria, input);
 		List<String> driverNamesNotQualifiedList = new ArrayList<String>();
+		String key = StringUtils.EMPTY;
 		for (BonusQualificationReport aBonusNotQualifiedReport : bonusNotQualifiedReportList) {
-			driverNamesNotQualifiedList.add(aBonusNotQualifiedReport.getDriverName());
+			key = aBonusNotQualifiedReport.getCompanyName() + "_" + aBonusNotQualifiedReport.getDriverName();
+			driverNamesNotQualifiedList.add(key);
 		}
 		
 		for (Driver aDriver : driverList) {
 			if (StringUtils.contains(aDriver.getFullName(), "Unknown")) {
 				continue;
 			}
-			if (driverNamesNotQualifiedList.contains(aDriver.getFullName())) {
+			
+			if (aDriver.getDateHired() == null) {
+				continue;
+			}
+			
+			key = aDriver.getCompany().getName() + "_" + aDriver.getFullName();
+			if (driverNamesNotQualifiedList.contains(key)) {
+				continue;
+			}
+			List<WeeklyPayDetail> payrollList = retrieveDriverPayroll(input, aDriver);
+			if (payrollList.size() <= 0) {
 				continue;
 			}
 			
 			BonusQualificationReport aBonusQualifiedReport = new BonusQualificationReport();
-			
-			List<WeeklyPayDetail> payrollList = retrievePayroll(input, aDriver);
-			aBonusQualifiedReport.setNoOfPayChecks(payrollList.size());
-			aBonusQualifiedReport.setHiredDate(aDriver.getDateHired());
-				
 			map(aBonusQualifiedReport, aDriver);
+			aBonusQualifiedReport.setNoOfPayChecks(payrollList.size());
+			
 			bonusQualifiedReportList.add(aBonusQualifiedReport);
 		}
 		
@@ -372,7 +440,7 @@ public class BonusQualificationReportController extends BaseController {
 		return bonusQualifiedReportList;
 	}
 	
-	private List<WeeklyPayDetail> retrievePayroll(BonusQualificationReportInput input, Driver driver) {
+	private List<WeeklyPayDetail> retrieveDriverPayroll(BonusQualificationReportInput input, Driver driver) {
 		StringBuffer driverPayQueryBuff = new StringBuffer("select obj from DriverPay obj where 1=1");
 		driverPayQueryBuff.append(" and drivername='").append(driver.getFullName()).append("'");
 		driverPayQueryBuff.append(" and company=").append(driver.getCompany().getId());
@@ -389,11 +457,10 @@ public class BonusQualificationReportController extends BaseController {
 		return payrollList;
 	}
 	
-	
-	
 	private void map(BonusQualificationReport aBonusQualifiedReport, Driver aDriver) {
 		aBonusQualifiedReport.setCompanyName(aDriver.getCompany().getName());
 		aBonusQualifiedReport.setDriverName(aDriver.getFullName());
+		aBonusQualifiedReport.setHiredDate(aDriver.getDateHired());
 	}
 	
 	private List<Accident> retrieveAccidents(String company, String driver, String dateFrom, String dateTo,
@@ -512,6 +579,28 @@ public class BonusQualificationReportController extends BaseController {
 			whereClause.append(" and obj.status=1");
 		}
     
+      query.append(whereClause);
+      query.append(" order by obj.fullName asc");
+      
+      List<Driver> driverList = genericDAO.getEntityManager().createQuery(query.toString()).getResultList();
+      
+      return driverList;
+	}
+	
+	private List<Driver> retrieveDriversHired(String company, String fromDate, String toDate) {
+		StringBuffer query = new StringBuffer("select obj from Driver obj where 1=1 and obj.catagory.id=2");
+		StringBuffer whereClause = new StringBuffer();
+		
+		if (StringUtils.isNotEmpty(company)) {
+			whereClause.append(" and obj.company.id=" + company);
+		}
+		
+		String formattedFromDate = ReportDateUtil.getFromDate(fromDate);
+		whereClause.append(" and dateHired >='").append(formattedFromDate).append("'");
+		
+		String formattedToDate = ReportDateUtil.getFromDate(toDate);
+		whereClause.append(" and dateHired <='").append(formattedToDate).append("'");
+		
       query.append(whereClause);
       query.append(" order by obj.fullName asc");
       

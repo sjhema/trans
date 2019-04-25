@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bonusNotQualifiedReport" pageWidth="1500" pageHeight="600" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bonusNotQualifiedReport" pageWidth="1700" pageHeight="600" orientation="Landscape" columnWidth="1660" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="362"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="dateRange" class="java.lang.String"/>
 	<field name="driverName" class="java.lang.String"/>
@@ -14,6 +14,8 @@
 	<field name="injuryType" class="java.lang.String"/>
 	<field name="violation" class="java.lang.String"/>
 	<field name="citation" class="java.lang.String"/>
+	<field name="hiredDate" class="java.util.Date"/>
+	<field name="noOfPayChecks" class="java.lang.Integer"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -23,14 +25,14 @@
 	<pageHeader>
 		<band height="84">
 			<staticText>
-				<reportElement mode="Opaque" x="626" y="0" width="208" height="16" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="726" y="0" width="208" height="16" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Bonus Not Qualified Report]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="634" y="24" width="185" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="739" y="24" width="185" height="25" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -44,7 +46,7 @@
 				<text><![CDATA[Date Range]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="634" y="49" width="185" height="20"/>
+				<reportElement x="739" y="49" width="185" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -88,7 +90,7 @@
 				<text><![CDATA[Company]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="829" y="25" width="99" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1020" y="25" width="99" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -113,10 +115,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Date]]></text>
+				<text><![CDATA[Incident Date]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="928" y="25" width="528" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1119" y="25" width="528" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -172,7 +174,7 @@
 				<text><![CDATA[Injury Type]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="723" y="25" width="53" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="914" y="25" width="53" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -186,7 +188,7 @@
 				<text><![CDATA[Violation]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="776" y="25" width="53" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="967" y="25" width="53" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -198,6 +200,34 @@
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Citation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="723" y="25" width="112" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date Hired]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="835" y="25" width="79" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. of paychecks]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -230,7 +260,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{driverName}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="829" y="0" width="99" height="34"/>
+				<reportElement x="1020" y="0" width="99" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -258,7 +288,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{date} == null ? "" : (new java.text.SimpleDateFormat("MM-dd-yyyy").format($F{date}))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="928" y="0" width="528" height="34"/>
+				<reportElement x="1119" y="0" width="528" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -314,7 +344,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{injuryType}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="723" y="0" width="53" height="34"/>
+				<reportElement x="914" y="0" width="53" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -328,7 +358,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{violation}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="776" y="0" width="53" height="34"/>
+				<reportElement x="967" y="0" width="53" height="34"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -340,6 +370,34 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{citation}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="723" y="0" width="112" height="34"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{hiredDate} == null ? "" : (new java.text.SimpleDateFormat("MM-dd-yyyy").format($F{hiredDate}))]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="835" y="0" width="79" height="34"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{noOfPayChecks}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
