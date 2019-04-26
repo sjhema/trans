@@ -193,7 +193,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name", false));
 		
 		//model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
-		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1"));
+		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type in (1, 4)"));
 		model.addAttribute("trailers", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=2 group by obj.unit"));
 	}
 
