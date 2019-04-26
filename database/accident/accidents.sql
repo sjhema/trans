@@ -220,3 +220,9 @@ where id in
 734, 735, 736, 737, 739, 740, 742, 746, 751, 759, 763, 764, 765, 768, 772, 777, 781, 787, 796, 798, 803, 804, 807, 813, 816, 819, 824, 833)
 ---
 
+UPDATE `lutransport`.`business_object` SET `URL`='/admin/accident/accidentmaint/list.do?rst=1,/admin/accident/accidentmaint/create.do,/admin/accident/accidentmaint/edit.do,/admin/accident/accidentmaint/delete.do,/admin/accident/accidentmaint/save.do,/admin/accident/accidentmaint/search.do,/admin/accident/accidentmaint/export.do,/admin/accident/accidentmaint/ajax.do,/admin/accident/accidentmaint/copy.do,/admin/accident/accidentmaint/print.do,/admin/accident/accidentmaint/uploadvideo/start.do,/admin/accident/accidentmaint/uploadvideo/download.do,/admin/accident/accidentmaint/uploadvideo/save.do,/admin/accident/accidentmaint/managedocs/start.do,/admin/accident/accidentmaint/managedocs/uploaddoc.do,/admin/accident/accidentmaint/managedocs/downloaddoc.do,/admin/accident/accidentmaint/managedocs/deletedoc.do' WHERE `ID`='300144';
+ALTER TABLE `lutransport`.`accident` 
+CHANGE COLUMN `pdf1` `docs` VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NULL DEFAULT 'N' COMMENT '' ;
+
+--
+

@@ -2,6 +2,7 @@ package com.primovision.lutransport.controller.admin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -55,6 +57,7 @@ import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.Violation;
 import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.accident.AccidentCause;
 import com.primovision.lutransport.model.accident.AccidentRoadCondition;
@@ -68,7 +71,8 @@ import com.primovision.lutransport.model.insurance.InsuranceCompanyRep;
 public class AccidentController extends CRUDController<Accident> {
 	private static final String UPLOAD_DIR = "/trans/storage/accident";
 	private static final String VIDEO_FILE_SUFFIX = "_accident_video.wmv";
-	private static final String PDF_FILE_SUFFIX = "_accident_pdf.pdf";
+	
+	private static final String FILE_SUFFIX = "_accident_doc";
 	
 	public AccidentController() {
 		setUrlContext("admin/accident/accidentmaint");
@@ -548,162 +552,6 @@ public class AccidentController extends CRUDController<Accident> {
 		}
 	}
 	
-	@RequestMapping("/uploadpdf/download.do")
-	public String downloadPdf(ModelMap model, HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") Long id) {
-		try {
-			processPdfDownload(request, response, id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private String constructPdfFilePath(Long id) {
-		String filePath = UPLOAD_DIR + "/" + id + PDF_FILE_SUFFIX;
-		return filePath;
-	}
-	
-	private void processPdfDownload(HttpServletRequest request,
-         HttpServletResponse response, Long id) {
-		// Reads input file from an absolute path
-		String filePath = constructPdfFilePath(id);
-		File downloadFile = new File(filePath);
-		FileInputStream inStream = null;
-		try {
-			inStream = new FileInputStream(downloadFile);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
-      
-		// Obtains ServletContext
-		ServletContext context = request.getServletContext();
-     
-		/*// If you want to use a relative path to context root:
-     	String relativePath = context.getRealPath("");
-     	System.out.println("relativePath = " + relativePath);*/
-      
-		// Gets MIME type of the file
-		String mimeType = context.getMimeType(filePath);
-		if (mimeType == null) {        
-			// Set to binary type if MIME mapping not found
-         mimeType = "application/pdf";
-		}
-		System.out.println("MIME type: " + mimeType);
-      
-		// Modifies response
-		response.setContentType(mimeType);
-		response.setContentLength((int)downloadFile.length());
-      
-		// Forces download
-		String headerKey = "Content-Disposition";
-		String headerValue = String.format("attachment; filename=\"%s\"", downloadFile.getName());
-		response.setHeader(headerKey, headerValue);
-      
-		// Obtains response's output stream
-		OutputStream outStream = null;
-		try {
-			outStream = response.getOutputStream();
-			byte[] buffer = new byte[4096];
-			int bytesRead = -1;
-	      
-			while ((bytesRead = inStream.read(buffer)) != -1) {
-				outStream.write(buffer, 0, bytesRead);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (inStream != null) {
-				try {
-					inStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (outStream != null) {
-				try {
-					outStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}  
-	}
-	
-	@RequestMapping("/uploadpdf/start.do")
-	public String uploadpdfStart(ModelMap model, HttpServletRequest request) {
-		return urlContext + "/loadPdf";
-	}
-	
-	@RequestMapping("/uploadpdf/save.do")
-	public String uploadPdfSave(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model,
-			@ModelAttribute("modelObject") Accident entity,
-			@RequestParam("dataFile") MultipartFile file) {
-		List<String> errorList = new ArrayList<String>();
-		model.addAttribute("errorList", errorList);
-		//model.addAttribute("error", StringUtils.EMPTY);
-		//request.getSession().setAttribute("error", StringUtils.EMPTY);
-		
-		try {
-			if (StringUtils.isEmpty(file.getOriginalFilename())) {
-			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
-			    return urlContext + "/loadPdf";
-		   }
-			
-			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-			if (!(ext.equalsIgnoreCase(".pdf"))) {
-          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .pdf!!");
-          	return urlContext + "/loadPdf";
-			}
-			
-			Long createdBy = getUser(request).getId();
-			savePdf(request, entity, file, createdBy, errorList);
-			if (errorList.isEmpty()) {
-				model.addAttribute("msg", "Successfully uploaded Accident pdf");
-			} 
-		} catch (Exception ex) {
-			log.warn("Unable to upload Accident pdf:===>>>>>>>>>" + ex);
-			ex.printStackTrace();
-			
-			//str.add("Exception while uploading");
-			//model.addAttribute("errorList", str);
-			
-			model.addAttribute("error", "An error occurred while uploading Accident pdf!!");
-		}
-		
-		return urlContext + "/loadPdf";
-	}
-	
-	private void savePdf(HttpServletRequest request, Accident entity, MultipartFile file,
-			Long userId, List<String> errorList) {
-		if (file.isEmpty()) {
-			errorList.add("Empty file");
-			return;
-		}
-	
-		try {
-			/*String realPathToUploads =  request.getServletContext().getRealPath(UPLOAD_DIR);
-			if (!new File(realPathtoUploads).exists()) {
-			    new File(realPathtoUploads).mkdir();
-			}*/
-
-			//String orgName = file.getOriginalFilename();
-			String filePath = constructPdfFilePath(entity.getId());
-			File dest = new File(filePath);
-			file.transferTo(dest);
-			
-			entity.setPdf1("Y");
-			entity.setModifiedAt(Calendar.getInstance().getTime());
-			entity.setModifiedBy(getUser(request).getId());
-			genericDAO.saveOrUpdate(entity);
-		} catch (Exception e) {
-			errorList.add("Error occured while uploading file");
-			return;
-		}
-	}
-	
 	@Override
 	public String edit2(ModelMap model, HttpServletRequest request) {
 		setupCreate(model, request);
@@ -808,12 +656,17 @@ public class AccidentController extends CRUDController<Accident> {
 			return BooleanUtils.toStringTrueFalse(responseBool);
 		}  else if (StringUtils.equalsIgnoreCase("deleteVideo", action)) {
 			return deleteVideo(request);
-		}  else if (StringUtils.equalsIgnoreCase("doesPdfExist", action)) {
-			boolean responseBool = doesPdfExist(request);
+		}  else if (StringUtils.equalsIgnoreCase("doesDocExist", action)) {
+			String file = request.getParameter("file");
+			if (StringUtils.isEmpty(file)) {
+				return StringUtils.EMPTY;
+			}
+			
+			String idStr = request.getParameter("id");
+			Long id = new Long(idStr);
+			boolean responseBool = doesDocExist(id, file);
 			return BooleanUtils.toStringTrueFalse(responseBool);
-		}  else if (StringUtils.equalsIgnoreCase("deletePdf", action)) {
-			return deletePdf(request);
-		} 
+		}
 		
 		return StringUtils.EMPTY;
 	}
@@ -844,36 +697,6 @@ public class AccidentController extends CRUDController<Accident> {
 		Long id = Long.valueOf(idStr);
 		
 		String filePath = constructVideoFilePath(id);
-		File file = new File(filePath);
-		return file.exists();
-	}
-	
-	private String deletePdf(HttpServletRequest request) {
-		String idStr = request.getParameter("id");
-		Long id = Long.valueOf(idStr);
-		
-		String filePath = constructPdfFilePath(id);
-		File file = new File(filePath);
-		
-		boolean status = file.delete();
-		if (status) {
-			Accident entity = genericDAO.getById(Accident.class, id);
-			entity.setPdf1("N");
-			entity.setModifiedAt(Calendar.getInstance().getTime());
-			entity.setModifiedBy(getUser(request).getId());
-			genericDAO.saveOrUpdate(entity);
-			
-			return "Successfully deleted the pdf";
-		} else {
-			return "Error occured while deleting the pdf";
-		}
-	}
-	
-	private boolean doesPdfExist(HttpServletRequest request) {
-		String idStr = request.getParameter("id");
-		Long id = Long.valueOf(idStr);
-		
-		String filePath = constructPdfFilePath(id);
 		File file = new File(filePath);
 		return file.exists();
 	}
@@ -983,5 +806,253 @@ public class AccidentController extends CRUDController<Accident> {
 				+ " order by obj.name";
 		List<InsuranceCompanyRep> claimReps = genericDAO.executeSimpleQuery(query);
 		return claimReps;
+	}
+	private boolean doesDocExist(Accident entity, MultipartFile file) {
+		String filePath = constructDocFilePath(entity.getId(), file);
+		return doesDocExist(filePath);
+	}
+	
+	private boolean doesDocExist(String file) {
+		File fileToCheck = new File(file);
+		return fileToCheck.exists();
+	}
+	
+	private boolean doesDocExist(Long id, String file) {
+		String filePath = constructDocFilePath(id, file);
+		return doesDocExist(filePath);
+	}
+	
+	@RequestMapping("/managedocs/deletedoc.do")
+	public String deleteDoc(ModelMap model, HttpServletRequest request, 
+				@ModelAttribute("modelObject") Accident entity) {
+		String filePath = constructDocFilePath(entity);
+		File file = new File(filePath);
+		
+		boolean status = file.delete();
+		if (status) {
+			if (!docsUploaded(entity)) {
+				entity.setDocs("N");
+				entity.setModifiedAt(Calendar.getInstance().getTime());
+				entity.setModifiedBy(getUser(request).getId());
+				genericDAO.saveOrUpdate(entity);
+			}
+			
+			request.getSession().setAttribute("msg", "Successfully deleted the pdf");
+		} else {
+			request.getSession().setAttribute("error", "Error occured while deleting the pdf!!");
+		}
+		
+		
+		setupManageDocs(model, entity);
+		return urlContext + "/manageDocs";
+	}
+	
+	private boolean docsUploaded(Accident entity) {
+		String[] filaeNamesList = getUploadedFileNames(entity);
+		return (filaeNamesList.length > 0) ? true : false;
+	}
+	
+	@RequestMapping("/managedocs/downloaddoc.do")
+	public String downloadDoc(ModelMap model, HttpServletRequest request, HttpServletResponse response,
+				@ModelAttribute("modelObject") Accident entity) {
+		try {
+			processDocDownload(request, response, entity);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private void processDocDownload(HttpServletRequest request,
+         HttpServletResponse response, @ModelAttribute("modelObject") Accident entity) {
+		// Reads input file from an absolute path
+		String filePath = constructDocFilePath(entity);
+		File downloadFile = new File(filePath);
+		FileInputStream inStream = null;
+		try {
+			inStream = new FileInputStream(downloadFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+      
+		// Obtains ServletContext
+		ServletContext context = request.getServletContext();
+     
+		/*// If you want to use a relative path to context root:
+     	String relativePath = context.getRealPath("");
+     	System.out.println("relativePath = " + relativePath);*/
+      
+		// Gets MIME type of the file
+		String mimeType = context.getMimeType(filePath);
+		if (mimeType == null) {        
+			// Set to binary type if MIME mapping not found
+         mimeType = "application/pdf";
+		}
+		System.out.println("MIME type: " + mimeType);
+      
+		// Modifies response
+		response.setContentType(mimeType);
+		response.setContentLength((int)downloadFile.length());
+      
+		// Forces download
+		String headerKey = "Content-Disposition";
+		String headerValue = String.format("attachment; filename=\"%s\"", downloadFile.getName());
+		response.setHeader(headerKey, headerValue);
+      
+		// Obtains response's output stream
+		OutputStream outStream = null;
+		try {
+			outStream = response.getOutputStream();
+			byte[] buffer = new byte[4096];
+			int bytesRead = -1;
+	      
+			while ((bytesRead = inStream.read(buffer)) != -1) {
+				outStream.write(buffer, 0, bytesRead);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (inStream != null) {
+				try {
+					inStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (outStream != null) {
+				try {
+					outStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}  
+	}
+	
+	@RequestMapping("/managedocs/start.do")
+	public String manageDocsStart(ModelMap model, HttpServletRequest request, 
+			@ModelAttribute("modelObject") Accident entity) {
+		setupManageDocs(model, entity);
+		return urlContext + "/manageDocs";
+	}
+	
+	private void setupManageDocs(ModelMap model, Accident entity) {
+		String[] fileNamesList = getUploadedFileNames(entity);
+		model.addAttribute("fileList", fileNamesList);
+	}
+	
+	private String[] getUploadedFileNames(Accident entity) {
+		String docPattern = constructDocFilePattern(entity.getId());
+		FileFilter fileFilter = new WildcardFileFilter(docPattern);
+		File dir = new File(UPLOAD_DIR);
+		File[] files = dir.listFiles(fileFilter);
+		String[] fileNamesList = new String[files.length];
+		for (int i = 0; i < files.length; i++) {
+			fileNamesList[i] = files[i].getName();
+		}
+		return fileNamesList;
+	}
+	
+	private boolean validateUploadDoc(List<String> errorList, Accident entity, MultipartFile file) {
+		if (StringUtils.isEmpty(file.getOriginalFilename())) {
+		    errorList.add("Please choose a file to upload !!");
+		    return false;
+	   }
+		
+		String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+		if (!(ext.equalsIgnoreCase(".pdf"))) {
+      	errorList.add("Please choose a file to upload with extention .pdf!!");
+		   return false;
+		}
+		
+		/*if (doesDocExist(entity, file)) {
+			errorList.add("PDF with same name is already uploaded");
+		   return false;
+		}*/
+		
+		return true;
+	}
+	
+	@RequestMapping("/managedocs/uploaddoc.do")
+	public String uploadDoc(HttpServletRequest request,
+			HttpServletResponse response, ModelMap model,
+			@ModelAttribute("modelObject") Accident entity,
+			@RequestParam("dataFile") MultipartFile file) {
+		List<String> errorList = new ArrayList<String>();
+		model.addAttribute("errorList", errorList);
+		//model.addAttribute("error", StringUtils.EMPTY);
+		//request.getSession().setAttribute("error", StringUtils.EMPTY);
+		
+		try {
+			if (!validateUploadDoc(errorList, entity, file)) {
+				 setupManageDocs(model, entity);
+			    return urlContext + "/manageDocs";
+			}
+			
+			Long createdBy = getUser(request).getId();
+			saveDoc(request, entity, file, createdBy, errorList);
+			if (errorList.isEmpty()) {
+				model.addAttribute("msg", "Successfully uploaded Citation pdf");
+			} 
+		} catch (Exception ex) {
+			log.warn("Unable to upload Citation doc:===>>>>>>>>>" + ex);
+			ex.printStackTrace();
+			
+			//str.add("Exception while uploading");
+			//model.addAttribute("errorList", str);
+			
+			model.addAttribute("error", "An error occurred while uploading Citation doc!!");
+		}
+		
+		setupManageDocs(model, entity);
+		return urlContext + "/manageDocs";
+	}
+	
+	private void saveDoc(HttpServletRequest request, Accident entity, MultipartFile file,
+			Long userId, List<String> errorList) {
+		if (file.isEmpty()) {
+			errorList.add("Empty file");
+			return;
+		}
+	
+		try {
+			/*String realPathToUploads =  request.getServletContext().getRealPath(UPLOAD_DIR);
+			if (!new File(realPathtoUploads).exists()) {
+			    new File(realPathtoUploads).mkdir();
+			}*/
+
+			String filePath = constructDocFilePath(entity.getId(), file);
+			File dest = new File(filePath);
+			file.transferTo(dest);
+			
+			entity.setDocs("Y");
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			entity.setModifiedBy(getUser(request).getId());
+			genericDAO.saveOrUpdate(entity);
+		} catch (Exception e) {
+			errorList.add("Error occured while uploading file");
+			return;
+		}
+	}
+	
+	private String constructDocFilePath(Accident entity) {
+		String filePath = UPLOAD_DIR + "/" + entity.getFileList()[0];
+		return filePath;
+	}
+	
+	private String constructDocFilePath(Long id, MultipartFile file) {
+		return constructDocFilePath(id, file.getOriginalFilename());
+	}
+	
+	private String constructDocFilePath(Long id, String file) {
+		String filePath = UPLOAD_DIR + "/" + id + FILE_SUFFIX;
+		String originalFileName = file.replaceAll("\\s", StringUtils.EMPTY);
+		return filePath + "_" + originalFileName;
+	}
+	
+	private String constructDocFilePattern(Long id) {
+		String filePath = id + FILE_SUFFIX + "*.*";
+		return filePath;
 	}
 }

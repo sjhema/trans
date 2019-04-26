@@ -147,8 +147,11 @@ public class Accident extends AbstractBaseModel {
 	@Column(name="video1")
 	private String video1 = "N";
 	
-	@Column(name="pdf1")
-	private String pdf1 = "N";
+	@Column(name="docs")
+	private String docs = "N";
+	
+	@Transient
+	String[] fileList;
 	
 	public String getVideo1() {
 		return video1;
@@ -157,13 +160,13 @@ public class Accident extends AbstractBaseModel {
 	public void setVideo1(String video1) {
 		this.video1 = video1;
 	}
-
-	public String getPdf1() {
-		return pdf1;
+	
+	public String getDocs() {
+		return docs;
 	}
 
-	public void setPdf1(String pdf1) {
-		this.pdf1 = pdf1;
+	public void setDocs(String docs) {
+		this.docs = docs;
 	}
 
 	public Date getIncidentDate() {
@@ -466,5 +469,15 @@ public class Accident extends AbstractBaseModel {
 	@Transient
 	public String getSubcontractorName() {
 		return (subcontractor == null ? StringUtils.EMPTY : subcontractor.getName());
+	}
+
+	@Transient
+	public String[] getFileList() {
+		return fileList;
+	}
+
+	@Transient
+	public void setFileList(String[] fileList) {
+		this.fileList = fileList;
 	}
 }
