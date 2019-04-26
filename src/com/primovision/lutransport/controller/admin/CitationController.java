@@ -189,7 +189,7 @@ public class CitationController extends CRUDController<Violation> {
 		}
 		if (entity.getTruck() != null && StringUtils.isNotEmpty(entity.getTruck().getUnitNum())
 				&& entity.getIncidentDate() != null) {
-			Vehicle matchingTruck = WorkerCompUtils.retrieveVehicleForUnit(entity.getTruck().getUnitNum(), 1,  
+			Vehicle matchingTruck = WorkerCompUtils.retrieveVehicleForUnit(entity.getTruck().getUnitNum(), "1, 4",  
 					entity.getIncidentDate(), genericDAO);
 			if (matchingTruck == null) {
 				bindingResult.rejectValue("truck.unitNum", "error.select.option", null, null);
@@ -206,7 +206,7 @@ public class CitationController extends CRUDController<Violation> {
 		}
 		if (entity.getTrailer() != null && StringUtils.isNotEmpty(entity.getTrailer().getUnitNum())
 				&& entity.getIncidentDate() != null) {
-			Vehicle matchingTrailer = WorkerCompUtils.retrieveVehicleForUnit(entity.getTrailer().getUnitNum(), 2,  
+			Vehicle matchingTrailer = WorkerCompUtils.retrieveVehicleForUnit(entity.getTrailer().getUnitNum(), "2",  
 					entity.getIncidentDate(), genericDAO);
 			if (matchingTrailer == null) {
 				bindingResult.rejectValue("trailer.unitNum", "error.select.option", null, null);

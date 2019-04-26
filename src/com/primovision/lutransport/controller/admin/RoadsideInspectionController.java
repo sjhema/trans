@@ -44,7 +44,7 @@ import com.google.gson.Gson;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
-
+import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.RoadsideInspection;
@@ -197,19 +197,46 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		model.addAttribute("trailers", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=2 group by obj.unit"));
 	}
 
-	private void validateSave(RoadsideInspection entity, BindingResult bindingResult) {
+	private void validateSave(RoadsideInspection entity, BindingResult bindingResult, HttpServletRequest request) {
 		if (entity.getInspectionDate() == null) {
 			bindingResult.rejectValue("inspectionDate", "NotNull.java.util.Date", null, null);
 		}
 		if (entity.getCompany() == null) {
 			bindingResult.rejectValue("company", "error.select.option", null, null);
 		}
-		if (entity.getTruck() == null) {
-			bindingResult.rejectValue("truck", "error.select.option", null, null);
+		
+		if (entity.getTruck() == null || StringUtils.isEmpty(entity.getTruck().getUnitNum())) {
+			bindingResult.rejectValue("truck.unitNum", "error.select.option", null, null);
 		}
-		if (entity.getTrailer() == null) {
-			bindingResult.rejectValue("trailer", "error.select.option", null, null);
+		if (entity.getTruck() != null && StringUtils.isNotEmpty(entity.getTruck().getUnitNum())
+				&& entity.getInspectionDate() != null) {
+			Vehicle matchingTruck = WorkerCompUtils.retrieveVehicleForUnit(entity.getTruck().getUnitNum(), "1, 4",  
+					entity.getInspectionDate(), genericDAO);
+			if (matchingTruck == null) {
+				bindingResult.rejectValue("truck.unitNum", "error.select.option", null, null);
+				request.getSession().setAttribute("error",
+						"No Matching Truck Entries Found for Selected Truck and inspection Date.");
+			} else {
+				entity.setTruck(matchingTruck);
+			}
 		}
+		
+		if (entity.getTrailer() == null || StringUtils.isEmpty(entity.getTrailer().getUnitNum())) {
+			bindingResult.rejectValue("trailer.unitNum", "error.select.option", null, null);
+		}
+		if (entity.getTrailer() != null && StringUtils.isNotEmpty(entity.getTrailer().getUnitNum())
+				&& entity.getInspectionDate() != null) {
+			Vehicle matchingTrailer = WorkerCompUtils.retrieveVehicleForUnit(entity.getTrailer().getUnitNum(), "2",  
+					entity.getInspectionDate(), genericDAO);
+			if (matchingTrailer == null) {
+				bindingResult.rejectValue("trailer.unitNum", "error.select.option", null, null);
+				request.getSession().setAttribute("error",
+						"No Matching Trailer Entries Found for Selected Trailer and inspection Date.");
+			} else {
+				entity.setTrailer(matchingTrailer);
+			}
+		}
+		
 		if (entity.getDriver() == null) {
 			bindingResult.rejectValue("driver", "error.select.option", null, null);
 		}
@@ -247,7 +274,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	public String save(HttpServletRequest request,
 			@ModelAttribute("modelObject") RoadsideInspection entity,
 			BindingResult bindingResult, ModelMap model) {
-		validateSave(entity, bindingResult);
+		validateSave(entity, bindingResult, request);
 		if (bindingResult.hasErrors()) {
         	setupCreate(model, request);
         	setupViolation(model, request, entity);

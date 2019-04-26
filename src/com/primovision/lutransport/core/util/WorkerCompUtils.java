@@ -357,8 +357,8 @@ public class WorkerCompUtils {
 		return (vehicleList == null || vehicleList.isEmpty()) ? null : vehicleList.get(0);
 	}
 	
-	public static Vehicle retrieveVehicleForUnit(String unit, Integer type, Date transactionDate, GenericDAO genericDAO) {
-		if (StringUtils.isEmpty(unit) || !StringUtils.isNumeric(unit) || type == null) {
+	public static Vehicle retrieveVehicleForUnit(String unit, String type, Date transactionDate, GenericDAO genericDAO) {
+		if (StringUtils.isEmpty(unit) || !StringUtils.isNumeric(unit) || StringUtils.isEmpty(type)) {
 			return null;
 		}
 		
@@ -368,8 +368,8 @@ public class WorkerCompUtils {
 			vehicleQuery += (" and obj.validFrom <='"
 					+ transactionDateStr + "' and obj.validTo >= '" + transactionDateStr + "'");
 		}	
-		if (type != null) {
-			vehicleQuery += (" and obj.type = " + type.intValue());
+		if (StringUtils.isNotEmpty(type)) {
+			vehicleQuery += (" and obj.type in(" + type + ")");
 		}
 		vehicleQuery += " order by obj.id DESC";
 		

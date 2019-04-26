@@ -120,19 +120,19 @@ function emptyViolation() {
 		<tr>
 			<td class="form-left"><primo:label code="Truck" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="truck" style="min-width:166px; max-width:166px">
+				<form:select cssClass="flat" path="truck.unitNum" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
-					<form:options items="${trucks}" itemValue="id" itemLabel="unit" />
-				</form:select>
-				<br> <form:errors path="truck" cssClass="errorMessage" />
+					<form:options items="${trucks}" itemValue="unitNum" itemLabel="unitNum"/>
+				</form:select> 
+				<br><form:errors path="truck.unitNum" cssClass="errorMessage" />
 			</td>
 			<td class="form-left"><primo:label code="Trailer" /><span class="errorMessage">*</span></td>
 			<td>
-				<form:select cssClass="flat" path="trailer" style="min-width:166px; max-width:166px">
+				<form:select cssClass="flat" path="trailer.unitNum" style="min-width:166px; max-width:166px">
 					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
-					<form:options items="${trailers}" itemValue="id" itemLabel="unit" />
-				</form:select>
-				<br> <form:errors path="trailer" cssClass="errorMessage" />
+					<form:options items="${trailers}" itemValue="unitNum" itemLabel="unitNum"/>
+				</form:select> 
+				<br><form:errors path="trailer.unitNum" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr class="table-heading">
