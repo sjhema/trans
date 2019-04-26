@@ -49,7 +49,7 @@ import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 
 import com.primovision.lutransport.core.util.WorkerCompUtils;
 import com.primovision.lutransport.core.util.MimeUtil;
-import com.primovision.lutransport.model.AbstractBaseModel;
+
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -57,7 +57,6 @@ import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Vehicle;
-import com.primovision.lutransport.model.Violation;
 import com.primovision.lutransport.model.accident.Accident;
 import com.primovision.lutransport.model.accident.AccidentCause;
 import com.primovision.lutransport.model.accident.AccidentRoadCondition;
