@@ -272,6 +272,12 @@ public class CitationController extends CRUDController<Violation> {
 		
 		request.getSession().setAttribute("msg", "Citation saved successfully");
 		
+		if (entity.getModifiedAt() == null) {
+			Violation aViolation = new Violation();
+			aViolation.setDriver(entity.getDriver());
+			aViolation.setCompany(entity.getCompany());
+			model.addAttribute("modelObject", aViolation);
+		}
 		setupCreate(model, request);
 		
 		return getUrlContext() + "/form";
