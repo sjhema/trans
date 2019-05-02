@@ -3317,21 +3317,28 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						}
 					}
 					
+					mileageLog.setGps("Y");
+					mileageLog.setSource(MileageLog.SOURCE_NEW_GPS);
+					
 					MileageLog existingMileageLog = checkDuplicate(mileageLog); 
 					if (existingMileageLog != null) {
-						if (!StringUtils.equals(MileageLog.SOURCE_OLD_GPS, existingMileageLog.getSource())) {
+						/*if (!StringUtils.equals(MileageLog.SOURCE_OLD_GPS, existingMileageLog.getSource())) {
 							recordError = true;
 							fatalRecordError = true;
 							recordErrorMsg.append("Duplicate record,");
-						} else {
-							Double consolidatedMiles = existingMileageLog.getMiles() + mileageLog.getMiles();
-							existingMileageLog.setMiles(consolidatedMiles);
-							existingMileageLog.setLastInState(mileageLog.getLastInState());
+						} else {*/
+						Double consolidatedMiles = existingMileageLog.getMiles() + mileageLog.getMiles();
+						existingMileageLog.setMiles(consolidatedMiles);
+						existingMileageLog.setLastInState(mileageLog.getLastInState());
+						
+						if (StringUtils.equals(MileageLog.SOURCE_OLD_GPS, existingMileageLog.getSource())
+								&& StringUtils.equals(MileageLog.SOURCE_NEW_GPS, mileageLog.getSource())) {
 							existingMileageLog.setSource(MileageLog.SOURCE_OLD_NEW_GPS);
-							existingMileageLog.setModifiedAt(Calendar.getInstance().getTime());
-							existingMileageLog.setModifiedBy(createdBy);
-							mileageLog = existingMileageLog;
 						}
+						
+						existingMileageLog.setModifiedAt(Calendar.getInstance().getTime());
+						existingMileageLog.setModifiedBy(createdBy);
+						mileageLog = existingMileageLog;
 					}
 				} catch (Exception ex) {
 					recordError = true;
@@ -3357,9 +3364,6 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 			if (!mileageLogList.isEmpty()) {
 				for (MileageLog aMileageLog : mileageLogList) {
 					if (aMileageLog.getCreatedBy() == null) {
-						aMileageLog.setGps("Y");
-						aMileageLog.setSource(MileageLog.SOURCE_NEW_GPS);
-						
 						aMileageLog.setCreatedBy(createdBy);
 						aMileageLog.setCreatedAt(Calendar.getInstance().getTime());
 					}
