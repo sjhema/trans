@@ -82,4 +82,14 @@ VALUES
 ----
  select subcontractor_id, count(*) from lutransport.ticket where subcontractor_id in (183, 184, 185)
  group by subcontractor_id;
+ 
+ ----
+ INSERT INTO `lutransport`.`business_object` (`ID`, `ACTION`, `DISPLAY_TAG`, `OBJECT_LEVEL`, `OBJECT_NAME`, `URL`, `status`, `display_order`, `hidden`, `parent_id`, `hierarchy`)
+VALUES ('1411', '/admin/internalSubcon/list.do?rst=1', 'Manage Internal Subcontractor', '3', 'Manage Internal Subcontractor', 
+'/admin/internalSubcon/list.do,/admin/internalSubcon/create.do,/admin/internalSubcon/save.do,/admin/internalSubcon/ajax.do,/admin/internalSubcon/edit.do,/admin/internalSubcon/delete.do,
+/admin/internalSubcon/search.do,/admin/internalSubcon/export.do',
+'1', '10', '0', '140', '/1/140/1411/');
+
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`)
+ VALUES (now(), '1', '1411', '1'); -- ADMIN
 
