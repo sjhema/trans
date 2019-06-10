@@ -1963,7 +1963,11 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 					}
 				}
 				else{
-					String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category+"  and obj.leavetype='"+leavetype+"'";
+					String ptodquery = "select obj from Ptod obj where obj.company="+comId
+							+" and obj.terminal="+terminalId
+							+" and obj.category="+category
+							+"  and obj.leavetype='"+leavetype+"'"
+							+" and obj.status=1";
 					List<Ptod> ptodob = genericDAO.executeSimpleQuery(ptodquery);
 					if(!ptodob.isEmpty()){
 						Ptod ptod=ptodob.get(0);
@@ -1985,8 +1989,11 @@ public class PtodapplicationController extends CRUDController<Ptodapplication> {
 			}
 			else{
 				// Jury duty fix - 3rd Nov 2016
-				String ptodquery = "select obj from Ptod obj where obj.company="+comId+" and obj.terminal="+terminalId+" and obj.category="+category
-						+"  and obj.leavetype='"+leaveTypeToBeUsed+"'";  // instead of leavetype
+				String ptodquery = "select obj from Ptod obj where obj.company="+comId
+						+" and obj.terminal="+terminalId
+						+" and obj.category="+category
+						+"  and obj.leavetype='"+leaveTypeToBeUsed+"'"  // instead of leavetype
+						+" and obj.status=1";
 				List<Ptod> ptodob = genericDAO.executeSimpleQuery(ptodquery);
 				if(!ptodob.isEmpty()){
 					Ptod ptod=ptodob.get(0);

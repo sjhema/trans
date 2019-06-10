@@ -21,6 +21,7 @@ import com.primovision.lutransport.core.dao.GenericDAO;
 
 import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.InternalSubcontractorMapping;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.Ticket;
@@ -158,6 +159,49 @@ public class TicketUtils {
 		}
 		
 		return colMapping;
+	}
+	
+	// WB LU subcontractor change - 3rd June 2019
+	private static List<InternalSubcontractorMapping> retrieveInternalSubcontractorMapping(Ticket entity, GenericDAO genericDAO) {
+		String query = "select obj from InternalSubcontractorMapping obj where"
+							+ " obj.origin.id="+entity.getOrigin().getId()
+							+ " and obj.destination.id="+entity.getDestination().getId()
+							+ " and obj.driverCompany.id="+entity.getDriverCompany().getId()
+							+ " and obj.billingCompany.id="+entity.getCompanyLocation().getId()
+							+ " order by obj.id desc";
+		List<InternalSubcontractorMapping> internalSubcontractorMappingList = 
+				genericDAO.executeSimpleQuery(query);
+		return internalSubcontractorMappingList;
+	}
+	
+	// WB LU subcontractor change - 3rd June 2019
+	public static void populateInternalSubcontractor(Ticket entity, GenericDAO genericDAO) {
+		if (entity.getDriverCompany() == null || entity.getDriverCompany().getId() == null
+				|| entity.getCompanyLocation() == null || entity.getCompanyLocation().getId() == null
+				|| entity.getOrigin() == null || entity.getOrigin().getId() == null 
+				|| entity.getDestination() == null || entity.getDestination().getId() == null) {
+			return;
+		}
+		
+		if (entity.getSubcontractor() != null && entity.getSubcontractor().getId() != null) {
+			String subconName = entity.getSubcontractor().getName();
+			if (StringUtils.isEmpty(subconName)) {
+				SubContractor subcontractor = genericDAO.getById(SubContractor.class, entity.getSubcontractor().getId());
+				subconName = subcontractor.getName();
+			}
+			if (!StringUtils.equalsIgnoreCase("blank", subconName)) {
+				return;	
+	     	}
+		}
+		
+		List<InternalSubcontractorMapping> internalSubcontractorMappingList = 
+				retrieveInternalSubcontractorMapping(entity, genericDAO);
+		if (internalSubcontractorMappingList == null || internalSubcontractorMappingList.isEmpty()) {
+			return;
+		}
+		
+		SubContractor internalSubcontractor = internalSubcontractorMappingList.get(0).getSubcontractor();
+		entity.setSubcontractor(internalSubcontractor);
 	}
 	
 	public static void save(Ticket entity, String type, StringBuffer errorMsgBuff, GenericDAO genericDAO) {
@@ -401,6 +445,9 @@ public class TicketUtils {
 		User user = genericDAO.getById(User.class, entity.getCreatedBy());
 		entity.setEnteredBy(user.getName());
 		entity.setCreatedAt(Calendar.getInstance().getTime());
+		
+		// WB LU subcontractor change - 3rd June 2019
+		populateInternalSubcontractor(entity, genericDAO);
 		
 		// Merge into datasource
 		genericDAO.saveOrUpdate(entity);

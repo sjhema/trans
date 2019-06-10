@@ -223,7 +223,12 @@ public class PtodController extends CRUDController<Ptod> {
 		if(entity.getId()!=null){
 			
 			StringBuffer query=new StringBuffer("");
-			query.append("select obj from Ptod obj where obj.id not in("+entity.getId()+") and obj.company="+entity.getCompany().getId()+" and obj.terminal="+entity.getTerminal().getId()+" and obj.category="+entity.getCategory().getId()+"  and obj.leavetype='"+entity.getLeavetype().getId()+"'");
+			query.append("select obj from Ptod obj where obj.id not in("+entity.getId()+") and obj.company="+entity.getCompany().getId()
+					+" and obj.terminal="+entity.getTerminal().getId()
+					+" and obj.category="+entity.getCategory().getId()
+					+"  and obj.leavetype='"+entity.getLeavetype().getId()+"'"
+					+" and obj.leaveQualifier='"+entity.getLeaveQualifier()+"'"
+					+" and obj.status="+entity.getStatus());
 		    query.append(" and obj.experienceindays="+entity.getExperienceindays());				
 			query.append(" and obj.experienceinyears="+entity.getExperienceinyears());
 			query.append(" and obj.experienceinyearsTo="+entity.getExperienceinyearsTo());
@@ -283,7 +288,12 @@ public class PtodController extends CRUDController<Ptod> {
 		
 		if(entity.getCompany()!=null && entity.getTerminal()!=null && entity.getCategory()!=null && entity.getLeavetype()!=null && entity.getId()==null){
 		  StringBuffer query=new StringBuffer("");
-			/* String*/ query.append("select obj from Ptod obj where obj.company="+entity.getCompany().getId()+" and obj.terminal="+entity.getTerminal().getId()+" and obj.category="+entity.getCategory().getId()+"  and obj.leavetype='"+entity.getLeavetype().getId()+"'"+"  and obj.leaveQualifier='"+entity.getLeaveQualifier()+"'");
+			/* String*/ query.append("select obj from Ptod obj where obj.company="+entity.getCompany().getId()
+					+" and obj.terminal="+entity.getTerminal().getId()
+					+" and obj.category="+entity.getCategory().getId()
+					+"  and obj.leavetype='"+entity.getLeavetype().getId()+"'"
+					+"  and obj.leaveQualifier='"+entity.getLeaveQualifier()+"'"
+					+" and obj.status="+entity.getStatus());
 		   //System.out.println("\nquery==>"+query+"\n");
 			if(entity.getExperienceindays()!=null){
 				query.append("and obj.experienceindays="+entity.getExperienceindays());				

@@ -141,9 +141,15 @@
 		<primo:textcolumn headerText="Leave Type" dataField="leavetype.name" />
 		<primo:textcolumn headerText="Experience From<br/>(in years)" dataField="experienceinyears"  />
 		<primo:textcolumn headerText="Experience To<br/>(in years)" dataField="experienceinyearsTo"  />
+		<primo:textcolumn headerText="Experience in days" dataField="experienceindays"  />
 		<primo:staticdatacolumn headerText="Leave Qualifier" dataField="leaveQualifier" dataType="LeaveQualifier"/>
 		<primo:textcolumn headerText="Days Earned" dataField="dayearned" />		
 		<primo:textcolumn headerText="Hours Earned" dataField="hoursearned" />
+		<primo:textcolumn headerText="PTOD Rate" dataField="rate" />
+		<primo:datecolumn headerText="Effective Date" dataField="effectiveDate" dataFormat="MM-dd-yyyy"/>	
+		<primo:datecolumn headerText="End Date" dataField="endDate" dataFormat="MM-dd-yyyy"/>
+		<primo:textcolumn headerText="Calculate" dataField="calculateFlag" />
+		<primo:textcolumn headerText="Annual accrual" dataField="annualoraccrual" />	
 		<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS" />
 		
 	</primo:datatable>

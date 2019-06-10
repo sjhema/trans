@@ -650,6 +650,9 @@ public class TicketController extends CRUDController<Ticket> {
 			entity.setAutoCreated(Ticket.AUTO_CREATED_NO);
 			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
 			
+			// WB LU subcontractor change - 3rd June 2019
+			TicketUtils.populateInternalSubcontractor(entity, genericDAO);
+			
 			// merge into datasource
 			genericDAO.saveOrUpdate(entity);
 			cleanUp(request);

@@ -211,6 +211,8 @@ function formatDate(){
 		<primo:textcolumn headerText="Hrs Paid" dataField="hourspaid" />
 		<primo:textcolumn headerText="Hrs Unpaid" dataField="hoursunpaid" />
 		<primo:textcolumn headerText="Hrs Paidout" dataField="paidouthours" />
+		
+		<primo:textcolumn headerText="PTOD Rate" dataField="ptodrates" />
 				
 		<primo:datecolumn headerText="Batch&nbsp;Date" dataField="batchdate" dataFormat="MM-dd-yyyy"/>		
 		<primo:textcolumn headerText="Check&nbsp;Date" dataField="checkdate" dataFormat="MM-dd-yyyy" />

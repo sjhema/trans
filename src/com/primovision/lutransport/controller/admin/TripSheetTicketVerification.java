@@ -527,6 +527,9 @@ public class TripSheetTicketVerification extends CRUDController<Ticket> {
 			
 			entity.setPaperVerifiedStatus(Ticket.PAPER_VERIFIED_STATUS_YES);
 			
+			// WB LU subcontractor change - 3rd June 2019
+			TicketUtils.populateInternalSubcontractor(entity, genericDAO);
+			
 			// merge into datasource
 			genericDAO.saveOrUpdate(entity);
 			cleanUp(request);
