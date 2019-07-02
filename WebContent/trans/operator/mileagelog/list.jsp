@@ -136,8 +136,8 @@ $(function() {
 				<primo:textcolumn headerText="VIN" dataField="vin"/>
 				<primo:textcolumn headerText="Permit" dataField="vehiclePermitNumber"/>
 				<primo:textcolumn headerText="Miles" dataField="miles"/>
-				<primo:textcolumn headerText="First In State" dataField="firstInState" dataFormat="MM-dd-yyyy"/>
-				<primo:textcolumn headerText="Last In State" dataField="lastInState" dataFormat="MM-dd-yyyy"/>
+				<primo:textcolumn headerText="First In State" dataField="firstInState" dataFormat="MM-dd-yyyy HH:mm:ss"/>
+				<primo:textcolumn headerText="Last In State" dataField="lastInState" dataFormat="MM-dd-yyyy HH:mm:ss"/>
 				<primo:textcolumn headerText="Groups" dataField="groups"/>
 				<primo:textcolumn headerText="Source" dataField="source"/>
 		</primo:datatable>

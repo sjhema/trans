@@ -4551,6 +4551,10 @@ throw new Exception("origin and destindation is empty");
 		
 		if (MileageLogReportInput.REPORT_TYPE_TOTALS.equals(input.getReportType())) {
 			returnMileageLogList = aggregateMileageLogByCompanyState(returnMileageLogList);
+			// New GPS change - 1st July 2019
+		} else if (MileageLogReportInput.REPORT_TYPE_DETAILS.equals(input.getReportType())
+				&& !drilldown) {
+			returnMileageLogList = aggregateMileageLogByCompanyStateUnit(returnMileageLogList);
 		}
 		
 		wrapper.setMileageLogList(returnMileageLogList);
