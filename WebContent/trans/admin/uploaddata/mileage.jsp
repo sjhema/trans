@@ -86,9 +86,11 @@
 		</td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="button" value="Upload Old Mileage" onclick="javascript:submitUploadform('OLD_GPS');"/>
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type="button" value="Upload New Mileage" onclick="javascript:submitUploadform('NEW_GPS');"/></td>
+		<td colspan="2">
+			<!--<input type="button" value="Upload Old Mileage" onclick="javascript:submitUploadform('OLD_GPS');"/>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+			<input type="button" value="Upload New Mileage" onclick="javascript:submitUploadform('NEW_GPS');"/>
+		</td>
 	</tr>
 </table>
 </form:form>

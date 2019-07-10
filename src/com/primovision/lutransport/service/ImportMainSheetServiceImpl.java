@@ -3186,11 +3186,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	public List<String> importMileageLogMainSheet(InputStream is, Date period, Double resetMiles, 
 			Long createdBy) throws Exception {
 		List<String> errorList = new ArrayList<String>();
-		if (!checkOldGPSMileageLoaded(period)) {
+		/*if (!checkOldGPSMileageLoaded(period)) {
 			String errorMsg = "Please upload old mileage first";
 			errorList.add(errorMsg);
 			return errorList;
-		}
+		}*/
 		
 		List<MileageLog> mileageLogList = new ArrayList<MileageLog>();
 		
