@@ -68,8 +68,8 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		
 		criterias.put("type", 3);
 		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias, "name",false));
-		criterias.put("type", 1);
-		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type=1 group by obj.unit"));
+		
+		model.addAttribute("trucks", genericDAO.executeSimpleQuery("select obj from Vehicle obj where obj.type in (1, 4) group by obj.unit"));
 		
 		criterias.clear();
 		model.addAttribute("states", genericDAO.findByCriteria(State.class, criterias, "name", false));
