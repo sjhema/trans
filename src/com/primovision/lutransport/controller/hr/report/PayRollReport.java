@@ -77,7 +77,7 @@ public class PayRollReport extends BaseController{
 		}
 		criterias.clear();
 		//criterias.put("catagory.id", catagory.getId());
-		criterias.put("status",1);
+		//criterias.put("status",1);
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
 		criterias.clear();
 		criterias.put("type", 3);
