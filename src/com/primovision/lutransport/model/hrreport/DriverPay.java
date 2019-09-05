@@ -90,6 +90,10 @@ public class DriverPay extends AbstractBaseModel{
 	@Column(name="bereavementAmount")
 	Double bereavementAmount=0.0;
 	
+	// Worker comp change - driver
+	@Column(name="workerCompAmount")
+	Double workerCompAmount=0.0;
+	
 	@Column(name="bonus_amount")
 	Double bonusAmount=0.0;
 	
@@ -158,6 +162,10 @@ public class DriverPay extends AbstractBaseModel{
 	@Transient
 	Double bereavementAmountSpc = 0.0;
 	
+	// Worker comp change - driver
+	@Transient
+	Double workerCompSpc = 0.0;
+	
 	@Transient
 	Double reimAmountSpc = 0.0;
 	
@@ -172,6 +180,26 @@ public class DriverPay extends AbstractBaseModel{
 	@Transient
 	public void setBereavementAmountSpc(Double bereavementAmountSpc) {
 		this.bereavementAmountSpc = bereavementAmountSpc;
+	}
+	
+	// Worker comp change - driver
+	public Double getWorkerCompAmount() {
+		return workerCompAmount;
+	}
+	// Worker comp change - driver
+	public void setWorkerCompAmount(Double workerCompAmount) {
+		this.workerCompAmount = workerCompAmount;
+	}
+	
+	// Worker comp change - driver
+	@Transient
+	public Double getWorkerCompSpc() {
+		return workerCompSpc;
+	}
+	// Worker comp change - driver
+	@Transient
+	public void setWorkerCompSpc(Double workerCompSpc) {
+		this.workerCompSpc = workerCompSpc;
 	}
 
 	public Double getTransportationAmount() {

@@ -75,6 +75,8 @@ public class PayChexDetail extends AbstractBaseModel{
 	
 	private Double bereavementAmount;
 	
+	private Double workerCompAmount;
+	
 	private Double reimburseAmount;
 	
 	private Double miscAmount;
@@ -247,6 +249,14 @@ public class PayChexDetail extends AbstractBaseModel{
 
 	public void setBereavementAmount(Double bereavementAmount) {
 		this.bereavementAmount = bereavementAmount;
+	}
+
+	public Double getWorkerCompAmount() {
+		return workerCompAmount;
+	}
+
+	public void setWorkerCompAmount(Double workerCompAmount) {
+		this.workerCompAmount = workerCompAmount;
 	}
 
 	public Double getReimburseAmount() {

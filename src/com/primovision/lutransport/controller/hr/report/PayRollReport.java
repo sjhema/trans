@@ -687,6 +687,8 @@ public class PayRollReport extends BaseController{
 						Double vacationAmount=0.00;
 						// Bereavement change - driver
 						Double bereavementAmount=0.00;
+					   // Worker comp change - driver
+						Double workerCompAmount=0.00;
 						Integer numberOfSickDays = 0;
 						Integer numberOfVactionDays = 0;
 						
@@ -751,6 +753,8 @@ public class PayRollReport extends BaseController{
 							vacationAmount=driverPay.getVacationAmount();
 							// Bereavement change - driver
 							bereavementAmount=driverPay.getBereavementAmount();
+							// Worker comp change - driver
+							workerCompAmount=driverPay.getWorkerCompAmount();
 									
 							numberOfVactionDays=driverPay.getNumberOfVactionDays();
 							
@@ -886,6 +890,8 @@ public class PayRollReport extends BaseController{
 							driverPay.setVacationAmountSpc(MathUtil.roundUp(vacationAmount,2));
 							// Bereavement change - driver
 							driverPay.setBereavementAmountSpc(MathUtil.roundUp(bereavementAmount,2));
+							// Worker comp change - driver
+							driverPay.setWorkerCompSpc(MathUtil.roundUp(workerCompAmount,2));
 							driverPay.setReimAmountSpc(reimburseAmt);
 							driverPay.setQuarterAmountSpc(qutarAmt);	
 							
