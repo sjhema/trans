@@ -9489,6 +9489,8 @@ public class HrReportServiceImpl implements HrReportService {
 			detail.setTransportationAmountDiff(pay.getTransportationAmountDiff());
 			// Bereavement change - driver
 			detail.setBereavementAmount(pay.getBereavementAmount());
+			// Worker comp change - driver
+			detail.setWorkersCompAmount(pay.getWorkerCompAmount());
 			detail.setVacationAmount(pay.getVacationAmount());
 			detail.setSickPersonalAmount(pay.getSickPersonalAmount());
 			detail.setBonusAmount(pay.getBonusAmount());

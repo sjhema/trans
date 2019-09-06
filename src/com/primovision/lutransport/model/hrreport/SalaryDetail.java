@@ -37,7 +37,17 @@ public class SalaryDetail {
 	// Bereavement change
 	private Double bereavementAmount=0.0;
 	
+	// Worker comp change
+	private Double workersCompAmount=0.0;
 	
+	public Double getWorkersCompAmount() {
+		return workersCompAmount;
+	}
+
+	public void setWorkersCompAmount(Double workersCompAmount) {
+		this.workersCompAmount = workersCompAmount;
+	}
+
 	public Double getProbationDetection() {
 		return probationDetection;
 	}
