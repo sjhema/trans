@@ -48,6 +48,17 @@ public class TimeSheet extends AbstractBaseModel {
 	@JoinColumn(name="catagory")
 	protected EmployeeCatagory catagory;
 	
+	@Transient
+	public String getCategory() {
+		String returnCategory = StringUtils.EMPTY;
+		if (catagory != null) {
+			returnCategory = catagory.getName();
+		}
+		return returnCategory;
+	}
+
+	
+
 	@ManyToOne
 	@JoinColumn(name="company")
 	protected Location company;
