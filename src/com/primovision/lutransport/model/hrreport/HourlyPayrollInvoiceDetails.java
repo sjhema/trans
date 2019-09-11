@@ -121,6 +121,18 @@ public class HourlyPayrollInvoiceDetails extends AbstractBaseModel implements Re
 	@Column
 	private Double bereavementAmount;
 	
+	// Worker comp change
+	@Column
+	private Double workerCompAmount = 0.0;
+	
+	public Double getWorkerCompAmount() {
+		return workerCompAmount;
+	}
+
+	public void setWorkerCompAmount(Double workerCompAmount) {
+		this.workerCompAmount = workerCompAmount;
+	}
+
 	public Double getBereavementAmount() {
 		return bereavementAmount;
 	}

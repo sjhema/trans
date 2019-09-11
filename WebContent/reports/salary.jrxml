@@ -29,7 +29,7 @@
 	<field name="quarterAmount" class="java.lang.Double"/>
 	<field name="bereavementAmount" class="java.lang.Double"/>
 	<field name="transportationAmountDiff" class="java.lang.Double"/>
-	<field name="workersCompAmount" class="java.lang.Double"/>
+	<field name="workerCompAmount" class="java.lang.Double"/>
 	<variable name="vacationSum" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{vacationAmount}]]></variableExpression>
 	</variable>
@@ -55,7 +55,7 @@
 		<variableExpression><![CDATA[$F{reimburseAmount}]]></variableExpression>
 	</variable>
 	<variable name="grandTotal" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{totalAmount}+$F{vacationAmount}+$F{quarterAmount}+$F{bereavementAmount}+$F{workersCompAmount}]]></variableExpression>
+		<variableExpression><![CDATA[$F{totalAmount}+$F{vacationAmount}+$F{quarterAmount}+$F{bereavementAmount}+$F{workerCompAmount}]]></variableExpression>
 	</variable>
 	<variable name="probationDeductionSum" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{probationDetection}]]></variableExpression>
@@ -70,7 +70,7 @@
 		<variableExpression><![CDATA[$F{transportationAmountDiff}]]></variableExpression>
 	</variable>
 	<variable name="sumOfWorkersCompAmount" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{workersCompAmount}]]></variableExpression>
+		<variableExpression><![CDATA[$F{workerCompAmount}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -625,7 +625,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totalAmount}+$F{vacationAmount}+$F{quarterAmount}+$F{bereavementAmount}+$F{workersCompAmount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{totalAmount}+$F{vacationAmount}+$F{quarterAmount}+$F{bereavementAmount}+$F{workerCompAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="382" y="0" width="120" height="20"/>
@@ -653,7 +653,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{workersCompAmount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{workerCompAmount})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

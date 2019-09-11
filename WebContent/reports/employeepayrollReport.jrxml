@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="1900" pageHeight="1050" orientation="Landscape" columnWidth="1896" leftMargin="2" rightMargin="2" topMargin="2" bottomMargin="2">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billing" pageWidth="2000" pageHeight="1050" orientation="Landscape" columnWidth="1996" leftMargin="2" rightMargin="2" topMargin="2" bottomMargin="2">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="975"/>
+	<property name="ireport.x" value="1117"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="date" class="java.lang.String"/>
 	<parameter name="payrollinvoiceNo" class="java.lang.String"/>
@@ -47,6 +47,7 @@
 	<field name="payRollBatchFrom" class="java.util.Date"/>
 	<field name="payRollCheckDate" class="java.util.Date"/>
 	<field name="bereavementAmount" class="java.lang.Double"/>
+	<field name="workerCompAmount" class="java.lang.Double"/>
 	<variable name="countLoad" class="java.lang.Integer" calculation="Count">
 		<variableExpression><![CDATA[$F{driver}]]></variableExpression>
 	</variable>
@@ -87,7 +88,10 @@
 		<variableExpression><![CDATA[$F{bereavementAmount}]]></variableExpression>
 	</variable>
 	<variable name="sumOfGrandTotal" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{sumOfTotVacSicBonus}+$F{vacationAmount}+$F{bereavementAmount}]]></variableExpression>
+		<variableExpression><![CDATA[$F{sumOfTotVacSicBonus}+$F{vacationAmount}+$F{bereavementAmount}+$F{workerCompAmount}]]></variableExpression>
+	</variable>
+	<variable name="sumOWorkerCompAmounts" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{workerCompAmount}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -467,7 +471,7 @@
 				<text><![CDATA[Misc. Pay]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1804" y="25" width="73" height="30" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1909" y="25" width="73" height="30" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -551,7 +555,7 @@
 				<text><![CDATA[Bereavement Amt]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1718" y="25" width="86" height="30" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1823" y="25" width="86" height="30" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -563,6 +567,20 @@
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1718" y="25" width="105" height="30" forecolor="#000000" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Workers Comp Amt]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -849,7 +867,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{miscAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1804" y="0" width="73" height="20"/>
+				<reportElement x="1909" y="0" width="73" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -933,7 +951,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{bereavementAmount})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1718" y="0" width="86" height="20"/>
+				<reportElement x="1823" y="0" width="86" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -944,7 +962,21 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{sumOfTotVacSicBonus}+$F{vacationAmount}+$F{bereavementAmount})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{sumOfTotVacSicBonus}+$F{vacationAmount}+$F{bereavementAmount}+$F{workerCompAmount})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1718" y="0" width="105" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("###0.00").format($F{workerCompAmount})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -1098,7 +1130,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumOfmiscAmounts})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1804" y="0" width="73" height="23"/>
+				<reportElement x="1909" y="0" width="73" height="23"/>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -1154,7 +1186,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumOfBereavementAmounts})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1718" y="0" width="86" height="23"/>
+				<reportElement x="1823" y="0" width="86" height="23"/>
 				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -1166,6 +1198,20 @@
 					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumOfGrandTotal})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1718" y="0" width="105" height="23"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{sumOWorkerCompAmounts})]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>
