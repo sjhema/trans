@@ -29,3 +29,12 @@ ADD COLUMN `workerCompAmount` DOUBLE NULL DEFAULT NULL;
 update `lutransport`.`hourlypayroll_invoice_details`
 set workerCompAmount = 0.0
 where workerCompAmount is null;
+
+-- Bereavement change - salary
+
+ALTER TABLE `lutransport`.`weeklypay_detail` 
+ADD COLUMN `workerCompAmount` DOUBLE NULL DEFAULT NULL;
+
+update `lutransport`.`weeklypay_detail`
+set workerCompAmount = 0.0
+where workerCompAmount is null;
