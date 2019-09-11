@@ -7568,6 +7568,9 @@ public class HrReportServiceImpl implements HrReportService {
 				Double reimburseamt=0.0;
 				// Bereavement change - salary
 				double bereavementAmount=0.0;
+				// Worker comp change - salary
+				double workerCompAmount=0.0;
+				
 				String query1="select obj from WeeklySalary obj where obj.driver.fullName='"+employee2.getFullName()+"' and obj.catagory="+employee2.getCatagory().getId()+" and obj.company="+employee2.getCompany().getId()+" and obj.terminal="+employee2.getTerminal().getId()+"and '"+payrollDate+"' BETWEEN obj.validFrom and obj.validTo";
 				
 				List<WeeklySalary> salaries=genericDAO.executeSimpleQuery(query1);
@@ -7619,15 +7622,24 @@ public class HrReportServiceImpl implements HrReportService {
 					if(ptodapplication.getLeavetype().getId() == 8) {
 						bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
 					}
+					
+					// Worker comp change - salary
+					if(ptodapplication.getLeavetype().getId() == 6) {
+						workerCompAmount = workerCompAmount + ptodapplication.getSequenceAmt1();
+					}
 				}
 				detail.setVacationAmount(vacationAmount);
 				detail.setSickPersonalAmount(sickParsonalAmount);
 				
 				// Bereavement change - salary
 				detail.setBereavementAmount(bereavementAmount);
+				
+				// Worker comp change - salary
+				detail.setWorkerCompAmount(workerCompAmount);
 
 				// Bereavement change - salary
-				detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount+bereavementAmount));
+				// Worker comp change - salary
+				detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount+bereavementAmount+workerCompAmount));
 
 				StringBuffer bonusquery=new StringBuffer("select obj from EmployeeBonus obj where obj.driver.fullName='"+employee2.getFullName()+"' and obj.category="+employee2.getCatagory().getId());
 				if(!StringUtils.isEmpty(payrollDate)){
@@ -7681,6 +7693,7 @@ public class HrReportServiceImpl implements HrReportService {
 				detail.setHolidayAmount(holidayAmount);
 				sumTotal+=detail.getAmount();
 				// Bereavement change - salary - Should bereavement be added below?
+				// Worker comp change - salary - Should workerComp be added below?
 				double totalamount=detail.getAmount()+detail.getSickPersonalAmount()+detail.getMiscAmount()+detail.getBonusAmount()+detail.getHolidayAmount();
 				totalamount=MathUtil.roundUp(totalamount, 2);
 				sumAmount+=totalamount;
@@ -7741,6 +7754,8 @@ public class HrReportServiceImpl implements HrReportService {
 		Double reimburseamt=0.0;
 		// Bereavement change - salary
 		double bereavementAmount=0.0;
+		// Worker comp change - salary
+		double workerCompAmount=0.0;
 		
 		WeeklyPayDetail detail=new WeeklyPayDetail();
 		detail.setCheckDate(checkDate);
@@ -7780,17 +7795,26 @@ public class HrReportServiceImpl implements HrReportService {
 			if(ptodapplication.getLeavetype().getId() == 8) {
 				bereavementAmount = bereavementAmount + ptodapplication.getSequenceAmt1();
 			}
+			
+			// Worker comp change - salary
+			if(ptodapplication.getLeavetype().getId() == 6) {
+				workerCompAmount = workerCompAmount + ptodapplication.getSequenceAmt1();
+			}
 		}
 		detail.setVacationAmount(vacationAmount);
 		detail.setSickPersonalAmount(sickParsonalAmount);
 		
 		// Bereavement change - salary
 		detail.setBereavementAmount(bereavementAmount);
+		
+		// Worker comp change - salary
+		detail.setWorkerCompAmount(workerCompAmount);
 
 		// Bereavement change - salary
+		// Worker comp change - salary
 		// Check 
 		//detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount+bereavementAmount));
-		detail.setAmount((paidSickPersonalAmount+paidVacationAmount+bereavementAmount));
+		detail.setAmount((paidSickPersonalAmount+paidVacationAmount+bereavementAmount+workerCompAmount));
 
 		StringBuffer bonusquery=new StringBuffer("select obj from EmployeeBonus obj where obj.driver.fullName='"+employee2.getFullName()
 				+"' and obj.category="+employee2.getCatagory().getId());
@@ -7855,6 +7879,7 @@ public class HrReportServiceImpl implements HrReportService {
 		//sumTotal+=detail.getAmount();
 		
 		// Bereavement change - salary - Should bereavement be added below?
+		// Worker comp change - salary - Should worker comp be added below?
 		double totalamount=detail.getAmount()+detail.getSickPersonalAmount()+detail.getMiscAmount()+detail.getBonusAmount()+detail.getHolidayAmount();
 		totalamount=MathUtil.roundUp(totalamount, 2);
 		
@@ -8432,7 +8457,9 @@ public class HrReportServiceImpl implements HrReportService {
 			criterias.clear();
 		if((payDetail.getVacationAmount()==0.0 || payDetail.getVacationAmount()==null)
 				// Bereavement change - salary
-				&& (payDetail.getBereavementAmount() == null || payDetail.getBereavementAmount() == 0.0))
+				&& (payDetail.getBereavementAmount() == null || payDetail.getBereavementAmount() == 0.0)
+				// Worker comp change - salary
+				&& (payDetail.getWorkerCompAmount() == null || payDetail.getWorkerCompAmount() == 0.0))
 		{
 			criterias.put("status",1);
 			criterias.put("fullName",payDetail.getDriver());
@@ -8470,7 +8497,9 @@ public class HrReportServiceImpl implements HrReportService {
 		}
 		else if((payDetail.getVacationAmount()!=0.0 && payDetail.getVacationAmount()!=null)
 					// Bereavement change - salary
-					|| (payDetail.getBereavementAmount() != null && payDetail.getBereavementAmount() != 0.0)){
+					|| (payDetail.getBereavementAmount() != null && payDetail.getBereavementAmount() != 0.0)
+					// Worker comp change - salary
+					|| (payDetail.getWorkerCompAmount() != null && payDetail.getWorkerCompAmount() != 0.0)){
 			criterias.put("status",1);
 			criterias.put("fullName",payDetail.getDriver());
 			criterias.put("company.id", payDetail.getCompany().getId());
@@ -8525,7 +8554,9 @@ public class HrReportServiceImpl implements HrReportService {
 					}
 					if(ptodapplication.getLeavetype().getId()==4 ||
 							// Bereavement change - salary
-							ptodapplication.getLeavetype().getId() == 8) {
+							ptodapplication.getLeavetype().getId() == 8
+							|| // Worker comp change - salary
+							ptodapplication.getLeavetype().getId() == 6) {
 						List<Integer> sequenceNumber = new ArrayList<Integer>();
 						List<Double>  sequenceAmount = new ArrayList<Double>();
 						
@@ -8562,15 +8593,20 @@ public class HrReportServiceImpl implements HrReportService {
 								detail2.setFirstName(employee.getFirstName());
 								// Worker comp change - salary
 								detail2.setWorkerCompAmount(0.0);
+								detail2.setVacationAmount(0.0);
+								detail2.setBereavementAmount(0.0);
 								// Bereavement change - salary
 								// Bereavement vacation fix - 7th Aug 2017
 								//if (sequenceNumber.get(i) == 7) {
+								// Worker comp change - salary
 								if (ptodapplication.getLeavetype().getId() == 8) {
 									detail2.setBereavementAmount(sequenceAmount.get(i));
-									detail2.setVacationAmount(0.0);
+									//detail2.setVacationAmount(0.0);
+								} else if (ptodapplication.getLeavetype().getId() == 6) {
+									detail2.setWorkerCompAmount(sequenceAmount.get(i));
 								} else {
 									detail2.setVacationAmount(sequenceAmount.get(i));
-									detail2.setBereavementAmount(0.0);
+									//detail2.setBereavementAmount(0.0);
 								}
 								
 								//detail2.setSalary(payDetail.getAmount());
@@ -8588,6 +8624,9 @@ public class HrReportServiceImpl implements HrReportService {
 							// Bereavement change - salary
 							if(payDetail.getBereavementAmount() != null && payDetail.getBereavementAmount() != 0.0) {
 								detail.setBereavementAmount(payDetail.getBereavementAmount());
+							// Worker comp change - salary
+							} else if(payDetail.getWorkerCompAmount() != null && payDetail.getWorkerCompAmount() != 0.0) {
+								detail.setWorkerCompAmount(payDetail.getWorkerCompAmount());
 							} else {
 								detail.setVacationAmount(detail.getVacationAmount()+(ptodapplication.getAmountpaid()+ptodapplication.getHourlyamountpaid()));
 							}
@@ -9568,6 +9607,8 @@ public class HrReportServiceImpl implements HrReportService {
 			detail.setReimburseAmount(payDetail.getReimburseAmount());
 			// Bereavement change - salary
 			detail.setBereavementAmount(payDetail.getBereavementAmount());
+			// Worker comp change - salary
+			detail.setWorkerCompAmount(payDetail.getWorkerCompAmount());
 			Map driverCriteria = new HashMap();
 			driverCriteria.clear();
 			driverCriteria.put("fullName",payDetail.getDriver());

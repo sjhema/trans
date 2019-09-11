@@ -69,12 +69,23 @@ public class WeeklyPayDetail extends AbstractBaseModel{
 	@Column(name="bereavementAmount")
 	private Double bereavementAmount=0.0;
 	
+	// Worker comp change - salary
+	private Double workerCompAmount=0.0;
+	
 	@Column
 	private Double miscAmount;
 	
 	@Column
 	private Double reimburseAmount;
 	
+	public Double getWorkerCompAmount() {
+		return workerCompAmount;
+	}
+
+	public void setWorkerCompAmount(Double workerCompAmount) {
+		this.workerCompAmount = workerCompAmount;
+	}
+
 	public Double getBereavementAmount() {
 		return bereavementAmount;
 	}
