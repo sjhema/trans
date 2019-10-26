@@ -6070,11 +6070,12 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 
 					// FOR CITY
 					String city = ((String) getCellValue(row.getCell(11)));
+					city = StringUtils.replace(city, "'", StringUtils.EMPTY);
 					if (!(StringUtils.isEmpty(city))) {
 						if (override == false) {
 							try {
 								if (!city.isEmpty()) {
-									fuellog.setCity((String) getCellValue(row.getCell(11)));
+									fuellog.setCity(city);
 								} else {
 									error = true;
 									lineError.append("City is blank,");
@@ -6084,7 +6085,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 								lineError.append("City,");
 							}
 						} else {
-							fuellog.setCity((String) getCellValue(row.getCell(11)));
+							fuellog.setCity(city);
 						}
 					} else {
 						fuellog.setCity("");

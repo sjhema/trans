@@ -31,7 +31,6 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.SubContractor;
 import com.primovision.lutransport.model.SubcontractorInvoice;
-import com.primovision.lutransport.model.report.Billing;
 import com.primovision.lutransport.model.report.SubcontractorBilling;
 import com.primovision.lutransport.service.DateUpdateService;
 import com.primovision.lutransport.service.DynamicReportService;

@@ -516,22 +516,22 @@ public class FuelVendorLogUploadUtil {
 		int expectedColumnStartIndex = 2;
 		
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice #");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Tran Date");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Time");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Invoice No"); // Invoice #
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date/Time"); // Old - Tran Date
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Date/Time"); // Old - Time
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit #");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Card Desc");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Card Description"); // Old - Card Desc
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Card No"); 
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Product");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Site  Desc"); 
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "ST");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++),  "Prod ID"); // Old - Product
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Site Description"); // Old - Site  Desc
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "State"); // Old - ST
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Units");
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Unit Price");
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Total Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), "Total");  // Old - Total Price
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
 		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex++), StringUtils.EMPTY);
-		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total Price");
+		actualColumnMap.put(expectedColumnList.get(expectedColumnStartIndex), "Total");  // Old - Total Price
 		vendorToFuelLogMapping.put(VENDOR_QUARLES, actualColumnMap);
 	}
 	
@@ -1286,14 +1286,13 @@ public class FuelVendorLogUploadUtil {
 		}
 		
 		int columnIndex = cell.getColumnIndex();
-		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4) { // Invoice Date, Transaction Date
+		if (oneCellValue instanceof Date || columnIndex == 2 || columnIndex == 4
+				 || columnIndex == 5) { // Invoice Date, Transaction Date, Transaction Date
 			setCellValueDateFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 3) {
 			setCellValueInvoiceNumberFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 6) {
 			setCellValueUnitNumberFormat(wb, cell, oneCellValue, vendor);
-		} else if (columnIndex == 5) { // transaction time 
-			setCellValueTimeFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 7 || columnIndex == 8) {
 			setCellValueDriverFormat(wb, cell, oneCellValue, vendor);
 		} else if (columnIndex == 9) { // cardnumber 
@@ -1568,7 +1567,7 @@ public class FuelVendorLogUploadUtil {
 		} else if (vendor.equalsIgnoreCase(VENDOR_DCFUELWB) || StringUtils.contains(vendor, VENDOR_KW_RASTALL)
 				|| StringUtils.contains(vendor, VENDOR_AC_T) || StringUtils.contains(vendor, VENDOR_ATLANTIC_COAST) || StringUtils.equals(vendor, VENDOR_QUICK_FUEL)) {
 			cell.setCellValue("00:00");
-		} else if (StringUtils.contains(vendor, VENDOR_QUARLES) || StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
+		} else if (StringUtils.contains(vendor, VENDOR_COMDATA_DREW)) { 
 			cell.setCellValue(timeStr);
 		}  
 	}
@@ -1644,7 +1643,8 @@ public class FuelVendorLogUploadUtil {
 		} else if (columnIndex == 5 && 
 				(StringUtils.equals(vendor, VENDOR_BALTIMORE_COUNTY_WB)
 						|| StringUtils.equals(vendor, VENDOR_JAMES_RIVER_PETROLEUM)
-						|| StringUtils.contains(vendor, VENDOR_ONSITE_FUEL))) { // Txn time
+						|| StringUtils.contains(vendor, VENDOR_ONSITE_FUEL)
+						|| StringUtils.contains(vendor, VENDOR_QUARLES))) { // Txn time
 			String specifiedTxnTime = convertToExpectedTimeFormat(dateStr, vendorDateFormat);
 			cell.setCellValue(specifiedTxnTime);
 			return;
