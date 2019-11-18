@@ -604,7 +604,7 @@ public class MileageLogReportController extends BaseController {
 		
       populateSearchCriteria(request, request.getParameterMap());
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(15000);
+		criteria.setPageSize(50000);
 		criteria.setPage(0);
       
       Map imagesMap = new HashMap();
@@ -660,7 +660,7 @@ public class MileageLogReportController extends BaseController {
 		
       populateSearchCriteria(request, request.getParameterMap());
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(15000);
+		criteria.setPageSize(50000);
 		criteria.setPage(0);
       
       Map imagesMap = new HashMap();
@@ -740,7 +740,7 @@ public class MileageLogReportController extends BaseController {
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(15000);
+		criteria.setPageSize(50000);
 		criteria.setPage(0);
 		
 		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
@@ -852,7 +852,7 @@ public class MileageLogReportController extends BaseController {
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(15000);
+		criteria.setPageSize(50000);
 		criteria.setPage(0);
 		
 		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
@@ -908,7 +908,7 @@ public class MileageLogReportController extends BaseController {
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(15000);
+		criteria.setPageSize(50000);
 		criteria.setPage(0);
 		
 		MileageLogReportInput input = (MileageLogReportInput)request.getSession().getAttribute("input");
