@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.primovision.lutransport.core.tags.StaticDataUtil;
+
 /**
  * @author Amit
  * 
@@ -603,6 +605,54 @@ public class Ticket extends AbstractBaseModel {
 	@Transient
 	public void setMode(String mode) {
 		this.mode = mode;
+	}
+	
+	@Transient
+	public Integer getTruckNum() {
+		if (vehicle == null) {
+			return null;
+		} else {
+			return vehicle.getUnit();
+		}
+	}
+	
+	@Transient
+	public String getPayrollStatusStr() {
+		return decodePayrollStatus();
+	}
+	
+	@Transient
+	public String getCompleteStatusStr() {
+		return decodeCompleteStatus();
+	}
+	
+	@Transient
+	public String getHoldStatusStr() {
+		return decodeHoldStatus();
+	}
+	
+	private String decodePayrollStatus() {
+		if (payRollStatus == null) {
+			return StringUtils.EMPTY;
+		} 
+		
+		return StaticDataUtil.getText("Payroll_Pending", payRollStatus.toString());
+	}
+	
+	private String decodeCompleteStatus() {
+		if (status == null) {
+			return StringUtils.EMPTY;
+		} 
+		
+		return StaticDataUtil.getText("STATUS", status.toString());
+	}
+	
+	private String decodeHoldStatus() {
+		if (ticketStatus == null) {
+			return StringUtils.EMPTY;
+		} 
+		
+		return StaticDataUtil.getText("TICKET_STATUS", ticketStatus.toString());
 	}
 
 	@Override
