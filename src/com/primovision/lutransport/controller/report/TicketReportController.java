@@ -262,10 +262,16 @@ public class TicketReportController extends BaseController {
 		populateSearchCriteria(request, request.getParameterMap());
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(500);
+		int origPage = criteria.getPage();
+		int origPageSize = criteria.getPageSize();
 		criteria.setPage(0);
+		criteria.setPageSize(500);
 		
 		Map<String, Object> datas = generateData(criteria, request);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(origPageSize);
+		
 		List<Ticket> ticketList = (List<Ticket>) datas.get("data");
 		Map<String, Object> params = (Map<String, Object>) datas.get("params");
 		
@@ -295,10 +301,16 @@ public class TicketReportController extends BaseController {
 		request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		criteria.setPageSize(500);
+		int origPage = criteria.getPage();
+		int origPageSize = criteria.getPageSize();
 		criteria.setPage(0);
+		criteria.setPageSize(500);
 		
 		Map<String, Object> datas = generateData(criteria, request);
+		
+		criteria.setPage(origPage);
+		criteria.setPageSize(origPageSize);
+		
 		List<Ticket> ticketList = (List<Ticket>) datas.get("data");
 		Map<String, Object> params = (Map<String, Object>) datas.get("params");
 		
