@@ -939,9 +939,13 @@ public class UploadDataController extends BaseController {
 	}
 	
 	private void setupWMTicketUpload(ModelMap model) {
-		Location location = genericDAO.getById(Location.class, 392l); // Fairless landfill
 		List<Location> locationList = new ArrayList<Location>();
+		
+		Location location = genericDAO.getById(Location.class, 392l); // Fairless landfill
 		locationList.add(location);
+		location = genericDAO.getById(Location.class, 459l); // Richland landfill
+		locationList.add(location);
+		
 		model.addAttribute("destinationLocations", locationList);
 	}
 	

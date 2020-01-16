@@ -81,7 +81,8 @@ public class TicketUtils {
 				|| locationId == 67l // Varick I Transfer
 				|| locationId == 31l // Forge Transfer
 				|| locationId == 71l // Yonkers Transfer
-				|| locationId == 70l) { // Waverly Transfer
+				|| locationId == 70l // Waverly Transfer
+				|| locationId == 459l) { // Richland Landfill
 			recordsToBeSkipped = 12;
 		}
 		
@@ -156,7 +157,20 @@ public class TicketUtils {
 			colMapping.put(WM_COL_TONS, 8);
 			colMapping.put(WM_COL_COMPANY, 11);
 			colMapping.put(WM_COL_HAULING_TICKET, 12);
-		}
+		} else if (locationId == 459l) { // Richland Landfill
+			colMapping.put(WM_COL_TXN_DATE, 0);
+			colMapping.put(WM_COL_TIME_IN, 1);
+			colMapping.put(WM_COL_TIME_OUT, 2);
+			colMapping.put(WM_COL_TICKET, 5);
+			colMapping.put(WM_COL_COMPANY, 7);
+			colMapping.put(WM_COL_VEHICLE, 8);
+			colMapping.put(WM_COL_TRAILER, 10);
+			colMapping.put(WM_COL_TONS, 19);
+			colMapping.put(WM_COL_GROSS, 21);
+			colMapping.put(WM_COL_TARE, 22);
+			colMapping.put(WM_COL_NET, 23);
+			colMapping.put(WM_COL_HAULING_COMPANY, 6);
+		}  
 		
 		return colMapping;
 	}
