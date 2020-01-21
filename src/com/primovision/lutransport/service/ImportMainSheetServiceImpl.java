@@ -2521,6 +2521,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						continue;
 					}
 					
+					WMTicket originTicketCopy = checkAndSetUpAsOriginWMTicket(currentWMTicket, errorMsgBuff);
+					if (errorMsgBuff.length() != 0) {
+						recordError = true;
+						errorList.add("Line " + recordCount + ": " + errorMsgBuff.toString() + "<br/>");
+						errorCount++;
+						continue;
+					}
+					
 					TripSheet tripSheet = retrieveMatchingTripsheet(currentWMTicket);
 					if (tripSheet == null) {
 						currentWMTicket.setProcessingStatus(WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
@@ -2529,6 +2537,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						if (destinationTicketCopy != null) {
 							destinationTicketCopy.setProcessingStatus(WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
 							genericDAO.saveOrUpdate(destinationTicketCopy);
+						}
+						
+						if (originTicketCopy != null) {
+							originTicketCopy.setProcessingStatus(WMTicket.PROCESSING_STATUS_NO_TRIPSHEET);
+							genericDAO.saveOrUpdate(originTicketCopy);
 						}
 						
 						/*recordError = true;
@@ -2543,6 +2556,11 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						TicketUtils.map(destinationTicketCopy, tripSheet);
 						destinationTicketCopy.setProcessingStatus(WMTicket.PROCESSING_STATUS_PROCESSING);
 						genericDAO.saveOrUpdate(destinationTicketCopy);
+					}
+					if (originTicketCopy != null) {
+						TicketUtils.map(originTicketCopy, tripSheet);
+						originTicketCopy.setProcessingStatus(WMTicket.PROCESSING_STATUS_PROCESSING);
+						genericDAO.saveOrUpdate(originTicketCopy);
 					}
 					
 					// Driver subcontractor change 2 - 21st Jul 2017
@@ -2686,6 +2704,42 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return destinationWMTicket;
 	}
 	
+	private WMTicket checkAndSetUpAsOriginWMTicket(WMTicket wmTicket, StringBuffer errorMsgBuff) {
+		if (!StringUtils.equals(WMTicket.DESTINATION_TICKET_TYPE, wmTicket.getTicketType())) {
+			return null;
+		}
+		
+		if (StringUtils.isEmpty(wmTicket.getWmHaulingCompany())
+				|| wmTicket.getOrigin() == null) {
+			return null;
+		}
+		
+		long destinationId = wmTicket.getDestination().getId().longValue();
+		List<LocationPair> locationPairList = retrieveLocationPairForDestination(destinationId);
+		if (locationPairList == null || locationPairList.isEmpty()) {
+			return null;
+		}
+		
+		Location derivedOrigin = wmTicket.getOrigin();
+		long derivedOriginId = derivedOrigin.getId().longValue();
+		
+		boolean copyAsOrigin = false;
+		for (LocationPair aLocationPair : locationPairList) {
+			if (derivedOriginId == aLocationPair.getOrigin().getId().longValue()) {
+				copyAsOrigin = true;
+				break;
+			}
+		}
+		if (!copyAsOrigin) {
+			return null;
+		}
+		
+		WMTicket originWMTicket = new WMTicket();
+		copyAsOrigin(originWMTicket, wmTicket, derivedOrigin);
+		
+		return originWMTicket;
+	}
+	
 	private boolean checkCompanyToBeSkipped(WMTicket wmTicket) {
 		if (!StringUtils.equals(WMTicket.DESTINATION_TICKET_TYPE, wmTicket.getTicketType())) {
 			return false;
@@ -2747,6 +2801,52 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		copy.setLandfillTare(orig.getTransferTare());
 		copy.setLandfillNet(orig.getTransferNet());
 		copy.setLandfillTons(orig.getTransferTons());
+	}
+	
+	private void copyAsOrigin(WMTicket copy, WMTicket dest, Location origin) {
+		copy.setTicket(dest.getTicket());
+		copy.setTxnDate(dest.getTxnDate());
+		copy.setCreatedAt(dest.getCreatedAt());
+		copy.setCreatedBy(dest.getCreatedBy());
+		copy.setStatus(dest.getStatus());
+		copy.setProcessingStatus(dest.getProcessingStatus());
+		
+		copy.setWmVehicle(dest.getWmVehicle());
+		copy.setWmTrailer(dest.getWmTrailer());
+		copy.setWmCompany(dest.getWmCompany());
+		
+		copy.setVehicle(dest.getVehicle());
+		copy.setTrailer(dest.getTrailer());
+		
+		copy.setDriver(dest.getDriver());
+		copy.setDriverCompany(dest.getDriverCompany());
+		copy.setTerminal(dest.getTerminal());
+		
+		copy.setTimeIn(dest.getTimeIn());
+		copy.setTimeOut(dest.getTimeOut());
+		
+		copy.setGross(dest.getGross());
+		copy.setTare(dest.getTare());
+		copy.setNet(dest.getNet());
+		copy.setTons(dest.getTons());
+		
+		copy.setTicketType(WMTicket.ORIGIN_TICKET_TYPE);
+		copy.setOrigin(origin);
+		copy.setOriginTicket(dest.getTicket());
+		
+		copy.setDestination(dest.getDestination());
+		//copy.setHaulingTicket(dest.getTicket());
+		
+		copy.setLoadDate(dest.getUnloadDate());
+		Date batchDate = TicketUtils.calculateBatchDate(copy.getLoadDate());
+		copy.setBillBatch(batchDate);
+		
+		copy.setTransferTimeIn(dest.getLandfillTimeIn());
+		copy.setTransferTimeOut(dest.getLandfillTimeOut());
+		copy.setTransferGross(dest.getLandfillGross());
+		copy.setTransferTare(dest.getLandfillTare());
+		copy.setTransferNet(dest.getLandfillNet());
+		copy.setTransferTons(dest.getLandfillTons());
 	}
 	
 	private Location retrieveOriginForWM(HSSFSheet sheet) {
@@ -2928,6 +3028,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 	private List<LocationPair> retrieveLocationPairForOrigin(Long originId) {
 		String query = "select obj from LocationPair obj where";
 		query += (" obj.origin=" + originId);
+		
+		List<LocationPair> locationPairList = genericDAO.executeSimpleQuery(query);
+		return locationPairList;
+	}
+	
+	private List<LocationPair> retrieveLocationPairForDestination(Long destinationId) {
+		String query = "select obj from LocationPair obj where";
+		query += (" obj.destination=" + destinationId);
 		
 		List<LocationPair> locationPairList = genericDAO.executeSimpleQuery(query);
 		return locationPairList;
