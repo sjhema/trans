@@ -55,8 +55,12 @@ public class MileageLogController extends CRUDController<MileageLog> {
 	public void initBinder(WebDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MMMMM yyyy");
 	   dateFormat.setLenient(false);
-	   
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+		
+		dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		binder.registerCustomEditor(Date.class, "firstInState", new CustomDateEditor(dateFormat, true));
+		binder.registerCustomEditor(Date.class, "lastInState", new CustomDateEditor(dateFormat, true));
+		
 		binder.registerCustomEditor(Vehicle.class, new AbstractModelEditor(Vehicle.class));
 		binder.registerCustomEditor(Location.class, new AbstractModelEditor(Location.class));
 		binder.registerCustomEditor(State.class, new AbstractModelEditor(State.class));
@@ -228,10 +232,6 @@ public class MileageLogController extends CRUDController<MileageLog> {
 			bindingResult.rejectValue("state", "error.select.option", null, null);
 		}
 		
-		if (entity.getCompany() == null){
-			bindingResult.rejectValue("company", "error.select.option", null, null);
-		}
-		
 		if (entity.getUnit() == null) {
 			bindingResult.rejectValue("unit", "error.select.option", null, null);
 		} else {
@@ -240,10 +240,12 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		   Vehicle vehicle = genericDAO.getByCriteria(Vehicle.class, crieiria);
 		   if (vehicle != null) {
 		   	entity.setUnitNum(vehicle.getUnitNum());
+		   	entity.setVin(vehicle.getVinNumber());
+		   	entity.setCompany(vehicle.getOwner());
 		   } 
 		}
 		
-		if (StringUtils.isEmpty(entity.getVehiclePermitNumber())) {
+		/*if (StringUtils.isEmpty(entity.getVehiclePermitNumber())) {
 			entity.setVehiclePermitNumber(StringUtils.EMPTY);
 			entity.setVehiclePermit(null);
 		} else {
@@ -253,6 +255,21 @@ public class MileageLogController extends CRUDController<MileageLog> {
 			} else {
 				bindingResult.rejectValue("vehiclePermitNumber", "error.textbox.vehiclePermitNumber", null, null);
 			}
+		}*/
+		
+		VehiclePermit vehiclePermit = retrieveVehiclePermit(entity);
+		if (vehiclePermit != null && StringUtils.isNotEmpty(vehiclePermit.getPermitNumber())) {
+			entity.setVehiclePermit(vehiclePermit);
+			entity.setVehiclePermitNumber(vehiclePermit.getPermitNumber());
+		} else {
+			entity.setVehiclePermit(null);
+			entity.setVehiclePermitNumber(StringUtils.EMPTY);
+			
+			/*if (entity.getState() != null 
+					&& StringUtils.equals("NY", entity.getState().getCode())) {
+				recordError = true;
+				recordErrorMsg.append("Could not determine vehicle permit,");
+			}*/
 		}
 		
 		try {
@@ -267,6 +284,11 @@ public class MileageLogController extends CRUDController<MileageLog> {
 			return urlContext + "/form";
 		}
 		
+		if (StringUtils.isEmpty(request.getParameter("id"))){
+			entity.setGps("N");
+			entity.setSource(MileageLog.SOURCE_MANUAL);
+		} 
+		
 		beforeSave(request, entity, model);
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
@@ -274,10 +296,31 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		if (!StringUtils.isEmpty(request.getParameter("id"))){
 			request.getSession().setAttribute("msg", "Mileage updated successfully");
 			return "redirect:list.do";
-		}
-		else {			
+		} else {			
 			request.getSession().setAttribute("msg", "Mileage added successfully");
 			return "redirect:create.do";
+		}
+	}
+	
+	private VehiclePermit retrieveVehiclePermit(MileageLog mileageLog) {
+		if (mileageLog.getUnit() == null || mileageLog.getCompany() == null 
+				|| mileageLog.getLastInState() == null) {
+			return null;
+		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String lastInStateStr = dateFormat.format(mileageLog.getLastInState());
+		
+		String query = "select obj from VehiclePermit obj where obj.status=1"
+				+ " and obj.issueDate <= '" + lastInStateStr + "'"
+				+ " and obj.expirationDate > '" + lastInStateStr + "'"
+				+ " and obj.vehicle.unitNum = " + mileageLog.getUnit().getUnitNum();
+				//+ " and obj.companyLocation = " + mileageLog.getCompany().getId();
+		List<VehiclePermit> permits = genericDAO.executeSimpleQuery(query);
+		if (permits != null && !permits.isEmpty()) {
+			return permits.get(0);
+		} else {
+			return null;
 		}
 	}
 	

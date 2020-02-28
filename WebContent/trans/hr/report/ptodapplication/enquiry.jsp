@@ -6,6 +6,79 @@ function searchReport() {
 $(document).ready(function(){
 	   $("select").multiselect();
 });
+
+function formatDate(dateElemId) {
+	var dateElem = document.getElementById(dateElemId);
+	var date = dateElem.value;
+	
+	if (date != "") {
+		if (date.length < 8) {
+			alert("Invalidte date format");
+			dateElem.value = "";
+			return true;
+		} else {
+			var str = new String(date);
+			if (!str.match("-")) {
+				var mm = str.substring(0,2);
+				var dd = str.substring(2,4);
+				var yy = str.substring(4,8);
+				var enddigit = str.substring(6,8);
+				if (!enddigit == 00 && enddigit%4 == 0 ) {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value="";
+							return true;
+						}
+					} if (mm == 02 && dd > 29) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					}
+				} if (enddigit == 00 && yy%400 == 0) {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value="";
+							return true;
+						}
+					} if (mm == 02 && dd > 29) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value="";
+						return true;
+					}					
+				} else {
+					if (mm == 04 || mm == 06 || mm == 09 || mm == 11) {
+						if (dd > 30) {
+							alert("Invalid date format");
+							dateElem.value = "";
+							return true;
+						}
+					} if (mm == 02 && dd > 28) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					} else if (dd > 31) {
+						alert("Invalid date format");
+						dateElem.value = "";
+						return true;
+					}
+				}
+				date = mm+"-"+dd+"-"+yy;
+				dateElem.value = date;
+			}
+	 	}
+	}
+}
+
 </script>
 
 <form:form action="search.do" name="searchForm" method="post" commandName="modelObject">
@@ -66,9 +139,10 @@ $(document).ready(function(){
 		<tr>
 				<td align="${left}" class="form-left">Pay Roll Batch Date From</td>
 			<td align="${left}"><form:input path="payRollBatchFrom"
-					cssClass="flat"  id="datepicker" onblur="return formatDate();" /></td>
+					cssClass="flat"  id="datepicker" onblur="return formatDate('datepicker');" /></td>
 					<td align="${left}" class="form-left">Pay Roll Batch Date To</td>
-				<td align="${left}"><form:input path="payRollBatchto" cssClass="flat"  id="datepicker1" onblur="return formatDate();" /> </td>
+				<td align="${left}"><form:input path="payRollBatchto" cssClass="flat"  id="datepicker1" 
+				onblur="return formatDate('datepicker1');" /> </td>
 		</tr>
 		 <tr>
 	   <td class="form-left"><primo:label code="Approve Status" /><span

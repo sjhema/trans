@@ -18,6 +18,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class MileageLog extends AbstractBaseModel implements ReportModel {
 	public static final String SOURCE_OLD_GPS = "OLD_GPS";
 	public static final String SOURCE_NEW_GPS = "NEW_GPS";
+	public static final String SOURCE_MANUAL = "MANUAL";
 	public static final String SOURCE_OLD_NEW_GPS = "OLD_NEW_GPS";
 	public static final String SOURCE_TICKET = "TICKET";
 	
