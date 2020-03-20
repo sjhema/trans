@@ -3389,6 +3389,10 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 						recordError = true;
 						fatalRecordError = true;
 						recordErrorMsg.append("Miles,");
+					} else if (milesDbl.doubleValue() == 0.0) {
+						recordError = true;
+						fatalRecordError = true;
+						recordErrorMsg.append("Miles is 0.0, will try to calculate miles using load tickets,");
 					} else {
 						String formattedMilesStr = milesFormat.format(milesDbl.doubleValue());
 						Double formattedMiles = new Double(formattedMilesStr);
@@ -3479,7 +3483,7 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 					genericDAO.saveOrUpdate(aMileageLog);
 				}
 				
-				uploadNoGPSMileageLogData(period, createdBy);
+				uploadNoGPSMileageLogData(period, createdBy, errorList);
 			}
 		} catch (Exception ex) {
 			errorList.add("Not able to upload XL!!! Please try again.");
@@ -3688,8 +3692,8 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		return aggreateMileageLogList;
 	}
 	
-	private void uploadNoGPSMileageLogData(Date period, Long createdBy) {
-		List<MileageLog> noGPSMileageLogList = retrieveNoGPSMileageLogData(period);
+	private void uploadNoGPSMileageLogData(Date period, Long createdBy, List<String> errorList) {
+		List<MileageLog> noGPSMileageLogList = retrieveNoGPSMileageLogData(period, errorList);
 		if (noGPSMileageLogList == null || noGPSMileageLogList.isEmpty()) {
 			return;
 		}
@@ -3712,14 +3716,14 @@ public class ImportMainSheetServiceImpl implements ImportMainSheetService {
 		}
 	}
 	
-	private List<MileageLog> retrieveNoGPSMileageLogData(Date period) {
+	private List<MileageLog> retrieveNoGPSMileageLogData(Date period, List<String> errorList) {
 		MileageLogReportInput input =  new MileageLogReportInput();
 		String periodStr = mileageSearchDateFormat.format(period);
 		input.setPeriodFrom(periodStr);
 		input.setPeriodTo(periodStr);
 		
 		List<MileageLog> noGPSMileageLogList = reportService.generateNoGPSMileageLogData(null, input,
-				null, null, null);
+				null, null, null, errorList);
 		
 		List<MileageLog> aggregateMileageLogList = aggregateMileageLogByUnitState(noGPSMileageLogList);
 		return aggregateMileageLogList;

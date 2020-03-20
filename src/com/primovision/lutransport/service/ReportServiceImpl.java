@@ -4668,7 +4668,7 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public List<MileageLog> generateNoGPSMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input,
-			String company, String state, String truck) {
+			String company, String state, String truck, List<String> errorList) {
 		IFTAReportInput iftaReportInput = new IFTAReportInput();
 		map(iftaReportInput, input);
 		List<Ticket> ticketList = retrieveNoGPSVehicleTickets(iftaReportInput, company, state, truck);
@@ -4688,10 +4688,36 @@ throw new Exception("origin and destindation is empty");
 		
 		Map<String, List<LocationDistance>> locationDistanceMap = retrieveAllLocationDistance();
 		
+		List<String> errorUnits = new ArrayList<String>();
 		List<MileageLog> aggregateMileageLogList = new ArrayList<MileageLog>();
 		for (Ticket aTicket : ticketList) {
+			Vehicle vehicle = aTicket.getVehicle();
+			String unitNum = StringUtils.EMPTY;
+			if (vehicle != null) {
+				unitNum = String.valueOf(vehicle.getUnit().intValue());
+			}
+			if (errorUnits.contains(unitNum)) {
+				continue;
+			}
+			
 			List<LocationDistance> locationDistanceList = retrieveAllLocationDistance(locationDistanceMap, aTicket);
 			if (locationDistanceList == null || locationDistanceList.isEmpty()) {
+				Location origin = aTicket.getOrigin();
+				Location destination = aTicket.getDestination();
+				StringBuffer locationPairBuff = new StringBuffer();
+				if (origin != null) {
+					locationPairBuff.append(origin.getName());
+				}
+				if (destination == null) {
+					locationPairBuff.append(" and " + destination.getName());
+				}
+				
+				errorList.add("Could not calulate miles for unit: " + unitNum 
+						+ " as following location pair not added in the system: " + locationPairBuff.toString());
+				if (StringUtils.isNotEmpty(unitNum)) {
+					errorUnits.add(unitNum);
+				}
+				
 				continue;
 			}
 			
@@ -4829,6 +4855,9 @@ throw new Exception("origin and destindation is empty");
 		
 		Double ctMiles = aLocationDistance.getCtMiles();
 		mapAndAdd(mileageLogList, aTicket, ctMiles, "CT", permit, period, searchStateObj, stateMap);
+		
+		Double scMiles = aLocationDistance.getScMiles();
+		mapAndAdd(mileageLogList, aTicket, scMiles, "SC", permit, period, searchStateObj, stateMap);
 	}
 	
 	private void mapAndAdd(List<MileageLog> mileageLogList, Ticket aTicket, Double miles, String state, 

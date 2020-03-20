@@ -74,5 +74,5 @@ public interface ReportService {
 	
 	public IFTAReportWrapper generateNoGPSMileageLogMPGData(SearchCriteria criteria, IFTAReportInput input);
 	public List<MileageLog> generateNoGPSMileageLogData(SearchCriteria searchCriteria, MileageLogReportInput input,
-				String company, String state, String truck); 
+				String company, String state, String truck, List<String> errorList); 
 }

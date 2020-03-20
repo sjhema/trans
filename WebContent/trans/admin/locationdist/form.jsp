@@ -122,6 +122,12 @@
 					 maxlength="9" onkeypress="return onlyNumbers(event, true)"/>
 				<br><form:errors path="ctMiles" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="SC Miles" /><span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="scMiles" style="min-width:150px; max-width:150px" cssClass="flat"
+					 maxlength="9" onkeypress="return onlyNumbers(event, true)"/>
+				<br><form:errors path="scMiles" cssClass="errorMessage" />
+			</td>
 		</tr>
 		<tr>
 			<td class="form-left"><primo:label code="WV Miles" /><span class="errorMessage"></span></td>

@@ -68,6 +68,7 @@
 		<primo:textcolumn headerText="IL Miles" dataField="ilMiles"/>
 		<primo:textcolumn headerText="FL Miles" dataField="flMiles"/>
 		<primo:textcolumn headerText="CT Miles" dataField="ctMiles"/>
+		<primo:textcolumn headerText="SC Miles" dataField="scMiles"/>
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>

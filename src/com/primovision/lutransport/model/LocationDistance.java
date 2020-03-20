@@ -60,6 +60,9 @@ public class LocationDistance extends AbstractBaseModel {
 	@Column(name="ct_miles")
 	private Double ctMiles;
 	
+	@Column(name="sc_miles")
+	private Double scMiles;
+	
 	@ManyToOne
 	@JoinColumn(name="company")
 	private Location company;
@@ -202,5 +205,13 @@ public class LocationDistance extends AbstractBaseModel {
 
 	public void setCtMiles(Double ctMiles) {
 		this.ctMiles = ctMiles;
+	}
+
+	public Double getScMiles() {
+		return scMiles;
+	}
+
+	public void setScMiles(Double scMiles) {
+		this.scMiles = scMiles;
 	}
 }
