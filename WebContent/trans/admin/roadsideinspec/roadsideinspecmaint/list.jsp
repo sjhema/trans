@@ -140,7 +140,9 @@ function processDelete(violationId) {
         <primo:textcolumn headerText="Driver" dataField="roadsideInspection.driver.fullName" width="190px"/>
         <primo:textcolumn headerText="Citation No" dataField="citationNo" width="130px"/>
         <primo:textcolumn headerText="Insp level" dataField="roadsideInspection.inspectionLevel" width="20px"/>
+        <primo:textcolumn headerText="Has Violation" dataField="isViolation" />
         <primo:textcolumn headerText="Violation Type" dataField="violationType" />
+        <primo:textcolumn headerText="Out Of Service" dataField="outOfService"/>
         <primo:textcolumn headerText="Pdf Uploaded" dataField="roadsideInspection.docs" width="20px"/>
 		<primo:anchorcolumn headerText="Manage Pdf" linkUrl="javascript:processManageDocs('{id}');" linkText="Manage Pdf" width="20px"/>
 	 	<primo:imagecolumn headerText="Edit" linkUrl="javascript:processEdit('{id}');" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>

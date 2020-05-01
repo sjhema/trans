@@ -1,3 +1,4 @@
+
 package com.primovision.lutransport.model;
 
 import java.util.Date;
@@ -45,6 +46,9 @@ public class Violation extends AbstractBaseModel {
 	@Column(name="out_of_service")
 	private String outOfService;
 	
+	@Column(name="is_violation")
+	private String isViolation;
+	
 	@ManyToOne
 	@JoinColumn(name="roadside_inspection")
 	private RoadsideInspection roadsideInspection;
@@ -54,6 +58,14 @@ public class Violation extends AbstractBaseModel {
 	
 	@Transient
 	String[] fileList;
+
+	public String getIsViolation() {
+		return isViolation;
+	}
+
+	public void setIsViolation(String isViolation) {
+		this.isViolation = isViolation;
+	}
 
 	public Vehicle getTruck() {
 		return truck;

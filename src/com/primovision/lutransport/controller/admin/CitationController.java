@@ -266,6 +266,8 @@ public class CitationController extends CRUDController<Violation> {
         	return getUrlContext() + "/form";
       }
 	
+		entity.setIsViolation("Y");
+		
 		beforeSave(request, entity, model);
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);

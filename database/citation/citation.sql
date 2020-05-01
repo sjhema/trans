@@ -115,7 +115,41 @@ SET `URL`='/admin/roadsideinspec/roadsideinspecmaint/list.do?rst=1,/admin/roadsi
  UPDATE `lutransport`.`business_object` SET `DISPLAY_TAG`='Roadside and Citations', `OBJECT_NAME`='Roadside and Citations' WHERE `ID`='30016';
 
  -------*****----
- 
  ---***---
+ 
+ALTER TABLE `lutransport`.`violation` 
+ADD COLUMN `is_violation` VARCHAR(10) NULL DEFAULT 'Y' COMMENT '' AFTER `roadside_inspection`;
+
+update lutransport.violation
+set is_violation = 'N'
+where violation_type in ('None', 'No violations');
+
+update lutransport.roadside_inspection
+set violation = 'N'
+where
+id in ('10',
+'22',
+'25',
+'27',
+'35',
+'36',
+'37',
+'47',
+'48',
+'49',
+'50',
+'52',
+'54',
+'55',
+'56',
+'65',
+'66',
+'68',
+'72',
+'76',
+'78',
+'79',
+'82')
+
 
 

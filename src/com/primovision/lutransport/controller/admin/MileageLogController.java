@@ -38,7 +38,6 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.State;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehiclePermit;
-import com.primovision.lutransport.model.accident.Accident;
 
 @Controller
 @RequestMapping("/operator/mileagelog")
@@ -339,8 +338,33 @@ public class MileageLogController extends CRUDController<MileageLog> {
 		}
 	}
 	
+	private String deleteByPeriod(HttpServletRequest request) {
+		String deleteByPeriod = request.getParameter("period");
+		if (StringUtils.isEmpty(deleteByPeriod)) {
+			return "Delete by period cannot be empty";
+		}
+		
+		String deleteByPeriodDbFmtStr = StringUtils.EMPTY;
+		try {
+			deleteByPeriodDbFmtStr = dbDateFormat.format(mileageSearchDateFormat.parse(deleteByPeriod));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "Error while formatting delete by period";
+		}
+		
+		StringBuffer delQuery = new StringBuffer("delete MileageLog where 1=1");
+		delQuery.append(" and period ='"+ deleteByPeriodDbFmtStr +"'");
+		genericDAO.executeSimpleUpdateQuery(delQuery.toString());
+		
+		return "success";
+	}
+	
 	@Override
 	protected String processAjaxRequest(HttpServletRequest request, String action, Model model) {
-		return "";
+		if (StringUtils.equalsIgnoreCase("deleteByPeriod", action)) {
+			return deleteByPeriod(request);
+		} 
+		
+		return StringUtils.EMPTY;
 	}
 }

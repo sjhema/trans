@@ -49,6 +49,7 @@ function editViolation(violationId) {
        		$("#citationNo").val(violation.citationNo);
        		$("#outOfService").val(violation.outOfService);
        		$("#violationType").val(violation.violationType);
+       		$("#isViolation").val(violation.isViolation);
 		}
 	});
 }
@@ -139,6 +140,15 @@ function emptyViolation() {
 			<td colspan="6"><b><primo:label code="Violations" /></b></td>
 		</tr>
 		<tr>
+			<td class="form-left"><primo:label code="Has Violation" /><span class="errorMessage">*</span></td>
+			<td align="${left}">
+				<form:select cssClass="flat" path="isViolation" style="min-width:166px; max-width:166px">
+					<form:option value="">-----<primo:label code="Please Select" />-----</form:option>
+					<form:option value="Y">Yes</form:option>
+					<form:option value="N">No</form:option>
+				</form:select> 
+				<br><form:errors path="isViolation" cssClass="errorMessage" />
+			</td>
 			<td class="form-left"><primo:label code="Citation No" /><span class="errorMessage"></span></td>
 			<td align="${left}">
 				<form:input path="citationNo" style="min-width:162px; max-width:162px" cssClass="flat" />
@@ -182,6 +192,7 @@ function emptyViolation() {
 	<primo:datatable urlContext="admin/roadsideinspec/roadsideinspecmaint"
 		baseObjects="${violationList}"
 		searchCriteria="<%=null%>" cellPadding="2">
+		<primo:textcolumn headerText="Is Violation" dataField="isViolation" />
 		<primo:textcolumn headerText="Citation No" dataField="citationNo" width="150px"/>
 		<primo:textcolumn headerText="Out Of Service" dataField="outOfService" width="20px"/>
 		<primo:textcolumn headerText="Violation Type" dataField="violationType" />

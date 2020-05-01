@@ -536,7 +536,7 @@ public class BonusQualificationReportController extends BaseController {
 	
 	private List<Violation> retrieveViolations(String company, String driver, String dateFrom, String dateTo) {
 		StringBuffer query = new StringBuffer("select obj from Violation obj where 1=1");
-		StringBuffer whereClause = new StringBuffer();
+		StringBuffer whereClause = new StringBuffer(" and obj.isViolation = 'Y'");
 		
 		if (StringUtils.isNotEmpty(company)) {
 			whereClause.append(" and obj.company.id=" + company);

@@ -248,22 +248,38 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	}
 	
 	private void validateSaveViolation(RoadsideInspection entity, BindingResult bindingResult) {
-		String violationType = StringUtils.trimToEmpty(entity.getViolationType());
-		if (StringUtils.isEmpty(violationType)) {
-			if (entity.getId() == null 
+		entity.setViolationType(StringUtils.trimToEmpty(entity.getViolationType()));
+		entity.setCitationNo(StringUtils.trimToEmpty(entity.getCitationNo()));
+		
+		String isViolation = entity.getIsViolation();
+		if (StringUtils.isEmpty(isViolation)) {
+			if (entity.getId() == null
 					|| StringUtils.isNotEmpty(entity.getViolationId())
 					|| StringUtils.isNotEmpty(entity.getCitationNo())
-					|| StringUtils.isNotEmpty(entity.getOutOfService())) {
-				bindingResult.rejectValue("violationType", "NotNull.java.lang.String", null, null);
+					|| StringUtils.isNotEmpty(entity.getOutOfService())
+					|| StringUtils.isNotEmpty(entity.getViolationType())) {
+				bindingResult.rejectValue("isViolation", "error.select.option", null, null);
 			}
 		} else {
+			if (!BooleanUtils.toBoolean(isViolation)) {
+				if (StringUtils.isNotEmpty(entity.getOutOfService())) {
+					entity.setOutOfService("No");
+				}
+				if (StringUtils.isNotEmpty(entity.getViolationType())) {
+					entity.setViolationType("No violations");
+				}
+			}
+			
 			if (StringUtils.isEmpty(entity.getOutOfService())) {
 				bindingResult.rejectValue("outOfService", "error.select.option", null, null);
 			}
 			
-			String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
-			if (StringUtils.isNotEmpty(citationNo)) {
-				if (isDuplicate(entity.getViolationId(), citationNo)) {
+			if (StringUtils.isEmpty(entity.getViolationType())) {
+				bindingResult.rejectValue("violationType", "NotNull.java.lang.String", null, null);
+			}
+			
+			if (StringUtils.isNotEmpty(entity.getCitationNo())) {
+				if (isDuplicate(entity.getViolationId(), entity.getCitationNo())) {
 					bindingResult.rejectValue("citationNo", "error.duplicate.entry", null, null);
 				}
 			}
@@ -281,10 +297,9 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
         	return getUrlContext() + "/form";
       }
 		
-		String violationType = StringUtils.trimToEmpty(entity.getViolationType());
-		entity.setViolationType(violationType);
-		if (StringUtils.isNotEmpty(violationType)) {
-			entity.setViolation("Y");
+		String isViolation = entity.getIsViolation();
+		if (StringUtils.isNotEmpty(isViolation)) {
+			entity.setViolation(isViolation);
 		} else {
 			if (entity.getId() == null) {
 				entity.setViolation("N");
@@ -295,9 +310,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 			}
 		}
 		
-		String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
-		entity.setCitationNo(citationNo);
-		if (StringUtils.isNotEmpty(citationNo)) {
+		if (StringUtils.isNotEmpty(entity.getCitationNo())) {
 			entity.setCitation("Y");
 		} else {
 			if (entity.getId() == null) {
@@ -323,7 +336,10 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	}
 	
 	private boolean hasViolations(Long roadInspectionId) {
-		List<Violation> violationList = retrieveViolationsForRoadInspec(roadInspectionId);
+		StringBuffer query = new StringBuffer("select obj from Violation obj"
+				+ " where obj.roadsideInspection.id=" + roadInspectionId
+				+ " and obj.isViolation='Y'");
+		List<Violation> violationList = genericDAO.executeSimpleQuery(query.toString());
 		return (violationList == null || violationList.isEmpty()) ? false : true;
 	}
 	
@@ -361,8 +377,8 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	}
 	
 	private void saveViolation(RoadsideInspection entity) {
-		String violationType = StringUtils.trimToEmpty(entity.getViolationType());
-		if (StringUtils.isEmpty(violationType)) {
+		String isViolation = StringUtils.trimToEmpty(entity.getIsViolation());
+		if (StringUtils.isEmpty(isViolation)) {
 			return;
 		}
 		
@@ -386,7 +402,8 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 		aViolation.setTrailer(entity.getTrailer());
 		aViolation.setIncidentDate(entity.getInspectionDate());
 		aViolation.setOutOfService(entity.getOutOfService());
-		aViolation.setViolationType(violationType);
+		aViolation.setIsViolation(entity.getIsViolation());
+		aViolation.setViolationType(StringUtils.trimToEmpty(entity.getViolationType()));
 		
 		String citationNo = StringUtils.trimToEmpty(entity.getCitationNo());
 		if (StringUtils.isNotEmpty(citationNo)) {
@@ -404,6 +421,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	
 	private void emptyViolation(RoadsideInspection entity) {
 		entity.setViolationId(StringUtils.EMPTY);
+		entity.setIsViolation(StringUtils.EMPTY);
 		entity.setCitationNo(StringUtils.EMPTY);
 		entity.setViolationType(StringUtils.EMPTY);
 		entity.setOutOfService(StringUtils.EMPTY);
@@ -412,8 +430,7 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 	@Override
 	public String delete(@ModelAttribute("modelObject") RoadsideInspection entity,
 			BindingResult bindingResult, HttpServletRequest request) {
-		String query = "select obj from Violation obj where obj.roadsideInspection.id=" + entity.getId();
-		List<Violation> violationList = genericDAO.executeSimpleQuery(query);
+		List<Violation> violationList = retrieveViolationsForRoadInspec(entity.getId());
 		for (Violation aViolation : violationList) {
 			genericDAO.delete(aViolation);
 		}
