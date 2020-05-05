@@ -261,11 +261,11 @@ public class RoadsideInspectionController extends CRUDController<RoadsideInspect
 				bindingResult.rejectValue("isViolation", "error.select.option", null, null);
 			}
 		} else {
-			if (!BooleanUtils.toBoolean(isViolation)) {
-				if (StringUtils.isNotEmpty(entity.getOutOfService())) {
+			if (!BooleanUtils.toBoolean(isViolation, "Y", "N")) {
+				if (StringUtils.isEmpty(entity.getOutOfService())) {
 					entity.setOutOfService("No");
 				}
-				if (StringUtils.isNotEmpty(entity.getViolationType())) {
+				if (StringUtils.isEmpty(entity.getViolationType())) {
 					entity.setViolationType("No violations");
 				}
 			}

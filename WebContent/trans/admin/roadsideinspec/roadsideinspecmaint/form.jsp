@@ -59,6 +59,7 @@ function emptyViolation() {
 	$("#citationNo").val("");
 	$("#outOfService").val("");
 	$("#violationType").val("");
+	$("#isViolation").val("");
 }
 
 </script>
