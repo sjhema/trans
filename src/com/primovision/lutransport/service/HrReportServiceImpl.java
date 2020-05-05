@@ -8534,8 +8534,12 @@ public class HrReportServiceImpl implements HrReportService {
 				//************** Newly Added
 				
 				///// ***************** PTOD related
-					
-				StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.payRollStatus=2 and obj.approvestatus=1 and obj.driver.fullName='"+employee.getFullName()+"' and obj.category!=2");
+				// Mixed category requirement - 4th May 2020	
+				StringBuffer ptodquery=new StringBuffer("select obj from Ptodapplication obj where obj.payRollStatus=2"
+							+ " and obj.approvestatus=1 and obj.driver.fullName='"+employee.getFullName()+"'"
+							+ " and obj.company.id=" +employee.getCompany().getId()
+							+ " and obj.category.id=" + employee.getCatagory().getId());
+							//+ " and obj.category!=2");
 				
 				ptodquery.append(" and obj.payRollBatch='"+mysqldf.format(payDetail.getCheckDate())+"'");
 				

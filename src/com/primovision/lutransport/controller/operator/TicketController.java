@@ -2020,6 +2020,15 @@ public class TicketController extends CRUDController<Ticket> {
 			ticketupdatequery.append("notes='").append(entity.getNotes()).append("'");
 		}
 		
+		if (entity.getPayRollStatus() != null && !revertMode){
+			if (doNotAddComma) {
+				doNotAddComma = false;
+			} else {
+				ticketupdatequery.append(",");
+			}
+			ticketupdatequery.append("payRollStatus=").append(entity.getPayRollStatus());
+		}
+		
 		if (revertMode) {
 			if (entity.getOrigin() == null && entity.getDestination() == null) {
 				if (doNotAddComma) {
