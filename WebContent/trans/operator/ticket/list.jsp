@@ -626,8 +626,17 @@ function formatDate3(){
 				type="text" onblur="return formatDate3();"
 				value="${sessionScope.searchCriteria.searchMap.pDate}"/>
 			</td>
-			<td align="${left}" class="first"></td>
-			<td align="${left}"></td>
+			<td align="${left}" class="first"><primo:label code="Not Billable"/></td>
+			<td align="${left}">
+				<select id="notBillable" name="notBillable" style="min-width:154px; max-width:154px">
+				    <option value="">------<primo:label code="Please Select" />------</option>
+				    <c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap.notBillable == 'Y'}">
+						<c:set var="selected" value="selected" />
+					</c:if>
+				    <option value="Y" ${selected}>Y</option> 
+			    </select>
+            </td>
 		</tr>
                
                
@@ -699,7 +708,8 @@ function formatDate3(){
 		<primo:textcolumn headerText="landfill Tare" dataField="landfillTare" />
 		<primo:textcolumn headerText="landfill Net" dataField="landfillNet" />
 		<primo:textcolumn headerText="landfill Tons" dataField="landfillTons" />
-                <primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
+        <primo:staticdatacolumn headerText="Payroll Pending" dataField="payRollStatus" dataType="Payroll_Pending" />
+		<primo:staticdatacolumn headerText="Not Billable" dataField="notBillable"/>
 		<primo:staticdatacolumn headerText="Complete Status" dataField="status" dataType="STATUS" />
 		<primo:staticdatacolumn headerText="Hold Status" dataField="ticketStatus" dataType="TICKET_STATUS" />
 		<primo:anchorcolumn headerText="Hold/Unhold" dataField="ticketStatus" linkUrl="/operator/ticket/changestatus.do?id={id}" linkText="Hold/Unhold"/>

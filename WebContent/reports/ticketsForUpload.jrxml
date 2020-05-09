@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ticketsForUpload" pageWidth="2350" pageHeight="600" orientation="Landscape" columnWidth="2310" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ticketsForUpload" pageWidth="2430" pageHeight="600" orientation="Landscape" columnWidth="2390" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="1425"/>
+	<property name="ireport.x" value="1547"/>
 	<property name="ireport.y" value="0"/>
 	<field name="loadDate" class="java.util.Date"/>
 	<field name="originTicket" class="java.lang.Long"/>
@@ -28,6 +28,7 @@
 	<field name="landfillTons" class="java.lang.Double"/>
 	<field name="subcontractorName" class="java.lang.String"/>
 	<field name="terminal.code" class="java.lang.String"/>
+	<field name="notBillable" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -397,6 +398,20 @@
 				</textElement>
 				<text><![CDATA[Terminal]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2300" y="25" width="74" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Not Billable]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -755,6 +770,20 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{terminal.code}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="2300" y="0" width="74" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{notBillable}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -192,6 +192,17 @@ public class Ticket extends AbstractBaseModel {
 	public void setAutoCreated(Integer autoCreated) {
 		this.autoCreated = autoCreated;
 	}
+	
+	@Column(name = "not_billable")
+	private String notBillable;
+	
+	public String getNotBillable() {
+		return notBillable;
+	}
+
+	public void setNotBillable(String notBillable) {
+		this.notBillable = notBillable;
+	}
 
 	@Column(name = "notes")
 	private String notes;

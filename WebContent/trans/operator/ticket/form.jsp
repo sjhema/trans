@@ -743,6 +743,16 @@ function formatDate1(){
 				</form:select> <br> <form:errors path="subcontractor" cssClass="errorMessage" />
 			</td>		
 		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Not Billable" /></td>
+			<td>
+				<form:select cssClass="flat" path="notBillable" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:option value="Y">Y</form:option>
+				</form:select> 
+				<br> <form:errors path="notBillable" cssClass="errorMessage" />
+			</td>		
+		</tr>
 		<%-- </c:if> --%>
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Transfer Station/Origin " />

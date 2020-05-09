@@ -2674,6 +2674,43 @@ public class TicketController extends CRUDController<Ticket> {
 			return;
 		}
 		
+		String reportName = "ticketReport";
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html")) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + reportName + "." + type);
+		}
+		
+		List<Ticket> ticketList = searchForExport(model, request);
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		List columnPropertyList = (List) request.getSession().getAttribute("columnPropertyList");
+		ByteArrayOutputStream out = null;
+		try {
+			out = dynamicReportService.exportReport(
+						urlContext + "Report", type, getEntityClass(), ticketList,
+						columnPropertyList, request);
+			/*out = dynamicReportService.generateStaticReport(reportName,
+					ticketList, params, type, request);*/
+			out.writeTo(response.getOutputStream());
+			if (type.equals("html")) {
+				response.getOutputStream().println(
+								"<script language=\"javascript\">window.print()</script>");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+					out = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		/****
 		List columnPropertyList = (List) request.getSession().getAttribute(
 				"columnPropertyList");
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
@@ -2700,6 +2737,7 @@ public class TicketController extends CRUDController<Ticket> {
 			e.printStackTrace();
 			log.warn("Unable to create file :" + e);
 		}
+		*******/
 	}
 	
 	private void exportForUpload(ModelMap model, HttpServletRequest request,
