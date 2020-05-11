@@ -2029,6 +2029,15 @@ public class TicketController extends CRUDController<Ticket> {
 			ticketupdatequery.append("payRollStatus=").append(entity.getPayRollStatus());
 		}
 		
+		if (StringUtils.isNotEmpty(entity.getNotBillable())) {
+			if (doNotAddComma) {
+				doNotAddComma = false;
+			} else {
+				ticketupdatequery.append(",");
+			}
+			ticketupdatequery.append("notBillable='").append(entity.getNotBillable()).append("'");
+		}
+		
 		if (revertMode) {
 			if (entity.getOrigin() == null && entity.getDestination() == null) {
 				if (doNotAddComma) {

@@ -741,12 +741,22 @@ function formatDate2(){
 				</form:select> 
 				<br> <form:errors path="payRollStatus" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Not Billable" /></td>
+			<td>
+				<form:select cssClass="flat" path="notBillable" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:option value="Y">Y</form:option>
+				</form:select> 
+				<br> <form:errors path="notBillable" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<tr>
 			<td class="form-left"><primo:label code="Subcontractor" /></td>
 			<td><form:select cssClass="flat" path="subcontractor" style="min-width:154px; max-width:154px">
 					<form:option value="">------<primo:label code="Please Select" />------</form:option>
 					<form:options items="${subcontractors}" itemValue="id"	itemLabel="name" />
 				</form:select> <br> <form:errors path="subcontractor" cssClass="errorMessage" />
-			</td>
+			</td>		
 		</tr>
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Transfer Station/Origin " />
