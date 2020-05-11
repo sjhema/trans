@@ -280,6 +280,19 @@ function formatDate(dateElemId) {
 				</select>
 			</td>
         </tr>
+        <tr>
+         	<td align="${left}" class="first"><primo:label code="Not Billable"/></td>
+			<td align="${left}">
+				<select id="notBillable" name="notBillable" style="min-width:154px; max-width:154px">
+				    <option value="">------<primo:label code="Please Select" />------</option>
+				    <c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap.notBillable == 'Y'}">
+						<c:set var="selected" value="selected" />
+					</c:if>
+				    <option value="Y" ${selected}>Y</option> 
+			    </select>
+            </td>
+        </tr>
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td align="${left}"></td>

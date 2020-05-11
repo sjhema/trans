@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ticketReport" pageWidth="2550" pageHeight="600" orientation="Landscape" columnWidth="2510" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ticketReport" pageWidth="2600" pageHeight="600" orientation="Landscape" columnWidth="2560" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="1717"/>
 	<property name="ireport.y" value="0"/>
 	<field name="loadDate" class="java.util.Date"/>
 	<field name="originTicket" class="java.lang.Long"/>
@@ -33,6 +33,7 @@
 	<field name="payrollStatusStr" class="java.lang.String"/>
 	<field name="completeStatusStr" class="java.lang.String"/>
 	<field name="holdStatusStr" class="java.lang.String"/>
+	<field name="notBillable" class="java.lang.String"/>
 	<variable name="totalCount" class="java.lang.Long" calculation="Count">
 		<variableExpression><![CDATA[$F{driverCompany.name}]]></variableExpression>
 	</variable>
@@ -42,7 +43,7 @@
 	<pageHeader>
 		<band height="34">
 			<staticText>
-				<reportElement mode="Opaque" x="1123" y="5" width="265" height="24" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1148" y="5" width="265" height="24" backcolor="#99CCFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -333,7 +334,7 @@
 				<text><![CDATA[Dest Ton]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2259" y="25" width="239" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="2312" y="25" width="239" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -471,6 +472,20 @@
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Hold Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2259" y="25" width="53" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Not Billable]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -651,7 +666,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("###0.00").format($F{landfillTons})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="2259" y="0" width="239" height="20"/>
+				<reportElement x="2312" y="0" width="239" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -887,6 +902,20 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{holdStatusStr}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="2259" y="0" width="53" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{notBillable}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

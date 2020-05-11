@@ -117,6 +117,7 @@ public class TicketReportController extends BaseController {
 		String ticketStatus = (String) criteria.getSearchMap().get("ticketStatus");
 		String processStatus = (String) criteria.getSearchMap().get("processStatus");
 		String payrollPending = (String) criteria.getSearchMap().get("payrollPending");
+		String notBillable = (String) criteria.getSearchMap().get("notBillable");
 		
 		String enteredBy = (String) criteria.getSearchMap().get("enteredBy");
 		
@@ -221,6 +222,9 @@ public class TicketReportController extends BaseController {
 		}
 		if (StringUtils.isNotEmpty(payrollPending)) {
 			whereClause.append(" and obj.payRollStatus=" + payrollPending);
+		}
+		if (StringUtils.isNotEmpty(notBillable)) {
+			whereClause.append(" and obj.notBillable='" + notBillable + "'");
 		}
 		
 		if (StringUtils.isNotEmpty(enteredBy)) {
