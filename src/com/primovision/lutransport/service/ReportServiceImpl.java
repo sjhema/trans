@@ -388,6 +388,7 @@ public class ReportServiceImpl implements ReportService {
 		String unloadDateTo = ReportDateUtil.getToDate(input.getUnloadedTo());
 
 		String ticketStatus = input.getTicketStatus();
+		String notBillable = input.getNotBillable();
 		String terminal = input.getTerminal();
 		String createdBy = input.getCreatedBy();
 		String origin = input.getOrigin();
@@ -566,6 +567,10 @@ public class ReportServiceImpl implements ReportService {
 					.append(")");
 			countQuery.append(" and  obj.ticketStatus in (")
 					.append(ticketStatus).append(")");
+		}
+		if (StringUtils.isNotEmpty(notBillable)) {
+			query.append(" and obj.notBillable='").append(notBillable).append("'");
+			countQuery.append(" and obj.notBillable='").append(notBillable).append("'");
 		}
 		if (!StringUtils.isEmpty(fromDateInvoiceStr)) {
 			query.append(" and  obj.invoiceDate>='").append(
@@ -912,6 +917,32 @@ public class ReportServiceImpl implements ReportService {
 		
 	}
 	
+	private void setNotBillable(List<Billing_New> billingNewList, List<Ticket> ticketList) {
+		if (billingNewList == null || billingNewList.isEmpty()
+				|| ticketList == null || ticketList.isEmpty()) {
+			return;
+		}
+		
+		for (Ticket aTicket : ticketList) {
+			if (StringUtils.isNotEmpty(aTicket.getNotBillable()) 
+					&& BooleanUtils.toBoolean(aTicket.getNotBillable(), "Y", "N")) {
+				Billing_New aBilling_New = findMathcingBillingNew(billingNewList, aTicket);
+				if (aBilling_New != null) {
+					aBilling_New.setNotBillable(aTicket.getNotBillable());
+				}
+			}
+		}
+	}
+	
+	private Billing_New findMathcingBillingNew(List<Billing_New> billingNewList, Ticket aTicket) {
+		for (Billing_New aBilling_New : billingNewList) {
+			if (aBilling_New.getTicket() == aTicket.getId().longValue()) {
+				return aBilling_New;
+			}
+		}
+		return null;
+	}
+	
 	// Subcontractor summary report - 16thMar2016
 	private BillingWrapper processTicketsNew(List<Ticket> tickets,Map<String, String> params, boolean isSummary) {
 		
@@ -942,6 +973,8 @@ public class ReportServiceImpl implements ReportService {
 			String query="select obj from Billing_New obj where obj.ticket in ("
 				+ticketIds.toString()+")";
 			 summarys=genericDAO.executeSimpleQuery(query);	
+			 
+			 setNotBillable(summarys, tickets);
 			 
 			// Subcontractor summary report - 16thMar2016
 		   wrapper.setBillings(summarys);
@@ -6253,6 +6286,7 @@ throw new Exception("origin and destindation is empty");
 		String unloadDateTo = ReportDateUtil.getToDate(input.getUnloadedTo());
 
 		String ticketStatus = input.getTicketStatus();
+		String notBillable = input.getNotBillable();
 		String terminal = input.getTerminal();
 		String createdBy = input.getCreatedBy();
 		
@@ -6407,6 +6441,10 @@ throw new Exception("origin and destindation is empty");
 					.append(")");
 			countQuery.append(" and  obj.ticketStatus in (")
 					.append(ticketStatus).append(")");
+		}
+		if (StringUtils.isNotEmpty(notBillable)) {
+			query.append(" and obj.notBillable='").append(notBillable).append("'");
+			countQuery.append(" and obj.notBillable='").append(notBillable).append("'");
 		}
 		if (!StringUtils.isEmpty(fromDateInvoiceStr)) {
 			query.append(" and  obj.invoiceDate>='").append(

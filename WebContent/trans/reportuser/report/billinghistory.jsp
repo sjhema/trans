@@ -357,6 +357,15 @@ $(document).ready(function(){
 				</form:select> <br> <form:errors path="driverCompany" cssClass="errorMessage" /></td>	
 				
 		</tr>
+		<tr>
+			<td class="form-left"><primo:label code="Not Billable" /></td>
+			<td>
+				<form:select cssClass="flat" path="notBillable" multiple="true">
+					<form:option value="Y">Y</form:option>
+				</form:select> 
+				<br> <form:errors path="notBillable" cssClass="errorMessage" />
+			</td>		
+		</tr>
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Origin " />
 			</b></td>

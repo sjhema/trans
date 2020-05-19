@@ -177,9 +177,19 @@ public class Billing_New extends AbstractBaseModel implements ReportModel {
 		this.driverCompanyName = driverCompanyName;
 	}
 	
+	@Transient
+	private String notBillable;
 	
-	
-	
+	@Transient
+	public String getNotBillable() {
+		return notBillable;
+	}
+
+	@Transient
+	public void setNotBillable(String notBillable) {
+		this.notBillable = notBillable;
+	}
+
 	/*@Transient
 	private Double gallon;*/
 	@Column(name="gallon_num")

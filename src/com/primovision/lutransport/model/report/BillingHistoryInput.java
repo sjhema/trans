@@ -91,6 +91,7 @@ public class BillingHistoryInput implements ReportModel {
 	
 	private Integer status;
 	private String ticketStatus;
+	private String notBillable;
 	
 	// Truck driver report
 	private String drillDownCompany = StringUtils.EMPTY;
@@ -624,6 +625,14 @@ public class BillingHistoryInput implements ReportModel {
 
 	public void setTicketStatus(String ticketStatus) {
 		this.ticketStatus = ticketStatus;
+	}
+
+	public String getNotBillable() {
+		return notBillable;
+	}
+
+	public void setNotBillable(String notBillable) {
+		this.notBillable = notBillable;
 	}
 
 	public String getFromInvoiceDate() {
