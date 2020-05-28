@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
@@ -81,6 +84,11 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 		
 		model.addAttribute("rateTypes", listStaticData("RATE_TYPE"));
 		model.addAttribute("rateUsing", listStaticData("RATE_USING"));
+		
+		String fromAlertPage = request.getParameter("fromAlertPage");
+		if (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) {
+			model.addAttribute("fromAlertPage", "true");
+		}
 	}
 	
 	@Override
@@ -344,9 +352,61 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 			}
 			
 		}
-		return super.save(request, entity, bindingResult, model);
+		
+		beforeSave(request, entity, model);			
+		genericDAO.saveOrUpdate(entity);
+		cleanUp(request);
+		
+		String fromAlertPage = request.getParameter("fromAlertPage");
+		if (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) { 
+			return "redirect:/hr/payrollratealert/list.do?type=driverPayRate";
+		} else {
+			return "redirect:/" + urlContext + "/list.do";
+		}
+		
+		//return super.save(request, entity, bindingResult, model);
 	}
 	
+	@Override
+	public String delete(@ModelAttribute("modelObject") DriverPayRate entity,
+			BindingResult bindingResult, HttpServletRequest request) {
+		try {
+			genericDAO.delete(entity);
+		} catch (Exception ex) {
+			request.getSession().setAttribute(
+					"errors",
+					"This" + entity.getClass().getSimpleName() + " can't be deleted");
+			log.warn("Error deleting record " + entity.getId(), ex);
+		}
+				
+		String fromAlertPage = request.getParameter("fromAlertPage");
+		if(StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) { 
+			return "redirect:/hr/payrollratealert/list.do?type=driverPayRate";
+		} else {
+			return "redirect:/" + urlContext + "/list.do";
+		}
+	}
+	
+	@RequestMapping("/changeAlertStatus.do")
+	public String changeAlertStatus(HttpServletRequest request, ModelMap modMap) {
+		DriverPayRate driverPayRate = genericDAO.getById(DriverPayRate.class, Long.valueOf(request.getParameter("id")));
+		String redirectUrl = StringUtils.EMPTY;
+		String fromAlertPage = request.getParameter("fromAlertPage");
+		if (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) {
+			redirectUrl = "redirect:/hr/payrollratealert/list.do?type=driverPayRate";
+			if (driverPayRate.getAlertStatus() == 1) { 
+				driverPayRate.setAlertStatus(0);
+			}
+		} else {			
+			if (driverPayRate.getAlertStatus() == 0) {
+				driverPayRate.setAlertStatus(1);
+			}
+			redirectUrl = "redirect:/" + urlContext + "/list.do";
+		}
+		
+		genericDAO.save(driverPayRate);
+		return redirectUrl;
+	}
 	
 	private String common(HttpServletRequest request,ModelMap model,DriverPayRate entity,String rateQuery)
 	{
