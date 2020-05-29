@@ -44,4 +44,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			return true;
 		return false;
 	}
+	
+	@Override
+	public boolean hasUserPermissionByBOName(User user, String boName) {
+		StringBuffer query = new StringBuffer("select u from User u, Role r, RolePrivilege rp where u.id=");
+		query.append(user.getId())
+				.append(" and u.role.id = r.id and r.id=rp.role.id and rp.businessObject.objectName = '")
+				.append(boName + "'");
+		List<User> users = genericDAO.executeSimpleQuery(query.toString());
+		return (users != null && !users.isEmpty());
+	}
 }

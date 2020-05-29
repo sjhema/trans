@@ -1,11 +1,18 @@
 <%@include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
+var driverPayRateUrl = "${ctx}/hr/driverpayrate/";
+
 function confirmDelete(id) {
 	if (!confirm("Are you sure you want to delete the selected record?")) {
 		return;
 	}
 	
-	var href = "${ctx}/hr/driverpayrate/delete.do?fromAlertPage=true&id=" + id;
+	var href = driverPayRateUrl + "delete.do?fromAlertPage=true&id=" + id;
+	document.location.href = href
+}
+
+function create() {
+	var href = driverPayRateUrl + "create.do?fromAlertPage=true";
 	document.location.href = href
 }
 
@@ -15,7 +22,7 @@ function changeAlertStatus(id, rateStatus) {
 		return;
 	}
 	
-	var href = "${ctx}/hr/driverpayrate/changeAlertStatus.do?fromAlertPage=true&id=" + id;
+	var href = driverPayRateUrl + "changeAlertStatus.do?fromAlertPage=true&id=" + id;
 	document.location.href = href
 }
 
@@ -61,7 +68,7 @@ function getOriginLoad(){
 }
 </script>
 
-<h3><primo:label code="Expired/Expiring Driver Pay Rate"/></h3>
+<h3><primo:label code="Expired/Expiring Driver Pay Rate(s)"/></h3>
 <div>
 	<form:form action="search.do" method="get" name="searchForm">
 		<input type="hidden" value="driverPayRate" name="type"/>
@@ -134,9 +141,22 @@ function getOriginLoad(){
 	</form:form>
 </div>
 <br/>
+<table width="100%">
+	<tbody>
+		<tr>
+			<td>
+				<a href="javascript:;" onclick="javascript:create();">
+					<img src="${ctx}/images/add.png" title="Add" class="toolbarButton" border="0">
+				</a>&nbsp;
+			</td>
+			<td width="90"></td>
+		</tr>
+	</tbody>
+</table>
 <div style="width:100%; margin:0px auto;">
 	<form:form name="serviceForm" id="serviceForm">
-		<primo:datatable urlContext="hr/driverpayrate" deletable="false" editable="false" insertable="false" exportPdf="false" exportXls="false" exportCsv="false"
+		<primo:datatable urlContext="hr/driverpayrate" deletable="false" editable="false" insertable="false" 
+			exportPdf="false" exportXls="false" exportCsv="false"
 			baseObjects="${expiredDriverPayRateList}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false" >

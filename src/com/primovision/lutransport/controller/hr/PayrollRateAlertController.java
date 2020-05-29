@@ -1,6 +1,7 @@
 package com.primovision.lutransport.controller.hr;
 
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,34 +13,29 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
+
 import org.apache.commons.lang.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
+
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import sun.util.logging.resources.logging;
-
 import com.primovision.lutransport.controller.BaseController;
-import com.primovision.lutransport.core.dao.GenericDAO;
-import com.primovision.lutransport.model.BillingRate;
-import com.primovision.lutransport.model.BusinessObject;
-import com.primovision.lutransport.model.FuelSurchargePadd;
-import com.primovision.lutransport.model.FuelSurchargeWeeklyRate;
+
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
-import com.primovision.lutransport.model.SubcontractorRate;
+
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.DriverPayRate;
-import com.primovision.lutransport.model.hrreport.DriverPay;
+
 import com.primovision.lutransport.service.AuthenticationService;
-import com.primovision.lutransport.service.DateUpdateService;
 
 @Controller
 @RequestMapping("/hr/payrollratealert")
@@ -51,20 +47,13 @@ public class PayrollRateAlertController extends BaseController {
 		this.authenticationService = authenticationService;
 	}
 	 
-	@Autowired
-	private GenericDAO genericDAO;
-	
-	public void setGenericDAO(GenericDAO genericDAO) {
-		this.genericDAO = genericDAO;
+	public PayrollRateAlertController() {
+		setUrlContext("hr/payrollratealert");
 	}
+	
+	String payrollRateAlertHomePg = "/home";
+	String driverPayRateAlertPg = "/driverPayRateAlert";
 
-	@Autowired
-	private DateUpdateService dateupdateService;
-	
-	public void setDateupdateService(DateUpdateService dateupdateService) {
-		this.dateupdateService = dateupdateService;
-	}
-	
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
@@ -72,17 +61,14 @@ public class PayrollRateAlertController extends BaseController {
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 	}
 	
+	private boolean hasPriv(HttpServletRequest request, String boName) {
+		User user = getUser(request);
+		return authenticationService.hasUserPermissionByBOName(user, boName);
+	}
+	
 	private boolean hasDriverPayRateAlertPriv(HttpServletRequest request) {
 		String objectName = "Manage Driver Pay Rate Alert";
-		StringBuffer query = new StringBuffer("select bo from BusinessObject bo where bo.status=1");
-		query.append(" and bo.objectName='").append(objectName).append("'");
-		List<BusinessObject> businessObjects = genericDAO.executeSimpleQuery(query.toString());
-		
-		BusinessObject bo = businessObjects.get(0);
-		String url = bo.getUrl();
-		//String url = "/hr/payrollratealert/driverpayrate";
-		User user = getUser(request);
-		return authenticationService.hasUserPermission(user, url);
+		return hasPriv(request, objectName);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="/list.do")
@@ -90,130 +76,131 @@ public class PayrollRateAlertController extends BaseController {
 		request.getSession().setAttribute("searchCriteria", null);
 		initList(model, request);
 		
+		String returnUrl = getUrlContext() + payrollRateAlertHomePg;
 		String type = request.getParameter("type");
 		if (StringUtils.equals("all", type)) {
-			if (!hasDriverPayRateAlertPriv(request)) {
-				model.addAttribute("driverPayRateExprdCount", null);
-				model.addAttribute("driverPayRateExprngCount", null);
-				return "hr/payrollratealert/home";
+			if (hasDriverPayRateAlertPriv(request)) {
+				searchDriverPayRateAlert(model, request, null);
 			}
-		
-			Map<String, Object> criterias = new HashMap<String, Object>();
-			criterias.clear();
-		   List<DriverPayRate> driverPayRateList = genericDAO.findByCriteria(DriverPayRate.class, criterias, "validFrom", true);
-		   checkExpiredDriverPayRates(model, request, driverPayRateList);
-			 
-			return "hr/payrollratealert/home";
-		} else if (StringUtils.equals("driverPayRate", type)) {
-			if (!hasDriverPayRateAlertPriv(request)) {
-				model.addAttribute("driverPayRateExprdCount", null);
-				model.addAttribute("driverPayRateExprngCount", null);
-				return "hr/payrollratealert/home";
-			}
-		
-			Map<String, Object> criterias = new HashMap<String, Object>();
-			criterias.clear();
-		   List<DriverPayRate> driverPayRateList = genericDAO.findByCriteria(DriverPayRate.class, criterias, "validFrom", true);
-		   checkExpiredDriverPayRates(model, request, driverPayRateList);
-			 
-			return "hr/payrollratealert/driverPayRateAlert";
+		} else if (StringUtils.equals("driverPayRate", type)
+				&& hasDriverPayRateAlertPriv(request)) {
+			searchDriverPayRateAlert(model, request, null);
+			returnUrl = getUrlContext() + driverPayRateAlertPg;
 		}
 			
-		return "blank/blank";
-	}
-	
-	@RequestMapping(method = RequestMethod.GET,value="/search.do")
-	public String search(ModelMap model, HttpServletRequest request) {		
-		populateSearchCriteria(request, request.getParameterMap());				
-		SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		searchCriteria.setPageSize(10000);
-		searchCriteria.getSearchMap().remove("type");
-		initList(model,request);
-		
-		request.getSession().setAttribute("searchCriteria", null);
-		String returnUrl = "blank/blank";
-		if (request.getParameter("type").equals("driverPayRate")) {
-			searchDriverPayRateAlert(model, request, searchCriteria);
-			returnUrl = "hr/payrollratealert/driverPayRateAlert";
-		}
-		
 		return returnUrl;
 	}
 	
-	public void searchDriverPayRateAlert(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
-		List<DriverPayRate> driverPayRateList = null;
-		if (searchCriteria == null) {
-			Map<String, Object> criterias = new HashMap<String, Object>();
-			driverPayRateList = genericDAO.findByCriteria(DriverPayRate.class, criterias, "transferStation.name asc,landfill.name asc, validFrom", true);
-		} else {
-			driverPayRateList = genericDAO.search(DriverPayRate.class, searchCriteria, "transferStation.name asc,landfill.name asc,validFrom", true);				
-			request.getSession().setAttribute("searchCriteria", null);
-		}
+	@RequestMapping(method = RequestMethod.GET, value="/search.do")
+	public String search(ModelMap model, HttpServletRequest request) {
+		initList(model, request);
 		
-	   checkExpiredDriverPayRates(model, request, driverPayRateList);
+		populateSearchCriteria(request, request.getParameterMap());				
+		SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		searchCriteria.setPageSize(10000);
+		searchCriteria.setPage(0);
+		searchCriteria.getSearchMap().remove("type");
+		request.getSession().setAttribute("searchCriteria", null);
+		
+		String returnUrl = "blank/blank";
+		String type = request.getParameter("type");
+		if (StringUtils.equals("driverPayRate", type)) {
+			searchDriverPayRateAlert(model, request, searchCriteria);
+			returnUrl = getUrlContext() + driverPayRateAlertPg;
+		}
+	
+		return returnUrl;
 	}
 	
-	public void checkExpiredDriverPayRates(ModelMap model, HttpServletRequest request, List<DriverPayRate> driverPayRateList) {		
-		int driverPayRateExprngCount = 0, driverPayRateExprdCount = 0;          
-      List<DriverPayRate> expiredDriverPayRateList = new ArrayList<DriverPayRate>();
+	private List<DriverPayRate> retrieveDriverPayRates(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
+		List<DriverPayRate> driverPayRateList = null;
+		String sortBy = "transferStation.name asc,landfill.name asc,validFrom";
+		if (searchCriteria == null) {
+			Map<String, Object> criterias = new HashMap<String, Object>();
+			driverPayRateList = genericDAO.findByCriteria(DriverPayRate.class, criterias, sortBy, true);
+		} else {
+			driverPayRateList = genericDAO.search(DriverPayRate.class, searchCriteria, sortBy, true);				
+		}
+		return driverPayRateList;
+	}
+	
+	private void searchDriverPayRateAlert(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
+		List<DriverPayRate> driverPayRateList = retrieveDriverPayRates(model, request, searchCriteria);
+		populateDriverPayRateAlert(model, driverPayRateList);
+	}
+	
+	private void populateDriverPayRateAlert(ModelMap model, List<DriverPayRate> driverPayRateList) {
+		List<DriverPayRate> expiredDriverPayRateList = new ArrayList<DriverPayRate>();
+		model.addAttribute("expiredDriverPayRateList", expiredDriverPayRateList);	
+	
+		if (driverPayRateList == null || driverPayRateList.isEmpty()) {
+			return;
+		}
+		
+		int driverPayRateExprngCount = 0, driverPayRateExprdCount = 0;
       for (DriverPayRate aDriverPayRate : driverPayRateList) {
 			if(aDriverPayRate.getAlertStatus() == 0) {
 				continue;
 			}
-			if (aDriverPayRate.getValidFrom().getTime() > new Date().getTime()) {
+			
+			long currentTime = new Date().getTime();
+			if (aDriverPayRate.getValidFrom().getTime() > currentTime) {
 				continue;
 			}
 			
-			int diffInDays = (int) ((aDriverPayRate.getValidTo().getTime()- new Date().getTime()) / (1000 * 60 * 60 * 24));		
-			if (diffInDays <= 30 && diffInDays >= 0) {		
+			int diffInDays = (int) ((aDriverPayRate.getValidTo().getTime()- currentTime) / (1000 * 60 * 60 * 24));		
+			if (diffInDays >= 0 && diffInDays <= 30) {		
 				driverPayRateExprngCount++;
 				aDriverPayRate.setRateStatus("CURRENT");
 				expiredDriverPayRateList.add(aDriverPayRate);
-			} else if (diffInDays<0){
+			} else if (diffInDays < 0) {
 				driverPayRateExprdCount++;
 				aDriverPayRate.setRateStatus("EXPIRED");
 				expiredDriverPayRateList.add(aDriverPayRate);				
 			}			
-		}		
+      }		
       
-      Comparator<DriverPayRate> comparator= new Comparator<DriverPayRate>() {
-			@Override
-			public int compare(DriverPayRate o1, DriverPayRate o2) {
-				return  o1.getCompany().getName().compareTo(o2.getCompany().getName());
-			}
-		};
+      sort(expiredDriverPayRateList);
 			
-		Comparator<DriverPayRate> comparator1 = new Comparator<DriverPayRate>() {
-			@Override
-			public int compare(DriverPayRate o1, DriverPayRate o2) {
-				return  o1.getValidTo().compareTo(o2.getValidTo());
-			}
-		};
-	        
-		Comparator<DriverPayRate> comparator2=new Comparator<DriverPayRate>() {
-			@Override
-			public int compare(DriverPayRate o1, DriverPayRate o2) {
-				return  o1.getTransferStation().getName().compareTo(o2.getTransferStation().getName());
-			}
-		};  
-		
-		Comparator<DriverPayRate> comparator3 = new Comparator<DriverPayRate>() {
-			@Override
-			public int compare(DriverPayRate o1, DriverPayRate o2) {
-				return  o1.getLandfill().getName().compareTo(o2.getLandfill().getName());
-			}
-		};
-		
-		ComparatorChain chain = new ComparatorChain();  		
-		chain.addComparator(comparator);
-		chain.addComparator(comparator1);			
-		chain.addComparator(comparator2);
-		chain.addComparator(comparator3);
-		Collections.sort(expiredDriverPayRateList, chain);
-			
-		model.addAttribute("expiredDriverPayRateList", expiredDriverPayRateList);		
 		model.addAttribute("driverPayRateExprdCount", driverPayRateExprdCount);
 		model.addAttribute("driverPayRateExprngCount", driverPayRateExprngCount);
+	}
+	
+	private void sort(List<DriverPayRate> driverPayRateList) {
+		 Comparator<DriverPayRate> compComparator = new Comparator<DriverPayRate>() {
+				@Override
+				public int compare(DriverPayRate o1, DriverPayRate o2) {
+					return  o1.getCompany().getName().compareTo(o2.getCompany().getName());
+				}
+			};
+				
+			Comparator<DriverPayRate> validTocomparator = new Comparator<DriverPayRate>() {
+				@Override
+				public int compare(DriverPayRate o1, DriverPayRate o2) {
+					return  o1.getValidTo().compareTo(o2.getValidTo());
+				}
+			};
+		        
+			Comparator<DriverPayRate> transferStationComparator = new Comparator<DriverPayRate>() {
+				@Override
+				public int compare(DriverPayRate o1, DriverPayRate o2) {
+					return  o1.getTransferStation().getName().compareTo(o2.getTransferStation().getName());
+				}
+			};  
+			
+			Comparator<DriverPayRate> landfillComparator = new Comparator<DriverPayRate>() {
+				@Override
+				public int compare(DriverPayRate o1, DriverPayRate o2) {
+					return  o1.getLandfill().getName().compareTo(o2.getLandfill().getName());
+				}
+			};
+			
+			ComparatorChain chain = new ComparatorChain();  		
+			chain.addComparator(compComparator);
+			chain.addComparator(validTocomparator);			
+			chain.addComparator(transferStationComparator);
+			chain.addComparator(landfillComparator);
+			Collections.sort(driverPayRateList, chain);
 	}
 	
 	public void initList(ModelMap model,HttpServletRequest request) {
@@ -226,6 +213,10 @@ public class PayrollRateAlertController extends BaseController {
 		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
 		criterias.put("type", 4);
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		
+		model.addAttribute("expiredDriverPayRateList", null);
+		model.addAttribute("driverPayRateExprdCount", null);
+		model.addAttribute("driverPayRateExprngCount", null);
 	}
 }
 

@@ -7,7 +7,7 @@
 	<td><img src="${ctx}/images/SignWarning.png" alt="test" width="22" height="22"/></td>
 	<td style="color:grey;">
 		<h3>
-			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprdCount} Driver pay rates have expired and ${driverPayRateExprngCount} more expiring within 30 days.</a>
+			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprdCount} Driver pay rate(s) have expired and ${driverPayRateExprngCount} more expiring within 30 days.</a>
 		</h3>
 	</td>
 </c:if>
@@ -16,7 +16,7 @@
 	<td><img src="${ctx}/images/SignWarning.png" alt="test" width="22" height="22"/></td>
 	<td style="color:grey;">
 		<h3>
-			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprdCount} Driver pay rates have expired.</a>
+			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprdCount} Driver pay rate(s) have expired.</a>
 		</h3>
 	</td>
 </c:if>
@@ -25,7 +25,7 @@
 	<td><img src="${ctx}/images/SignWarning.png" alt="test" width="22" height="22"/></td>
 	<td style="color:grey;">
 		<h3>
-			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprngCount} Driver pay rates expiring within 30 days.</a>
+			<a href="${ctx}/hr/payrollratealert/list.do?type=driverPayRate" style="color:grey">${driverPayRateExprngCount} Driver pay rate(s) expiring within 30 days.</a>
 		</h3>
 	</td>
 </c:if>

@@ -9,4 +9,5 @@ public interface AuthenticationService {
     List<Role> findRolesForURL(String url);
 
     public boolean hasUserPermission(User user, String url);
+    public boolean hasUserPermissionByBOName(User user, String boName);
 }
