@@ -1,7 +1,5 @@
 package com.primovision.lutransport.controller.hr;
 
-import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,14 +14,9 @@ import org.apache.commons.collections.comparators.ComparatorChain;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -32,43 +25,21 @@ import com.primovision.lutransport.controller.BaseController;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 
-import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.DriverPayRate;
-
-import com.primovision.lutransport.service.AuthenticationService;
 
 @Controller
 @RequestMapping("/hr/payrollratealert")
 public class PayrollRateAlertController extends BaseController {
-	@Autowired
-	private AuthenticationService authenticationService;
-
-	public void setAuthenticationService(AuthenticationService authenticationService) {
-		this.authenticationService = authenticationService;
-	}
-	 
 	public PayrollRateAlertController() {
 		setUrlContext("hr/payrollratealert");
 	}
 	
 	String payrollRateAlertHomePg = "/home";
 	String driverPayRateAlertPg = "/driverPayRateAlert";
-
-	@InitBinder
-	public void initBinder(WebDataBinder binder) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-		dateFormat.setLenient(false);
-		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
-	}
-	
-	private boolean hasPriv(HttpServletRequest request, String boName) {
-		User user = getUser(request);
-		return authenticationService.hasUserPermissionByBOName(user, boName);
-	}
 	
 	private boolean hasDriverPayRateAlertPriv(HttpServletRequest request) {
 		String objectName = "Manage Driver Pay Rate Alert";
-		return hasPriv(request, objectName);
+		return hasPrivByBOName(request, objectName);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="/list.do")
@@ -77,13 +48,12 @@ public class PayrollRateAlertController extends BaseController {
 		initList(model, request);
 		
 		String returnUrl = getUrlContext() + payrollRateAlertHomePg;
-		String type = request.getParameter("type");
+		String type = getRequestType(request);
 		if (StringUtils.equals("all", type)) {
 			if (hasDriverPayRateAlertPriv(request)) {
 				searchDriverPayRateAlert(model, request, null);
 			}
-		} else if (StringUtils.equals("driverPayRate", type)
-				&& hasDriverPayRateAlertPriv(request)) {
+		} else if (isDriverPayRateRequestAndHasPriv(type, request)) {
 			searchDriverPayRateAlert(model, request, null);
 			returnUrl = getUrlContext() + driverPayRateAlertPg;
 		}
@@ -103,13 +73,21 @@ public class PayrollRateAlertController extends BaseController {
 		request.getSession().setAttribute("searchCriteria", null);
 		
 		String returnUrl = "blank/blank";
-		String type = request.getParameter("type");
-		if (StringUtils.equals("driverPayRate", type)) {
+		String type = getRequestType(request);
+		if (isDriverPayRateRequestAndHasPriv(type, request)) {
 			searchDriverPayRateAlert(model, request, searchCriteria);
 			returnUrl = getUrlContext() + driverPayRateAlertPg;
 		}
 	
 		return returnUrl;
+	}
+	
+	private String getRequestType(HttpServletRequest request) {
+		return request.getParameter("type");
+	}
+	
+	private boolean isDriverPayRateRequestAndHasPriv(String type, HttpServletRequest request) {
+		return (StringUtils.equals("driverPayRate", type) && hasDriverPayRateAlertPriv(request));
 	}
 	
 	private List<DriverPayRate> retrieveDriverPayRates(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
@@ -139,7 +117,7 @@ public class PayrollRateAlertController extends BaseController {
 		
 		int driverPayRateExprngCount = 0, driverPayRateExprdCount = 0;
       for (DriverPayRate aDriverPayRate : driverPayRateList) {
-			if(aDriverPayRate.getAlertStatus() == 0) {
+			if (aDriverPayRate.getAlertStatus() == 0) {
 				continue;
 			}
 			
@@ -203,7 +181,7 @@ public class PayrollRateAlertController extends BaseController {
 			Collections.sort(driverPayRateList, chain);
 	}
 	
-	public void initList(ModelMap model,HttpServletRequest request) {
+	private void initList(ModelMap model,HttpServletRequest request) {
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		criterias.put("type", 1);
 		model.addAttribute("transferStation", genericDAO.findByCriteria(Location.class, criterias, "name", false));

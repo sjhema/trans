@@ -31,6 +31,7 @@ import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.service.AuditService;
+import com.primovision.lutransport.service.AuthenticationService;
 
 @SuppressWarnings("unchecked")
 public class BaseController {
@@ -42,6 +43,9 @@ public class BaseController {
 
 	@Autowired
 	private AuditService auditService;
+	
+	@Autowired
+	private AuthenticationService authenticationService;
 
 	protected String urlContext;
 
@@ -51,6 +55,14 @@ public class BaseController {
 
 	public void setUrlContext(String urlContext) {
 		this.urlContext = urlContext;
+	}
+	
+	public AuthenticationService getAuthenticationService() {
+		return authenticationService;
+	}
+
+	public void setAuthenticationService(AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
 	}
 
 	// Set up any custom editors, adds a custom one for java.sql.date by default
@@ -200,5 +212,18 @@ public class BaseController {
 			String action, Model model) {
 		Gson gson = new Gson();
 		return gson.toJson("");
+	}
+	
+	protected boolean hasPrivByBOName(HttpServletRequest request, String boName) {
+		User user = getUser(request);
+		return getAuthenticationService().hasUserPermissionByBOName(user, boName);
+	}
+	
+	protected void addMsg(HttpServletRequest request, String msg) {
+		request.getSession().setAttribute("msg", msg);
+	}
+	
+	protected void addError(HttpServletRequest request, String error) {
+		request.getSession().setAttribute("error", error);
 	}
 }

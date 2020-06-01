@@ -42,6 +42,7 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 	}
 
 	String driverPayRateAlertListPg = "hr/payrollratealert/list.do?type=driverPayRate";
+	String fromAlertPageIndicator = "fromAlertPage";
 	
 	@Override
 	public void setupList(ModelMap model, HttpServletRequest request) {
@@ -86,9 +87,8 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 		model.addAttribute("rateTypes", listStaticData("RATE_TYPE"));
 		model.addAttribute("rateUsing", listStaticData("RATE_USING"));
 		
-		String fromAlertPage = request.getParameter("fromAlertPage");
-		if (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) {
-			model.addAttribute("fromAlertPage", "true");
+		if (isRequestFromAlertPage(request)) {
+			model.addAttribute(fromAlertPageIndicator, "true");
 		}
 	}
 	
@@ -358,11 +358,10 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 		genericDAO.saveOrUpdate(entity);
 		cleanUp(request);
 		
-		request.getSession().setAttribute("msg", "Driver pay rate details saved successfully");
+		addMsg(request, "Driver pay rate details saved successfully");
 		
 		String redirectUrl = "redirect:/" + urlContext + "/list.do";
-		String fromAlertPage = request.getParameter("fromAlertPage");
-		if(StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) { 
+		if (isRequestFromAlertPage(request)) {
 			redirectUrl = "redirect:/" + driverPayRateAlertListPg;
 		}
 		return redirectUrl;
@@ -382,11 +381,10 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 			log.warn("Error deleting record " + entity.getId(), ex);
 		}
 			
-		request.getSession().setAttribute("msg", "Driver pay rate deleted successfully");
+		addMsg(request, "Driver pay rate deleted successfully");
 		
 		String redirectUrl = "redirect:/" + urlContext + "/list.do";
-		String fromAlertPage = request.getParameter("fromAlertPage");
-		if(StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) { 
+		if (isRequestFromAlertPage(request)) {
 			redirectUrl = "redirect:/" + driverPayRateAlertListPg;
 		}
 		return redirectUrl;
@@ -396,8 +394,7 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 	public String changeAlertStatus(HttpServletRequest request, ModelMap modMap) {
 		DriverPayRate driverPayRate = genericDAO.getById(DriverPayRate.class, Long.valueOf(request.getParameter("id")));
 		String redirectUrl = "redirect:/" + urlContext + "/list.do";
-		String fromAlertPage = request.getParameter("fromAlertPage");
-		if (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage)) {
+		if (isRequestFromAlertPage(request)) {
 			redirectUrl = "redirect:/" + driverPayRateAlertListPg;
 			if (driverPayRate.getAlertStatus() == 1) { 
 				driverPayRate.setAlertStatus(0);
@@ -409,9 +406,14 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 		}
 		
 		genericDAO.save(driverPayRate);
-		request.getSession().setAttribute("msg", "Driver pay rate alert status changed successfully");
+		addMsg(request, "Driver pay rate alert status changed successfully");
 		
 		return redirectUrl;
+	}
+	
+	private boolean isRequestFromAlertPage(HttpServletRequest request) {
+		String fromAlertPage = request.getParameter(fromAlertPageIndicator);
+		return (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage));
 	}
 	
 	private String common(HttpServletRequest request,ModelMap model,DriverPayRate entity,String rateQuery)

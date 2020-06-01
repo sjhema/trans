@@ -2,17 +2,21 @@
 <script type="text/javascript">
 var driverPayRateUrl = "${ctx}/hr/driverpayrate/";
 
+function constructBaseUrl(action) {
+	return (driverPayRateUrl + action + "?fromAlertPage=true");
+}
+
 function confirmDelete(id) {
 	if (!confirm("Are you sure you want to delete the selected record?")) {
 		return;
 	}
 	
-	var href = driverPayRateUrl + "delete.do?fromAlertPage=true&id=" + id;
+	var href = constructBaseUrl("delete.do") + "&id=" + id;
 	document.location.href = href
 }
 
 function create() {
-	var href = driverPayRateUrl + "create.do?fromAlertPage=true";
+	var href = constructBaseUrl("create.do");
 	document.location.href = href
 }
 
@@ -22,23 +26,23 @@ function changeAlertStatus(id, rateStatus) {
 		return;
 	}
 	
-	var href = driverPayRateUrl + "changeAlertStatus.do?fromAlertPage=true&id=" + id;
+	var href = constructBaseUrl("changeAlertStatus.do") + "&id=" + id;
 	document.location.href = href
 }
 
-function getDestinationLoad(){
-	var selectedtransfer= document.getElementById('transferStation');
-	var origin=selectedtransfer.options[selectedtransfer.selectedIndex].value;
-	var selectedlandfill= document.getElementById('landfill');
-	var destination=selectedlandfill.options[selectedlandfill.selectedIndex].value;
-	if(origin!="" && destination==""){
+function populateDestinationLoad() {
+	var selectedTransfer = document.getElementById('transferStation');
+	var origin = selectedTransfer.options[selectedTransfer.selectedIndex].value;
+	var selectedLandfill = document.getElementById('landfill');
+	var destination = selectedLandfill.options[selectedLandfill.selectedIndex].value;
+	if (origin != "" && destination == "") {
 		jQuery.ajax({
 			url:'${ctx}/hr/driverpayrate/ajax.do?action=findDestinationLoad&origin='+origin, 
 			success: function( data ) {
-				var listData=jQuery.parseJSON(data);
+				var listData = jQuery.parseJSON(data);
 				var options = '<option value="">Please Select</option>';
-				for (var i = 0; i <listData.length; i++) {
-					var destination=listData[i];
+				for (var i = 0; i < listData.length; i++) {
+					var destination = listData[i];
 					options += '<option value="'+destination.id+'">'+destination.name+'</option>';
 				  }
 				$("#landfill").html(options);
@@ -46,18 +50,18 @@ function getDestinationLoad(){
 		});
 	}	
 }
-function getOriginLoad(){
-	var selectedtransfer= document.getElementById('transferStation');
-	var origin=selectedtransfer.options[selectedtransfer.selectedIndex].value;
-	var selectedlandfill= document.getElementById('landfill');
-	var destination=selectedlandfill.options[selectedlandfill.selectedIndex].value;
-	if(destination!="" && origin==""){
+function populateOriginLoad() {
+	var selectedTransfer = document.getElementById('transferStation');
+	var origin = selectedTransfer.options[selectedTransfer.selectedIndex].value;
+	var selectedLandfill = document.getElementById('landfill');
+	var destination = selectedLandfill.options[selectedLandfill.selectedIndex].value;
+	if (destination != "" && origin == "") {
 		jQuery.ajax({
 			url:'${ctx}/hr/driverpayrate/ajax.do?action=findOriginLoad&destination='+destination, 
 			success: function( data ) {
-				var listData=jQuery.parseJSON(data);
+				var listData = jQuery.parseJSON(data);
 				var options = '<option value="">Please Select</option>';
-				for (var i = 0; i <listData.length; i++) {
+				for (var i = 0; i < listData.length; i++) {
 					var origin=listData[i];
 					options += '<option value="'+origin.id+'">'+origin.name+'</option>';
 				  }
@@ -70,8 +74,7 @@ function getOriginLoad(){
 
 <h3><primo:label code="Expired/Expiring Driver Pay Rate(s)"/></h3>
 <div>
-	<form:form action="search.do" method="get" name="searchForm">
-		<input type="hidden" value="driverPayRate" name="type"/>
+	<form:form action="search.do?type=driverPayRate" method="get" name="searchForm">
 		<table id="form-table" width="100%" cellspacing="0" cellpadding="5">
 			<tr class="table-heading">
 				<td align="${left}" colspan="9"><b><primo:label code="Search Driver Pay Rate Alert"/></b></td>
@@ -107,7 +110,7 @@ function getOriginLoad(){
 			<tr>
 				<td align="${left}" class="first"><label>Transfer Station</label></td>
 				<td align="${left}">
-					<select id="transferStation" name="transferStation.id" style="min-width:154px; max-width:154px" onchange="javascript:getDestinationLoad()">
+					<select id="transferStation" name="transferStation.id" style="min-width:154px; max-width:154px" onchange="javascript:populateOriginLoad()">
 						<option value="">------<primo:label code="Please Select"/>------</option>
 						<c:forEach items="${transferStation}" var="transferStation">
 						<c:set var="selected" value=""/>
@@ -120,7 +123,7 @@ function getOriginLoad(){
 				</td>
 				<td align="${left}" class="first"><label>Landfill</label></td>
 				<td align="${left}">
-					<select id="landfill" name="landfill.id" style="min-width:154px; max-width:154px" onchange="javascript:getOriginLoad()">
+					<select id="landfill" name="landfill.id" style="min-width:154px; max-width:154px" onchange="javascript:populateOriginLoad()">
 						<option value="">------<primo:label code="Please Select"/>------</option>
 						<c:forEach items="${landfill}" var="landfill">
 							<c:set var="selected" value=""/>
