@@ -375,8 +375,7 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 		try {
 			genericDAO.delete(entity);
 		} catch (Exception ex) {
-			request.getSession().setAttribute(
-					"errors",
+			request.getSession().setAttribute("errors",
 					"This" + entity.getClass().getSimpleName() + " can't be deleted");
 			log.warn("Error deleting record " + entity.getId(), ex);
 		}
@@ -393,20 +392,17 @@ public class DriverPayRateController extends CRUDController<DriverPayRate>{
 	@RequestMapping("/changeAlertStatus.do")
 	public String changeAlertStatus(HttpServletRequest request, ModelMap modMap) {
 		DriverPayRate driverPayRate = genericDAO.getById(DriverPayRate.class, Long.valueOf(request.getParameter("id")));
+		String newStatus = request.getParameter("status");
+		if (!StringUtils.equals(newStatus, String.valueOf(driverPayRate.getAlertStatus()))) { 
+			driverPayRate.setAlertStatus(Integer.valueOf(newStatus));
+			genericDAO.save(driverPayRate);
+			addMsg(request, "Driver pay rate alert status changed successfully");
+		}
+		
 		String redirectUrl = "redirect:/" + urlContext + "/list.do";
 		if (isRequestFromAlertPage(request)) {
 			redirectUrl = "redirect:/" + driverPayRateAlertListPg;
-			if (driverPayRate.getAlertStatus() == 1) { 
-				driverPayRate.setAlertStatus(0);
-			}
-		} else {			
-			if (driverPayRate.getAlertStatus() == 0) {
-				driverPayRate.setAlertStatus(1);
-			}
 		}
-		
-		genericDAO.save(driverPayRate);
-		addMsg(request, "Driver pay rate alert status changed successfully");
 		
 		return redirectUrl;
 	}

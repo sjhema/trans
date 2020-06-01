@@ -26,7 +26,7 @@ function changeAlertStatus(id, rateStatus) {
 		return;
 	}
 	
-	var href = constructBaseUrl("changeAlertStatus.do") + "&id=" + id;
+	var href = constructBaseUrl("changeAlertStatus.do") + "&status=0&id=" + id;
 	document.location.href = href
 }
 

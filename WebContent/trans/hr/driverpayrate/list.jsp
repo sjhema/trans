@@ -128,7 +128,7 @@ function getOriginLoad(){
 			<primo:textcolumn headerText="Probation Rate" dataField="probationRate"/>
 			<primo:staticdatacolumn headerText="Rate Type" dataField="rateType" dataType="RATE_TYPE"/>
 			<primo:staticdatacolumn headerText="Rate Using" dataField="rateUsing" dataType="RATE_USING"/>
-			<primo:anchorcolumn headerText="Manage Alert" dataField="alertStatus" linkUrl="/hr/driverpayrate/changeAlertStatus.do?id={id}" linkText="On alert"/>	
+			<primo:anchorcolumn headerText="Manage Alert" dataField="alertStatus" linkUrl="/hr/driverpayrate/changeAlertStatus.do?id={id}&status=1" linkText="On alert"/>	
 		</primo:datatable>
 			<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
