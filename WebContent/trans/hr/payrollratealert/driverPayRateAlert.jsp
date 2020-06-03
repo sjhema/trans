@@ -74,7 +74,8 @@ function populateOriginLoad() {
 
 <h3><primo:label code="Expired/Expiring Driver Pay Rate(s)"/></h3>
 <div>
-	<form:form action="search.do?type=driverPayRate" method="get" name="searchForm">
+	<form:form action="search.do" method="get" name="searchForm">
+		<input type="hidden" id="type" name="type" value="driverPayRate"/>
 		<table id="form-table" width="100%" cellspacing="0" cellpadding="5">
 			<tr class="table-heading">
 				<td align="${left}" colspan="9"><b><primo:label code="Search Driver Pay Rate Alert"/></b></td>
@@ -134,6 +135,7 @@ function populateOriginLoad() {
 						</c:forEach>
 					</select>
 				</td>
+			</tr>
 			<tr>
 				<td align="${left}"></td>
 				<td align="${left}">
@@ -181,7 +183,7 @@ function populateOriginLoad() {
 			<primo:imagecolumn headerText="EDIT" linkUrl="${ctx}/hr/driverpayrate/edit.do?id={id}&fromAlertPage=true" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
  			<primo:imagecolumn headerText="DEL" linkUrl="javascript:confirmDelete('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center" width="25px"/>
        	 </primo:datatable>
-		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
+		 <%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 	</form:form>
 </div>
 		

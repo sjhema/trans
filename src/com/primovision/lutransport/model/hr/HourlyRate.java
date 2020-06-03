@@ -70,14 +70,35 @@ public class HourlyRate extends AbstractBaseModel{
 	@Column(name="hourlydoubletime_rate")
 	private Double hourlyDoubleTimeRate;
 	
+	@Column(name="alert_status")
+	protected Integer alertStatus=1;
+	
 	@Transient
 	private Date validFromTemp;
 	
 	@Transient
 	private Date validToTemp;
 	
+	@Transient
+   private String rateStatus;
 	
+	@Transient
+	public String getRateStatus() {
+		return rateStatus;
+	}
 
+	@Transient
+	public void setRateStatus(String rateStatus) {
+		this.rateStatus = rateStatus;
+	}
+
+	public Integer getAlertStatus() {
+		return alertStatus;
+	}
+
+	public void setAlertStatus(Integer alertStatus) {
+		this.alertStatus = alertStatus;
+	}
 
 	public Date getValidFrom() {
 		setValidFromTemp(validFrom);

@@ -233,7 +233,7 @@
 
 
 
-<form:form action="save.do" name="typeForm" commandName="modelObject"
+<form:form action="save.do?fromAlertPage=${fromAlertPage}" name="typeForm" commandName="modelObject"
 	method="post">
    <form:hidden path="id" id="id" />
 	<table id="form-table" width="100%" cellspacing="1" cellpadding="5">
@@ -391,13 +391,18 @@
 		</tr>
 
 		<tr><td>&nbsp;</td>
-			<td align="${left}" colspan="2"><input type="submit"
-				name="create" id="create" onclick=""
-				value="<primo:label code="Save"/>" class="flat" /> <input
-				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
-				class="flat" /> <input type="button" id="cancelBtn"
-				value="<primo:label code="Cancel"/>" class="flat"
-				onClick="location.href='list.do'" /></td>
+			<td align="${left}" colspan="2">
+				<input type="submit" name="create" id="create" onclick=""
+					value="<primo:label code="Save"/>" class="flat" /> 
+				<input type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
+					class="flat" />
+				<c:set var="cancelAction" value="location.href='list.do'"/>
+				<c:if test="${fromAlertPage ne null and fromAlertPage eq 'true'}">
+					<c:set var="cancelAction" value="JavaScript:window.location='${ctx}/hr/payrollratealert/list.do?type=hourlyPayRate';"/>
+				</c:if>
+				<input type="button" id="cancelBtn" value="<primo:label code="Cancel"/>" class="flat"
+					onClick="${cancelAction}"/>
+			</td>
 		</tr>
 
 

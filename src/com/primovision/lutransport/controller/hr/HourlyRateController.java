@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -30,6 +31,7 @@ import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.LeaveCurrentBalance;
 import com.primovision.lutransport.model.hr.LeaveType;
@@ -48,6 +50,10 @@ public class HourlyRateController extends CRUDController<HourlyRate> {
 	public HourlyRateController() {
 		setUrlContext("/hr/hourlyrate");
 	}
+	
+	String hourlyPayRateAlertListPg = "hr/payrollratealert/list.do?type=hourlyPayRate";
+	String fromAlertPageIndicator = "fromAlertPage";
+	
 	@Autowired
 	private DateUpdateService dateupdateService;
 	
@@ -89,6 +95,10 @@ public class HourlyRateController extends CRUDController<HourlyRate> {
 		
 		criterias.clear();
 		model.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
+		
+		if (isRequestFromAlertPage(request)) {
+			model.addAttribute(fromAlertPageIndicator, "true");
+		}
 	}
 
 	
@@ -221,7 +231,16 @@ public class HourlyRateController extends CRUDController<HourlyRate> {
 				return urlContext + "/form"; 
 			}
 		}
-		return super.save(request, entity, bindingResult, model);
+		
+		addMsg(request, "Hourly rate details saved successfully");
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + hourlyPayRateAlertListPg;
+		}
+		return redirectUrl;
+		
+		//return super.save(request, entity, bindingResult, model);
 	}
 	
 	
@@ -243,6 +262,48 @@ public class HourlyRateController extends CRUDController<HourlyRate> {
 		return "";
 	}
 	
+	@Override
+	public String delete(@ModelAttribute("modelObject") HourlyRate entity,
+			BindingResult bindingResult, HttpServletRequest request) {
+		try {
+			genericDAO.delete(entity);
+		} catch (Exception ex) {
+			request.getSession().setAttribute("errors",
+					"This" + entity.getClass().getSimpleName() + " can't be deleted");
+			log.warn("Error deleting record " + entity.getId(), ex);
+		}
+			
+		addMsg(request, "Hourly rate deleted successfully");
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + hourlyPayRateAlertListPg;
+		}
+		return redirectUrl;
+	}
+	
+	@RequestMapping("/changeAlertStatus.do")
+	public String changeAlertStatus(HttpServletRequest request, ModelMap modMap) {
+		HourlyRate hourlyRate = genericDAO.getById(HourlyRate.class, Long.valueOf(request.getParameter("id")));
+		String newStatus = request.getParameter("status");
+		if (!StringUtils.equals(newStatus, String.valueOf(hourlyRate.getAlertStatus()))) { 
+			hourlyRate.setAlertStatus(Integer.valueOf(newStatus));
+			genericDAO.save(hourlyRate);
+			addMsg(request, "Hourly rate alert status changed successfully");
+		}
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + hourlyPayRateAlertListPg;
+		}
+		
+		return redirectUrl;
+	}
+	
+	private boolean isRequestFromAlertPage(HttpServletRequest request) {
+		String fromAlertPage = request.getParameter(fromAlertPageIndicator);
+		return (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage));
+	}
 
 	protected String processAjaxRequest(HttpServletRequest request,String action, Model model) 
 	{
