@@ -143,6 +143,7 @@
 			dataFormat="MM-dd-yyyy" />
 		<primo:datecolumn headerText="Valid To" dataField="validTo"
 			dataFormat="MM-dd-yyyy" />
+		<primo:anchorcolumn headerText="Manage Alert" dataField="alertStatus" linkUrl="/hr/hourlyrate/changeAlertStatus.do?id={id}&status=1" linkText="On alert"/>	
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
