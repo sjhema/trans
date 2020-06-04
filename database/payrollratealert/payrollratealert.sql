@@ -36,6 +36,22 @@ WHERE `ID`='9021';
 
  INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '9027', '1'); -- ADMIN
+
+// Weekly salary Rate
+ALTER TABLE `lutransport`.`weekly_salary` 
+ADD COLUMN `alert_status` INT(11) NULL DEFAULT 1 COMMENT '' AFTER `daily_salary`;
+update weekly_salary set alert_status = 0 where valid_to < '2020-05-31';
+
+// Weekly salary Rate
+UPDATE `lutransport`.`business_object` SET `URL`='/hr/weeklysalaryrate/list.do,/hr/weeklysalaryrate/form.do,/hr/weeklysalaryrate/save.do,/hr/weeklysalaryrate/create.do,/hr/weeklysalaryrate/search.do,/hr/weeklysalaryrate/delete.do,/hr/weeklysalaryrate/ajax.do,/hr/weeklysalaryrate/edit.do,/hr/weeklysalaryrate/export.do,/hr/weeklysalaryrate/changeAlertStatus.do' 
+WHERE `ID`='9022';
+
+// Weekly salary Rate
+ INSERT INTO `business_object` (`ID`,`ACTION`,`DISPLAY_TAG`,`OBJECT_LEVEL`,`OBJECT_NAME`,`URL`,`created_at`,`created_by`,`modified_at`,`modified_by`,`status`,`display_order`,`hidden`,`parent_id`,`hierarchy`,`url_context`)
+ VALUES (9028,'/hr/payrollratealert/list.do?type=weeklySalaryRate','Manage Weekly Salary Rate Alert',3,'Manage Weekly Salary Rate Alert','/hr/payrollratealert/list.do?type=weeklySalaryRate,/hr/payrollratealert/search.do?type=weeklySalaryRate',NULL,NULL,NULL,NULL,1,8,0,902,'/1/902/9028/',NULL);
+
+ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '9028', '1'); -- ADMIN
 ----
 
 // Payroll rate alert
@@ -57,20 +73,6 @@ VALUES (now(), '1', '9026', '10'); -- Sp Priv 1
 
 
 
-// Weekly salary Rate
-ALTER TABLE `lutransport`.`weekly_salary` 
-ADD COLUMN `alert_status` INT(11) NULL DEFAULT 1 COMMENT '' AFTER `daily_salary`;
-update weekly_salary set alert_status = 0 where valid_to < '2020-05-31';
 
-// Weekly salary Rate
-UPDATE `lutransport`.`business_object` SET `URL`='/hr/weeklysalaryrate/list.do,/hr/weeklysalaryrate/form.do,/hr/weeklysalaryrate/save.do,/hr/weeklysalaryrate/create.do,/hr/weeklysalaryrate/search.do,/hr/weeklysalaryrate/delete.do,/hr/weeklysalaryrate/ajax.do,/hr/weeklysalaryrate/edit.do,/hr/weeklysalaryrate/export.do,/hr/weeklysalaryrate/changeAlertStatus.do' 
-WHERE `ID`='9022';
-
-// Weekly salary Rate
- INSERT INTO `business_object` (`ID`,`ACTION`,`DISPLAY_TAG`,`OBJECT_LEVEL`,`OBJECT_NAME`,`URL`,`created_at`,`created_by`,`modified_at`,`modified_by`,`status`,`display_order`,`hidden`,`parent_id`,`hierarchy`,`url_context`)
- VALUES (9028,'/hr/payrollratealert/list.do?type=weeklySalaryRate','Manage Weekly Salary Rate Alert',3,'Manage Weekly Salary Rate Alert','/hr/payrollratealert/list.do?type=weeklySalaryRate,/hr/payrollratealert/search.do?type=weeklySalaryRate',NULL,NULL,NULL,NULL,1,8,0,902,'/1/902/9028/',NULL);
-
- INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
-VALUES (now(), '1', '9028', '1'); -- ADMIN
 
 

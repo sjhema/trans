@@ -79,6 +79,9 @@ public class PayrollRateAlertController extends BaseController {
 		} else if (isHourlyPayRateRequestAndHasPriv(type, request)) {
 			searchHourlyPayRateAlert(model, request, null);
 			returnUrl = getUrlContext() + hourlyPayRateAlertPg;
+		} else if (isWeeklySalaryRateRequestAndHasPriv(type, request)) {
+			searchHourlyPayRateAlert(model, request, null);
+			returnUrl = getUrlContext() + weeklySalaryRateAlertPg;
 		}
 			
 		return returnUrl;
