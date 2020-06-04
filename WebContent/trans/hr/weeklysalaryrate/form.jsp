@@ -227,7 +227,7 @@ function formatDate1() {
 <h3>
 	<primo:label code="Add/Update Weekly Salary Rate" />
 </h3>
-<form:form action="save.do" name="employeeForm" commandName="modelObject"
+<form:form action="save.do?fromAlertPage=${fromAlertPage}" name="employeeForm" commandName="modelObject"
 	method="post">
 	<form:hidden path="id" id="id" />
 	<table width="100%" id="form-table">
@@ -333,13 +333,15 @@ function formatDate1() {
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td align="${left}"><input type="submit"
-				name="create" id="create" onclick=""
-				value="<primo:label code="Save"/>" class="flat" /> <input
-				type="reset" id="resetBtn" value="<primo:label code="Reset"/>"
-				class="flat" /> <input type="button" id="cancelBtn"
-				value="<primo:label code="Cancel"/>" class="flat"
-				onClick="location.href='list.do'" />
+			<td align="${left}">
+				<input type="submit" name="create" id="create" onclick="" value="<primo:label code="Save"/>" class="flat" /> 
+				<input type="reset" id="resetBtn" value="<primo:label code="Reset"/>" class="flat" />
+				<c:set var="cancelAction" value="location.href='list.do'"/>
+				<c:if test="${fromAlertPage ne null and fromAlertPage eq 'true'}">
+					<c:set var="cancelAction" value="JavaScript:window.location='${ctx}/hr/payrollratealert/list.do?type=weeklySalaryRate';"/>
+				</c:if>
+				<input type="button" id="cancelBtn" value="<primo:label code="Cancel"/>" class="flat"
+					onClick="${cancelAction}" />
 			</td>
 		</tr>
 	</table>

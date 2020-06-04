@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -29,6 +31,7 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.Driver;
+import com.primovision.lutransport.model.hr.DriverPayRate;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.WeeklySalary;
 import com.primovision.lutransport.service.DateUpdateService;
@@ -41,6 +44,9 @@ public class WeeklySalaryRateController extends CRUDController<WeeklySalary>
 	public WeeklySalaryRateController() {
 		setUrlContext("/hr/weeklysalaryrate");
 	}
+	
+	String weeklySalaryRateAlertListPg = "hr/payrollratealert/list.do?type=weeklySalaryRate";
+	String fromAlertPageIndicator = "fromAlertPage";
 	
 	@Autowired
 	private DateUpdateService dateupdateService;
@@ -65,6 +71,10 @@ public class WeeklySalaryRateController extends CRUDController<WeeklySalary>
 		map.put("dataType", "STATUS");
 		map.put("dataValue", "0,1");
 		model.addAttribute("employeestatus", genericDAO.findByCriteria(StaticData.class, map,"dataText",false));
+		
+		if (isRequestFromAlertPage(request)) {
+			model.addAttribute(fromAlertPageIndicator, "true");
+		}
 	}
 	
 	
@@ -152,8 +162,77 @@ public class WeeklySalaryRateController extends CRUDController<WeeklySalary>
 		if(entity.getTerminal()==null){
 			bindingResult.rejectValue("terminal", "error.select.option",
 					null, null);
-		}		
-	return super.save(request, entity, bindingResult, model);
+		}
+		
+		try {
+			getValidator().validate(entity, bindingResult);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			log.warn("Error in validation :" + e);
+		}
+		
+		// Return to form if we had errors
+		if (bindingResult.hasErrors()) {
+			setupCreate(model, request);
+			return urlContext + "/form";
+		}
+		
+		beforeSave(request, entity, model);			
+		genericDAO.saveOrUpdate(entity);
+		cleanUp(request);
+		
+		addMsg(request, "Weekly salary rate details saved successfully");
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + weeklySalaryRateAlertListPg;
+		}
+		return redirectUrl;
+		
+		//return super.save(request, entity, bindingResult, model);
+	}
+	
+	@Override
+	public String delete(@ModelAttribute("modelObject") WeeklySalary entity,
+			BindingResult bindingResult, HttpServletRequest request) {
+		try {
+			genericDAO.delete(entity);
+		} catch (Exception ex) {
+			request.getSession().setAttribute("errors",
+					"This" + entity.getClass().getSimpleName() + " can't be deleted");
+			log.warn("Error deleting record " + entity.getId(), ex);
+		}
+			
+		addMsg(request, "Weekly salary rate deleted successfully");
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + weeklySalaryRateAlertListPg;
+		}
+		return redirectUrl;
+	}
+	
+	@RequestMapping("/changeAlertStatus.do")
+	public String changeAlertStatus(HttpServletRequest request, ModelMap modMap) {
+		WeeklySalary weeklySalary = genericDAO.getById(WeeklySalary.class, Long.valueOf(request.getParameter("id")));
+		String newStatus = request.getParameter("status");
+		if (!StringUtils.equals(newStatus, String.valueOf(weeklySalary.getAlertStatus()))) { 
+			weeklySalary.setAlertStatus(Integer.valueOf(newStatus));
+			genericDAO.save(weeklySalary);
+			addMsg(request, "Weekly salary rate alert status changed successfully");
+		}
+		
+		String redirectUrl = "redirect:/" + urlContext + "/list.do";
+		if (isRequestFromAlertPage(request)) {
+			redirectUrl = "redirect:/" + weeklySalaryRateAlertListPg;
+		}
+		
+		return redirectUrl;
+	}
+	
+	private boolean isRequestFromAlertPage(HttpServletRequest request) {
+		String fromAlertPage = request.getParameter(fromAlertPageIndicator);
+		return (StringUtils.isNotEmpty(fromAlertPage) && BooleanUtils.toBoolean(fromAlertPage));
 	}
 	
 	

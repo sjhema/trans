@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -60,6 +61,30 @@ public class WeeklySalary extends AbstractBaseModel{
 	
 	@Column(name="daily_salary")
 	private Double dailySalary;
+	
+	@Column(name="alert_status")
+	private Integer alertStatus=1;
+	
+	@Transient
+   private String rateStatus;
+	
+	public Integer getAlertStatus() {
+		return alertStatus;
+	}
+
+	public void setAlertStatus(Integer alertStatus) {
+		this.alertStatus = alertStatus;
+	}
+
+	@Transient
+	public String getRateStatus() {
+		return rateStatus;
+	}
+
+	@Transient
+	public void setRateStatus(String rateStatus) {
+		this.rateStatus = rateStatus;
+	}
 
 	public String getStaffId() {
 		return staffId;

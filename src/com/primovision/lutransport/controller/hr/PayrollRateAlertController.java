@@ -26,8 +26,8 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 
 import com.primovision.lutransport.model.hr.DriverPayRate;
-import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hr.HourlyRate;
+import com.primovision.lutransport.model.hr.WeeklySalary;
 
 @Controller
 @RequestMapping("/hr/payrollratealert")
@@ -39,6 +39,7 @@ public class PayrollRateAlertController extends BaseController {
 	String payrollRateAlertHomePg = "/home";
 	String driverPayRateAlertPg = "/driverPayRateAlert";
 	String hourlyPayRateAlertPg = "/hourlyPayRateAlert";
+	String weeklySalaryRateAlertPg = "/weeklySalaryRateAlert";
 	
 	private boolean hasDriverPayRateAlertPriv(HttpServletRequest request) {
 		String objectName = "Manage Driver Pay Rate Alert";
@@ -47,6 +48,11 @@ public class PayrollRateAlertController extends BaseController {
 	
 	private boolean hasHourlyPayRateAlertPriv(HttpServletRequest request) {
 		String objectName = "Manage Hourly Pay Rate Alert";
+		return hasPrivByBOName(request, objectName);
+	}
+	
+	private boolean hasWeeklySalaryRateAlertPriv(HttpServletRequest request) {
+		String objectName = "Manage Weekly Salary Rate Alert";
 		return hasPrivByBOName(request, objectName);
 	}
 	
@@ -63,6 +69,9 @@ public class PayrollRateAlertController extends BaseController {
 			}
 			if (hasHourlyPayRateAlertPriv(request)) {
 				searchHourlyPayRateAlert(model, request, null);
+			}
+			if (hasWeeklySalaryRateAlertPriv(request)) {
+				searchWeeklySalaryRateAlert(model, request, null);
 			}
 		} else if (isDriverPayRateRequestAndHasPriv(type, request)) {
 			searchDriverPayRateAlert(model, request, null);
@@ -94,6 +103,9 @@ public class PayrollRateAlertController extends BaseController {
 		} else if (isHourlyPayRateRequestAndHasPriv(type, request)) {
 			searchHourlyPayRateAlert(model, request, searchCriteria);
 			returnUrl = getUrlContext() + hourlyPayRateAlertPg;
+		} else if (isWeeklySalaryRateRequestAndHasPriv(type, request)) {
+			searchHourlyPayRateAlert(model, request, searchCriteria);
+			returnUrl = getUrlContext() + weeklySalaryRateAlertPg;
 		}
 	
 		return returnUrl;
@@ -109,6 +121,10 @@ public class PayrollRateAlertController extends BaseController {
 	
 	private boolean isHourlyPayRateRequestAndHasPriv(String type, HttpServletRequest request) {
 		return (StringUtils.equals("hourlyPayRate", type) && hasHourlyPayRateAlertPriv(request));
+	}
+	
+	private boolean isWeeklySalaryRateRequestAndHasPriv(String type, HttpServletRequest request) {
+		return (StringUtils.equals("weeklySalaryRate", type) && hasWeeklySalaryRateAlertPriv(request));
 	}
 	
 	private List<DriverPayRate> retrieveDriverPayRates(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
@@ -135,6 +151,18 @@ public class PayrollRateAlertController extends BaseController {
 		return hourlyPayRateList;
 	}
 	
+	private List<WeeklySalary> retrieveWeeklySalaryRates(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
+		List<WeeklySalary> weeklySalaryRateList = null;
+		String sortBy = "driver.fullName";
+		if (searchCriteria == null) {
+			Map<String, Object> criterias = new HashMap<String, Object>();
+			weeklySalaryRateList = genericDAO.findByCriteria(WeeklySalary.class, criterias, sortBy, true);
+		} else {
+			weeklySalaryRateList = genericDAO.search(WeeklySalary.class, searchCriteria, sortBy, true);				
+		}
+		return weeklySalaryRateList;
+	}
+	
 	private void searchDriverPayRateAlert(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
 		List<DriverPayRate> driverPayRateList = retrieveDriverPayRates(model, request, searchCriteria);
 		populateDriverPayRateAlert(model, driverPayRateList);
@@ -143,6 +171,11 @@ public class PayrollRateAlertController extends BaseController {
 	private void searchHourlyPayRateAlert(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
 		List<HourlyRate> hourlyPayRateList = retrieveHourlyPayRates(model, request, searchCriteria);
 		populateHourlyPayRateAlert(model, hourlyPayRateList);
+	}
+	
+	private void searchWeeklySalaryRateAlert(ModelMap model, HttpServletRequest request, SearchCriteria searchCriteria) {		
+		List<WeeklySalary> weeklySalaryList = retrieveWeeklySalaryRates(model, request, searchCriteria);
+		populateWeeklySalaryRateAlert(model, weeklySalaryList);
 	}
 	
 	private void populateDriverPayRateAlert(ModelMap model, List<DriverPayRate> driverPayRateList) {
@@ -219,6 +252,43 @@ public class PayrollRateAlertController extends BaseController {
 		model.addAttribute("hourlyPayRateExprngCount", hourlyPayRateExprngCount);
 	}
 	
+	private void populateWeeklySalaryRateAlert(ModelMap model, List<WeeklySalary> weeklySalaryRateList) {
+		List<WeeklySalary> expiredWeeklySalaryRateList = new ArrayList<WeeklySalary>();
+		model.addAttribute("expiredWeeklySalaryRateList", expiredWeeklySalaryRateList);	
+	
+		if (weeklySalaryRateList == null || weeklySalaryRateList.isEmpty()) {
+			return;
+		}
+		
+		int weeklySalaryRateExprngCount = 0, weeklySalaryRateExprdCount = 0;
+      for (WeeklySalary aWeeklySalary : weeklySalaryRateList) {
+			if (aWeeklySalary.getAlertStatus() == 0) {
+				continue;
+			}
+			
+			long currentTime = new Date().getTime();
+			if (aWeeklySalary.getValidFrom().getTime() > currentTime) {
+				continue;
+			}
+			
+			int diffInDays = (int) ((aWeeklySalary.getValidTo().getTime()- currentTime) / (1000 * 60 * 60 * 24));		
+			if (diffInDays >= 0 && diffInDays <= 30) {		
+				weeklySalaryRateExprngCount++;
+				aWeeklySalary.setRateStatus("CURRENT");
+				expiredWeeklySalaryRateList.add(aWeeklySalary);
+			} else if (diffInDays < 0) {
+				weeklySalaryRateExprdCount++;
+				aWeeklySalary.setRateStatus("EXPIRED");
+				expiredWeeklySalaryRateList.add(aWeeklySalary);				
+			}			
+      }		
+      
+      sortWeeklySalaryRate(expiredWeeklySalaryRateList);
+			
+		model.addAttribute("weeklySalaryRateExprdCount", weeklySalaryRateExprdCount);
+		model.addAttribute("weeklySalaryRateExprngCount", weeklySalaryRateExprngCount);
+	}
+	
 	private void sortDriverPayRate(List<DriverPayRate> driverPayRateList) {
 		Comparator<DriverPayRate> compComparator = new Comparator<DriverPayRate>() {
 			@Override
@@ -293,6 +363,19 @@ public class PayrollRateAlertController extends BaseController {
 		 Collections.sort(hourlyPayRateList, chain);
 	}
 	
+	private void sortWeeklySalaryRate(List<WeeklySalary> weeklySalaryRateList) {
+		 Comparator<WeeklySalary> driverFullNameComparator = new Comparator<WeeklySalary>() {
+				@Override
+				public int compare(WeeklySalary o1, WeeklySalary o2) {
+					return  o1.getDriver().getFullName().compareTo(o2.getDriver().getFullName());
+				}
+		 };
+		  
+		 ComparatorChain chain = new ComparatorChain();  		
+		 chain.addComparator(driverFullNameComparator);
+		 Collections.sort(weeklySalaryRateList, chain);
+	}
+	
 	private void initList(ModelMap model,HttpServletRequest request) {
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		criterias.put("type", 1);
@@ -316,6 +399,10 @@ public class PayrollRateAlertController extends BaseController {
 		model.addAttribute("expiredHourlyPayRateList", null);
 		model.addAttribute("hourlyPayRateExprdCount", null);
 		model.addAttribute("hourlyPayRateExprngCount", null);
+		
+		model.addAttribute("expiredWeeklySalaryRateList", null);
+		model.addAttribute("weeklySalaryRateExprdCount", null);
+		model.addAttribute("weeklySalaryRateExprngCount", null);
 	}
 }
 

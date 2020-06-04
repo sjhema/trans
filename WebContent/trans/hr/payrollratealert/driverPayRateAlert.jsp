@@ -50,6 +50,7 @@ function populateDestinationLoad() {
 		});
 	}	
 }
+
 function populateOriginLoad() {
 	var selectedTransfer = document.getElementById('transferStation');
 	var origin = selectedTransfer.options[selectedTransfer.selectedIndex].value;

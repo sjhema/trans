@@ -232,6 +232,10 @@ public class HourlyRateController extends CRUDController<HourlyRate> {
 			}
 		}
 		
+		beforeSave(request, entity, model);			
+		genericDAO.saveOrUpdate(entity);
+		cleanUp(request);
+		
 		addMsg(request, "Hourly rate details saved successfully");
 		
 		String redirectUrl = "redirect:/" + urlContext + "/list.do";

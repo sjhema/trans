@@ -1,9 +1,9 @@
 <%@include file="/common/taglibs.jsp"%>
 <script type="text/javascript">
-var hourlyPayRateUrl = "${ctx}/hr/hourlyrate/";
+var weeklySalaryRateUrl = "${ctx}/hr/weeklysalaryrate/";
 
 function constructBaseUrl(action) {
-	return (hourlyPayRateUrl + action + "?fromAlertPage=true");
+	return (weeklySalaryRateUrl + action + "?fromAlertPage=true");
 }
 
 function confirmDelete(id) {
@@ -29,15 +29,17 @@ function changeAlertStatus(id, rateStatus) {
 	var href = constructBaseUrl("changeAlertStatus.do") + "&status=0&id=" + id;
 	document.location.href = href
 }
+
+
 </script>
 
-<h3><primo:label code="Expired/Expiring Hourly Pay Rate(s)"/></h3>
+<h3><primo:label code="Expired/Expiring Weekly Salary Rate(s)"/></h3>
 <div>
 	<form:form action="search.do" method="get" name="searchForm">
-		<input type="hidden" id="type" name="type" value="hourlyPayRate"/>
+		<input type="hidden" id="type" name="type" value="weeklySalaryRate"/>
 		<table id="form-table" width="100%" cellspacing="0" cellpadding="5">
 			<tr class="table-heading">
-				<td align="${left}" colspan="9"><b><primo:label code="Search Hourly Pay Rate Alert"/></b></td>
+				<td align="${left}" colspan="9"><b><primo:label code="Search Weekly Salary Rate Alert"/></b></td>
 			</tr>
 			<tr>
 			 	<td align="${left}" class="first"><primo:label code="Company"/></td>
@@ -91,9 +93,9 @@ function changeAlertStatus(id, rateStatus) {
 </table>
 <div style="width:100%; margin:0px auto;">
 	<form:form name="serviceForm" id="serviceForm">
-		<primo:datatable urlContext="hr/hourlyrate" deletable="false" editable="false" insertable="false" 
+		<primo:datatable urlContext="hr/weeklysalaryrate" deletable="false" editable="false" insertable="false" 
 			exportPdf="false" exportXls="false" exportCsv="false"
-			baseObjects="${expiredHourlyPayRateList}"
+			baseObjects="${expiredWeeklySalaryRateList}"
 			searchCriteria="${sessionScope['searchCriteria']}" cellPadding="2"
 			pagingLink="search.do" multipleDelete="false" searcheable="false" >
 			<primo:textcolumn headerText="Employee" dataField="driver.fullName" />
@@ -101,15 +103,12 @@ function changeAlertStatus(id, rateStatus) {
 			<primo:textcolumn headerText="Company" dataField="company.name" />
 			<primo:textcolumn headerText="Terminal" dataField="terminal.name" />
 			<primo:textcolumn headerText="Category" dataField="catagory.name" />
-			<primo:textcolumn headerText="Weekly Regular Hours" dataField="weeklyHours" />
-			<primo:textcolumn headerText="Daily Regular Hours" dataField="dailyHours" />
-			<primo:textcolumn headerText="Regular Hourly Rate" dataField="hourlyRegularRate" />
-			<primo:textcolumn headerText="OT Rate Factor" dataField="hourlyOvertimeRate" />
-			<primo:textcolumn headerText="DT Rate Factor" dataField="hourlyDoubleTimeRate" />
-			<primo:datecolumn headerText="Valid Date" dataField="validFrom" dataFormat="MM-dd-yyyy" />
+			<primo:textcolumn headerText="Weekly Pay" dataField="weeklySalary" />
+			<primo:textcolumn headerText="Daily Pay" dataField="dailySalary" />
+			<primo:datecolumn headerText="Valid From" dataField="validFrom" dataFormat="MM-dd-yyyy" />
 			<primo:datecolumn headerText="Valid To" dataField="validTo" dataFormat="MM-dd-yyyy" />
 			<primo:anchorcolumn headerText="Manage Alert" dataField="alertStatus" linkUrl="javascript:changeAlertStatus('{id}', '{rateStatus}');" linkText="Off alert"/>	
-			<primo:imagecolumn headerText="EDIT" linkUrl="${ctx}/hr/hourlyrate/edit.do?id={id}&fromAlertPage=true" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
+			<primo:imagecolumn headerText="EDIT" linkUrl="${ctx}/hr/weeklysalaryrate/edit.do?id={id}&fromAlertPage=true" imageSrc="${ctx}/images/edit.png" HAlign="center" width="25px"/>
  			<primo:imagecolumn headerText="DEL" linkUrl="javascript:confirmDelete('{id}');" imageSrc="${ctx}/images/delete.png" HAlign="center" width="25px"/>
        	 </primo:datatable>
 		 <%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
