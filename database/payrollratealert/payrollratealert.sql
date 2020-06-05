@@ -54,7 +54,7 @@ WHERE `ID`='9022';
 VALUES (now(), '1', '9028', '1'); -- ADMIN
 ----
 
-// Payroll rate alert
+// Hidden alert
  INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '9025', '7'); -- HR
 
@@ -62,7 +62,7 @@ VALUES (now(), '1', '9025', '7'); -- HR
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '9026', '7'); -- HR
 
-// Payroll rate alert
+// Hidden alert
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '9025', '10'); -- Sp Priv 1
 
