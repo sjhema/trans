@@ -70,7 +70,13 @@ VALUES (now(), '1', '9025', '10'); -- Sp Priv 1
 INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
 VALUES (now(), '1', '9026', '10'); -- Sp Priv 1
 
+// Hourly Rate
+INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '9027', '7'); -- HR
 
+// Weekly salary Rate
+ INSERT INTO `lutransport`.`role_privilege` (`created_at`, `status`, `business_object_id`, `role_id`) 
+VALUES (now(), '1', '9028', '7'); -- HR
 
 
 
