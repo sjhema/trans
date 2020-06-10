@@ -361,7 +361,7 @@ $(document).ready(function(){
 			<td class="form-left"><primo:label code="Not Billable" /></td>
 			<td>
 				<form:select cssClass="flat" path="notBillable" multiple="true">
-					<form:option value="Y">Y</form:option>
+					<form:options items="${notBillableOptions}" />
 				</form:select> 
 				<br> <form:errors path="notBillable" cssClass="errorMessage" />
 			</td>		

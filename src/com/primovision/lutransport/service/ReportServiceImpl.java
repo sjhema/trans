@@ -568,9 +568,14 @@ public class ReportServiceImpl implements ReportService {
 			countQuery.append(" and  obj.ticketStatus in (")
 					.append(ticketStatus).append(")");
 		}
-		if (StringUtils.isNotEmpty(notBillable)) {
+		/*if (StringUtils.isNotEmpty(notBillable)) {
 			query.append(" and obj.notBillable='").append(notBillable).append("'");
 			countQuery.append(" and obj.notBillable='").append(notBillable).append("'");
+		}*/
+		// For search detail report
+		if (StringUtils.equals(BillingHistoryInput.EXCLUDE_NOT_BILLABLE, notBillable)) {
+			query.append(" and (obj.notBillable = '' or obj.notBillable is null)");
+			countQuery.append(" and (obj.notBillable = '' or obj.notBillable is null)");
 		}
 		if (!StringUtils.isEmpty(fromDateInvoiceStr)) {
 			query.append(" and  obj.invoiceDate>='").append(
@@ -6442,9 +6447,15 @@ throw new Exception("origin and destindation is empty");
 			countQuery.append(" and  obj.ticketStatus in (")
 					.append(ticketStatus).append(")");
 		}
-		if (StringUtils.isNotEmpty(notBillable)) {
+		/*if (StringUtils.isNotEmpty(notBillable)) {
 			query.append(" and obj.notBillable='").append(notBillable).append("'");
 			countQuery.append(" and obj.notBillable='").append(notBillable).append("'");
+		}*/
+		// For summary report
+		if (StringUtils.isEmpty(notBillable) 
+				|| StringUtils.equals(BillingHistoryInput.EXCLUDE_NOT_BILLABLE, notBillable)) {
+			query.append(" and (obj.notBillable = '' or obj.notBillable is null)");
+			countQuery.append(" and (obj.notBillable = '' or obj.notBillable is null)");
 		}
 		if (!StringUtils.isEmpty(fromDateInvoiceStr)) {
 			query.append(" and  obj.invoiceDate>='").append(

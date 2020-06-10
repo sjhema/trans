@@ -109,6 +109,12 @@ public class BillingHistoryReportController extends BaseController {
 		//criterias.put("role.id", "2,l");
 		model.addAttribute("operators", genericDAO.findByCriteria(User.class, criterias, "username", false));
 		model.addAttribute("ticketStatuss", listStaticData("TICKET_STATUS"));
+		
+		List<String> notBillableOptions = new ArrayList<String>();
+		notBillableOptions.add(BillingHistoryInput.EXCLUDE_NOT_BILLABLE);
+		notBillableOptions.add(BillingHistoryInput.INCLUDE_NOT_BILLABLE);
+		model.addAttribute("notBillableOptions", notBillableOptions);
+		
 		return "reportuser/report/billinghistory";
 	}
 
@@ -162,7 +168,7 @@ public class BillingHistoryReportController extends BaseController {
 		params.put("sumNet", wrapper.getSumNet());
 		params.put("sumAmount", wrapper.getSumAmount());
 		params.put("sumFuelSurcharge", wrapper.getSumFuelSurcharge());
-		populateParams(params, input);
+		populateParams(params, input, false);
 		
 		data.put("data", wrapper.getBillings());		
 		data.put("params", params);
@@ -268,11 +274,11 @@ public class BillingHistoryReportController extends BaseController {
 	private List<Summary> generateSummaryNew(SearchCriteria criteria, Map<String,Object> params, 
 			BillingHistoryInput input) {
 		List<Summary> list = reportService.generateSummaryNew(criteria, input);
-		populateParams(params, input);
+		populateParams(params, input, true);
 		return list;
 	}
 	
-	private void populateParams(Map<String,Object> params, BillingHistoryInput input) {
+	private void populateParams(Map<String,Object> params, BillingHistoryInput input, boolean isSummary) {
 		if (!StringUtils.isEmpty(input.getBatchDateFrom())) {
 			params.put("batchDateFrom",input.getBatchDateFrom());
 		}
@@ -291,6 +297,15 @@ public class BillingHistoryReportController extends BaseController {
 		if (!StringUtils.isEmpty(input.getUnloadedTo())) {
 			params.put("unloadedTo", input.getUnloadedTo());
 		}
+		String notBillable = input.getNotBillable();
+		if (StringUtils.isEmpty(notBillable)) {
+			if (isSummary) {
+				notBillable = BillingHistoryInput.EXCLUDE_NOT_BILLABLE;
+			} else {
+				notBillable = BillingHistoryInput.INCLUDE_NOT_BILLABLE;
+			}
+		}
+		params.put("notBillable", notBillable);
 	}
 	
 	/**

@@ -5,7 +5,9 @@ import org.apache.commons.lang.StringUtils;
 import com.primovision.lutransport.model.ReportModel;
 
 public class BillingHistoryInput implements ReportModel {
-
+	public static String EXCLUDE_NOT_BILLABLE = "Exclude";
+	public static String INCLUDE_NOT_BILLABLE = "Include";
+	
 	private String batchDateFrom;
 	private String batchDateTo;
 	

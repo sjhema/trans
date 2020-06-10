@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="billinghistory" pageWidth="2750" pageHeight="800" orientation="Landscape" columnWidth="2740" leftMargin="5" rightMargin="5" topMargin="10" bottomMargin="10" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="1424"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="parameters" class="java.lang.String"/>
 	<parameter name="sumOriginTon" class="java.lang.Double"/>
@@ -319,7 +319,7 @@
 				<text><![CDATA[    Fuel    Surcharge]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1827" y="24" width="77" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1827" y="24" width="76" height="30" forecolor="#FFFFFF" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -924,7 +924,7 @@
 				<textFieldExpression class="java.lang.Double"><![CDATA[$F{destinationGrossWt}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1827" y="0" width="77" height="30"/>
+				<reportElement x="1827" y="0" width="76" height="30"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -1516,7 +1516,7 @@
 				<text><![CDATA[Total  ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="1827" y="0" width="77" height="23"/>
+				<reportElement x="1827" y="0" width="76" height="23"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
