@@ -258,8 +258,10 @@ function formatReportDate(d1){
 			}
 		}
 		else {
-			alert("Invalid date");
-			document.getElementById(d1).focus();
+			alert("Invalid date...");
+			//document.getElementById(d1).focus();
+			document.getElementById(d1).value="";
+			return true;
 		}
 	}
 }

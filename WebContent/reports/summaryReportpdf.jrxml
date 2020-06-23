@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryReportpdf" pageWidth="1280" pageHeight="842" columnWidth="1240" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="397"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="batchDateFrom" class="java.lang.String"/>
 	<parameter name="batchDateTo" class="java.lang.String"/>
@@ -9,6 +9,7 @@
 	<parameter name="loadedTo" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="unloadedFrom" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="unloadedTo" class="java.lang.String"/>
+	<parameter name="notBillable" class="java.lang.String"/>
 	<field name="origin" class="java.lang.String"/>
 	<field name="destination" class="java.lang.String"/>
 	<field name="count" class="java.lang.Integer"/>
@@ -63,7 +64,7 @@
 				<text><![CDATA[BILLING  SUMMARY]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="627" y="53" width="149" height="20"/>
+				<reportElement x="746" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -77,7 +78,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{batchDateTo}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="478" y="53" width="149" height="20"/>
+				<reportElement x="597" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -91,7 +92,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{batchDateFrom}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="478" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="597" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -105,7 +106,7 @@
 				<text><![CDATA[Batch Date From]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="627" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="746" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -119,7 +120,7 @@
 				<text><![CDATA[Batch Date To]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="329" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="448" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -133,7 +134,7 @@
 				<text><![CDATA[Load Date To]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="180" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="299" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -147,7 +148,7 @@
 				<text><![CDATA[Load Date From]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="329" y="53" width="149" height="20"/>
+				<reportElement x="448" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -161,7 +162,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{loadedTo}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="180" y="53" width="149" height="20"/>
+				<reportElement x="299" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -175,7 +176,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{loadedFrom}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="925" y="53" width="149" height="20"/>
+				<reportElement x="1044" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -189,7 +190,7 @@
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{unloadedTo}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Opaque" x="776" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="895" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -203,7 +204,7 @@
 				<text><![CDATA[Unload Date From]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="925" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<reportElement mode="Opaque" x="1044" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
 				<box>
 					<pen lineWidth="1.0" lineColor="#333333"/>
 					<topPen lineWidth="1.0" lineColor="#333333"/>
@@ -217,7 +218,7 @@
 				<text><![CDATA[Unload Date To]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="776" y="53" width="149" height="20"/>
+				<reportElement x="895" y="53" width="149" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -229,6 +230,34 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$P{unloadedFrom}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="150" y="34" width="149" height="19" forecolor="#000000" backcolor="#99CCFF"/>
+				<box>
+					<pen lineWidth="1.0" lineColor="#333333"/>
+					<topPen lineWidth="1.0" lineColor="#333333"/>
+					<leftPen lineWidth="1.0" lineColor="#333333"/>
+					<bottomPen lineWidth="1.0" lineColor="#333333"/>
+					<rightPen lineWidth="1.0" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Not Billable]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="53" width="149" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{notBillable}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>

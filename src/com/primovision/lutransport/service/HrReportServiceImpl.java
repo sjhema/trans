@@ -7640,7 +7640,7 @@ public class HrReportServiceImpl implements HrReportService {
 				// Bereavement change - salary
 				// Worker comp change - salary
 				detail.setAmount(detail.getAmount()-(paidSickPersonalAmount+paidVacationAmount+bereavementAmount+workerCompAmount));
-
+				
 				StringBuffer bonusquery=new StringBuffer("select obj from EmployeeBonus obj where obj.driver.fullName='"+employee2.getFullName()+"' and obj.category="+employee2.getCatagory().getId());
 				if(!StringUtils.isEmpty(payrollDate)){
 					bonusquery.append(" and obj.batchFrom='"+payrollDate+"'");
@@ -7691,6 +7691,10 @@ public class HrReportServiceImpl implements HrReportService {
 					holidayAmount=holidayAmount+type.getAmount();
 				}
 				detail.setHolidayAmount(holidayAmount);
+				
+				// Mixed driver salary payroll 22nd June 2020
+				detail.setAmount(detail.getAmount()-(holidayAmount));
+
 				sumTotal+=detail.getAmount();
 				// Bereavement change - salary - Should bereavement be added below?
 				// Worker comp change - salary - Should workerComp be added below?
