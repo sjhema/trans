@@ -55,6 +55,7 @@ function searchReport() {
 
 $(document).ready(function(){
 	   $("#driversmul").multiselect();
+	   $("#holidayexpdriversmul").multiselect();
 });
 </script>
 <form:form action="search.do?for=payroll" method="post"
@@ -138,6 +139,17 @@ $(document).ready(function(){
 				</select>
 			</td>
 		    
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><label>Holiday Exceptions</label></td>
+		    <td align="${left}">
+				<select name="holidayexpdriversmul" id="holidayexpdriversmul" multiple="multiple" style="width:100px">
+					<option value="-1">--Please Select--</option>
+					<c:forEach var="item" items="${drivers}">
+						<option value="${item.id}">${item.fullName}</option>
+					</c:forEach>
+				</select>
+			</td>
 		</tr>
 			<tr>
 			<td align="${left}"></td>

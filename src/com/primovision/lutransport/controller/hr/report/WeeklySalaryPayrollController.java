@@ -32,6 +32,7 @@ import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.Vehicle;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hrreport.WeeklyPay;
 import com.primovision.lutransport.model.hrreport.WeeklypayWrapper;
 import com.primovision.lutransport.service.DynamicReportService;
@@ -77,6 +78,15 @@ public class WeeklySalaryPayrollController extends BaseController{
 		criterias.put("type", 4);
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
 		
+		criterias.clear();
+		criterias.put("name", "Driver");
+		EmployeeCatagory catagory = genericDAO.getByCriteria(EmployeeCatagory.class, criterias);
+		criterias.clear();
+		criterias.put("catagory.id", catagory.getId());
+		criterias.put("payTerm", "3");
+		criterias.put("status", 1);
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		
 		if(StringUtils.equalsIgnoreCase(from,"payroll")){
 			return "hr/report/weeklypayroll";
 		}
@@ -116,6 +126,13 @@ public class WeeklySalaryPayrollController extends BaseController{
 		   request.getSession().setAttribute("IMAGES_MAP", imagesMap);
 		   populateSearchCriteria(request, request.getParameterMap());
 		   SearchCriteria searchCriteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		   
+		   String[] holidayExpdriversmul = (String[])request.getParameterValues("holidayexpdriversmul");
+		   if (holidayExpdriversmul != null) {
+			   String holidayExcepnDriverIds = "," + StringUtils.join(holidayExpdriversmul) + ",";
+			   searchCriteria.getSearchMap().put("holidayexpdriversmul", holidayExcepnDriverIds);
+		   }	
+		   
 		   Map<String,Object> datas = generateData(searchCriteria, request, from);
 		   if (StringUtils.isEmpty(type))
 				type = "html";

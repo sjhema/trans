@@ -7504,6 +7504,9 @@ public class HrReportServiceImpl implements HrReportService {
 		String payrollDate=(String)criteria.getSearchMap().get("payrollDate");
 		String payrollNumber=(String)criteria.getSearchMap().get("checkDate");
 		String driversmul=(String)criteria.getSearchMap().get("driversmul");
+		
+		String holidayExcepnDriverIds = (String)criteria.getSearchMap().get("holidayexpdriversmul");
+		
 		payrollNumber = ReportDateUtil.getFromDate(payrollNumber);
 		payrollDate=ReportDateUtil.getFromDate(payrollDate);
 		Date paydate = null;
@@ -7680,17 +7683,26 @@ public class HrReportServiceImpl implements HrReportService {
 				}
 
 				detail.setReimburseAmount(reimburseamt);
-
-				StringBuffer holidayquery=new StringBuffer("select obj from HolidayType obj where obj.paid=1 and obj.company="+employee2.getCompany().getId()+" and obj.terminal="+employee2.getTerminal().getId()+" and obj.catagory="+employee2.getCatagory().getId()+" and obj.leaveType=3");
+				
+				// Mixed driver salary payroll 22nd June 2020
+				StringBuffer holidayquery=new StringBuffer("select obj from HolidayType obj where obj.paid=1 and obj.company="
+						+ employee2.getCompany().getId()+" and obj.terminal="+employee2.getTerminal().getId()
+						+ " and obj.catagory="+employee2.getCatagory().getId()+" and obj.leaveType=3");
 				if(!StringUtils.isEmpty(payrollDate)){
 					holidayquery.append(" and obj.batchdate='"+payrollDate+"'");
 				}
 
 				List<HolidayType> holidayTypes=genericDAO.executeSimpleQuery(holidayquery.toString());
 				for(HolidayType type:holidayTypes){
-					holidayAmount=holidayAmount+type.getAmount();
+					holidayAmount = holidayAmount+type.getAmount();
 				}
-				detail.setHolidayAmount(holidayAmount);
+				
+				// Mixed driver salary payroll 22nd June 2020
+				detail.setHolidayAmount(0.0);
+				if (StringUtils.isEmpty(holidayExcepnDriverIds)
+						|| !StringUtils.contains(holidayExcepnDriverIds, ("," + employee2.getId().longValue() + ","))) {
+					detail.setHolidayAmount(holidayAmount);
+				}
 				
 				// Mixed driver salary payroll 22nd June 2020
 				detail.setAmount(detail.getAmount()-(holidayAmount));
