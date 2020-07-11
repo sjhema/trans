@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -137,7 +138,46 @@ public class UploadHourlyPayrollRunController extends CRUDController<HourlyPayro
 		return urlContext + "/list";
 	}
 	
+	// Multiple same batch payroll - 10th July 2020
+	private List<HourlyPayrollInvoice> retrieveSameBatchInvoiceHeaders(HourlyPayrollInvoice runInvoice) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("payrollinvoicedate", runInvoice.getPayrollinvoicedate());
+		params.put("billBatchFrom", runInvoice.getBillBatchFrom());
+		params.put("billBatchTo", runInvoice.getBillBatchTo());
+		
+		if (runInvoice.getCompanyLoc() != null) {
+			params.put("companyLoc.id", runInvoice.getCompanyLoc().getId());
+		}
+		
+		if (runInvoice.getTerminal() != null) {
+			params.put("terminal.id", runInvoice.getTerminal().getId());
+		}
+        
+		List<HourlyPayrollInvoice> sameBatchInvoiceHeaders = genericDAO.findByCriteria(HourlyPayrollInvoice.class, params, "id desc", false);
+		return sameBatchInvoiceHeaders;
+	}
 	
+	// Multiple same batch payroll - 10th July 2020
+	private Date determineMinInvoiceCreatedDate(HourlyPayrollInvoice runInvoice) {
+		List<HourlyPayrollInvoice> sameBatchInvoiceHeaders = retrieveSameBatchInvoiceHeaders(runInvoice);
+		if (sameBatchInvoiceHeaders.size() < 2) {
+			return null;
+		}
+		
+		int i = 0;
+		for ( ; i < sameBatchInvoiceHeaders.size(); i++) {
+			if (sameBatchInvoiceHeaders.get(i).getId().longValue() == runInvoice.getId().longValue()) {
+				break;
+			}
+		}
+		
+		i++;
+		if (i == sameBatchInvoiceHeaders.size()) {
+			return null;
+		}
+		
+		return sameBatchInvoiceHeaders.get(i).getCreatedAt();
+	}
 	
 	
 	@RequestMapping(value="/downloadrun.do")
@@ -166,7 +206,22 @@ public class UploadHourlyPayrollRunController extends CRUDController<HourlyPayro
 	        
 			datas = genericDAO.findByCriteria(HourlyPayrollInvoiceDetails.class, params,"terminal asc,driver",false);
 		
+			// Multiple same batch payroll - 10th July 2020
+			Date minInvoiceCreatedDate = determineMinInvoiceCreatedDate(runinvoice);
 			for(HourlyPayrollInvoiceDetails hpdObj:datas){
+				// Multiple same batch payroll - 10th July 2020
+				if (hpdObj.getCreatedAt().after(runinvoice.getCreatedAt())) {
+					continue;
+				}
+				// Multiple same batch payroll - 10th July 2020
+				if (minInvoiceCreatedDate != null) {
+					int compare = hpdObj.getCreatedAt().compareTo(minInvoiceCreatedDate); 
+					if (compare == 0
+							|| compare == -1) {
+						continue;
+					}
+				}
+				
 				if(!StringUtils.isEmpty(hpdObj.getBatchdate())){
 					String[] splitedDate = hpdObj.getBatchdate().split("-");					
 					String formattedDate = splitedDate[1]+"-"+splitedDate[2]+"-"+splitedDate[0];
