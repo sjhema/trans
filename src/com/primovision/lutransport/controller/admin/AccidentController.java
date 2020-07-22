@@ -493,15 +493,19 @@ public class AccidentController extends CRUDController<Accident> {
 		//model.addAttribute("error", StringUtils.EMPTY);
 		//request.getSession().setAttribute("error", StringUtils.EMPTY);
 		
+		String originalFilename = file.getOriginalFilename();
 		try {
-			if (StringUtils.isEmpty(file.getOriginalFilename())) {
-			    request.getSession().setAttribute("error", "Please choose a file to upload !!");
+			if (StringUtils.isEmpty(originalFilename)
+					|| originalFilename.indexOf(".") == -1) {
+			    request.getSession().setAttribute("error", "Please choose a valid file to upload !!");
 			    return urlContext + "/loadVideo";
 		   }
 			
-			String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-			if (!(ext.equalsIgnoreCase(".wmv"))) {
-          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .wmv!!");
+			String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+			ext = StringUtils.lowerCase(ext);
+			String validExtensions = "wmv, mp4";
+			if (StringUtils.indexOf(validExtensions, ext) == -1) {
+          	request.getSession().setAttribute("error", "Please choose a file to upload with extention .wmv oe .mp4!!");
           	return urlContext + "/loadVideo";
 			}
 			

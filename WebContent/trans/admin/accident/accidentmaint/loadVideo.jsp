@@ -1,9 +1,13 @@
 <%@include file="/common/taglibs.jsp"%>
 
 <script type="text/javascript">
-	function checkfile() {
-		var fileExt = document.getElementById("dataFile").value.lastIndexOf(".wmv");
-		if (fileExt == -1) {    
+	function checkFile() {
+		var fileName = document.getElementById("dataFile").value;
+		var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
+		fileExt = fileExt.toLowerCase();
+		
+		var validExtensions = "wmv, mp4";
+		if (validExtensions.indexOf(fileExt) == -1) {    
 			alert("This File Is Not Allowed"); 
 			document.getElementById("dataFile").value="";   
 			return false;
@@ -32,7 +36,7 @@
 	<tr>
 		<td align="${left}" class="first"><primo:label code="Upload Accident Video" /><span class="errorMessage">*</span>
 		<td align="${left}">
-			<input type="file" id="dataFile" name="dataFile" onchange="return checkfile()"/>
+			<input type="file" id="dataFile" name="dataFile" onchange="return checkFile()"/>
 		</td>
 	</tr>
 	<tr>
