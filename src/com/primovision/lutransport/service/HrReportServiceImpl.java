@@ -5706,6 +5706,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String dateProbationEnd=input.getDateProbationEnd();
 		dateProbationStart=ReportDateUtil.getFromDate(dateProbationStart);
 		dateProbationEnd=ReportDateUtil.getToDate(dateProbationEnd);
+		String ssn=input.getSsn();
 		
 		StringBuffer query=new StringBuffer("");
 		int q=0;
@@ -5724,6 +5725,9 @@ public class HrReportServiceImpl implements HrReportService {
 		if (!StringUtils.isEmpty(terminal)) {
 				query.append("and  obj.terminal in ("+terminal+")");
 			}
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.ssn='"+ssn+"'");
+		}
 		if(!StringUtils.isEmpty(dateProbationStart)){
 			query.append("and obj.dateProbationStart>='"+dateProbationStart+"'");
 			q++;
@@ -5769,6 +5773,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String employee = input.getDriver();
 		String category = input.getCategory();
 		String empstatus = input.getStatus();
+		String ssn = input.getSsn();
 		
 		//String hireddatefrom=input.getDateHiredfrom();
 		//String hireddateto=input.getDateHiredto();
@@ -5811,6 +5816,11 @@ public class HrReportServiceImpl implements HrReportService {
 			query.append("and  obj.status in (" + empstatus + ")");
 			queryCount.append(" and obj.status in (" + empstatus + ")");
 		}
+		
+		if(StringUtils.isNotEmpty(ssn)){
+			query.append(" and obj.ssn='"+ssn+"'");
+		}
+		
 		query.append(" order by obj.company.name asc,obj.terminal.name asc,obj.fullName asc,obj.dateHired asc,obj.dateReHired asc");
 		queryCount.append(" order by obj.company.name asc,obj.terminal.name asc,obj.fullName asc,obj.dateHired asc,obj.dateReHired asc");
 		System.out.println("\ntEmp Query=>" + query + "\n");

@@ -26,12 +26,23 @@ function searchReport() {
 					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
 				</form:select> 
 			</td>
-			
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
+		</tr>
+		<tr>	
 			<td class="form-left"><primo:label code="Category" /></td>
 			<td><form:select cssClass="flat" path="category" multiple="true">
 					<form:option value="-1">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${categories}" itemValue="id" itemLabel="name" />
+				</form:select>
+			</td>
+			<td class="form-left"><primo:label code="Status" /></td>
+		<td><form:select cssClass="flat" path="status" multiple="true">
+		            <form:option value="-1">--<primo:label code="Please Select" />--</form:option>
+					<form:options items="${employeestatus}" itemValue="dataValue" itemLabel="dataText" />
 				</form:select>
 			</td>
 		  </tr>
@@ -83,16 +94,6 @@ function searchReport() {
 		    </script></td>
 		    
 	   </tr>
-	   <tr>
-		<td class="form-left"><primo:label code="Status" /></td>
-		<td><form:select cssClass="flat" path="status" multiple="true">
-		            <form:option value="-1">--<primo:label code="Please Select" />--</form:option>
-					<form:options items="${employeestatus}" itemValue="dataValue" itemLabel="dataText" />
-				</form:select>
-			</td>
-		</tr>
-		
-		
 		
 		<tr>
 			<td align="${left}"></td>

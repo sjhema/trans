@@ -14,13 +14,36 @@
 		
 		
 		var d1 = document.getElementById('fromDate').value;
-		if (d1!=null && d1!='' && !isValidDate(d1)) {
-			alert("Invalid billBatch date");
-		}
 		var d6 = document.getElementById('toDate').value;
-		if (d6!=null && d6!='' && !isValidDate(d6)) {
-			alert("Invalid billBatch date");
+		if (d1 == null || d1 == '') {
+			alert("Please enter From Batch date");
+			return;
 		}
+		if (d6 == null || d6 == '') {
+			alert("Please enter To Batch date");
+			return;
+		}
+		
+		if (d1!=null && d1!='' && !isValidDate(d1)) {
+			alert("Invalid From Batch date");
+			return;
+		}
+		
+		if (d6!=null && d6!='' && !isValidDate(d6)) {
+			alert("Invalid To Batch date");
+			return;
+		}
+		
+		var fromBatchDate = toJSDate(d1);
+		var toBatchDate = toJSDate(d6);
+		
+		var noOfDays = dateDiff(fromBatchDate, toBatchDate);
+		if (noOfDays > 740) {
+			alert("Difference between From Batch date and To Batch date should not be greater than 2 years");
+			return;
+		}
+		
+		
 		var d2 = document.getElementById('fromloadDate').value;
 		if (d2!=null && d2!='' && !isValidDate(d2)) {
 			alert("Invalid from loaddate");
@@ -71,7 +94,8 @@
 	   document .getElementById("miscelleneousNote").value=allNotes;
 	   document .getElementById("miscelleneousCharges").value=allCharges;
 	   
-	   if (company!=null && company!='' && subcon!=null && subcon!=''){
+	   if (company!=null && company!='' && subcon!=null && subcon!=''
+			   && d1 != null && d1 != '' && d6 != null && d6 != ''){
 			document.forms[0].target="reportData";
 			document.forms[0].submit();
 	   }
@@ -79,6 +103,21 @@
 		   alert("Please Select Subcontractor Name and Company");
 	   }
 	}
+	
+	function toJSDate(dateStr) {
+		// 07-26-2020
+		var dateStrSplit = dateStr.split('-');
+		// 2020-07-26
+		var jsDateStr = dateStrSplit[2] + "-" + dateStrSplit[0] + "-" + dateStrSplit[1];
+		return new Date(jsDateStr);
+	}
+	
+	function dateDiff(first, second) {
+	    // Take the difference between the dates and divide by milliseconds per day.
+	    // Round to nearest whole number to deal with DST.
+	    return Math.round((second-first)/(1000*60*60*24));
+	}
+
 	
 	
 	function removeMultipleNote(){

@@ -24,15 +24,21 @@ $(document).ready(function(){
 					<form:options items="${employees}" itemValue="fullName" itemLabel="fullName" />
 				</form:select> 
 			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
 			
-			<td class="form-left"><primo:label code="Terminal" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="terminal" multiple="true">
+		 </tr>
+		 <tr>
+		 <td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="category" multiple="true">
 					<form:option value="-1">------<primo:label
 							code="Please Select" />------</form:option>
-					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
+					<form:options items="${categories}" itemValue="id" itemLabel="name" />
 				</form:select>
 			</td>
-		 </tr>
+		</tr>
 		<tr>		
 		
 		<td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
@@ -42,16 +48,15 @@ $(document).ready(function(){
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
 				</form:select> 
 			</td>	
-		
-		
-			<td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="category" multiple="true">
+		<td class="form-left"><primo:label code="Terminal" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="terminal" multiple="true">
 					<form:option value="-1">------<primo:label
 							code="Please Select" />------</form:option>
-					<form:options items="${categories}" itemValue="id" itemLabel="name" />
+					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
 				</form:select>
 			</td>
-		</tr>
+		
+		</tr>	
 		
 	 
 		<tr>

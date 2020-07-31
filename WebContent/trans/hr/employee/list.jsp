@@ -85,29 +85,16 @@ function formatDate(){
 		</tr>
 		
 		<tr>
-		<td align="${left}" class="first"><primo:label code="Employee Id"/></td>
-		<td>
-		<input id="staffId" name="staffId"
-				type="text" 
-				value="${sessionScope.searchCriteria.searchMap.staffId}"/>
-		</td>
-		
-		
-		<td align="${left}" class="first"><primo:label code="Status"/></td>
-		<td>	
-		<select id="status" name="status" style="min-width:154px; max-width:154px">
-					<option value="">------<primo:label code="Please Select"/>------</option>
-					<c:forEach items="${employeestatus}" var="employeestatus">
-					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['status'] == employeestatus.dataValue}">
-						<c:set var="selected" value="selected"/>
-					</c:if>
-						<option value="${employeestatus.dataValue}" ${selected}>${employeestatus.dataText}</option>
-					</c:forEach>
-			</select>
-		
-		</td>
-		
+			<td align="${left}" class="first"><primo:label code="Employee Id"/></td>
+			<td>
+			<input id="staffId" name="staffId"
+					type="text" 
+					value="${sessionScope.searchCriteria.searchMap.staffId}"/>
+			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
 		</tr>
 		<%-- <tr>
 			<td align="${left}" class="first"><primo:label code="Driver Name"/></td>
@@ -156,6 +143,22 @@ function formatDate(){
 						<option value="${catagory.id}" ${selected}>${catagory.name}</option>
 					</c:forEach>
 			</select></td>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Status"/></td>
+			<td>	
+			<select id="status" name="status" style="min-width:154px; max-width:154px">
+						<option value="">------<primo:label code="Please Select"/>------</option>
+						<c:forEach items="${employeestatus}" var="employeestatus">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['status'] == employeestatus.dataValue}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+							<option value="${employeestatus.dataValue}" ${selected}>${employeestatus.dataText}</option>
+						</c:forEach>
+				</select>
+			
+			</td>
+		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Company"/></td>
 				<td align="${left}"><select id="company" name="company.id" style="min-width:154px; max-width:154px">

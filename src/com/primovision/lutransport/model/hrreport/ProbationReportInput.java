@@ -27,7 +27,17 @@ public class ProbationReportInput {
 	
 	private String  dateTerminated;
 	
+	private String ssn;
+	
 	private String status;
+
+	public String getSsn() {
+		return ssn;
+	}
+
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 
 	public String getDriver() {
 		return driver;

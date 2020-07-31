@@ -24,14 +24,17 @@ public class EmployeeInput {
 	private String dateTerminatedfrom;
 	private String dateTerminatedto;
 	
+	private String ssn;
 	
 	private String status;
 	
 	
-	
-	
-	
-	
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 	public String getStaffId() {
 		return staffId;
 	}
