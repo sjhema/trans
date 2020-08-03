@@ -343,3 +343,23 @@ function formatDate(datepicker){
 	 }
    }
 }
+
+function toJSDate(screenDateStr) {
+	// 07-26-2020
+	var dateStrSplit = screenDateStr.split('-');
+	// 2020-07-26
+	var jsDateStr = dateStrSplit[2] + "-" + dateStrSplit[0] + "-" + dateStrSplit[1];
+	return new Date(jsDateStr);
+}
+
+function dateDiff(fromDate, toDate) {
+    // Take the difference between the dates and divide by milliseconds per day.
+    // Round to nearest whole number to deal with DST.
+    return Math.round((toDate - fromDate)/(1000*60*60*24));
+}
+
+function dateDiffForDateStr(fromDateStr, toDateStr) {
+	var fromDate = toJSDate(fromDateStr);
+	var toDate = toJSDate(toDateStr);
+    return dateDiff(fromDate, toDate);
+}

@@ -34,11 +34,8 @@
 			return;
 		}
 		
-		var fromBatchDate = toJSDate(d1);
-		var toBatchDate = toJSDate(d6);
-		
-		var noOfDays = dateDiff(fromBatchDate, toBatchDate);
-		if (noOfDays > 740) {
+		var diffDays = dateDiffForDateStr(d1, d6);
+		if (diffDays > 740) {
 			alert("Difference between From Batch date and To Batch date should not be greater than 2 years");
 			return;
 		}
@@ -103,22 +100,6 @@
 		   alert("Please Select Subcontractor Name and Company");
 	   }
 	}
-	
-	function toJSDate(dateStr) {
-		// 07-26-2020
-		var dateStrSplit = dateStr.split('-');
-		// 2020-07-26
-		var jsDateStr = dateStrSplit[2] + "-" + dateStrSplit[0] + "-" + dateStrSplit[1];
-		return new Date(jsDateStr);
-	}
-	
-	function dateDiff(first, second) {
-	    // Take the difference between the dates and divide by milliseconds per day.
-	    // Round to nearest whole number to deal with DST.
-	    return Math.round((second-first)/(1000*60*60*24));
-	}
-
-	
 	
 	function removeMultipleNote(){
 		var notes=document.getElementById("miscelleneousNote").value="";
