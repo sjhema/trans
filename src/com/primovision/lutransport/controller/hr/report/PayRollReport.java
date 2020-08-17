@@ -100,6 +100,8 @@ public class PayRollReport extends BaseController{
 		//String payrollDate=request.getParameter("payrollDate");
 		String type=request.getParameter("type");
 		String reportType =  request.getParameter("reportType");
+		String ssn =  request.getParameter("ssn");
+		
 		//DriverPayroll payroll=genericDAO.getById(DriverPayroll.class, Long.valueOf(invoiceId));
 		try{
 			
@@ -126,6 +128,10 @@ public class PayRollReport extends BaseController{
 				driverPayQuery.append(" and payRollBatch <='").append(tobatch).append("'");
 			}
 			
+			String driverName = getDriverName(ssn);
+			if (StringUtils.isNotEmpty(driverName)) {
+				driverPayQuery.append(" and drivername='").append(driverName).append("'");
+			}
 			
 			driverPayQuery.append(" order by obj.drivername asc"); 
 			
@@ -181,7 +187,19 @@ public class PayRollReport extends BaseController{
 			
 	}
 	
-	
+	private String getDriverName(String ssn) {
+		if (StringUtils.isEmpty(ssn)) {
+			return StringUtils.EMPTY;
+		}
+		
+		String sql = "select obj from Driver obj where ssn='" + ssn + "'";
+		List<Driver> driverList = genericDAO.executeSimpleQuery(sql);
+		if (driverList == null || driverList.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		
+		return driverList.get(0).getFullName();
+	}
 	
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/searchWeeklyPayroll.do")
@@ -190,6 +208,7 @@ public class PayRollReport extends BaseController{
 		String tobatch=request.getParameter("toDate");		
 		String type=request.getParameter("type");
 		String reportType =  request.getParameter("reportType");
+		String ssn =  request.getParameter("ssn");
 		//DriverPayroll payroll=genericDAO.getById(DriverPayroll.class, Long.valueOf(invoiceId));
 		try{
 			
@@ -199,6 +218,12 @@ public class PayRollReport extends BaseController{
 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
 				driverPayQuery.append(" and driver='").append(request.getParameter("driver")).append("'");
 			}
+			
+			String driverName = getDriverName(ssn);
+			if (StringUtils.isNotEmpty(driverName)) {
+				driverPayQuery.append(" and driver='").append(driverName).append("'");
+			}
+			
 			if(!StringUtils.isEmpty(request.getParameter("company"))){
 				driverPayQuery.append(" and company='").append(request.getParameter("company")).append("'");
 				Location companyObj = genericDAO.getById(Location.class, Long.valueOf(request.getParameter("company")));
@@ -289,6 +314,7 @@ public class PayRollReport extends BaseController{
 		
 		String type=request.getParameter("type");
 		String reportType =  request.getParameter("reportType");
+		String ssn =  request.getParameter("ssn");
 		//DriverPayroll payroll=genericDAO.getById(DriverPayroll.class, Long.valueOf(invoiceId));
 		try{
 			
@@ -297,6 +323,10 @@ public class PayRollReport extends BaseController{
 			StringBuilder driverPayQuery = new StringBuilder("select obj from HourlyPayrollInvoiceDetails obj where 1=1");
 			if(!StringUtils.isEmpty(request.getParameter("driver"))){
 				driverPayQuery.append(" and driver='").append(request.getParameter("driver")).append("'");
+			}
+			String driverName = getDriverName(ssn);
+			if (StringUtils.isNotEmpty(driverName)) {
+				driverPayQuery.append(" and driver='").append(driverName).append("'");
 			}
 			if(!StringUtils.isEmpty(request.getParameter("company"))){
 				driverPayQuery.append(" and companyLoc='").append(request.getParameter("company")).append("'");
