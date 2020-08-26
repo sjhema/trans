@@ -44,6 +44,7 @@ import com.primovision.lutransport.model.hr.UpdateLeaveBalanceHistory;
 @Controller
 @RequestMapping("/hr/employee/alert")
 public class EmployeeProbationAlertController extends BaseController{
+	private static SimpleDateFormat logDateFormat = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss");
 	
 	@Autowired
 	private GenericDAO genericDAO;
@@ -112,13 +113,20 @@ public class EmployeeProbationAlertController extends BaseController{
 	
 	
 	
-	@Scheduled(cron="0 0 5 * * ?")
+	//@Scheduled(cron="0 0 5 * * ?")
+	@Scheduled(cron="0 10 2 * * ?")
 	public void checkEmployeeProbation() throws ParseException{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 		SimpleDateFormat databasedf = new SimpleDateFormat("yyyy-MM-dd");
-		Date curr_date=new Date();		
+		Date curr_date=new Date();	
+		
+		long startTime = System.currentTimeMillis();
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		System.out.println(formatDateNow + " -> Now starting employee probation job");
+		
 		String query="select obj from Driver obj where obj.status=1 and obj.dateLeaveProbationEnd='"+ databasedf.format(curr_date)+" 00:00:00'";
-		List<Driver> employees=genericDAO.executeSimpleQuery(query);		
+		List<Driver> employees=genericDAO.executeSimpleQuery(query);
+		System.out.println("Employee probation job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){
 			for(Driver empObj:employees){
 				if(empObj.getCompany().getId() == 4l){
@@ -255,16 +263,28 @@ public class EmployeeProbationAlertController extends BaseController{
 			}
 		}
 	}	
+		
+		long endTime = System.currentTimeMillis();
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> Finished employee probation job. Time taken: "
+				+ (endTime-startTime)/1000);
 	}
 	
-	@Scheduled(cron="0 0 3 * * ?")
+	//@Scheduled(cron="0 0 3 * * ?")
+	@Scheduled(cron="0 45 1 * * ?")
 	public void checkEmployeeAnniversary() throws ParseException{
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 		SimpleDateFormat databasedf = new SimpleDateFormat("yyyy-MM-dd");
-		Date curr_date=new Date();		
+		Date curr_date=new Date();	
+		
+		long startTime = System.currentTimeMillis();
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		System.out.println(formatDateNow + " -> Now starting employee anniversary job");
+		
 		String query="select obj from Driver obj where obj.status=1 and obj.anniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
-		List<Driver> employees=genericDAO.executeSimpleQuery(query);		
+		List<Driver> employees=genericDAO.executeSimpleQuery(query);
+		System.out.println("Employee anniversary job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){
 			for(Driver empObj:employees){		
 			Map criterias=new HashMap();
@@ -473,17 +493,28 @@ public class EmployeeProbationAlertController extends BaseController{
 			leavebalobj=null;			
 		}
 	}	
+		
+		long endTime = System.currentTimeMillis();
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> Finished employee anniversary job. Time taken: "
+				+ (endTime-startTime)/1000);
 	}
 	
-	@Scheduled(cron="0 25 1 * * ?")
+	@Scheduled(cron="0 20 1 * * ?")
 	public void checkAnniversaryToUpdateVactaionLeaveBalance() throws ParseException{		
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
 		SimpleDateFormat databasedf = new SimpleDateFormat("yyyy-MM-dd");
 		Date curr_date=new Date();		
+		
+		long startTime = System.currentTimeMillis();
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		System.out.println(formatDateNow + " -> Now starting employee anniversary vacation leave balance job");
+		
 		String query="select obj from Driver obj where obj.status=1 and obj.nextAnniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
 		
-		List<Driver> employees=genericDAO.executeSimpleQuery(query);		
+		List<Driver> employees=genericDAO.executeSimpleQuery(query);
+		System.out.println("Employee anniversary vacation leave balance job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){			
 			for(Driver empObj:employees){	
 				System.out.println("******* Entered employee"+empObj.getFullName());
@@ -849,6 +880,11 @@ public class EmployeeProbationAlertController extends BaseController{
 			genericDAO.saveOrUpdate(empObj);
 		}
 	}
+		
+		long endTime = System.currentTimeMillis();
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> Finished employee anniversary vacation leave balance job. Time taken: "
+				+ (endTime-startTime)/1000);
 	
 }
 	

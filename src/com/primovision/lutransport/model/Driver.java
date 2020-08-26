@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
@@ -590,6 +591,27 @@ public class Driver extends AbstractBaseModel{
 		this.role = role;
 	}
 	
-	 
+	@Transient
+	private String driverNameWithStatus;
+	
+	@Transient
+	public String getDriverNameWithStatus() {
+		String driverName = getFullName();
+		if (StringUtils.isEmpty(driverName)) {
+			return StringUtils.EMPTY;
+		}
+		
+		if (getStatus() == 0) {
+			driverName = driverName + " - Inactive";
+		}
+		
+		return driverName;
+	}
+	
+	@Transient
+	public void populateDriverNameWithStatus() {
+		driverNameWithStatus = getDriverNameWithStatus();
+	}
+	
 	 
 }

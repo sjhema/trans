@@ -1,6 +1,7 @@
 package com.primovision.lutransport.controller.report;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,10 @@ import com.primovision.lutransport.model.report.SubcontractorBillingNew;
 @Controller
 @SuppressWarnings("unchecked")
 public class NetReportMainController extends BaseController{
+	private static SimpleDateFormat logDateFormat = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss");
 	
-	@Scheduled(cron="0 45 1 * * ?")	
+	//@Scheduled(cron="0 45 1 * * ?")
+	@Scheduled(cron="0 45 2 * * ?")
 	public void generateMainNetReportData(){
 		
 		
@@ -40,7 +43,6 @@ public class NetReportMainController extends BaseController{
 		DateMidnight beginningOfNextMonth = now.plusMonths(1).withDayOfMonth(1);
 		DateMidnight endOfCurrentMonth = beginningOfNextMonth.minusDays(1);
 		
-		String formatDateNow = sdf.format(now.toDate());
 		String formatDate1 = sdf.format(beginningOfLastMonth.toDate());
 		String formatDate2 = sdf.format(beginningOfNextMonth.toDate());
 		String formatDate3 = sdf.format(endOfCurrentMonth.toDate());
@@ -49,16 +51,23 @@ public class NetReportMainController extends BaseController{
 		formatDate2 = "'"+formatDate2+"'";
 		formatDate3 = "'"+formatDate3+"'";
 		
+		
 		NetReportAutoUpdateTriggerTable netReportAutoUpdateObj = new NetReportAutoUpdateTriggerTable();
 		
 		netReportAutoUpdateObj.setFromDate(formatDate1);
 		netReportAutoUpdateObj.setToDate(formatDate3);
 		
 		long startTime = System.currentTimeMillis();
-		System.out.println(formatDateNow + " -> Now inserting into net report trigger 1 table");
-		genericDAO.saveOrUpdate(netReportAutoUpdateObj);	
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		System.out.println(formatDateNow + " -> Now starting Net report 1 job");
+		System.out.println(formatDateNow + " -> Now inserting into net report job trigger 1 table");
+		genericDAO.saveOrUpdate(netReportAutoUpdateObj);
+		
 		long endTime = System.currentTimeMillis();
-		System.out.println(formatDateNow + " -> After inserting into net report trigger 1 table.  Time taken: "
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> After inserting into net report job trigger 1 table.  Time taken: "
+				+ (endTime-startTime)/1000);
+		System.out.println(formatDateNow + " -> Finished Net report 1 job.  Time taken: "
 				+ (endTime-startTime)/1000);
 		
 		/*
@@ -203,7 +212,7 @@ public class NetReportMainController extends BaseController{
 		
 	}
 	
-	@Scheduled(cron="0 20 3 * * ?")	
+	@Scheduled(cron="0 20 4 * * ?")
 	public void generateMainNetReportData2(){
 		
 		
@@ -215,7 +224,6 @@ public class NetReportMainController extends BaseController{
 		DateMidnight beginningOfNextMonth = now.plusMonths(1).withDayOfMonth(1);
 		DateMidnight endOfCurrentMonth = beginningOfNextMonth.minusDays(1);
 		
-		String formatDateNow = sdf.format(now.toDate());
 		String formatDate1 = sdf.format(beginningOfLastMonth.toDate());
 		String formatDate2 = sdf.format(beginningOfNextMonth.toDate());
 		String formatDate3 = sdf.format(endOfCurrentMonth.toDate());
@@ -230,10 +238,17 @@ public class NetReportMainController extends BaseController{
 		netReportAutoUpdateObj.setToDate(formatDate3);
 		
 		long startTime = System.currentTimeMillis();
-		System.out.println(formatDateNow + " -> Now inserting into net report trigger 2 table");
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		System.out.println(formatDateNow + " -> Now starting Net report 2 job");
+		System.out.println(formatDateNow + " -> Now inserting into net report job trigger 2 table");
+		
 		genericDAO.saveOrUpdate(netReportAutoUpdateObj);
+		
 		long endTime = System.currentTimeMillis();
-		System.out.println(formatDateNow + " -> After inserting into net report trigger 2 table.  Time taken: "
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> After inserting into net report job trigger 2 table.  Time taken: "
+				+ (endTime-startTime)/1000);
+		System.out.println(formatDateNow + " -> Finished Net report 2 job. Time taken: "
 				+ (endTime-startTime)/1000);
 	}
 	

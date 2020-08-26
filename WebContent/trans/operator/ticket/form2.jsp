@@ -121,6 +121,12 @@ function getTerminal()
 	}
 }
 
+function validateDriver() {
+	var driver = $("#driverId option:selected").text();
+	if (driver.indexOf("Inactive") != -1) {
+		alert("Warning - Driver selected is inactive");
+	}
+}
 
 function getDriver()
 {
@@ -149,7 +155,7 @@ function getDriver()
 						if(driverId==dlst.id)
 						options += '<option value="'+dlst.id+'" selected="selected">'+dlst.fullName+'</option>';
 						else
-							options += '<option value="'+dlst.id+'">'+dlst.fullName+'</option>';
+							options += '<option value="'+dlst.id+'">'+dlst.driverNameWithStatus+'</option>';
 						
 					}
 					$("#driverId").html(options);
@@ -166,7 +172,7 @@ function getDriver()
 					var options = '<option value="">------Please Select------</option>';
 					for (var i = 0; i <listData.length; i++) {
 						var dlst=listData[i];
-						options += '<option value="'+dlst.id+'">'+dlst.fullName+'</option>';
+						options += '<option value="'+dlst.id+'">'+dlst.driverNameWithStatus+'</option>';
 					  }
 					$("#driverId").html(options);
 			}
@@ -647,11 +653,12 @@ function formatDate1(){
 			<td class="form-left"><primo:label code="Driver" /><span
 				class="errorMessage">*</span></td>
 			<td><form:select cssClass="flat" path="driver" id="driverId"
-					style="min-width:154px; max-width:154px" disabled="true">
+					onchange="javascript:validateDriver();"
+					style="min-width:234px; max-width:234px" disabled="true">
 					<form:option value="">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${drivers}" itemValue="id"
-						itemLabel="fullName"></form:options> 
+						itemLabel="driverNameWithStatus"></form:options> 
 				</form:select> <br> <form:errors path="driver" cssClass="errorMessage" />
 			</td>
 

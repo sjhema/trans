@@ -205,7 +205,7 @@ public class TicketController extends CRUDController<Ticket> {
 		criterias.clear();
 		/*EmployeeCatagory empobj = genericDAO.getById(EmployeeCatagory.class,2l);
 		criterias.put("catagory", empobj);*/
-		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName asc, id desc", false));
 		criterias.clear();
 		model.addAttribute("subcontractors", genericDAO.findByCriteria(SubContractor.class,	criterias, "name", false));
 		model.addAttribute("operators", genericDAO.findByCriteria(User.class, criterias, "name", false));
@@ -2442,15 +2442,18 @@ public class TicketController extends CRUDController<Ticket> {
 			if (!StringUtils.isEmpty(terminalId))
 			{		
 				if(!StringUtils.isEmpty(request.getParameter("tickId"))){				
-				String query="select obj from Driver obj where obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC";
+				String query="select obj from Driver obj where obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC, id desc";
 				dlst=genericDAO.executeSimpleQuery(query);
 				}
 				else{
-					String query="select obj from Driver obj where obj.status=1 and obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC";
+					String query="select obj from Driver obj where obj.status=1 and obj.terminal="+terminalId+" and obj.company in ("+companyId+",149) order by fullName ASC, id desc";
 					
 					dlst=genericDAO.executeSimpleQuery(query);
 				}
 			}
+			
+			populateDriverNameWithStatus(dlst);
+			
 			Gson gson = new Gson();
 			return gson.toJson(dlst);
 		}
@@ -2458,8 +2461,10 @@ public class TicketController extends CRUDController<Ticket> {
 		if ("findAllDriver".equalsIgnoreCase(action)) {
 
 			List<Driver> dlst=null;
-				String query="select obj from Driver obj where obj.status=1 order by fullName ASC";
+				String query="select obj from Driver obj where obj.status=1 order by fullName ASC, id desc";
 				dlst=genericDAO.executeSimpleQuery(query);
+			
+			populateDriverNameWithStatus(dlst);	
 			
 			Gson gson = new Gson();
 			return gson.toJson(dlst);
@@ -2640,6 +2645,16 @@ public class TicketController extends CRUDController<Ticket> {
 		
 		
 		return "";
+	}
+	
+	private void populateDriverNameWithStatus(List<Driver> driverList) {
+		if (driverList == null) {
+			return;
+		}
+		
+		for (Driver aDriver : driverList) {
+			aDriver.populateDriverNameWithStatus();
+		}
 	}
 
 	/*public String checkforduplicacy(ModelMap model, HttpServletRequest request,
