@@ -212,7 +212,7 @@ public class NetReportMainController extends BaseController{
 		
 	}
 	
-	@Scheduled(cron="0 20 4 * * ?")
+	@Scheduled(cron="0 20 3 * * ?")
 	public void generateMainNetReportData2(){
 		
 		

@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.model.EzToll;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.Ticket;
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.Vehicle;
 import com.primovision.lutransport.model.VehicleTollTag;
+import com.primovision.lutransport.model.driver.TripSheet;
 import com.primovision.lutransport.service.DateUpdateService;
 
 /**
@@ -289,6 +292,27 @@ public class VehicleTollTagController extends CRUDController<VehicleTollTag>{
 		//return super.save(request, entity, bindingResult, model);
 	}
 	
+	@Override
+	public String delete(@ModelAttribute("modelObject") VehicleTollTag entity,
+			BindingResult bindingResult, HttpServletRequest request) {
+		if (!validateDelete(entity)) {
+			request.getSession().setAttribute("error", "Cannot delete Vehicle Toll Tag as it is associated to Vehicle Toll Logs");
+			// Return to list
+			return "redirect:/" + urlContext + "/list.do";
+		}
+		
+		return super.delete(entity, bindingResult, request);
+	}
+	
+	private boolean validateDelete(VehicleTollTag entity) {
+		String query = "select obj from EzToll obj where obj.tollTagNumber=" + entity.getId();
+		List<EzToll> ezTollList  = genericDAO.executeSimpleQuery(query);
+		if (ezTollList != null && !ezTollList.isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 		private String common(HttpServletRequest request,ModelMap model,VehicleTollTag entity,String query)
 		{

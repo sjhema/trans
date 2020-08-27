@@ -126,7 +126,7 @@ public class EmployeeProbationAlertController extends BaseController{
 		
 		String query="select obj from Driver obj where obj.status=1 and obj.dateLeaveProbationEnd='"+ databasedf.format(curr_date)+" 00:00:00'";
 		List<Driver> employees=genericDAO.executeSimpleQuery(query);
-		System.out.println("Employee probation job - No. of employees: " + employees.size());
+		System.out.println(formatDateNow + " -> Employee probation job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){
 			for(Driver empObj:employees){
 				if(empObj.getCompany().getId() == 4l){
@@ -284,7 +284,7 @@ public class EmployeeProbationAlertController extends BaseController{
 		
 		String query="select obj from Driver obj where obj.status=1 and obj.anniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
 		List<Driver> employees=genericDAO.executeSimpleQuery(query);
-		System.out.println("Employee anniversary job - No. of employees: " + employees.size());
+		System.out.println(formatDateNow + " -> Employee anniversary job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){
 			for(Driver empObj:employees){		
 			Map criterias=new HashMap();
@@ -514,7 +514,7 @@ public class EmployeeProbationAlertController extends BaseController{
 		String query="select obj from Driver obj where obj.status=1 and obj.nextAnniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
 		
 		List<Driver> employees=genericDAO.executeSimpleQuery(query);
-		System.out.println("Employee anniversary vacation leave balance job - No. of employees: " + employees.size());
+		System.out.println(formatDateNow + " -> Employee anniversary vacation leave balance job - No. of employees: " + employees.size());
 		if(employees!=null && employees.size()>0){			
 			for(Driver empObj:employees){	
 				System.out.println("******* Entered employee"+empObj.getFullName());
