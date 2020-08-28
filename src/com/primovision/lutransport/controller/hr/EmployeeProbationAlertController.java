@@ -500,7 +500,7 @@ public class EmployeeProbationAlertController extends BaseController{
 				+ (endTime-startTime)/1000);
 	}
 	
-	@Scheduled(cron="0 20 1 * * ?")
+	@Scheduled(cron="0 30 1 * * ?")
 	public void checkAnniversaryToUpdateVactaionLeaveBalance() throws ParseException{		
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
