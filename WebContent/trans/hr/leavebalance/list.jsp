@@ -22,8 +22,14 @@
 					</c:if>
 						<option value="${empname}" ${selected}>${empname}</option>
 				</c:forEach>
-			</select></td>		
+			</select></td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="empname.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.empname.ssn}"/>
+			</td>
+		</tr>
 		
+		<tr>
 		<td align="${left}" class="first"><primo:label code="Category"/></td>
 		<td align="${left}"><select id="empcategory" name="empcategory.id" style="min-width:154px; max-width:154px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
@@ -34,6 +40,18 @@
 					</c:if>
 						<option value="${empcategory.id}" ${selected}>${empcategory.name}</option>
 				</c:forEach>
+			</select>
+		</td>
+		<td align="${left}" class="first"><primo:label code="Leave Type"/></td>
+				<td align="${left}"><select id="name" name="leavetype.id" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select"/>------</option>
+					<c:forEach items="${leavetypes}" var="leavetype">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['leavetype.id'] == leavetype.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${leavetype.id}" ${selected}>${leavetype.name}</option>
+					</c:forEach>
 			</select>
 		</td>						
 		</tr>
@@ -49,22 +67,7 @@
 						<option value="${company.id}" ${selected}>${company.name}</option>
 					</c:forEach>
 			</select></td>
-			
-			<td align="${left}" class="first"><primo:label code="Leave Type"/></td>
-				<td align="${left}"><select id="name" name="leavetype.id" style="min-width:154px; max-width:154px">
-					<option value="">------<primo:label code="Please Select"/>------</option>
-					<c:forEach items="${leavetypes}" var="leavetype">
-					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['leavetype.id'] == leavetype.id}">
-						<c:set var="selected" value="selected"/>
-					</c:if>
-						<option value="${leavetype.id}" ${selected}>${leavetype.name}</option>
-					</c:forEach>
-			</select></td>
-		</tr>		
-		
-		<tr>
-		<td align="${left}" class="first"><primo:label code="Terminal"/></td>
+			<td align="${left}" class="first"><primo:label code="Terminal"/></td>
 			<td align="${left}"><select id="terminal" name="terminal.id" style="min-width:154px; max-width:154px">
 				<option value="">------<primo:label code="Please Select"/>------</option>
 				<c:forEach items="${terminals}" var="terminal">
