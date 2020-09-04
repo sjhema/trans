@@ -26,13 +26,10 @@ function searchReport() {
 					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
 				</form:select> 
 			</td>
-		    <td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
+		   	<td align="${left}" class="first"><primo:label code="SSN"/></td>
 			<td>
-				<form:select cssClass="flat" path="category" style="min-width:154px; max-width:154px">
-					<form:option value="">------<primo:label code="Please Select" />------</form:option>
-					<form:options items="${categories}" itemValue="id" itemLabel="name" />
-				</form:select>
-			</td>		
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
 		</tr>
 		<tr>
 		 	<td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
@@ -51,6 +48,13 @@ function searchReport() {
 			</td>
 		</tr>
 	   	<tr>
+	   	 	<td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
+			<td>
+				<form:select cssClass="flat" path="category" style="min-width:154px; max-width:154px">
+					<form:option value="">------<primo:label code="Please Select" />------</form:option>
+					<form:options items="${categories}" itemValue="id" itemLabel="name" />
+				</form:select>
+			</td>	
 			<td class="form-left"><primo:label code="Leave Type" /><span class="errorMessage"></span></td>
 			<td>
 				<form:select cssClass="flat" path="leaveType" style="min-width:154px; max-width:154px">

@@ -3502,6 +3502,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String category=input.getCategory();
 		String leaveType=input.getLeaveType();
 		String employees=input.getEmployees();
+		String ssn=input.getSsn();
 		StringBuffer query=new StringBuffer("");
 		query.append("select obj from LeaveCurrentBalance obj where 1=1");
 		query.append(" and ((obj.hourremain!='0.0' and obj.hourremain is not null) OR (obj.daysremain!='0.0' and obj.daysremain is not null)) ");
@@ -3521,6 +3522,10 @@ public class HrReportServiceImpl implements HrReportService {
 		if (!StringUtils.isEmpty(terminal)) {
 				query.append("and  obj.terminal in ("+terminal+")");
 			}
+		
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.empname.ssn = '"+ssn+"'");
+		}
 		
 		query.append(" order by obj.company.name asc, obj.terminal.name asc, obj.empname.fullName asc");
 		
@@ -3614,6 +3619,11 @@ public class HrReportServiceImpl implements HrReportService {
 		if (StringUtils.isNotEmpty(category)) {
 			//criterias.put("catagory.id", Long.valueOf(category));
 			query.append(" and obj.catagory = " + category);
+		}
+		
+		String ssn = input.getSsn();
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.ssn = '" + ssn + "'");
 		}
 		
 		query.append(" order by obj.company.name asc, obj.terminal.name asc, obj.fullName asc");
@@ -5481,6 +5491,8 @@ public class HrReportServiceImpl implements HrReportService {
 		String employees=input.getEmployees();
 		String approveStatus=input.getApprovestatus();
 		
+		String ssn = input.getSsn();
+		
 		String payRollBatchFrom=input.getPayRollBatchFrom();
 		String payRollBatchto=input.getPayRollBatchto();
 		payRollBatchFrom=ReportDateUtil.getFromDate(payRollBatchFrom);
@@ -5512,6 +5524,10 @@ public class HrReportServiceImpl implements HrReportService {
 		if(!StringUtils.isEmpty(approveStatus)){
 			query.append(" and obj.approvestatus in ("+approveStatus+")");
 		}
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.driver.ssn='"+ssn+"'");
+		}
+		
 		List<PtodApplicationInput> out=new ArrayList<PtodApplicationInput>();
 		List<Ptodapplication> ptodapplications=genericDAO.executeSimpleQuery(query.toString()); 
 		for(Ptodapplication ptodapplication:ptodapplications){

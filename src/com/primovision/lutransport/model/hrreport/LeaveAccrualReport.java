@@ -8,6 +8,7 @@ public class LeaveAccrualReport {
 	private String terminal = StringUtils.EMPTY;
 	private String category = StringUtils.EMPTY;
 	private String leaveType = StringUtils.EMPTY;
+	private String ssn = StringUtils.EMPTY;
 	private Integer accrualYear = 0;
 	
 	private String employeeStaffId = StringUtils.EMPTY;
@@ -21,6 +22,7 @@ public class LeaveAccrualReport {
 	private Double hourlyAmount = 0.0;
 	private Double dailyRate = 0.0;
 	private Double hourlyRate = 0.0;
+	
 	public String getEmployee() {
 		return employee;
 	}
@@ -122,5 +124,11 @@ public class LeaveAccrualReport {
 	}
 	public void setHourlyRate(Double hourlyRate) {
 		this.hourlyRate = hourlyRate;
+	}
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
 	}
 }

@@ -98,15 +98,12 @@ function formatDate(dateElemId) {
 					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
 				</form:select> 
 			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
+		</tr>
 	    
-	    <td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
-			<td><form:select cssClass="flat" path="category" multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${categories}" itemValue="id" itemLabel="name" />
-				</form:select>
-			</td>		
-		 </tr>
 		<tr>
 		 <td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
 			<td><form:select cssClass="flat" path="company" multiple="true">
@@ -115,26 +112,32 @@ function formatDate(dateElemId) {
 					<form:options items="${companies}" itemValue="id" itemLabel="name" />
 				</form:select> 
 			</td>
-		
-			  <td class="form-left"><primo:label code="Leave Type" /><span
-				class="errorMessage"></span></td>
-		<td><form:select cssClass="flat" path="leaveType"  multiple="true">
-					<form:option value="-1">------<primo:label
-							code="Please Select" />------</form:option>
-					<form:options items="${leavetypes}" itemValue="id" itemLabel="name" />
-				</form:select> <br> <form:errors path="leaveType" cssClass="errorMessage" />
-			</td>			
-			
-		</tr>
-		
-	   <tr>
-	 <td class="form-left"><primo:label code="Terminal" /><span class="errorMessage"></span></td>
+			<td class="form-left"><primo:label code="Terminal" /><span class="errorMessage"></span></td>
 			<td><form:select cssClass="flat" path="terminal" multiple="true">
 					<form:option value="-1">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${terminals}" itemValue="id" itemLabel="name" />
 				</form:select>
 			</td>
+		</tr>
+		
+	   <tr>
+	   <td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
+			<td><form:select cssClass="flat" path="category" multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${categories}" itemValue="id" itemLabel="name" />
+				</form:select>
+			</td>
+	    <td class="form-left"><primo:label code="Leave Type" /><span
+				class="errorMessage"></span></td>
+		<td><form:select cssClass="flat" path="leaveType"  multiple="true">
+					<form:option value="-1">------<primo:label
+							code="Please Select" />------</form:option>
+					<form:options items="${leavetypes}" itemValue="id" itemLabel="name" />
+				</form:select> <br> <form:errors path="leaveType" cssClass="errorMessage" />
+			</td>		
+	 
 		</tr>
 		<tr>
 				<td align="${left}" class="form-left">Pay Roll Batch Date From</td>

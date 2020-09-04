@@ -120,8 +120,9 @@ public class LeaveAccrualReportController extends BaseController {
 			@RequestParam(required = false, value = "type") String type,
 			@RequestParam(required = false, value = "jrxml") String jrxml) {
 		if (StringUtils.isEmpty(input.getCompany()) && StringUtils.isEmpty(input.getEmployee())
-				 && StringUtils.isEmpty(input.getTerminal()) && StringUtils.isEmpty(input.getCategory())) {
-			request.getSession().setAttribute("errors", "Please choose at least one of Company, Terminal, Employee or Category");
+				 && StringUtils.isEmpty(input.getTerminal()) && StringUtils.isEmpty(input.getCategory())
+				 && StringUtils.isEmpty(input.getSsn())) {
+			request.getSession().setAttribute("errors", "Please choose at least one of Company, Terminal, Employee, SSN or Category");
 			setupEnquiry(model);
 			return getUrlContext() + "/enquiry";
 		}

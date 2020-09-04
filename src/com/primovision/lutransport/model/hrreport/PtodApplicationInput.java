@@ -30,6 +30,16 @@ public class PtodApplicationInput {
 	private String checkdate="";
 	private String approvestatus="";
 	private String approveby="";
+	
+	private String ssn="";
+	
+	
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 	public String getEmployeesId() {
 		return employeesId;
 	}
