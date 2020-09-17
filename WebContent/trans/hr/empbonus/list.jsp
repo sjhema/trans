@@ -105,18 +105,24 @@ function formatDate(){
 						<option value="${driver}" ${selected}>${driver}</option>
 					</c:forEach>
 			</select></td>
-			
-		<td align="${left}" class="first"><primo:label code="Category"/></td>
-				<td align="${left}"><select id="category" name="category.id" style="min-width:154px; max-width:154px">
-					<option value="">------<primo:label code="Please Select"/>------</option>
-					<c:forEach items="${categories}" var="category">
-					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['category.id'] == category.id}">
-						<c:set var="selected" value="selected"/>
-					</c:if>
-						<option value="${category.id}" ${selected}>${category.name}</option>
-					</c:forEach>
-			</select></td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Category"/></td>
+					<td align="${left}"><select id="category" name="category.id" style="min-width:154px; max-width:154px">
+						<option value="">------<primo:label code="Please Select"/>------</option>
+						<c:forEach items="${categories}" var="category">
+						<c:set var="selected" value=""/>
+						<c:if test="${sessionScope.searchCriteria.searchMap['category.id'] == category.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if>
+							<option value="${category.id}" ${selected}>${category.name}</option>
+						</c:forEach>
+				</select></td>
+		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Company"/></td>
 				<td align="${left}"><select id="company" name="company.id" style="min-width:154px; max-width:154px">

@@ -31,8 +31,15 @@
 					</c:forEach>
 			</select>
 			</td>
-			
-			<td align="${left}" class="first"><primo:label code="Company" />
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+				<td>
+					<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+				</td>
+		</tr>
+
+
+		<tr>
+		<td align="${left}" class="first"><primo:label code="Company" />
 			</td>
 			<td align="${left}"><select id="company" name="company.id" style="min-width:154px; max-width:154px">
 					<option value="">
@@ -50,27 +57,6 @@
 					</c:forEach>
 			</select>
 			</td>
-			
-
-		</tr>
-
-
-		<tr>
-		
-		<td align="${left}" class="first"><primo:label code="Category" />
-			</td>
-			<td align="${left}"><select id="company" name="catagory.id" style="min-width:154px; max-width:154px">
-					<option value="">------<primo:label code="Please Select"/>------</option>
-					<c:forEach items="${catagories}" var="catagory">
-					<c:set var="selected" value=""/>
-					<c:if test="${sessionScope.searchCriteria.searchMap['catagory.id'] == catagory.id}">
-						<c:set var="selected" value="selected"/>
-					</c:if>
-						<option value="${catagory.id}" ${selected}>${catagory.name}</option>
-					</c:forEach>
-			</select></td>
-		
-			
 			<td align="${left}" class="first"><primo:label code="Terminal" />
 			</td>
 			<td align="${left}"><select id="terminal" name="terminal.id" style="min-width:154px; max-width:154px">
@@ -92,7 +78,20 @@
 
 		</tr>
 		
-
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Category" />
+			</td>
+			<td align="${left}"><select id="company" name="catagory.id" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select"/>------</option>
+					<c:forEach items="${catagories}" var="catagory">
+					<c:set var="selected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['catagory.id'] == catagory.id}">
+						<c:set var="selected" value="selected"/>
+					</c:if>
+						<option value="${catagory.id}" ${selected}>${catagory.name}</option>
+					</c:forEach>
+			</select></td>
+		</tr>
 
 		<tr>
 			<td align="${left}" class="first">Valid From</td>

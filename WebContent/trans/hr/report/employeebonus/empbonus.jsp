@@ -36,16 +36,20 @@ function searchReport() {
 					<form:options items="${employees}" itemValue="id" itemLabel="fullName" />
 				</form:select> 
 			</td>
-			
-			<td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
+		  </tr>
+		  <tr>
+		 	<td class="form-left"><primo:label code="Category" /><span class="errorMessage"></span></td>
 			<td><form:select cssClass="flat" path="category" multiple="true">
 					<form:option value="-1">------<primo:label
 							code="Please Select" />------</form:option>
 					<form:options items="${categories}" itemValue="id" itemLabel="name" />
 				</form:select>
 			</td>
-		  </tr>
-		
+		  </tr> 
 		<tr>
 		    <td class="form-left"><primo:label code="Company" /><span class="errorMessage"></span></td>
 			<td><form:select cssClass="flat" path="company" multiple="true">

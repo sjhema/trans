@@ -536,12 +536,10 @@ function formatDate3(){
 						<option value="${item.fullName}"${selected}>${item.fullName}</option>
 					</c:forEach>
 			</select></td>
-			<td align="${left}" class="first"><primo:label code="Bill Batch Date" />
-			</td>
-			<td align="${left}"><input id="datepicker2" name="billBatchDate" style="min-width:150px; max-width:150px"
-				type="text" onblur="return formatDate2();"
-				value="${sessionScope.searchCriteria.searchMap.billBatchDate}"/>
-			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+				<td>
+					<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+				</td>
 		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
@@ -557,6 +555,12 @@ function formatDate3(){
 						<option value="${aSubcontractor.id}"${selected}>${aSubcontractor.name}</option>
 					</c:forEach>
 				</select>
+			</td>
+			<td align="${left}" class="first"><primo:label code="Bill Batch Date" />
+			</td>
+			<td align="${left}"><input id="datepicker2" name="billBatchDate" style="min-width:150px; max-width:150px"
+				type="text" onblur="return formatDate2();"
+				value="${sessionScope.searchCriteria.searchMap.billBatchDate}"/>
 			</td>
 		</tr>
 		

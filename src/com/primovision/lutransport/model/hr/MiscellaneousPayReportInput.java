@@ -13,6 +13,8 @@ public class MiscellaneousPayReportInput implements ReportModel {
 	String batchDateFrom;
 	String batchDateTo;
 	
+	String ssn;
+	
 	public String getCompany() {
 		return company;
 	}
@@ -49,6 +51,10 @@ public class MiscellaneousPayReportInput implements ReportModel {
 	public void setBatchDateTo(String batchDateTo) {
 		this.batchDateTo = batchDateTo;
 	}
-	
-	
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 }

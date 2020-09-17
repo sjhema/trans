@@ -106,7 +106,13 @@ function formatDate(){
 						<option value="${driver.fullName}" ${selected}>${driver.fullName}</option>
 					</c:forEach>
 			</select></td>
-		<td align="${left}" class="first"><primo:label code="Company"/></td>
+				<td align="${left}" class="first"><primo:label code="SSN"/></td>
+				<td>
+					<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+				</td>
+			</tr>
+			<tr>
+				<td align="${left}" class="first"><primo:label code="Company"/></td>
 				<td align="${left}"><select id="company" name="company.id" style="min-width:154px; max-width:154px">
 					<option value="">------<primo:label code="Please Select"/>------</option>
 					<c:forEach items="${companies}" var="company">
@@ -116,11 +122,7 @@ function formatDate(){
 					</c:if>
 						<option value="${company.id}" ${selected}>${company.name}</option>
 					</c:forEach>
-			</select></td>
-			
-			
-			<tr>
-
+				</select></td>
 				<td align="${left}" class="first"><primo:label code="Terminal"/></td>
 				<td align="${left}"><select id="terminal" name="terminal.id" style="min-width:154px; max-width:154px">
 					<option value="">------<primo:label code="Please Select"/>------</option>
@@ -132,14 +134,14 @@ function formatDate(){
 						<option value="${terminal.id}" ${selected}>${terminal.name}</option>
 					</c:forEach>
 			</select></td>
-				<td align="${left}" class="first"><primo:label code="Batch Date" />
-			</td>
-			<td align="${left}"><input id="datepicker" name="batchFrom" style="min-width:150px; max-width:150px"
-				type="text" onblur="return formatDate();"
-				value=""/>
-			</td>
 			</tr>
 			<tr>
+				<td align="${left}" class="first"><primo:label code="Batch Date" />
+				</td>
+				<td align="${left}"><input id="datepicker" name="batchFrom" style="min-width:150px; max-width:150px"
+					type="text" onblur="return formatDate();"
+					value=""/>
+				</td>
 				<td align="${left}" class="first"><primo:label code="Misc. Description"/></td>
 				<td align="${left}">
 				<select id="miscNotes" name="miscNotes" style="min-width:154px; max-width:154px">
@@ -154,18 +156,7 @@ function formatDate(){
 						<option value="${miscellaneousDesc.dataLabel}" ${selected}>${miscellaneousDesc.dataLabel}</option>
 					</c:forEach>
 				</select></td>
-				<td align="${left}" class="first">
-			</td>
-			<td >
-			</td>
 			</tr>
-			
-			
-		
-		<tr>
-			
-			
-		</tr>
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}"><input type="button"

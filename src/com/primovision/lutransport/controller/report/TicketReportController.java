@@ -95,6 +95,7 @@ public class TicketReportController extends BaseController {
 		String subcontractor = (String) criteria.getSearchMap().get("subcontractor");
 		
 		String driver = (String) criteria.getSearchMap().get("driver");
+		String ssn = (String) criteria.getSearchMap().get("ssn");
 		
 		String origin = (String) criteria.getSearchMap().get("origin");
 		String destination = (String) criteria.getSearchMap().get("destination");
@@ -136,6 +137,9 @@ public class TicketReportController extends BaseController {
 		}
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");
+		}
+		if (StringUtils.isNotEmpty(ssn)) {
+			whereClause.append(" and obj.driver.ssn='" + ssn + "'");
 		}
 		if (StringUtils.isNotEmpty(origin)) {
 			whereClause.append(" and obj.origin.id=" + origin);

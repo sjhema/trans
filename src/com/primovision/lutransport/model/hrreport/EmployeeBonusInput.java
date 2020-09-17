@@ -8,14 +8,14 @@ import com.primovision.lutransport.model.hr.EmployeeBonus;
 import com.primovision.lutransport.model.hr.TimeSheet;;
 
 public class EmployeeBonusInput {
-	
-	
 	private String driver;
 	private String category;
 	private String company;
 	private String terminal;
 	private String bonustype;
 	private String employeeNo;
+	
+	private String ssn;
 	
 	String batchFrom;
 	String batchTo;
@@ -93,9 +93,12 @@ public class EmployeeBonusInput {
 	public void setBatchTo(String batchTo) {
 		this.batchTo = batchTo;
 	}
-	
-	
-	
-	
-	
+
+	public String getSsn() {
+		return ssn;
+	}
+
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 }

@@ -133,6 +133,12 @@ function formatDate(dateElemId) {
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
+		</tr>
+		<tr>
 			<td align="${left}" class="first"><primo:label code="Subcontractor"/></td>
 			<td align="${left}">
 				<select id="subcontractor" name="subcontractor" style="min-width:154px; max-width:154px">

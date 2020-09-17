@@ -196,6 +196,8 @@ public class MiscellaneousPayReportController extends BaseController {
 		String batchDateFrom = input.getBatchDateFrom();
 		String batchDateTo = input.getBatchDateTo();
 		
+		String ssn = input.getSsn();
+		
 		StringBuffer query = new StringBuffer("select obj from MiscellaneousAmount obj where 1=1");
 		StringBuffer countQuery = new StringBuffer("select count(obj) from MiscellaneousAmount obj where 1=1");
 		StringBuffer whereClause = new StringBuffer();
@@ -208,6 +210,9 @@ public class MiscellaneousPayReportController extends BaseController {
 		}
 		if (StringUtils.isNotEmpty(employee)) {
 			whereClause.append(" and obj.driver.fullName='" + employee + "'");
+		}
+		if (StringUtils.isNotEmpty(ssn)) {
+			whereClause.append(" and obj.driver.ssn='" + ssn + "'");
 		}
 		if (StringUtils.isNotEmpty(miscellaneousDesc)) {
 			String[] miscellaneousDescTokens = miscellaneousDesc.split(",");

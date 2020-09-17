@@ -5574,6 +5574,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String category = input.getCategory();
 		String bonustype = input.getBonustype();
 		String empnumber = input.getEmployeeNo();
+		String ssn = input.getSsn();
 		
 		String batchDateFrom = input.getBatchFrom();
 		String batchDateTo = input.getBatchTo();
@@ -5610,6 +5611,11 @@ public class HrReportServiceImpl implements HrReportService {
 		if (!StringUtils.isEmpty(empnumber)) {
 			query.append("and  obj.empnumber ="+  empnumber +"" );
 			queryCount.append("and  obj.empnumber ="+  empnumber +"" );
+			
+		}
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.driver.ssn ='"+  ssn +"'" );
+			queryCount.append(" and obj.driver.ssn ='"+  ssn +"'" );
 			
 		}
 		

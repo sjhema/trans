@@ -138,6 +138,10 @@ $(document).ready(function() {
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>
 		</tr>
 		<tr>
 			<td align="${left}" class="first"><primo:label code="Misc. Description"/></td>

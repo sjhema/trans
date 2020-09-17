@@ -519,8 +519,13 @@ function formatDate5(){
 						<option value="${item.fullName}"${selected}>${item.fullName}</option>
 					</c:forEach>
 			</select></td>
-			
-		<td align="${left}" class="first"><primo:label code="Verification Status" /></td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+				<td>
+					<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+				</td>
+		</tr> 
+		<tr>
+			<td align="${left}" class="first"><primo:label code="Verification Status" /></td>
 			<td align="${left}"><select id="veirifcationID" name="verificationStatus" style="min-width:154px; max-width:154px">
 					<option value="">
 						------
@@ -541,9 +546,8 @@ function formatDate5(){
 						<option value="null" ${nselected}>Not Verified</option>
 						<option value="Verified" ${selected}>Verified</option>
 					
-			</select></td>		 
-			
-		</tr>              
+			</select></td>	
+		</tr>             
          
          <tr>  		
 			
