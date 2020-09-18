@@ -31,8 +31,13 @@ function confirmAddToPrev(id) {
 						<option value="${driver}" ${selected}>${driver}</option>
 					</c:forEach>
 			</select></td>
-		
-		<td align="${left}" class="first"><primo:label code="Category"/></td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+			</td>
+	   </tr>
+		<tr>
+				<td align="${left}" class="first"><primo:label code="Category"/></td>
 				<td align="${left}"><select id="catagory" name="catagory.id" style="min-width:154px; max-width:154px">
 					<option value="">------<primo:label code="Please Select"/>------</option>
 					<c:forEach items="${catagories}" var="catagory">
@@ -42,12 +47,8 @@ function confirmAddToPrev(id) {
 					</c:if>
 						<option value="${catagory.id}" ${selected}>${catagory.name}</option>
 					</c:forEach>
-			</select></td>		
-			
-	   </tr>
-		
-		
-		
+			</select></td>	
+		</tr>
 		
         <tr>
 				<td align="${left}" class="first"><primo:label code="Company"/></td>

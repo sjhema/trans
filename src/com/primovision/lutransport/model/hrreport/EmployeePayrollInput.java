@@ -10,6 +10,7 @@ public class EmployeePayrollInput {
 	
 	
 	private String driver;
+	private String ssn;
 	private String company;
 	private String terminal;
 	private String category;
@@ -19,8 +20,12 @@ public class EmployeePayrollInput {
 	
 	List<TimeSheet> timesheets=null;
 	
-	
-	
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 	public List<TimeSheet> getTimesheets() {
 		return timesheets;
 	}

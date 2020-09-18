@@ -80,6 +80,7 @@ public class DriverPayAdjustReportController extends BaseController {
 		String terminal = (String) criteria.getSearchMap().get("terminal");
 		
 		String driver = (String) criteria.getSearchMap().get("driver");
+		String ssn = (String) criteria.getSearchMap().get("ssn");
 		
 		String checkDateFrom = (String) criteria.getSearchMap().get("checkDateFrom");
 		String checkDateTo = (String) criteria.getSearchMap().get("checkDateTo");
@@ -102,6 +103,10 @@ public class DriverPayAdjustReportController extends BaseController {
 		
 		if (StringUtils.isNotEmpty(driver)) {
 			whereClause.append(" and obj.driver.fullName='" + driver + "'");
+		}
+		
+		if (StringUtils.isNotEmpty(ssn)) {
+			whereClause.append(" and obj.driver.ssn='" + ssn + "'");
 		}
 		
 	   if (StringUtils.isNotEmpty(checkDateFrom)){

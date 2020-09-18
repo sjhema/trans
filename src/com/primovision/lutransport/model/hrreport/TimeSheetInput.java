@@ -11,6 +11,7 @@ public class TimeSheetInput /*implements ReportModel*/{
 	private String company;
 	private String terminal;
 	private String category;
+	private String ssn;
 
 	private String weekstartDateFrom;
 	private String weekendDateTo;
@@ -20,7 +21,12 @@ public class TimeSheetInput /*implements ReportModel*/{
 	List<Attendance> attendance=null;
 
 
-
+	public String getSsn() {
+		return ssn;
+	}
+	public void setSsn(String ssn) {
+		this.ssn = ssn;
+	}
 
 
 

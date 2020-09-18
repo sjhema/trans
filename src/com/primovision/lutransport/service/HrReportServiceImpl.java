@@ -3068,6 +3068,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String company = input.getCompany();
 		String terminal = input.getTerminal();
 		String employee = input.getDriver();
+		String ssn = input.getSsn();
 		String category = input.getCategory();
 		
 		
@@ -3087,7 +3088,9 @@ public class HrReportServiceImpl implements HrReportService {
 		if (!StringUtils.isEmpty(employee)) {
 			query.append("and  obj.driver in (" + employee + ")");
 		}
-		
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.driver.ssn='" + ssn + "'");
+		}
 		if (!StringUtils.isEmpty(category)) {
 			query.append("and  obj.catagory in (" + category + ")");
 		}
@@ -3873,6 +3876,7 @@ public class HrReportServiceImpl implements HrReportService {
 		String company = input.getCompany();
 		String terminal = input.getTerminal();
 		String employee = input.getDriver();
+		String ssn = input.getSsn();
 		String category = input.getCategory();
 		String status=input.getHourlypayrollstatus();
 		/*String employeeno = input.getEmployeesNo();*/
@@ -3920,7 +3924,10 @@ public class HrReportServiceImpl implements HrReportService {
 			query.append("and  obj.driver in (" + empids + ")");
 			queryCount.append(" and obj.driver in (" + empids + ")");
 		}
-		
+		if (StringUtils.isNotEmpty(ssn)) {
+			query.append(" and obj.driver.ssn='" + ssn + "'");
+			queryCount.append(" and obj.driver.ssn='" + ssn + "'");
+		}
 		if (!StringUtils.isEmpty(category)) {
 			query.append("and  obj.catagory in (" + category + ")");
 			queryCount.append(" and obj.catagory in (" + category + ")");

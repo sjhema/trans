@@ -107,7 +107,11 @@ function getEmpDetail(){
 			<td  align="${left}">
 				<form:input size="10" path="employeesNo" cssClass="flat" style="min-width:120px; max-width:120px"/> 
 				
-			</td>		 
+			</td>	
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+			<td>
+				<input id="ssn" name="ssn" type="text" value="${sessionScope.searchCriteria.searchMap.ssn}"/>
+			</td>	 
 	</tr>	
 			<tr>
 		       <td class="form-left">Company</td>

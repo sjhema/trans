@@ -91,6 +91,12 @@ function formatDate(){
 					</c:forEach>
 				</select>
 			</td>
+			<td align="${left}" class="first"><primo:label code="SSN"/></td>
+				<td>
+					<input id="driver.ssn" name="driver.ssn" type="text" value="${sessionScope.searchCriteria.searchMap.driver.ssn}"/>
+				</td>
+		</tr>
+		<tr>
 			<td align="${left}" class="first">Batch Date</td>
 			<td align="${left}">
 				<input name="payrollBatch" id="datepicker" type="text" style="min-width:154px; max-width:154px" onblur="return formatDate();" />
