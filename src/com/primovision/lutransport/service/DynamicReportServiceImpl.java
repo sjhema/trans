@@ -921,7 +921,7 @@ public class DynamicReportServiceImpl implements
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jp);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
 		exporter.setParameter(JRHtmlExporterParameter.HTML_HEADER,
-		"<html><head><style> @page {size: landscape; margin-left: 0.00in;margin-right: 0.00in;margin-top: 0.00in;margin-bottom: 0.00in;}</style></head><body>");
+		"<html><head><style> @page {size: landscape; margin-left: 0.20in;margin-right: 0.20in;margin-top: 0.40in;margin-bottom: 0.20in;}</style></head><body>");
 		exporter.setParameter(JRHtmlExporterParameter.HTML_FOOTER,
 		"<script language=\"javascript\">  try  { document.execCommand('print', false, null); } catch(e) { window.print(); }</script></body></html>");
 		exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI,
