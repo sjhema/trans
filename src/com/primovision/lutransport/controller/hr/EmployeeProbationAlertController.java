@@ -888,5 +888,461 @@ public class EmployeeProbationAlertController extends BaseController{
 	
 }
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+	// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+	//@Scheduled(cron="0 58 21 * * ?")
+	public void checkAnniversaryToUpdateVactaionLeaveBalance_MissedJobFix() throws ParseException{		
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+		SimpleDateFormat databasedf = new SimpleDateFormat("yyyy-MM-dd");
+		Date curr_date=new Date();		
+		
+		long startTime = System.currentTimeMillis();
+		String formatDateNow = logDateFormat.format(new Date(startTime));
+		
+		// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+		String companyId = "5";
+		String terminalId = "456";
+		String categoryId = "2"; // 2 - Driver  Loader/Tipper - 6
+		String status = "1";
+		String nextAnniversaryDate = "2021-12-28 00:00:00";
+		
+		String effectiveDateFrom = "2020-12-28 01:30:00";
+		SimpleDateFormat annivsdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		Date effectiveDateFromObj = annivsdf.parse(effectiveDateFrom);
+		
+		// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+		//String query="select obj from Driver obj where obj.status=1 and obj.nextAnniversaryDate='"+ databasedf.format(curr_date)+" 00:00:00'";
+		
+		System.out.println(formatDateNow + " -> Now starting employee anniversary vacation leave balance job - missed job fix"
+				+ " for nextAnniversaryDate: " + nextAnniversaryDate);
+			
+		String query="select obj from Driver obj where obj.status=1"
+						+ " and obj.nextAnniversaryDate='" + nextAnniversaryDate + "'"
+						+ " and obj.company=" + companyId
+						+ " and obj.terminal=" + terminalId
+						+ " and obj.catagory=" + categoryId
+						+ " and obj.status=" + status;
+		
+		List<Driver> employees=genericDAO.executeSimpleQuery(query);
+		// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+		System.out.println(formatDateNow + " -> Employee anniversary vacation leave balance job - missed job fix - No. of employees: " + employees.size()
+				+ "  running for nextAnniversaryDate: " + nextAnniversaryDate);
+		print(employees);
+		if(employees!=null && employees.size()>0){			
+			for(Driver empObj:employees){	
+				System.out.println("******* Entered employee"+empObj.getFullName());
+			Map criterias=new HashMap();
+			criterias.put("company.id",empObj.getCompany().getId());
+			criterias.put("terminal.id", empObj.getTerminal().getId());
+			criterias.put("empcategory.id", empObj.getCatagory().getId());
+			criterias.put("empname.id", empObj.getId());
+			criterias.put("leavetype.id", 4l);
+			criterias.put("status",1);
+			List<LeaveCurrentBalance> leavebalobj=genericDAO.findByCriteria(LeaveCurrentBalance.class, criterias);
+			if(leavebalobj!=null && leavebalobj.size()>0){
+				System.out.println("******* Entered 007");
+				criterias.clear();
+				criterias.put("company.id", empObj.getCompany().getId());
+				criterias.put("terminal.id", empObj.getTerminal().getId());
+				criterias.put("category.id", empObj.getCatagory().getId());
+				criterias.put("leavetype.id", 4l);
+				//criterias.put("leaveQualifier","2");
+				criterias.put("status",1);
+				List<Ptod> ptods=genericDAO.findByCriteria(Ptod.class,criterias);
+				if(ptods.size()>0 && ptods!=null){
+					for(Ptod ptod:ptods){					
+						StringBuffer buffer=new StringBuffer("");
+						String acc="No";
+						if(ptod.getAnnualoraccrual()==1)
+							acc="Yes";
+					
+						boolean accheck=false;
+						if(ptod.getAnnualoraccrual()==1)
+							accheck=true;
+						
+						int fromdays=0;
+						int todays=0;
+						int days=0;
+						if(ptod.getExperienceinyears()!=null)
+							fromdays=ptod.getExperienceinyears();
+						if(ptod.getExperienceinyearsTo()!=null)
+							todays=ptod.getExperienceinyearsTo();
+						if(ptod.getExperienceindays()!=null)
+							days=ptod.getExperienceindays();
+						int count=0;
+						
+					    DateTime dt = new DateTime();
+									    	
+					    	
+							boolean expelg=false;
+							int totex=0;				
+							int orgintotex=0;
+							if(empObj.getDateReHired()!=null && empObj.getDateHired()!=null){
+								
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateHired()), new DateMidnight(dt)).getDays();
+							}
+							else if (empObj.getDateReHired()!=null){
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateReHired()), new DateMidnight(dt)).getDays();
+							}
+							else{
+								
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateHired()), new DateMidnight(dt)).getDays();
+							}
+							
+							orgintotex=totex;
+							totex= totex/365;
+							
+							System.out.println("Total exp "+totex);
+							System.out.println("\n driver-->"+empObj.getFullName());
+							if(days>0&&orgintotex>0){
+								if(orgintotex>=days)
+									expelg=true;
+							}
+							if(fromdays>0&&totex>0&&todays>0){
+								
+							if(ptod.getLeaveQualifier().equals("2")){
+								if(totex>=fromdays&&totex<todays)
+									expelg=true;
+							}					
+							else{
+								if(totex>=fromdays&&totex<=todays)
+									expelg=true;
+							}
+					    }
+							if(fromdays>0&&todays<=0&&totex>0){
+								if(totex>=fromdays)
+									expelg=true;
+								
+							}
+							if(fromdays<=0&&todays>0&&totex>0){
+								if(ptod.getLeaveQualifier().equals("5")){
+									if(totex<todays)
+										expelg=true;
+								}
+								else{
+									if(totex<=todays)
+										expelg=true;
+								}
+							}
+							if(expelg){				
+								
+								LeaveCurrentBalance balance = leavebalobj.get(0);									
+								LeaveCurrentBalance newLeaveBalance = new LeaveCurrentBalance();
+								
+								newLeaveBalance.setEmpname(balance.getEmpname());
+								newLeaveBalance.setCompany(balance.getCompany());
+								newLeaveBalance.setEmpcategory(balance.getEmpcategory());				
+								newLeaveBalance.setTerminal(balance.getTerminal());
+								newLeaveBalance.setLeavetype(balance.getLeavetype());				
+								
+								
+								
+								if(ptod.getDayearned()!=null){		
+									if(!empObj.getPayTerm().equals("2")){
+										if(accheck){
+											Double earnedday=0.0;
+											if(balance.getDaysremain()!=null){	
+												newLeaveBalance.setDaysaccrude(balance.getDaysremain());
+												earnedday=balance.getDaysremain()+ptod.getDayearned();
+											}else{
+												earnedday=0+ptod.getDayearned();
+												newLeaveBalance.setDaysaccrude(0.0);
+											}
+											newLeaveBalance.setDaysavailable(earnedday);
+											newLeaveBalance.setDayssbalance(ptod.getDayearned());
+											newLeaveBalance.setDaysused(0.00);
+											newLeaveBalance.setDaysremain(earnedday);							
+										
+										}else{	
+											newLeaveBalance.setDaysaccrude(0.0);
+											Double earnedday=ptod.getDayearned();
+											newLeaveBalance.setDaysavailable(earnedday);
+											newLeaveBalance.setDayssbalance(earnedday);
+											newLeaveBalance.setDaysused(0.00);
+											newLeaveBalance.setDaysremain(earnedday);							
+										}						
+								}
+								else{
+									newLeaveBalance.setDaysaccrude(0.0);
+									Double earnedday=0.0;
+									newLeaveBalance.setDaysavailable(earnedday);
+									newLeaveBalance.setDayssbalance(earnedday);
+									newLeaveBalance.setDaysused(0.00);
+									newLeaveBalance.setDaysremain(earnedday);
+								}
+							}
+							
+								//Hours
+								if(ptod.getHoursearned()!=null){
+									if(empObj.getPayTerm().equals("2")){
+										if(accheck){
+											Double earnehour=0.0;
+											if(balance.getHourremain()!=null){
+												newLeaveBalance.setHoursaccrude(balance.getHourremain());
+												earnehour=balance.getHourremain()+ptod.getHoursearned();
+											}else{
+												newLeaveBalance.setHoursaccrude(0.0);
+												earnehour=0+ptod.getHoursearned();						
+											}
+											newLeaveBalance.setHoursavailable(earnehour);
+											newLeaveBalance.setHoursbalance(earnehour);								
+											newLeaveBalance.setHoursused(0.00);
+											newLeaveBalance.setHourremain(earnehour);							
+										}else{	
+											newLeaveBalance.setHoursaccrude(0.0);
+											Double earnehour=balance.getHourremain();
+											newLeaveBalance.setHoursavailable(earnehour);
+											newLeaveBalance.setHoursbalance(earnehour);
+											newLeaveBalance.setHoursused(0.00);
+											newLeaveBalance.setHourremain(earnehour);										
+										}				
+									}
+									else{
+										newLeaveBalance.setHoursaccrude(0.0);
+										Double earnehour=0.0;
+										newLeaveBalance.setHoursavailable(earnehour);
+										newLeaveBalance.setHoursbalance(earnehour);
+										newLeaveBalance.setHoursused(0.00);
+										newLeaveBalance.setHourremain(earnehour);
+									}
+							}
+								
+								Calendar now = Calendar.getInstance();
+								
+								int currentYear = now.get(Calendar.YEAR);
+							    int nextyear =  currentYear + 1;
+							    
+							    int month = now.get(Calendar.MONTH);
+							    int day = now.get(Calendar.DAY_OF_MONTH);												
+											
+							    newLeaveBalance.setDateEffectiveFrom(now.getTime());
+								
+								now.set(Calendar.YEAR,nextyear);
+								now.set(Calendar.MONTH, month);
+								now.set(Calendar.DAY_OF_MONTH, day);
+								
+								newLeaveBalance.setDateEffectiveTo(now.getTime());						
+								
+								// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+								System.out.println("Employee anniversary vacation leave balance job - missed job fix - DRIVER: Id:" + empObj.getId() + "  Name: " + empObj.getFullName()
+											+ "  Updating new leave balance");
+								//genericDAO.saveOrUpdate(newLeaveBalance);
+								balance.setStatus(0);
+								// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+								System.out.println("Employee anniversary vacation leave balance job - missed job fix - DRIVER: Id:" + empObj.getId() + "  Name: " + empObj.getFullName()
+								+ "  Updating old leave balance");
+								//genericDAO.saveOrUpdate(balance);
+								newLeaveBalance =null;									    
+								
+							}			
+					}		
+				}
+			}
+			else{
+				// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+				System.out.println("Employee anniversary vacation leave balance job - missed job fix - DRIVER: Id:" + empObj.getId() + "  Name: " + empObj.getFullName()
+							+ "  Entered 009");
+				//System.out.println("******* Entered 009");
+				criterias.clear();
+				criterias.put("company.id", empObj.getCompany().getId());
+				criterias.put("terminal.id", empObj.getTerminal().getId());
+				criterias.put("category.id", empObj.getCatagory().getId());
+				criterias.put("leavetype.id", 4l);
+				//criterias.put("leaveQualifier","2");
+				criterias.put("status",1);
+				List<Ptod> ptods=genericDAO.findByCriteria(Ptod.class,criterias);
+				if(ptods.size()>0 && ptods!=null){						
+					for(Ptod ptod:ptods){						
+						StringBuffer buffer=new StringBuffer("");
+						String acc="No";
+						if(ptod.getAnnualoraccrual()==1)
+							acc="Yes";
+					
+						boolean accheck=false;
+						if(ptod.getAnnualoraccrual()==1)
+							accheck=true;
+						
+						int fromdays=0;
+						int todays=0;
+						int days=0;
+						if(ptod.getExperienceinyears()!=null)
+							fromdays=ptod.getExperienceinyears();
+						if(ptod.getExperienceinyearsTo()!=null)
+							todays=ptod.getExperienceinyearsTo();
+						if(ptod.getExperienceindays()!=null)
+							days=ptod.getExperienceindays();
+						int count=0;
+						
+					    DateTime dt = new DateTime();
+									    	
+					    	
+							boolean expelg=false;
+							int totex=0;				
+							int orgintotex=0;
+							if(empObj.getDateReHired()!=null && empObj.getDateHired()!=null){
+								
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateHired()), new DateMidnight(dt)).getDays();
+							}
+							else if (empObj.getDateReHired()!=null){
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateReHired()), new DateMidnight(dt)).getDays();
+							}
+							else{
+								
+								totex=Days.daysBetween(new DateMidnight(empObj.getDateHired()), new DateMidnight(dt)).getDays();
+							}
+							orgintotex=totex;
+							totex = totex/365;
+							
+							
+							System.out.println("\n driver-->"+empObj.getFullName());
+							if(days>0&&orgintotex>0){
+								if(orgintotex>=days)
+									expelg=true;
+							}
+							if(fromdays>0&&totex>0&&todays>0){
+								
+							if(ptod.getLeaveQualifier().equals("2")){
+								if(totex>=fromdays&&totex<todays)
+									expelg=true;
+							}					
+							else{
+								if(totex>=fromdays&&totex<=todays)
+									expelg=true;
+							}
+					    }
+							if(fromdays>0&&todays<=0&&totex>0){
+								if(totex>=fromdays)
+									expelg=true;
+								
+							}
+							if(fromdays<=0&&todays>0&&totex>0){
+								if(ptod.getLeaveQualifier().equals("5")){
+									if(totex<todays)
+										expelg=true;
+								}
+								else{
+									if(totex<=todays)
+										expelg=true;
+								}
+							}
+							if(expelg){								
+							LeaveCurrentBalance leavebalanceObj = new LeaveCurrentBalance();
+							leavebalanceObj.setEmpname(empObj);
+							leavebalanceObj.setCompany(empObj.getCompany());
+							leavebalanceObj.setEmpcategory(empObj.getCatagory());				
+							leavebalanceObj.setTerminal(empObj.getTerminal());
+							leavebalanceObj.setLeavetype(ptod.getLeavetype());
+							if(!empObj.getPayTerm().equals("2")){
+								leavebalanceObj.setDaysaccrude(0.0);
+								leavebalanceObj.setDayssbalance(ptod.getDayearned());
+								leavebalanceObj.setDaysavailable(ptod.getDayearned());
+								leavebalanceObj.setDaysused(0.0);
+								leavebalanceObj.setDaysremain(ptod.getDayearned());				
+							}
+							else{
+								leavebalanceObj.setDaysaccrude(0.0);
+								leavebalanceObj.setDayssbalance(0.0);
+								leavebalanceObj.setDaysavailable(0.0);
+								leavebalanceObj.setDaysused(0.0);
+								leavebalanceObj.setDaysremain(0.0);
+							}
+							if(empObj.getPayTerm().equals("2")){
+								leavebalanceObj.setHoursaccrude(0.0);
+								leavebalanceObj.setHoursbalance(ptod.getHoursearned());
+								leavebalanceObj.setHoursavailable(ptod.getHoursearned());
+								leavebalanceObj.setHoursused(0.0);
+								leavebalanceObj.setHourremain(ptod.getHoursearned());
+							}
+							else{
+								leavebalanceObj.setHoursaccrude(0.0);
+								leavebalanceObj.setHoursbalance(0.0);
+								leavebalanceObj.setHoursavailable(0.0);
+								leavebalanceObj.setHoursused(0.0);
+								leavebalanceObj.setHourremain(0.0);
+							}
+							Calendar now = Calendar.getInstance();
+							// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+							now.setTime(effectiveDateFromObj);
+							
+							int currentYear = now.get(Calendar.YEAR);
+						    int nextyear =  currentYear + 1;
+						    
+						    int month = now.get(Calendar.MONTH);
+						    int day = now.get(Calendar.DAY_OF_MONTH);												
+										
+							leavebalanceObj.setDateEffectiveFrom(now.getTime());
+							
+							now.set(Calendar.YEAR,nextyear);
+							now.set(Calendar.MONTH, month);
+							now.set(Calendar.DAY_OF_MONTH, day);
+							
+							leavebalanceObj.setDateEffectiveTo(now.getTime());
+							
+							// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+							System.out.println("Employee anniversary vacation leave balance job - missed job fix - DRIVER: Id:" + empObj.getId() + "  Name: " + empObj.getFullName()
+										+ "  Entered 009 - Adding leave balance");
+							genericDAO.saveOrUpdate(leavebalanceObj);
+							leavebalanceObj =null;
+						}				    
+					    
+					}					
+				}	
+			}	
+			
+			Calendar now = Calendar.getInstance();
+			
+			int currentYear = now.get(Calendar.YEAR);
+		    int nextyear =  currentYear + 1;
+		    int month = now.get(Calendar.MONTH);
+		    int day = now.get(Calendar.DAY_OF_MONTH);		
+			
+			now.set(Calendar.YEAR,nextyear);
+			now.set(Calendar.MONTH, month);
+			now.set(Calendar.DAY_OF_MONTH, day);
+			
+			// Update vacation on anniversary fix - 1st Feb 2017
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			empObj.setNextAnniversaryDate(now.getTime());
+			
+			// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+			//genericDAO.saveOrUpdate(empObj);
+		}
+	}
+		
+		long endTime = System.currentTimeMillis();
+		formatDateNow = logDateFormat.format(new Date(endTime));
+		System.out.println(formatDateNow + " -> Finished employee anniversary vacation leave balance job - missed job fix. Time taken: "
+				+ (endTime-startTime)/1000);
+	
+	}
+
+	// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+	private void print(List<Driver> employees) {
+		for (Driver empObj : employees){
+			System.out.println("Employee anniversary vacation leave balance job - missed job fix - DRIVER: Id:" + empObj.getId() + "  Name: " + empObj.getFullName());
+		}
+	}
+	// Employee anniversary vacation leave balance job - missed job fix - 20th Jan 2021
+	*/
+	
+	
+	
+	
+	
 
 }
