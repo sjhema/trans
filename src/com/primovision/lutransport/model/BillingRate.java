@@ -109,6 +109,18 @@ public class BillingRate extends AbstractBaseModel {
 	@Column(name="billed_by")
 	private String billedby;
 	
+	// Peak rate 2nd Feb 2021
+	@Column(name="peak_rate")
+	private Double peakRate;
+	
+	// Peak rate 2nd Feb 2021
+	@Column(name="peak_rate_valid_from")
+	private String peakRateValidFrom;
+	
+	// Peak rate 2nd Feb 2021
+	@Column(name="peak_rate_valid_to")
+	private String peakRateValidTo;
+	
 
 	@Transient
 	    private String ratestatus;
@@ -379,5 +391,35 @@ public Date getValidFromTemp() {
 
 	public void setWeeklyRateUsing(Integer weeklyRateUsing) {
 		this.weeklyRateUsing = weeklyRateUsing;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public Double getPeakRate() {
+		return peakRate;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public void setPeakRate(Double peakRate) {
+		this.peakRate = peakRate;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public String getPeakRateValidFrom() {
+		return peakRateValidFrom;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public void setPeakRateValidFrom(String peakRateValidFrom) {
+		this.peakRateValidFrom = peakRateValidFrom;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public String getPeakRateValidTo() {
+		return peakRateValidTo;
+	}
+
+	// Peak rate 2nd Feb 2021
+	public void setPeakRateValidTo(String peakRateValidTo) {
+		this.peakRateValidTo = peakRateValidTo;
 	}
 }

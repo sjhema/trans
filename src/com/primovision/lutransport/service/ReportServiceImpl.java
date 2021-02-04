@@ -25,8 +25,10 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.apache.poi.util.StringUtil;
 import org.hibernate.bytecode.buildtime.ExecutionException;
+import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.DurationFieldType;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -1431,6 +1433,9 @@ public class ReportServiceImpl implements ReportService {
 				ex.printStackTrace();
 			}
 			if (billingRate != null) {
+				// Peak rate 2nd Feb 2021
+				Double derivedRate = deriveBillingRate(ticket, billingRate);
+				
 				// billing.setCustomer(billingRate.getCustomername().getName());
 				int billUsing = (billingRate.getBillUsing() == null) ? 1
 						: billingRate.getBillUsing();
@@ -1553,19 +1558,30 @@ public class ReportServiceImpl implements ReportService {
 							billing.setEffectiveNetWt(ticket.getLandfillNet());
 						}
 					}
-					billing.setRate(billingRate.getValue());
+					
+					// Peak rate 2nd Feb 2021
+					//billing.setRate(billingRate.getValue());
+					billing.setRate(derivedRate);
+					
 				// Change to 8.35 - 28th Dec 2016
 					billing.setAmount((billing.getEffectiveNetWt() / 8.35)
-							* billingRate.getValue());
+							* derivedRate); // Peak rate 2nd Feb 2021
+							// * billingRate.getValue());
 				} else if (rateType == 2) {
 					// per load
-					billing.setRate(billingRate.getValue());
-					billing.setAmount(billingRate.getValue());
+					// Peak rate 2nd Feb 2021
+					//billing.setRate(billingRate.getValue());
+					//billing.setAmount(billingRate.getValue());
+					billing.setRate(derivedRate);
+					billing.setAmount(derivedRate);
 				} else if (rateType == 3) {
 					// per tonne
-					billing.setRate(billingRate.getValue());
+					// Peak rate 2nd Feb 2021
+					//billing.setRate(billingRate.getValue());
+					billing.setRate(derivedRate);
 					billing.setAmount(billing.getEffectiveTonsWt()
-							* billingRate.getValue());
+							* derivedRate); // Peak rate 2nd Feb 2021
+							//* billingRate.getValue());
 				}
 				sumGallon += billing.getGallon();
 				sumBillableTon += billing.getEffectiveTonsWt();
@@ -1651,11 +1667,13 @@ public class ReportServiceImpl implements ReportService {
 									.getPeg(),3)) / 0.08);
 							if (rateType == 2) {
 								fuelSurcharge = percentage
-										* billingRate.getValue() * 0.01;
+										* derivedRate * 0.01; // Peak rate 2nd Feb 2021
+										//* billingRate.getValue() * 0.01;
 							} else if (rateType == 3) {
 								// per tonne
 								fuelSurcharge = billing.getEffectiveTonsWt()
-										* billingRate.getValue() * percentage
+										* derivedRate * percentage // Peak rate 2nd Feb 2021
+										//* billingRate.getValue() * percentage
 										* 0.01;
 							}
 						}
@@ -1880,6 +1898,59 @@ public class ReportServiceImpl implements ReportService {
 		Long recordCount = (Long) genericDAO.getEntityManager().createQuery(countQuery.toString()).getSingleResult();        
 		
 		return (recordCount > 0) ? true : false;
+	}
+	
+	// Peak rate 2nd Feb 2021
+	private Double deriveBillingRate(Ticket ticket, BillingRate billingRate) {
+		Double derivedRate = billingRate.getValue();
+		Double peakRate = billingRate.getPeakRate();
+		
+		String landfillTimeIn = ticket.getLandfillTimeIn();
+		String landfillTimeOut = ticket.getLandfillTimeOut();
+		String peakRateValidFrom = billingRate.getPeakRateValidFrom();
+		String peakRateValidTo = billingRate.getPeakRateValidTo();
+		if (peakRate == null || peakRate == 0.0
+				|| StringUtils.isEmpty(peakRateValidFrom)
+				|| StringUtils.isEmpty(peakRateValidTo)
+				|| StringUtils.isEmpty(landfillTimeIn)
+				|| StringUtils.isEmpty(landfillTimeOut)) {
+			return derivedRate;
+		}
+		
+		DateTime start = toDateTime(peakRateValidFrom);
+      DateTime end = toDateTime(peakRateValidTo);
+      DateTime landfillTimeInInstant = toDateTime(landfillTimeIn);
+      DateTime landfillTimeOutInstant = toDateTime(landfillTimeOut);
+      if (start == null || end == null
+      		|| landfillTimeInInstant == null || landfillTimeOutInstant == null) {
+      	return derivedRate;
+      }
+      
+      Interval interval = new Interval(start, end);
+      if (interval.contains(landfillTimeInInstant) || interval.contains(landfillTimeOutInstant)) {
+      	derivedRate = peakRate;
+      }
+      
+      return derivedRate;
+	}
+	
+	// Peak rate 2nd Feb 2021
+	private DateTime toDateTime(String timeStr) {
+		String[] timeSplit = timeStr.split(":");
+		if (timeSplit.length <= 1) {
+			return null;
+		}
+		
+		DateTime dt = null;
+		try {
+		   int hour = Integer.parseInt(timeSplit[0]);
+		   int mins = Integer.parseInt(timeSplit[1]);
+		   dt = new DateTime(2021, 1, 1, hour, mins);
+		} catch (Throwable t) {
+			dt = null;
+		}
+	   
+	   return dt;
 	}
 	
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)

@@ -386,6 +386,10 @@ public class BillingReportController extends ReportController<Billing> {
 			               if(reportname.equals("bynoTonnage")){
 				                 setReportName("bynoTonnage");
 			                }
+			               // Peak rate 2nd Feb 2021
+			               if(reportname.equals("byPeakRate")){
+			               	setReportName("byPeakRateBilling");
+			               }
 			     }
 				 else
 				 {

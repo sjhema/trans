@@ -241,6 +241,7 @@ function formatDate1(){
 	                <form:option value="byoriginWeight">Format5_Per Load_by Origin</form:option>
                     <form:option value="bynoFuelSurchage">Format6_No Fuel Surcharge_No Tonnage_No Demurrage</form:option>
                     <form:option value="bynoTonnage">Format7_No Tonnage_No Demurrage</form:option>
+                    <form:option value="byPeakRate">Format8_Peak Rate</form:option>
             </form:select>
             </td>
 		</TR>
@@ -292,6 +293,30 @@ function formatDate1(){
 					cssClass="flat" onblur="return formatDate1();"/> 
 			<br><form:errors path="validTo" cssClass="errorMessage" /></td>
 		</tr>
+		
+		
+		<!--Peak rate 2nd Feb 2021-->
+		<tr>
+			<td class="form-left">Peak Rate (USD)<span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="peakRate" style="min-width:150px; max-width:150px" />
+				<br><form:errors path="peakRate" cssClass="errorMessage" />
+			</td>
+		</tr>
+		<!--Peak rate 2nd Feb 2021-->
+		<tr>
+			<td class="form-left">Peak Rate Valid From<span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="peakRateValidFrom" style="min-width:150px; max-width:150px" />
+				<br><form:errors path="peakRateValidFrom" cssClass="errorMessage" />
+			</td>
+			<td class="form-left">Peak Rate Valid To<span class="errorMessage"></span></td>
+			<td align="${left}">
+				<form:input path="peakRateValidTo" style="min-width:150px; max-width:150px" />
+				<br><form:errors path="peakRateValidTo" cssClass="errorMessage" />
+			</td>
+		</tr>
+		
 		<tr class="table-heading">
 			<td colspan="4"><b>Fuel Surcharge</b></td>
 		</tr>

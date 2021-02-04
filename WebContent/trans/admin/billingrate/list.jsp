@@ -133,6 +133,12 @@ function getOriginLoad(){
 			<primo:staticdatacolumn headerText="Fuel Surcharge Weekly Rate" dataField="fuelsurchargeweeklyRate" dataType="YES_NO"/>
 			<primo:textcolumn headerText="Surcharge Per Ton" dataField="surchargePerTon"/>
 			<primo:textcolumn headerText="Surcharge Amount" dataField="surchargeAmount"/>
+			
+			<!--Peak rate 2nd Feb 2021-->
+			<primo:textcolumn headerText="Peak Rate" dataField="peakRate"/>
+			<primo:textcolumn headerText="Peak Rate Valid From" dataField="peakRateValidFrom"/>
+			<primo:textcolumn headerText="Peak Rate Valid To" dataField="peakRateValidTo"/>
+			
 			<primo:anchorcolumn headerText="Manage Alert" dataField="status" linkUrl="/admin/billingrate/changestatus.do?id={id}" linkText="On alert"/>			
 		</primo:datatable>
 		<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>

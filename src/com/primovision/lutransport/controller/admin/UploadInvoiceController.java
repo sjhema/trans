@@ -407,6 +407,15 @@ public class UploadInvoiceController extends CRUDController<Invoice> {
 						                 out = dynamicReportService.generateStaticReport("bynoTonnage",datas, params, type, request);
 					            	}
 					            }
+					            // Peak rate 2nd Feb 2021
+					            if (billingRate1.getBilledby().equals("byPeakRate")) {
+					            	System.out.println("byPeakRate");
+					            	if (type.equals("pdf")){
+					            		out = dynamicReportService.generateStaticReport("byPeakRateBillingpdf", datas, params, type, request);
+					            	} else {
+						               out = dynamicReportService.generateStaticReport("byPeakRateBilling", datas, params, type, request);
+					            	}
+					            }
 					}
 					else
 					{
