@@ -232,17 +232,12 @@ function processManageDocs(id) {
         <primo:textcolumn headerText="Rec." dataField="recordable"/>
         <primo:textcolumn headerText="# inj." dataField="noInjured"/>
         <primo:textcolumn headerText="Fatal." dataField="fatality"/>
-        <primo:textcolumn headerText="Road" dataField="roadCondition.roadCondition"/>
         <primo:textcolumn headerText="Citn." dataField="citation"/>
         <primo:textcolumn headerText="Tow" dataField="towed"/>
         <primo:numbercolumn headerText="Tot Cost" dataField="totalCost" dataFormat="#####0.00"/>
-        <primo:textcolumn headerText="Claim Rep" dataField="claimRep.name"/>
-        <primo:textcolumn headerText="Phone" dataField="claimRep.phone"/>
-        <primo:textcolumn headerText="Email" dataField="claimRep.email"/>
         <primo:anchorcolumn headerText="Upload Video" linkUrl="javascript:processUploadVideo('{id}');" linkText="Upload Video"/>
 		<primo:anchorcolumn headerText="Down Video" linkUrl="javascript:processDownloadVideo('{id}');" linkText="Down Video"/>
 		<primo:anchorcolumn headerText="Delete Video" linkUrl="javascript:processDeleteVideo('{id}');" linkText="Delete Video"/>
-		<primo:textcolumn headerText="Pdf Uploaded" dataField="docs" width="20px"/>
 		<primo:anchorcolumn headerText="Manage Pdf" linkUrl="javascript:processManageDocs('{id}');" linkText="Manage Pdf" width="20px"/>
 	 </primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
