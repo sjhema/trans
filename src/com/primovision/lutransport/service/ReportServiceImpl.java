@@ -1917,10 +1917,10 @@ public class ReportServiceImpl implements ReportService {
 			return derivedRate;
 		}
 		
-		DateTime start = toDateTime(peakRateValidFrom);
-      DateTime end = toDateTime(peakRateValidTo);
-      DateTime landfillTimeInInstant = toDateTime(landfillTimeIn);
-      DateTime landfillTimeOutInstant = toDateTime(landfillTimeOut);
+		DateTime start = toDateTime(peakRateValidFrom, null);
+      DateTime end = toDateTime(peakRateValidTo, start);
+      DateTime landfillTimeInInstant = toDateTime(landfillTimeIn, null);
+      DateTime landfillTimeOutInstant = toDateTime(landfillTimeOut, null);
       if (start == null || end == null
       		|| landfillTimeInInstant == null || landfillTimeOutInstant == null) {
       	return derivedRate;
@@ -1929,13 +1929,19 @@ public class ReportServiceImpl implements ReportService {
       Interval interval = new Interval(start, end);
       if (interval.contains(landfillTimeInInstant) || interval.contains(landfillTimeOutInstant)) {
       	derivedRate = peakRate;
+      } else {
+      	landfillTimeInInstant = landfillTimeInInstant.plusDays(1);
+      	landfillTimeOutInstant = landfillTimeOutInstant.plusDays(1);
+      	if (interval.contains(landfillTimeInInstant) || interval.contains(landfillTimeOutInstant)) {
+         	derivedRate = peakRate;
+         }
       }
       
       return derivedRate;
 	}
 	
 	// Peak rate 2nd Feb 2021
-	private DateTime toDateTime(String timeStr) {
+	private DateTime toDateTime(String timeStr, DateTime start) {
 		String[] timeSplit = timeStr.split(":");
 		if (timeSplit.length <= 1) {
 			return null;
@@ -1946,6 +1952,10 @@ public class ReportServiceImpl implements ReportService {
 		   int hour = Integer.parseInt(timeSplit[0]);
 		   int mins = Integer.parseInt(timeSplit[1]);
 		   dt = new DateTime(2021, 1, 1, hour, mins);
+		   
+		   if (start != null && dt.isBefore(start)) {
+		   	dt = dt.plusDays(1);
+		   }
 		} catch (Throwable t) {
 			dt = null;
 		}
