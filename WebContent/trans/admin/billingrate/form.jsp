@@ -305,14 +305,16 @@ function formatDate1(){
 		</tr>
 		<!--Peak rate 2nd Feb 2021-->
 		<tr>
-			<td class="form-left">Peak Rate Valid From<span class="errorMessage"></span></td>
+			<td class="form-left">Peak Rate Start Time<span class="errorMessage"></span></td>
 			<td align="${left}">
-				<form:input path="peakRateValidFrom" style="min-width:150px; max-width:150px" />
+				<form:input path="peakRateValidFrom" style="min-width:150px; max-width:150px" 
+					onkeypress="return onlyNumbers(event, false)" onblur="return validateTime('peakRateValidFrom')"/>
 				<br><form:errors path="peakRateValidFrom" cssClass="errorMessage" />
 			</td>
-			<td class="form-left">Peak Rate Valid To<span class="errorMessage"></span></td>
+			<td class="form-left">Peak Rate End Time<span class="errorMessage"></span></td>
 			<td align="${left}">
-				<form:input path="peakRateValidTo" style="min-width:150px; max-width:150px" />
+				<form:input path="peakRateValidTo" style="min-width:150px; max-width:150px" 
+					onkeypress="return onlyNumbers(event, false)" onblur="return validateTime('peakRateValidTo')"/>
 				<br><form:errors path="peakRateValidTo" cssClass="errorMessage" />
 			</td>
 		</tr>

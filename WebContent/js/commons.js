@@ -363,3 +363,54 @@ function dateDiffForDateStr(fromDateStr, toDateStr) {
 	var toDate = toJSDate(toDateStr);
     return dateDiff(fromDate, toDate);
 }
+
+function clearTextAndFocus(field) {
+	document.getElementById(field).value = "";
+	$("#"+field).focus();
+}
+
+function validateTime(timeField) {
+	var time = document.getElementById(timeField).value;
+	if (time == "") {
+		return true;
+	}
+	
+	if (time.length < 4 || time.length > 5) {
+		alert("Invalidte time format");
+		clearTextAndFocus(timeField);
+		return true;
+	} 
+	
+	var str = new String(time);
+	var hour = str.substring(0, 2);
+	var min = "";
+	if (str.match(":")) {
+		if (time.length < 5) {
+			alert("Invalidte time format");
+			clearTextAndFocus(timeField);
+			return true;
+		} 
+		if (str.indexOf(":") != 2) {
+			alert("Invalidte time format");
+			clearTextAndFocus(timeField);
+			return true;
+		}
+		min = str.substring(3, 5);
+	} else {
+		if (time.length > 4) {
+			alert("Invalidte time format");
+			clearTextAndFocus(timeField);
+			return true;
+		} 
+		min = str.substring(2, 4);
+	}
+	
+	if (hour >= 24 || min >= 60){
+		alert("Invalidte time format");
+		clearTextAndFocus(timeField);
+		return true;
+	}
+	
+	var time = hour+":"+min;
+	document.getElementById(timeField).value = time;
+}

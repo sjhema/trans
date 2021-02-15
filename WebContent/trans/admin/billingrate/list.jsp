@@ -136,8 +136,8 @@ function getOriginLoad(){
 			
 			<!--Peak rate 2nd Feb 2021-->
 			<primo:textcolumn headerText="Peak Rate" dataField="peakRate"/>
-			<primo:textcolumn headerText="Peak Rate Valid From" dataField="peakRateValidFrom"/>
-			<primo:textcolumn headerText="Peak Rate Valid To" dataField="peakRateValidTo"/>
+			<primo:textcolumn headerText="Peak Rate Start Time" dataField="peakRateValidFrom"/>
+			<primo:textcolumn headerText="Peak Rate End Time" dataField="peakRateValidTo"/>
 			
 			<primo:anchorcolumn headerText="Manage Alert" dataField="status" linkUrl="/admin/billingrate/changestatus.do?id={id}" linkText="On alert"/>			
 		</primo:datatable>
