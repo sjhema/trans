@@ -27,9 +27,11 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import com.google.gson.Gson;
 import com.primovision.lutransport.core.dao.GenericDAO;
 import com.primovision.lutransport.model.Language;
+import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
 import com.primovision.lutransport.model.User;
+import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.service.AuditService;
 import com.primovision.lutransport.service.AuthenticationService;
 
@@ -37,6 +39,9 @@ import com.primovision.lutransport.service.AuthenticationService;
 public class BaseController {
 	protected static DecimalFormat decimalFormat = new DecimalFormat(
 			"######.000");
+	
+	// Driver, Mechanic, Loader/Tipper employee categories
+	protected static String allAccessibleEmpCategories = "2,3,6";
 
 	protected static Logger log = Logger
 			.getLogger("com.primovision.lutransport.controller");
@@ -104,6 +109,34 @@ public class BaseController {
 
 	protected User getUser(HttpServletRequest request) {
 		return (User) request.getSession().getAttribute("userInfo");
+	}
+	
+	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+		User user = getUser(request);
+		Role role = user.getRole();
+		if (role.getId() == 1l) {
+			return StringUtils.EMPTY;
+		}
+		
+		return allAccessibleEmpCategories;
+	}
+	
+	protected String deriveAccessibleEmpCategoryNames(HttpServletRequest request) {
+		User user = getUser(request);
+		Role role = user.getRole();
+		if (role.getId() == 1l) {
+			return StringUtils.EMPTY;
+		}
+		
+		// Driver, Mechanic, Loader/Tipper employee categories
+		String categoryQuery = "select obj from EmployeeCatagory obj where obj.id in ("
+				+ allAccessibleEmpCategories + ")";
+		List<EmployeeCatagory> categoryList = genericDAO.executeSimpleQuery(categoryQuery);
+		String accessibleEmpCategoryNames = StringUtils.EMPTY;
+		for (EmployeeCatagory category : categoryList) {
+			accessibleEmpCategoryNames += "'" + category.getName() + "',";
+		}
+		return accessibleEmpCategoryNames.substring(0, accessibleEmpCategoryNames.length() - 1);
 	}
 
 	protected List<StaticData> listStaticData(String staticDataType) {

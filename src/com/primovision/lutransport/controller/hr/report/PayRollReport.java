@@ -25,7 +25,9 @@ import com.primovision.lutransport.core.util.MimeUtil;
 import com.primovision.lutransport.core.util.ReportDateUtil;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.Location;
+import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.SearchCriteria;
+import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.model.hrreport.DriverPay;
 import com.primovision.lutransport.model.hrreport.DriverPayFreezWrapper;
@@ -60,15 +62,13 @@ public class PayRollReport extends BaseController{
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/start.do")
 	public String populate(ModelMap model, HttpServletRequest request) {
-
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		if (criteria != null) {
 			if (criteria.getSearchMap() != null)
 				criteria.getSearchMap().clear();
 		}
-		Map criterias = new HashMap();
 		
+		/*
 		criterias.put("name","Driver");
 		EmployeeCatagory catagory=genericDAO.getByCriteria(EmployeeCatagory.class, criterias);
 		if(catagory==null){
@@ -78,20 +78,32 @@ public class PayRollReport extends BaseController{
 		criterias.clear();
 		//criterias.put("catagory.id", catagory.getId());
 		//criterias.put("status",1);
+		 */
+		
+		Map<String, Object> criterias = new HashMap<String, Object>();
+		
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			criterias.clear();
+			criterias.put("catagory.id", accessibleEmpCategories);
+		}
 		model.addAttribute("drivers", genericDAO.findByCriteria(Driver.class, criterias, "fullName", false));
+		
 		criterias.clear();
 		criterias.put("type", 3);
 		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
 		criterias.clear();
 		criterias.put("type", 4);
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		
 		criterias.clear();
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			criterias.put("id", accessibleEmpCategories);
+		}
 		model.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
 		
 		return "hr/report/driverpayhistory";
 	}
-	
-	
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/search.do")
 	public String displayDriverPayroll(HttpServletRequest request,Model model,HttpServletResponse response){
@@ -250,6 +262,7 @@ public class PayRollReport extends BaseController{
 				driverPayQuery.append(" and checkDate <='").append(tobatch).append("'");
 			}
 			
+			addAccessibleEmpCategoriesCriteria(request, driverPayQuery);
 			
 			driverPayQuery.append(" order by obj.driver asc"); 
 			
@@ -353,6 +366,7 @@ public class PayRollReport extends BaseController{
 				driverPayQuery.append(" and payRollCheckDate <='").append(tobatch).append("'");
 			}
 			
+			addAccessibleEmpCategoriesCriteria(request, driverPayQuery);
 			
 			driverPayQuery.append(" order by obj.driver asc"); 
 			
@@ -409,8 +423,13 @@ public class PayRollReport extends BaseController{
 			
 	}
 	
-	
-	
+	private void addAccessibleEmpCategoriesCriteria(HttpServletRequest request, StringBuilder payQuery) {
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryNames(request);
+		if (StringUtils.isEmpty(accessibleEmpCategories)) {
+			return;
+		}
+		payQuery.append(" and category in (").append(accessibleEmpCategories).append(")");
+	}
 	
 	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/export.do")
 	public String downloadPayrollReort(ModelMap model, HttpServletRequest request,
