@@ -82,7 +82,7 @@ public class PayRollReport extends BaseController{
 		
 		Map<String, Object> criterias = new HashMap<String, Object>();
 		
-		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request, payrollReportBOId);
 		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
 			criterias.clear();
 			criterias.put("catagory.id", accessibleEmpCategories);
@@ -91,7 +91,7 @@ public class PayRollReport extends BaseController{
 		
 		criterias.clear();
 		criterias.put("type", 3);
-		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
+		model.addAttribute("companies", genericDAO.findByCriteria(Location.class, criterias,"name",false));
 		criterias.clear();
 		criterias.put("type", 4);
 		model.addAttribute("terminals", genericDAO.findByCriteria(Location.class, criterias,"name",false));
@@ -424,7 +424,7 @@ public class PayRollReport extends BaseController{
 	}
 	
 	private void addAccessibleEmpCategoriesCriteria(HttpServletRequest request, StringBuilder payQuery) {
-		String accessibleEmpCategories = deriveAccessibleEmpCategoryNames(request);
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryNames(request, payrollReportBOId);
 		if (StringUtils.isEmpty(accessibleEmpCategories)) {
 			return;
 		}

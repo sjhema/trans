@@ -30,6 +30,7 @@ import com.primovision.lutransport.model.AbstractBaseModel;
 import com.primovision.lutransport.model.BaseModel;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
+import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.service.DynamicReportService;
 
 @SuppressWarnings("unchecked")
@@ -269,6 +270,25 @@ public abstract class CRUDController<T extends BaseModel> extends
 				dateFormat, false));
 		binder.registerCustomEditor(byte[].class,
 				new ByteArrayMultipartFileEditor());
+	}
+	
+	protected void setModifier(HttpServletRequest request, AbstractBaseModel entity) {
+		if (entity.getId() == null) {
+			entity.setCreatedAt(Calendar.getInstance().getTime());
+			if (entity.getCreatedBy() == null) {
+				entity.setCreatedBy(getUserId(request));
+			}
+		} else {
+			entity.setModifiedAt(Calendar.getInstance().getTime());
+			if (entity.getModifiedBy() == null) {
+				entity.setModifiedBy(getUserId(request));
+			}
+		}
+	}
+	
+	protected Long getUserId(HttpServletRequest request) {
+		User user = getUser(request);
+		return user.getId();
 	}
 
 }

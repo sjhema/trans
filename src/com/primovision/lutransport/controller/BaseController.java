@@ -26,6 +26,7 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.Language;
 import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.SearchCriteria;
@@ -41,7 +42,10 @@ public class BaseController {
 			"######.000");
 	
 	// Driver, Mechanic, Loader/Tipper employee categories
-	protected static String allAccessibleEmpCategories = "2,3,6";
+	protected static final String allAccessibleEmpCategories = "2,3,6";
+	
+	protected static final long payrollReportBOId = 6013l;
+	protected static final long manageEmployeeBOId = 2031l;
 
 	protected static Logger log = Logger
 			.getLogger("com.primovision.lutransport.controller");
@@ -111,26 +115,49 @@ public class BaseController {
 		return (User) request.getSession().getAttribute("userInfo");
 	}
 	
-	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request, Long boId) {
 		User user = getUser(request);
-		Role role = user.getRole();
-		if (role.getId() == 1l) {
-			return StringUtils.EMPTY;
+		long roleId = user.getRole().getId();
+		
+		String query = "select obj from DataPrivilege obj where obj.status=1"
+				+ " and role=" + roleId
+				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'"
+				+ " and bo=" + boId;
+		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
+		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
+			return allAccessibleEmpCategories;
 		}
 		
-		return allAccessibleEmpCategories;
+		return dataPrivilegeList.get(0).getPrivilege();
 	}
 	
-	protected String deriveAccessibleEmpCategoryNames(HttpServletRequest request) {
+	protected String deriveAccessibleEmpCategories(HttpServletRequest request, long boId) {
 		User user = getUser(request);
-		Role role = user.getRole();
-		if (role.getId() == 1l) {
+		long roleId = user.getRole().getId();
+		String accessibleEmpCategories = StringUtils.EMPTY;
+		
+		String query = "select obj from DataPrivilege obj where obj.status=1"
+				+ " and role=" + roleId
+				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'"
+				+ " and bo=" + boId;
+		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
+		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
+			accessibleEmpCategories = allAccessibleEmpCategories;
+		} else {
+			accessibleEmpCategories = dataPrivilegeList.get(0).getPrivilege();
+		}
+		
+		return accessibleEmpCategories;
+	}
+	
+	protected String deriveAccessibleEmpCategoryNames(HttpServletRequest request, long boId) {
+		String accessibleEmpCategories = deriveAccessibleEmpCategories(request, boId);
+		if (StringUtils.isEmpty(accessibleEmpCategories)) {
 			return StringUtils.EMPTY;
 		}
 		
-		// Driver, Mechanic, Loader/Tipper employee categories
 		String categoryQuery = "select obj from EmployeeCatagory obj where obj.id in ("
-				+ allAccessibleEmpCategories + ")";
+				+ accessibleEmpCategories + ")";
 		List<EmployeeCatagory> categoryList = genericDAO.executeSimpleQuery(categoryQuery);
 		String accessibleEmpCategoryNames = StringUtils.EMPTY;
 		for (EmployeeCatagory category : categoryList) {

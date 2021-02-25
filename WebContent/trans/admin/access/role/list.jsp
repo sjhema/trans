@@ -27,6 +27,7 @@
 			<primo:textcolumn headerText="Role Name" dataField="name" />
 			<primo:staticdatacolumn headerText="Status" dataField="status" dataType="STATUS"/>
 			<primo:anchorcolumn headerText="Manage Permissions" linkUrl="/admin/access/roleprivilege/create.do?id={id}" linkText="Manage Permissions" dataField=""/>
+			<primo:anchorcolumn headerText="Manage Data Access" linkUrl="/admin/access/dataprivilege/create.do?roleId={id}" linkText="Manage Data Access" dataField=""/>
 		</primo:datatable>
 	</form:form>
 </div>
