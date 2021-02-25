@@ -1,5 +1,7 @@
 package com.primovision.lutransport.controller.admin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,10 +29,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.controller.CRUDController;
 import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.MimeUtil;
+import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Driver;
 import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.Location;
@@ -161,10 +167,11 @@ public class DriverController extends CRUDController<Driver>{
 		populateSearchCriteria(request, request.getParameterMap());
 		//setupCreate(model, request);
 		
-		String query="select distinct(obj.fullName) from Driver obj";
-		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
-		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
-			query += (" where catagory.id in (" + accessibleEmpCategories + ")");
+		String query = "select distinct(obj.fullName) from Driver obj";
+		String accessibleEmpCategoryIds = deriveAccessibleEmpCategoryIds(request);
+		if (StringUtils.isNotEmpty(accessibleEmpCategoryIds)) {
+			String where = " where catagory in (" + accessibleEmpCategoryIds + ")";
+			query += where;
 		}
 		query += " order by obj.fullName";
 		model.addAttribute("employees", genericDAO.executeSimpleQuery(query));
@@ -172,8 +179,8 @@ public class DriverController extends CRUDController<Driver>{
 		Map criterias = new HashMap();
 		
 		criterias.clear();
-		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
-			criterias.put("id", accessibleEmpCategories);
+		if (StringUtils.isNotEmpty(accessibleEmpCategoryIds)) {
+			criterias.put("id", accessibleEmpCategoryIds);
 		}
 		model.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
 		
@@ -219,30 +226,17 @@ public class DriverController extends CRUDController<Driver>{
 		setupList(model, request);
 		
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
-		addAccessiblEmployeeCategoriesCriteria(request, criteria);
-		
+		boolean addedAccessibleEmpCatCriteria = addAccessibleEmployeeCategoriesCriteria(request, criteria);
 		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria, "lastName asc,firstName asc,status desc",null,null));
+		removeAccessibleEmpCatCrietria(addedAccessibleEmpCatCriteria, criteria);
+		
 		return urlContext + "/list";
 	}
 	
-	private String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+	@Override
+	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
 		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request, manageEmployeeBOId);
 		return accessibleEmpCategories;
-	}
-	
-	private String deriveAccessibleEmpCategoryNames(HttpServletRequest request) {
-		String accessibleEmpCategories = deriveAccessibleEmpCategoryNames(request, manageEmployeeBOId);
-		return accessibleEmpCategories;
-	}
-	
-	private void addAccessiblEmployeeCategoriesCriteria(HttpServletRequest request, SearchCriteria criteria) {
-		String categoryId = (String) criteria.getSearchMap().get("catagory.id");
-		if (StringUtils.isEmpty(categoryId)) {
-			String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
-			if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
-				criteria.getSearchMap().put("catagory.id", accessibleEmpCategories);
-			}
-		}
 	}
 	
 	@Override
@@ -252,12 +246,11 @@ public class DriverController extends CRUDController<Driver>{
 		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		dateupdateService.updateDate(request, "Hireddate", "dateHired");
 		
-		addAccessiblEmployeeCategoriesCriteria(request, criteria);
-		
+		boolean addedAccessibleEmpCatCriteria = addAccessibleEmployeeCategoriesCriteria(request, criteria);
 		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria,"lastName asc,firstName asc,status desc",null,null));
+		removeAccessibleEmpCatCrietria(addedAccessibleEmpCatCriteria, criteria);
+		
 		return urlContext + "/list";
-		
-		
 	}
 
 	
@@ -655,8 +648,41 @@ public class DriverController extends CRUDController<Driver>{
 		return "redirect:/" + urlContext + "/list.do";
 	}
 	
-	
-	
+	@Override
+	public void export(ModelMap model, HttpServletRequest request,
+			HttpServletResponse response, @RequestParam("type") String type,
+			Object objectDAO, Class clazz) {
+		List columnPropertyList = (List) request.getSession().getAttribute(
+				"columnPropertyList");
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		boolean addedAccessibleEmpCatCriteria = addAccessibleEmployeeCategoriesCriteria(request, criteria);
+		List<Driver> driverList = genericDAO.search(getEntityClass(), criteria, "lastName asc,firstName asc,status desc",null,null);
+				
+		response.setContentType(MimeUtil.getContentType(type));
+		if (!type.equals("html"))
+			response.setHeader("Content-Disposition", "attachment;filename=" + urlContext + "Report." + type);
+		try {
+			criteria.setPageSize(100000);
+			/*ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(),
+					columnPropertyList, criteria, request);*/
+			ByteArrayOutputStream out = dynamicReportService.exportReport(
+					urlContext + "Report", type, getEntityClass(), driverList,
+					columnPropertyList, request);
+			out.writeTo(response.getOutputStream());
+			if (type.equals("html")) {
+				response.getOutputStream().println("<script language=\"javascript\">window.print()</script>");
+			}
+			criteria.setPageSize(25);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.warn("Unable to create file :" + e);
+		} finally {
+			removeAccessibleEmpCatCrietria(addedAccessibleEmpCatCriteria, criteria);
+		}
+	}
 	
 	protected String processAjaxRequest(HttpServletRequest request,
 			String action, Model model) {

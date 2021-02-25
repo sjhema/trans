@@ -105,7 +105,8 @@ public class PayRollReport extends BaseController{
 		return "hr/report/driverpayhistory";
 	}
 	
-	private String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+	@Override
+	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
 		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request, payrollReportBOId);
 		return accessibleEmpCategories;
 	}

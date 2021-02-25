@@ -25,4 +25,16 @@ CREATE TABLE `data_privilege` (
   CONSTRAINT `data_priv_bo_fk` FOREIGN KEY (`business_object_id`) REFERENCES `business_object` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
+INSERT INTO `lutransport`.`data_privilege` 
+(`id`, `created_at`, `created_by`, `status`, `data_type`, `privilege`, `role_id`, `business_object_id`)
+VALUES ('1', '2021-02-23 11:27:22', '1', '1', 'EMP_CAT', '1,2,3,4,5,6,7,8,9,10,11', '1', 6013); -- ADMIN payroll report
+
+INSERT INTO `lutransport`.`data_privilege` 
+(`id`, `created_at`, `created_by`, `status`, `data_type`, `privilege`, `role_id`, `business_object_id`)
+VALUES ('2', '2021-02-23 11:27:22', '1', '1', 'EMP_CAT', '1,2,3,4,5,6,7,8,9,10,11', '1', 2031); -- ADMIN manage employee
+
+INSERT INTO `lutransport`.`data_privilege` 
+(`id`, `created_at`, `created_by`, `status`, `data_type`, `privilege`, `role_id`, `business_object_id`)
+VALUES ('3', '2021-02-23 11:27:22', '1', '1', 'EMP_CAT', '2,3,6', '3', 6013); -- REPORTUSER payroll report
+
 

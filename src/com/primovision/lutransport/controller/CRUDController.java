@@ -235,7 +235,7 @@ public abstract class CRUDController<T extends BaseModel> extends
 				"columnPropertyList");
 		SearchCriteria criteria = (SearchCriteria) request.getSession()
 				.getAttribute("searchCriteria");
-
+		
 		response.setContentType(MimeUtil.getContentType(type));
 		if (!type.equals("html"))
 			response.setHeader("Content-Disposition", "attachment;filename="

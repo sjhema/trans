@@ -118,7 +118,7 @@ public class BaseController {
 	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request, long boId) {
 		User user = getUser(request);
 		long roleId = user.getRole().getId();
-		String accessibleEmpCategories = StringUtils.EMPTY;
+		String accessibleEmpCategoryIds = StringUtils.EMPTY;
 		
 		String query = "select obj from DataPrivilege obj where obj.status=1"
 				+ " and role=" + roleId
@@ -126,15 +126,18 @@ public class BaseController {
 				+ " and bo=" + boId;
 		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
 		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
-			accessibleEmpCategories = defaultAccessibleEmpCategories;
+			accessibleEmpCategoryIds = defaultAccessibleEmpCategories;
 		} else {
-			accessibleEmpCategories = dataPrivilegeList.get(0).getPrivilege();
-			if (StringUtils.isEmpty(accessibleEmpCategories)) {
-				accessibleEmpCategories = defaultAccessibleEmpCategories;
+			accessibleEmpCategoryIds = dataPrivilegeList.get(0).getPrivilege();
+			if (StringUtils.isEmpty(accessibleEmpCategoryIds)) {
+				accessibleEmpCategoryIds = defaultAccessibleEmpCategories;
 			}
 		}
 		
-		return accessibleEmpCategories;
+		if (accessibleEmpCategoryIds.indexOf(',') == -1) {
+			accessibleEmpCategoryIds += ",-1";
+		}
+		return accessibleEmpCategoryIds;
 	}
 	
 	protected String deriveAccessibleEmpCategoryNames(HttpServletRequest request, long boId) {
@@ -151,6 +154,32 @@ public class BaseController {
 			accessibleEmpCategoryNames += "'" + category.getName() + "',";
 		}
 		return accessibleEmpCategoryNames.substring(0, accessibleEmpCategoryNames.length() - 1);
+	}
+	
+	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+		return StringUtils.EMPTY;
+	}
+	
+	protected boolean addAccessibleEmployeeCategoriesCriteria(HttpServletRequest request, SearchCriteria criteria) {
+		boolean added = false;
+		String categoryId = (String) criteria.getSearchMap().get("catagory.id");
+		if (StringUtils.isNotEmpty(categoryId)) {
+			return added;
+		}
+		
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			added = true;
+			criteria.getSearchMap().put("catagory.id", accessibleEmpCategories);
+		}
+		return added;
+	}
+	
+	protected void removeAccessibleEmpCatCrietria(boolean addedAccessibleEmpCatCriteria, SearchCriteria criteria) {
+		if (!addedAccessibleEmpCatCriteria) {
+			return;
+		}
+		criteria.getSearchMap().remove("catagory.id");
 	}
 
 	protected List<StaticData> listStaticData(String staticDataType) {

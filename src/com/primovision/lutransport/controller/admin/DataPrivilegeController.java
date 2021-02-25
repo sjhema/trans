@@ -119,29 +119,30 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 	@Override
 	public String save(HttpServletRequest request, DataPrivilege entity,
 			BindingResult bindingResult, ModelMap model) {
+		Role role = entity.getRole();
 		String query = "select obj from DataPrivilege obj where obj.status=1"
-				+ " and role=" + entity.getRole().getId()
+				+ " and role=" + role.getId()
 				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'";
 		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
 		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
 			genericDAO.delete(aDataPrivilege);
 		}
 		
-		save(request, payrollReportBOId, entity.getPrivilegeArrPayrollReport());
-		save(request, manageEmployeeBOId, entity.getPrivilegeArrManageEmployee());
+		save(request, role, payrollReportBOId, DataPrivilege.DATA_TYPE_EMP_CAT, entity.getPrivilegeArrPayrollReport());
+		save(request, role, manageEmployeeBOId, DataPrivilege.DATA_TYPE_EMP_CAT, entity.getPrivilegeArrManageEmployee());
 		
 		return "redirect:/admin/access/role/list.do";
 	}
 	
-	private void save(HttpServletRequest request, long boId, String[] privilegeArr) {
+	private void save(HttpServletRequest request, Role role, long boId, String dataType, String[] privilegeArr) {
 		String privilege = buildEmpCatPrivilege(privilegeArr);
 		if (StringUtils.isEmpty(privilege)) {
 			return;
 		}
 		
 		DataPrivilege entity = new DataPrivilege();
-		entity.setDataType(DataPrivilege.DATA_TYPE_EMP_CAT);
-		entity.setRole(entity.getRole());
+		entity.setDataType(dataType);
+		entity.setRole(role);
 		BusinessObject bo = genericDAO.getById(BusinessObject.class, Long.valueOf(boId));
 		entity.setBo(bo);
 		entity.setPrivilege(privilege);
