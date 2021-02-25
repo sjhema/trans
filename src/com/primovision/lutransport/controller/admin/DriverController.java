@@ -69,7 +69,15 @@ public class DriverController extends CRUDController<Driver>{
 	}
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
 		Map criterias = new HashMap();
+		
+		criterias.clear();
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			criterias.put("id", accessibleEmpCategories);
+		}
 		model.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
+		
+		criterias.clear();
 		criterias.put("status", 1);
 		model.addAttribute("employees", genericDAO.findByCriteria(Driver.class, criterias,"fullName",false));
 		criterias.clear();
@@ -152,10 +160,23 @@ public class DriverController extends CRUDController<Driver>{
 	public void setupList(ModelMap model, HttpServletRequest request) {
 		populateSearchCriteria(request, request.getParameterMap());
 		//setupCreate(model, request);
-		String query="select distinct(obj.fullName) from Driver obj order by obj.fullName";
+		
+		String query="select distinct(obj.fullName) from Driver obj";
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			query += (" where catagory.id in (" + accessibleEmpCategories + ")");
+		}
+		query += " order by obj.fullName";
 		model.addAttribute("employees", genericDAO.executeSimpleQuery(query));
+		
 		Map criterias = new HashMap();
+		
+		criterias.clear();
+		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+			criterias.put("id", accessibleEmpCategories);
+		}
 		model.addAttribute("catagories", genericDAO.findByCriteria(EmployeeCatagory.class, criterias,"name",false));
+		
 		criterias.clear();
 		criterias.put("type", 3);
 		model.addAttribute("companies",genericDAO.findByCriteria(Location.class, criterias,"name",false));
@@ -196,19 +217,44 @@ public class DriverController extends CRUDController<Driver>{
 	@Override
 	public String list(ModelMap model, HttpServletRequest request) {
 		setupList(model, request);
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
-		model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"lastName asc,firstName asc,status desc",null,null));
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		addAccessiblEmployeeCategoriesCriteria(request, criteria);
+		
+		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria, "lastName asc,firstName asc,status desc",null,null));
 		return urlContext + "/list";
+	}
+	
+	private String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request, manageEmployeeBOId);
+		return accessibleEmpCategories;
+	}
+	
+	private String deriveAccessibleEmpCategoryNames(HttpServletRequest request) {
+		String accessibleEmpCategories = deriveAccessibleEmpCategoryNames(request, manageEmployeeBOId);
+		return accessibleEmpCategories;
+	}
+	
+	private void addAccessiblEmployeeCategoriesCriteria(HttpServletRequest request, SearchCriteria criteria) {
+		String categoryId = (String) criteria.getSearchMap().get("catagory.id");
+		if (StringUtils.isEmpty(categoryId)) {
+			String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
+			if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
+				criteria.getSearchMap().put("catagory.id", accessibleEmpCategories);
+			}
+		}
 	}
 	
 	@Override
 	public String search2(ModelMap model, HttpServletRequest request) {
 		setupList(model, request);
-		SearchCriteria criteria = (SearchCriteria) request.getSession()
-				.getAttribute("searchCriteria");
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
 		dateupdateService.updateDate(request, "Hireddate", "dateHired");
-		 model.addAttribute("list",genericDAO.search(getEntityClass(), criteria,"lastName asc,firstName asc,status desc",null,null));
+		
+		addAccessiblEmployeeCategoriesCriteria(request, criteria);
+		
+		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria,"lastName asc,firstName asc,status desc",null,null));
 		return urlContext + "/list";
 		
 		
