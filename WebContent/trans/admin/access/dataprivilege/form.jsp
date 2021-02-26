@@ -10,9 +10,7 @@
 			<td class="form-left">
 				<primo:label code="Role Name" />
 			</td>
-			<td>
-				${modelObject.role.name}
-			</td>
+			<td style="font-weight: 900;">${modelObject.role.name}</td>
 		</tr>
 		<tr class="table-heading">
 			<td colspan="6"><b><primo:label code="Employee Category"/></b></td>
@@ -21,34 +19,30 @@
 			<td class="form-left">
 				<primo:label code="Screen" />
 			</td>
-			<td>
-				Payroll Report
-			</td>
+			<td style="font-weight: 900;">Payroll Report</td>
 		</tr>
 		<tr>
 			<td class="form-left">
 				<primo:label code="Employee Category" /><span class="errorMessage">*</span>
 			</td>
 			<td>
-				<form:checkboxes items="${empCatNames}" path="privilegeArrPayrollReport" />
-				<br><form:errors path="privilegeArrPayrollReport" cssClass="errorMessage" />
+				<form:checkboxes items="${empCatNames}" path="privilegeArrEmpCatPayrollReport" />
+				<br><form:errors path="privilegeArrEmpCatPayrollReport" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>
 			<td class="form-left">
 				<primo:label code="Screen" />
 			</td>
-			<td>
-				Manage Employee
-			</td>
+			<td style="font-weight: 900;">Manage Employee</td>
 		</tr>
 		<tr>
 			<td class="form-left">
 				<primo:label code="Employee Category" /><span class="errorMessage">*</span>
 			</td>
 			<td>
-				<form:checkboxes items="${empCatNames}" path="privilegeArrManageEmployee" />
-				<br><form:errors path="privilegeArrManageEmployee" cssClass="errorMessage" />
+				<form:checkboxes items="${empCatNames}" path="privilegeArrEmpCatManageEmployee" />
+				<br><form:errors path="privilegeArrEmpCatManageEmployee" cssClass="errorMessage" />
 			</td>
 		</tr>
 		<tr>

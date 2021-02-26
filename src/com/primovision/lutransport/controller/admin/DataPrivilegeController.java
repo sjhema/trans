@@ -15,13 +15,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.primovision.lutransport.core.util.CoreUtil;
-
 import com.primovision.lutransport.controller.CRUDController;
 
 import com.primovision.lutransport.model.BusinessObject;
 import com.primovision.lutransport.model.DataPrivilege;
-import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 
@@ -50,38 +47,43 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 		DataPrivilege entity = (DataPrivilege)model.get("modelObject");
 		entity.setRole(role);
 		
-		query = "select obj from DataPrivilege obj where obj.status=1"
-				+ " and role=" + roleId
-				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'";
-		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
+		List<DataPrivilege> dataPrivilegeList = retrieveDataPrivileges(role.getId());
 		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
-			entity.setPrivilegeArrPayrollReport(new String[0]);
-			entity.setPrivilegeArrManageEmployee(new String[0]);
+			entity.setPrivilegeArrEmpCatPayrollReport(new String[0]);
+			entity.setPrivilegeArrEmpCatManageEmployee(new String[0]);
 			return;
 		}
 		
-		String empCatPrivilege = StringUtils.EMPTY;
-		List<String> accessibleEmpCats = new ArrayList<String>();
-		String[] accessibleEmpCatsArr = null;
 		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
-			accessibleEmpCats.clear();
-			empCatPrivilege = aDataPrivilege.getPrivilege();
-			if (StringUtils.isEmpty(empCatPrivilege)) {
+			String privilege = aDataPrivilege.getPrivilege();
+			if (StringUtils.isEmpty(privilege)) {
 				continue;
 			}
 			
-			String[] empCatIdArr = empCatPrivilege.split(",");
-			for (String empCatId : empCatIdArr) {
-				accessibleEmpCats.add(retrieveEmpCatName(empCategories, empCatId));
+			if (StringUtils.equals(DataPrivilege.DATA_TYPE_EMP_CAT, aDataPrivilege.getDataType())) {
+				populateEmpCatPrivilege(entity, aDataPrivilege, empCategories);
 			}
-			accessibleEmpCatsArr = accessibleEmpCats.toArray(new String[0]);
+		}
+	}
+	
+	private void populateEmpCatPrivilege(DataPrivilege entity, DataPrivilege aDataPrivilege, List<EmployeeCatagory> empCategories) {
+		String empCatPrivilege = aDataPrivilege.getPrivilege();
+		if (StringUtils.isEmpty(empCatPrivilege)) {
+			return;
+		}
+		
+		List<String> accessibleEmpCats = new ArrayList<String>();
+		String[] empCatIdArr = empCatPrivilege.split(",");
+		for (String empCatId : empCatIdArr) {
+			accessibleEmpCats.add(retrieveEmpCatName(empCategories, empCatId));
+		}
+		String[] accessibleEmpCatsArr = accessibleEmpCats.toArray(new String[0]);
 			
-			long boId = aDataPrivilege.getBo().getId().longValue();
-			if (boId == payrollReportBOId) {
-				entity.setPrivilegeArrPayrollReport(accessibleEmpCatsArr);
-			} else if (boId == manageEmployeeBOId) {
-				entity.setPrivilegeArrManageEmployee(accessibleEmpCatsArr);
-			}
+		long boId = aDataPrivilege.getBo().getId().longValue();
+		if (boId == payrollReportBOId) {
+			entity.setPrivilegeArrEmpCatPayrollReport(accessibleEmpCatsArr);
+		} else if (boId == manageEmployeeBOId) {
+			entity.setPrivilegeArrEmpCatManageEmployee(accessibleEmpCatsArr);
 		}
 	}
 	
@@ -116,26 +118,40 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 		return empCatList.get(0);
 	}
 	
+	private List<DataPrivilege> retrieveDataPrivileges(Long roleId) {
+		String query = "select obj from DataPrivilege obj where obj.status=1"
+				+ " and role=" + roleId;
+				//+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'";
+		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
+		return dataPrivilegeList;
+	}
+	
+	private void deleteDataPrivileges(Long roleId) {
+		List<DataPrivilege> dataPrivilegeList = retrieveDataPrivileges(roleId);
+		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
+			genericDAO.delete(aDataPrivilege);
+		}
+	}
 	@Override
 	public String save(HttpServletRequest request, DataPrivilege entity,
 			BindingResult bindingResult, ModelMap model) {
 		Role role = entity.getRole();
-		String query = "select obj from DataPrivilege obj where obj.status=1"
-				+ " and role=" + role.getId()
-				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'";
-		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
-		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
-			genericDAO.delete(aDataPrivilege);
-		}
+		deleteDataPrivileges(role.getId());
 		
-		save(request, role, payrollReportBOId, DataPrivilege.DATA_TYPE_EMP_CAT, entity.getPrivilegeArrPayrollReport());
-		save(request, role, manageEmployeeBOId, DataPrivilege.DATA_TYPE_EMP_CAT, entity.getPrivilegeArrManageEmployee());
+		saveEmpCatDataPrivileges(request, role, entity);
 		
 		return "redirect:/admin/access/role/list.do";
 	}
 	
-	private void save(HttpServletRequest request, Role role, long boId, String dataType, String[] privilegeArr) {
-		String privilege = buildEmpCatPrivilege(privilegeArr);
+	private void saveEmpCatDataPrivileges(HttpServletRequest request, Role role, DataPrivilege entity) {
+		String empCatDataType = DataPrivilege.DATA_TYPE_EMP_CAT;
+		String privilege = buildEmpCatPrivilege(entity.getPrivilegeArrEmpCatPayrollReport());
+		save(request, role, payrollReportBOId, empCatDataType, privilege);
+		privilege = buildEmpCatPrivilege(entity.getPrivilegeArrEmpCatManageEmployee());
+		save(request, role, manageEmployeeBOId, empCatDataType, privilege);
+	}
+	
+	private void save(HttpServletRequest request, Role role, long boId, String dataType, String privilege) {
 		if (StringUtils.isEmpty(privilege)) {
 			return;
 		}
