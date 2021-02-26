@@ -78,21 +78,35 @@ function getOriginLoad(){
 		</tr>
 		
 		<tr>
-		<td align="${left}" class="first"><label>Customer Name</label></td>
-		<td align="${left}"><select id="customerid" name="customername.id" style="min-width:154px; max-width:154px"  onchange="javascript:getOriginLoad()">
-				<option value="">------<primo:label code="Please Select"/>------</option>
-				<c:forEach items="${customernames}" var="customer">
-					<c:set var="selected" value=""/>
-					<%-- <c:if test="${sessionScope.searchCriteria.searchMap['customername.id'] == customer.id}">
-						<c:set var="selected" value="selected"/>
-					</c:if> --%>
-						<option value="${customer.id}" ${selected}>${customer.name}</option>
-				</c:forEach>
-			</select>
-		</td>		
+			<td align="${left}" class="first"><label>Customer Name</label></td>
+			<td align="${left}"><select id="customerid" name="customername.id" style="min-width:154px; max-width:154px"  onchange="javascript:getOriginLoad()">
+					<option value="">------<primo:label code="Please Select"/>------</option>
+					<c:forEach items="${customernames}" var="customer">
+						<c:set var="selected" value=""/>
+						<%-- <c:if test="${sessionScope.searchCriteria.searchMap['customername.id'] == customer.id}">
+							<c:set var="selected" value="selected"/>
+						</c:if> --%>
+							<option value="${customer.id}" ${selected}>${customer.name}</option>
+					</c:forEach>
+				</select>
+			</td>
+			<td align="${left}" class="first"><label>Peak Rate</label></td>
+			<td align="${left}">
+				<select id="peakRate" name="peakRate" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select"/>------</option>
+					<c:set var="yesSelected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['peakRate'] == '!null'}">
+						<c:set var="yesSelected" value="selected"/>
+					</c:if>
+					<c:set var="noSelected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['peakRate'] == 'null'}">
+						<c:set var="noSelected" value="selected"/>
+					</c:if>
+					<option value="!null" ${yesSelected}>Yes</option>
+					<option value="null" ${noSelected}>No</option>
+				</select>
+			</td>		
 		</tr>
-		
-		
 		<tr>
 			<td align="${left}"></td>
 			<td align="${left}"><input type="button"
