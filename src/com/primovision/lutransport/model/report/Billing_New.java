@@ -89,6 +89,10 @@ public class Billing_New extends AbstractBaseModel implements ReportModel {
 	Double rate = 0.0;
 	Double amount=0.0;
 	
+	// Peak rate 2nd Feb 2021
+	@Column(name="is_peak_rate")
+	String isPeakRate = "N";
+	
 	@Column(name="fuel_surcharge")
 	Double fuelSurcharge = 0.0;
 	
@@ -665,8 +669,12 @@ public class Billing_New extends AbstractBaseModel implements ReportModel {
 	public void setUnloadDate(Date unloadDate) {
 		this.unloadDate = unloadDate;
 	}
-	
-	
-	
-	
+
+	public String getIsPeakRate() {
+		return isPeakRate;
+	}
+
+	public void setIsPeakRate(String isPeakRate) {
+		this.isPeakRate = isPeakRate;
+	}
 }

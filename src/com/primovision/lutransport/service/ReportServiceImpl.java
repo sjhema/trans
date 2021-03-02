@@ -270,6 +270,9 @@ public class ReportServiceImpl implements ReportService {
 
 		String rateFrom = input.getRateFrom();
 		String rateTo = input.getRateTo();
+		
+		// Peak rate 2nd Feb 2021
+		String isPeakRate = input.getIsPeakRate();
 
 		boolean useInvoice = false;
 		StringBuffer ticketIds = new StringBuffer("-1,");
@@ -288,7 +291,8 @@ public class ReportServiceImpl implements ReportService {
 				|| (!StringUtils.isEmpty(totalAmtTo))
 				|| (!StringUtils.isEmpty(totalAmtFrom))//
 				|| (!StringUtils.isEmpty(input.getRateFrom()))
-				|| (!StringUtils.isEmpty(input.getRateTo()))) {
+				|| (!StringUtils.isEmpty(input.getRateTo()))
+				|| (!StringUtils.isEmpty(isPeakRate))) { // Peak rate 2nd Feb 2021
 			StringBuffer query2 = new StringBuffer(
 					"select bill.ticket from Invoice inv, Billing bill where 1=1 and bill.invoiceNo = inv.invoiceNumber and bill.origin=inv.transferStation.name and ((bill.destination=inv.landfill.name AND bill.destination not in ('Grows','Tullytown')) OR bill.destination in ('Grows','Tullytown'))");
 
@@ -362,6 +366,12 @@ public class ReportServiceImpl implements ReportService {
 			}
 			if (!StringUtils.isEmpty(totAmtTo)) {
 				query2.append(" and inv.sumTotal <= ").append(totAmtTo);
+			}
+			
+			// Peak rate 2nd Feb 2021
+			if (StringUtils.isNotEmpty(isPeakRate)) {
+				query2.append(" and  bill.isPeakRate='").append(
+						isPeakRate + "'");
 			}
 
 			useInvoice = true;
@@ -1434,7 +1444,9 @@ public class ReportServiceImpl implements ReportService {
 			}
 			if (billingRate != null) {
 				// Peak rate 2nd Feb 2021
-				Double derivedRate = deriveBillingRate(ticket, billingRate);
+				Object[] derivedRateInfo = deriveBillingRate(ticket, billingRate);
+				boolean isPeakRate = (Boolean)derivedRateInfo[0];
+				Double derivedRate = (Double)derivedRateInfo[1];
 				
 				// billing.setCustomer(billingRate.getCustomername().getName());
 				int billUsing = (billingRate.getBillUsing() == null) ? 1
@@ -1562,6 +1574,7 @@ public class ReportServiceImpl implements ReportService {
 					// Peak rate 2nd Feb 2021
 					//billing.setRate(billingRate.getValue());
 					billing.setRate(derivedRate);
+					billing.setIsPeakRate(BooleanUtils.toString(isPeakRate, "Y", "N"));
 					
 				// Change to 8.35 - 28th Dec 2016
 					billing.setAmount((billing.getEffectiveNetWt() / 8.35)
@@ -1901,9 +1914,13 @@ public class ReportServiceImpl implements ReportService {
 	}
 	
 	// Peak rate 2nd Feb 2021
-	private Double deriveBillingRate(Ticket ticket, BillingRate billingRate) {
-		Double derivedRate = billingRate.getValue();
+	private Object[] deriveBillingRate(Ticket ticket, BillingRate billingRate) {
+		Double regularRate = billingRate.getValue();
 		Double peakRate = billingRate.getPeakRate();
+		
+		Object[] retObjArr = new Object[2];
+		retObjArr[0] = false;
+		retObjArr[1] = regularRate;
 		
 		String landfillTimeIn = ticket.getLandfillTimeIn();
 		String landfillTimeOut = ticket.getLandfillTimeOut();
@@ -1914,7 +1931,7 @@ public class ReportServiceImpl implements ReportService {
 				|| StringUtils.isEmpty(peakRateValidTo)
 				|| StringUtils.isEmpty(landfillTimeIn)
 				|| StringUtils.isEmpty(landfillTimeOut)) {
-			return derivedRate;
+			return retObjArr;
 		}
 		
 		DateTime start = toDateTime(peakRateValidFrom, null);
@@ -1923,21 +1940,22 @@ public class ReportServiceImpl implements ReportService {
       DateTime landfillTimeOutInstant = toDateTime(landfillTimeOut, null);
       if (start == null || end == null
       		|| landfillTimeInInstant == null || landfillTimeOutInstant == null) {
-      	return derivedRate;
+      	return retObjArr;
       }
       
       Interval interval = new Interval(start, end);
       if (interval.contains(landfillTimeInInstant) || interval.contains(landfillTimeOutInstant)) {
-      	derivedRate = peakRate;
+      	retObjArr[0] = true;
+   		retObjArr[1] = peakRate;
       } else {
       	landfillTimeInInstant = landfillTimeInInstant.plusDays(1);
       	landfillTimeOutInstant = landfillTimeOutInstant.plusDays(1);
       	if (interval.contains(landfillTimeInInstant) || interval.contains(landfillTimeOutInstant)) {
-         	derivedRate = peakRate;
+         	retObjArr[0] = true;
+      		retObjArr[1] = peakRate;
          }
       }
-      
-      return derivedRate;
+      return retObjArr;
 	}
 	
 	// Peak rate 2nd Feb 2021

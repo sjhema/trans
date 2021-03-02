@@ -1,3 +1,8 @@
+USE `lutransport`;
+DROP procedure IF EXISTS `BillingHistoryProc2`;
+
+DELIMITER $$
+USE `lutransport`$$
 CREATE DEFINER=`lutransport`@`%` PROCEDURE `BillingHistoryProc2`(IN tick_id bigint(150),IN func_type varchar(225))
 BEGIN
 
@@ -919,4 +924,7 @@ SET Rate=0.0;
 
 END LOOP ticket_loop;
 
-END
+END$$
+
+DELIMITER ;
+

@@ -95,6 +95,9 @@ public class BillingHistoryInput implements ReportModel {
 	private String ticketStatus;
 	private String notBillable;
 	
+	// Peak rate 2nd Feb 2021
+	private String isPeakRate;
+	
 	// Truck driver report
 	private String drillDownCompany = StringUtils.EMPTY;
 	private String drillDownOrigin = StringUtils.EMPTY;
@@ -683,5 +686,13 @@ public class BillingHistoryInput implements ReportModel {
 
 	public void setCustomer(String customer) {
 		this.customer = customer;
+	}
+
+	public String getIsPeakRate() {
+		return isPeakRate;
+	}
+
+	public void setIsPeakRate(String isPeakRate) {
+		this.isPeakRate = isPeakRate;
 	}
 }

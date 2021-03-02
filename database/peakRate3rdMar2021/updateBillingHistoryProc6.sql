@@ -1,3 +1,8 @@
+USE `lutransport`;
+DROP procedure IF EXISTS `BillingHistoryProc6`;
+
+DELIMITER $$
+USE `lutransport`$$
 CREATE DEFINER=`lutransport`@`%` PROCEDURE `BillingHistoryProc6`(IN tick_id bigint(250),IN inv_id bigint(250))
 BEGIN
 
@@ -328,4 +333,7 @@ SET bill_batch_date_var=null;
 
 END LOOP ticket_loop;
 
-END
+END$$
+
+DELIMITER ;
+

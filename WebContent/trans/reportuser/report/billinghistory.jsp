@@ -364,7 +364,7 @@ $(document).ready(function(){
 					<form:options items="${notBillableOptions}" />
 				</form:select> 
 				<br> <form:errors path="notBillable" cssClass="errorMessage" />
-			</td>		
+			</td>
 		</tr>
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Origin " />
