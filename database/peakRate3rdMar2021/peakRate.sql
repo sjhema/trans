@@ -33,6 +33,4 @@ where t_origin='Western Acceptance'
 and t_destination='Bresco'
 and rate = 13.43;
 
-----
-ALTER TABLE `lutransport`.`invoice_detail` 
-ADD INDEX `idx_is_peak_rate` USING BTREE (`is_peak_rate` ASC)  COMMENT '';
+

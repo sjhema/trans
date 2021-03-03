@@ -273,7 +273,7 @@ public class ReportServiceImpl implements ReportService {
 		
 		// Peak rate 2nd Feb 2021
 		String isPeakRate = input.getIsPeakRate();
-
+		
 		boolean useInvoice = false;
 		StringBuffer ticketIds = new StringBuffer("-1,");
 		if ( (!StringUtils.isEmpty(invoiceNumberFrom))
@@ -291,8 +291,7 @@ public class ReportServiceImpl implements ReportService {
 				|| (!StringUtils.isEmpty(totalAmtTo))
 				|| (!StringUtils.isEmpty(totalAmtFrom))//
 				|| (!StringUtils.isEmpty(input.getRateFrom()))
-				|| (!StringUtils.isEmpty(input.getRateTo()))
-				|| (!StringUtils.isEmpty(isPeakRate))) { // Peak rate 2nd Feb 2021
+				|| (!StringUtils.isEmpty(input.getRateTo()))) {
 			StringBuffer query2 = new StringBuffer(
 					"select bill.ticket from Invoice inv, Billing bill where 1=1 and bill.invoiceNo = inv.invoiceNumber and bill.origin=inv.transferStation.name and ((bill.destination=inv.landfill.name AND bill.destination not in ('Grows','Tullytown')) OR bill.destination in ('Grows','Tullytown'))");
 
@@ -366,12 +365,6 @@ public class ReportServiceImpl implements ReportService {
 			}
 			if (!StringUtils.isEmpty(totAmtTo)) {
 				query2.append(" and inv.sumTotal <= ").append(totAmtTo);
-			}
-			
-			// Peak rate 2nd Feb 2021
-			if (StringUtils.isNotEmpty(isPeakRate)) {
-				query2.append(" and  bill.isPeakRate='").append(
-						isPeakRate + "'");
 			}
 
 			useInvoice = true;
@@ -929,7 +922,8 @@ public class ReportServiceImpl implements ReportService {
 		// ticketIds1=null;
 		ticketIds = null;
 		// Subcontractor summary report - 16thMar2016
-		return processTicketsNew(tickets, params, false);
+		// Peak rate 2nd Feb 2021
+		return processTicketsNew(tickets, params, false, isPeakRate);
 
 		
 	}
@@ -961,7 +955,8 @@ public class ReportServiceImpl implements ReportService {
 	}
 	
 	// Subcontractor summary report - 16thMar2016
-	private BillingWrapper processTicketsNew(List<Ticket> tickets,Map<String, String> params, boolean isSummary) {
+	private BillingWrapper processTicketsNew(List<Ticket> tickets,Map<String, String> params, 
+				boolean isSummary, String isPeakRate) { // Peak rate 2nd Feb 2021
 		
 		List<Billing_New> summarys = new ArrayList<Billing_New>();
 		BillingWrapper wrapper = new BillingWrapper();
@@ -989,7 +984,13 @@ public class ReportServiceImpl implements ReportService {
 			
 			String query="select obj from Billing_New obj where obj.ticket in ("
 				+ticketIds.toString()+")";
-			 summarys=genericDAO.executeSimpleQuery(query);	
+			
+			// Peak rate 2nd Feb 2021
+			if (StringUtils.isNotEmpty(isPeakRate)) {
+				query += (" and obj.isPeakRate='" + isPeakRate + "'");
+			}
+			
+			summarys=genericDAO.executeSimpleQuery(query);	
 			 
 			 setNotBillable(summarys, tickets);
 			 
@@ -1108,7 +1109,8 @@ public class ReportServiceImpl implements ReportService {
 		}
 		
 		// Then get customer billing data for the same tickets retrieved above
-		BillingWrapper billingWrapper = processTicketsNew(subcontractorBillingWrapper.getTickets(), null, true);
+		BillingWrapper billingWrapper = processTicketsNew(subcontractorBillingWrapper.getTickets(), null, true,
+					StringUtils.EMPTY); // Peak rate 2nd Feb 2021
 		List<Billing_New> billingNewList = billingWrapper.getBillings();
 		if (billingNewList == null || billingNewList.isEmpty()) {
 			System.out.println("Subcontractor summary report: No billing history found for specified subcontractor tickets");
@@ -6270,6 +6272,9 @@ throw new Exception("origin and destindation is empty");
 
 		String rateFrom = input.getRateFrom();
 		String rateTo = input.getRateTo();
+		
+		// Peak rate 2nd Feb 2021
+		String isPeakRate = input.getIsPeakRate();
 
 		boolean useInvoice = false;
 		StringBuffer ticketIds = new StringBuffer("-1,");
@@ -6876,9 +6881,10 @@ throw new Exception("origin and destindation is empty");
 		if (!StringUtils.isEmpty(input.getDrillDownCompany())) {
 			return processTicketsForSummaryTruckDriver(tickets, input.getDrillDownCompany(), 
 					input.getDrillDownOrigin(), 
-					input.getDrillDownDestination());
+					input.getDrillDownDestination(),
+					isPeakRate); // Peak rate 2nd Feb 2021
 		} else {
-			return processTicketsForSummary(tickets, params);
+			return processTicketsForSummary(tickets, params, isPeakRate); // Peak rate 2nd Feb 2021
 		}
 	}
 	
@@ -6905,7 +6911,8 @@ throw new Exception("origin and destindation is empty");
 		return summarys;
 }*/
 	
-	private List<Summary> processTicketsForSummary(List<Ticket> tickets, Map<String, String> params) {
+	private List<Summary> processTicketsForSummary(List<Ticket> tickets, Map<String, String> params,
+			String isPeakRate) { // Peak rate 2nd Feb 2021
 		List<Summary> returnSummaryList = new ArrayList<Summary>();
 		if (tickets == null || tickets.isEmpty()) {
 			return returnSummaryList;
@@ -6922,10 +6929,17 @@ throw new Exception("origin and destindation is empty");
 		
 		String query = "select obj.t_origin, obj.t_destination, count(obj), sum(amount), obj.company, sum(effectiveTonsWt), count(distinct t_unit), "
 				+ " sum(totAmt), sum(fuelSurcharge), sum(driverPayRate) from Billing_New obj where obj.ticket in ("
-			+ticketIds.toString()+") group by t_origin,t_destination " + 
+			+ ticketIds.toString()+")";
+		
+		// Peak rate 2nd Feb 2021
+		if (StringUtils.isNotEmpty(isPeakRate)) {
+			query += (" and obj.isPeakRate='" + isPeakRate + "'");
+		}
+		
+		query	+= (" group by t_origin,t_destination "); 
 			// Billing History Summary - Order fix	
 			//" order by obj.t_origin asc,obj.t_destination asc";
-			" order by obj.company asc, obj.t_origin asc, obj.t_destination asc";
+		query	+= (" order by obj.company asc, obj.t_origin asc, obj.t_destination asc");
 		
 		List<Summary> summarys = genericDAO.executeSimpleQuery(query);	
 		if (summarys == null || summarys.isEmpty()) {
@@ -6977,7 +6991,7 @@ throw new Exception("origin and destindation is empty");
 	
 	// Truck driver report
 	private List<Summary> processTicketsForSummaryTruckDriver(List<Ticket> tickets, String drillDownCompany, String drillDownOrigin, 
-			String drillDownDestination) {
+			String drillDownDestination, String isPeakRate) { // Peak rate 2nd Feb 2021
 		List<Summary> returnSummaryList = new ArrayList<Summary>();
 		if (tickets == null || tickets.isEmpty()) {
 			return returnSummaryList;
@@ -6993,7 +7007,7 @@ throw new Exception("origin and destindation is empty");
 		}
 		
 		List<Summary> summarys = retrieveBillingTruckDriverInfo(ticketIds.toString(), drillDownCompany, drillDownOrigin, 
-				drillDownDestination);
+				drillDownDestination, isPeakRate); // Peak rate 2nd Feb 2021
 		if (summarys == null || summarys.isEmpty()) {
 			return returnSummaryList;
 		}
@@ -7017,14 +7031,20 @@ throw new Exception("origin and destindation is empty");
 	
 	// Truck driver report
 	private List<Summary> retrieveBillingTruckDriverInfo(String ticketIds, String company, String origin,
-			String destination) {
+			String destination, String isPeakRate) { // Peak rate 2nd Feb 2021
 		String query = "select distinct obj.t_unit, obj.driver"
 				+ " from Billing_New obj "
 				+ " where obj.ticket in ("+ticketIds+")"
 				+ " and obj.company='" + company + "'"
 				+ " and obj.t_origin='" + origin + "'"
-				+ " and obj.t_destination='" + destination + "'"
-				+ " order by CAST(obj.t_unit AS int), obj.driver";
+				+ " and obj.t_destination='" + destination + "'";
+		
+		// Peak rate 2nd Feb 2021
+		if (StringUtils.isNotEmpty(isPeakRate)) {
+			query += (" and obj.isPeakRate='" + isPeakRate + "'");
+		}
+				
+		query += (" order by CAST(obj.t_unit AS int), obj.driver");
 		
 		List<Summary> summarys = genericDAO.executeSimpleQuery(query);
 		return summarys;

@@ -96,7 +96,7 @@ public class BillingHistoryInput implements ReportModel {
 	private String notBillable;
 	
 	// Peak rate 2nd Feb 2021
-	private String isPeakRate;
+	private String isPeakRate = StringUtils.EMPTY;
 	
 	// Truck driver report
 	private String drillDownCompany = StringUtils.EMPTY;

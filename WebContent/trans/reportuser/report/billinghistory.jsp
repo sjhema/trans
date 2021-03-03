@@ -365,6 +365,13 @@ $(document).ready(function(){
 				</form:select> 
 				<br> <form:errors path="notBillable" cssClass="errorMessage" />
 			</td>
+			<td class="form-left"><primo:label code="Peak Rate" /></td>
+			<td>
+				<form:select cssClass="flat" path="isPeakRate" multiple="true">
+					<form:options items="${peakRateOptions}" />
+				</form:select>
+				<br><form:errors path="isPeakRate" cssClass="errorMessage" />
+			</td>
 		</tr>
 		<tr class="table-heading">
 			<td colspan="4"><b><primo:label code="Origin " />

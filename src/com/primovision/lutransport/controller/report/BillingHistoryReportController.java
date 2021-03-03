@@ -115,6 +115,11 @@ public class BillingHistoryReportController extends BaseController {
 		notBillableOptions.add(BillingHistoryInput.INCLUDE_NOT_BILLABLE);
 		model.addAttribute("notBillableOptions", notBillableOptions);
 		
+		List<String> peakRateOptions = new ArrayList<String>();
+		peakRateOptions.add("Y");
+		peakRateOptions.add("N");
+		model.addAttribute("peakRateOptions", peakRateOptions);
+		
 		return "reportuser/report/billinghistory";
 	}
 
