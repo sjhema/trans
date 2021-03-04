@@ -2,7 +2,11 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryReport" pageWidth="1250" pageHeight="595" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="113"/>
+	<subDataset name="graphDataset">
+		<field name="rateType" class="java.lang.String"/>
+		<field name="count" class="java.lang.Integer"/>
+	</subDataset>
 	<parameter name="batchDateFrom" class="java.lang.String"/>
 	<parameter name="batchDateTo" class="java.lang.String"/>
 	<parameter name="truckDriverReportUrl" class="java.lang.String"/>
@@ -11,6 +15,7 @@
 	<parameter name="unloadedFrom" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="unloadedTo" class="java.lang.String"/>
 	<parameter name="notBillable" class="java.lang.String"/>
+	<parameter name="rateTypeCountMap" class="net.sf.jasperreports.engine.data.JRMapCollectionDataSource"/>
 	<field name="origin" class="java.lang.String"/>
 	<field name="destination" class="java.lang.String"/>
 	<field name="count" class="java.lang.Integer"/>
@@ -561,7 +566,7 @@
 		<band splitType="Stretch"/>
 	</pageFooter>
 	<summary>
-		<band height="42" splitType="Stretch">
+		<band height="300" splitType="Stretch">
 			<staticText>
 				<reportElement x="224" y="0" width="149" height="23"/>
 				<box>
@@ -611,6 +616,30 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{totalNetAmount})]]></textFieldExpression>
 			</textField>
+			<pie3DChart>
+				<chart isShowLegend="true" evaluationTime="Report">
+					<reportElement x="52" y="47" width="481" height="236"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<dataset>
+						<datasetRun subDataset="graphDataset">
+							<dataSourceExpression><![CDATA[$P{rateTypeCountMap}]]></dataSourceExpression>
+						</datasetRun>
+					</dataset>
+					<keyExpression><![CDATA[$F{rateType}]]></keyExpression>
+					<valueExpression><![CDATA[$F{count}]]></valueExpression>
+					<labelExpression><![CDATA[$F{rateType} + ": " + ($F{count}).toString()]]></labelExpression>
+				</pieDataset>
+				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} ({2})">
+					<plot/>
+					<itemLabel color="#000000" backgroundColor="#FFFFFF">
+						<font size="10"/>
+					</itemLabel>
+				</pie3DPlot>
+			</pie3DChart>
 		</band>
 	</summary>
 </jasperReport>

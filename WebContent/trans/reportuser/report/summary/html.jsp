@@ -3,10 +3,14 @@
 <%@ page import="net.sf.jasperreports.engine.util.*" %>
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
 <%@ page import="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource" %>
+<%@ page import="net.sf.jasperreports.j2ee.servlets.ImageServlet" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.io.*" %>
 <%
-	JasperPrint jasperPrint = (JasperPrint)request.getAttribute("jasperPrint");
+	//Peak rate 2nd Feb 2021
+	//JasperPrint jasperPrint = (JasperPrint)request.getAttribute("jasperPrint");
+	JasperPrint jasperPrint = (JasperPrint)request.getSession().getAttribute(ImageServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE);
+	
 	JRHtmlExporter exporter = new JRHtmlExporter();
 	exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 	exporter.setParameter(JRExporterParameter.OUTPUT_WRITER, out);
@@ -23,5 +27,5 @@
 	}catch(Exception e){
 			e.printStackTrace();
 	}
-	request.removeAttribute("jasperPrint");
+	//request.removeAttribute("jasperPrint");
 %>

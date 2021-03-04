@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
+import net.sf.jasperreports.j2ee.servlets.ImageServlet;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +117,7 @@ public class BillingHistoryReportController extends BaseController {
 		notBillableOptions.add(BillingHistoryInput.INCLUDE_NOT_BILLABLE);
 		model.addAttribute("notBillableOptions", notBillableOptions);
 		
+		// Peak rate 2nd Feb 2021
 		List<String> peakRateOptions = new ArrayList<String>();
 		peakRateOptions.add("Y");
 		peakRateOptions.add("N");
@@ -220,12 +223,30 @@ public class BillingHistoryReportController extends BaseController {
 			String truckDriverReportUrl = StringUtils.replace(requestUrl.toString(), "search.do", "truckDriverReport.do");
 			params.put("truckDriverReportUrl", truckDriverReportUrl);
 			
+			// Peak rate 2nd Feb 2021
+			List<Map<String, Object>> rateTypeCountMapList = new ArrayList<Map<String, Object>>();
+			Map<String, Object> rateTypeCountMap = new HashMap<String, Object>();
+			rateTypeCountMap.put("rateType", "Regular Rate");
+			rateTypeCountMap.put("count", 5);
+			rateTypeCountMapList.add(rateTypeCountMap);
+			rateTypeCountMap = new HashMap<String, Object>();
+			rateTypeCountMap.put("rateType", "Peak Rate");
+			rateTypeCountMap.put("count", 100);
+			rateTypeCountMapList.add(rateTypeCountMap); 
+			JRMapCollectionDataSource jrMap = new JRMapCollectionDataSource(rateTypeCountMapList);
+			params.put("rateTypeCountMap", jrMap);
+			
 			if (StringUtils.isEmpty(type))
 				type = "html";
-			response.setContentType(MimeUtil.getContentType(type));			
+			response.setContentType(MimeUtil.getContentType(type));
+			
 		    //ByteArrayOutputStream out = new ByteArrayOutputStream();
 			JasperPrint jasperPrint = dynamicReportService.getJasperPrintFromFile("summaryReport",(List)list,params,request);
-			request.setAttribute("jasperPrint", jasperPrint);	
+			
+			// Peak rate 2nd Feb 2021
+			//request.setAttribute("jasperPrint", jasperPrint);
+			request.getSession().setAttribute(ImageServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
+			
 			request.getSession().setAttribute("input", input);
 			return  "reportuser/report/summary/html";
 	
@@ -383,7 +404,20 @@ public class BillingHistoryReportController extends BaseController {
 							summary.setDriverPay(Double.parseDouble(objArry[9].toString()));
 					 }
 					 summarylist.add(summary);
-					}*/	
+					}*/
+	 			// Peak rate 2nd Feb 2021
+ 				List<Map<String, Object>> rateTypeCountMapList = new ArrayList<Map<String, Object>>();
+ 				Map<String, Object> rateTypeCountMap = new HashMap<String, Object>();
+ 				rateTypeCountMap.put("rateType", "Regular Rate");
+ 				rateTypeCountMap.put("count", 5);
+ 				rateTypeCountMapList.add(rateTypeCountMap);
+ 				rateTypeCountMap = new HashMap<String, Object>();
+ 				rateTypeCountMap.put("rateType", "Peak Rate");
+ 				rateTypeCountMap.put("count", 100);
+ 				rateTypeCountMapList.add(rateTypeCountMap); 
+ 				JRMapCollectionDataSource jrMap = new JRMapCollectionDataSource(rateTypeCountMapList);
+ 				params.put("rateTypeCountMap", jrMap);
+	 				
 	 			if (StringUtils.isEmpty(type))
 					type = "xlsx";
 				if (!type.equals("html") && !(type.equals("print"))) {
