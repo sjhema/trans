@@ -27,5 +27,6 @@
 	}catch(Exception e){
 			e.printStackTrace();
 	}
+	//Peak rate 2nd Feb 2021
 	//request.removeAttribute("jasperPrint");
 %>
