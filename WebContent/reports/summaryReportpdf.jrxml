@@ -2,10 +2,10 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryReportpdf" pageWidth="1280" pageHeight="842" columnWidth="1240" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="186"/>
-	<subDataset name="graphDataset">
+	<property name="ireport.y" value="197"/>
+	<subDataset name="rateTypeCountGraphDataset">
 		<field name="rateType" class="java.lang.String"/>
-		<field name="count" class="java.lang.Integer"/>
+		<field name="count" class="java.lang.Long"/>
 	</subDataset>
 	<parameter name="batchDateFrom" class="java.lang.String"/>
 	<parameter name="batchDateTo" class="java.lang.String"/>
@@ -561,7 +561,7 @@
 		<band splitType="Stretch"/>
 	</pageFooter>
 	<summary>
-		<band height="370" splitType="Stretch">
+		<band height="340" splitType="Stretch">
 			<staticText>
 				<reportElement x="237" y="1" width="149" height="23"/>
 				<box>
@@ -612,27 +612,27 @@
 				<textFieldExpression class="java.lang.String"><![CDATA["$"+new java.text.DecimalFormat("#,##0.00").format($V{totalNetAmount})]]></textFieldExpression>
 			</textField>
 			<pie3DChart>
-				<chart>
-					<reportElement x="14" y="49" width="562" height="310">
-						<propertyExpression name="series.dataLabels.enabled"><![CDATA["true"]]></propertyExpression>
-					</reportElement>
+				<chart isShowLegend="true" evaluationTime="Report">
+					<reportElement x="17" y="47" width="540" height="280"/>
 					<chartTitle/>
 					<chartSubtitle/>
 					<chartLegend/>
 				</chart>
 				<pieDataset>
 					<dataset>
-						<datasetRun subDataset="graphDataset">
+						<datasetRun subDataset="rateTypeCountGraphDataset">
 							<dataSourceExpression><![CDATA[$P{rateTypeCountMap}]]></dataSourceExpression>
 						</datasetRun>
 					</dataset>
 					<keyExpression><![CDATA[$F{rateType}]]></keyExpression>
 					<valueExpression><![CDATA[$F{count}]]></valueExpression>
-					<labelExpression><![CDATA[(": Count ")]]></labelExpression>
+					<labelExpression><![CDATA[$F{rateType} + ": " + ($F{count}).toString()]]></labelExpression>
 				</pieDataset>
-				<pie3DPlot>
+				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} ({2})">
 					<plot/>
-					<itemLabel color="#000000" backgroundColor="#FFFFFF"/>
+					<itemLabel color="#000000" backgroundColor="#FFFFFF">
+						<font size="10"/>
+					</itemLabel>
 				</pie3DPlot>
 			</pie3DChart>
 		</band>

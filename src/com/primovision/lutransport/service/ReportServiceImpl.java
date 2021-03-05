@@ -97,6 +97,9 @@ import com.primovision.lutransport.model.report.SubcontractorSummary;
 import com.primovision.lutransport.model.report.Summary;
 import com.primovision.lutransport.model.report.TollDistributionReportInput;
 import com.primovision.lutransport.model.report.TollDistributionReportWrapper;
+
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
+
 import com.primovision.lutransport.model.TollCompany;
 import com.primovision.lutransport.model.Customer;
 
@@ -6244,7 +6247,7 @@ throw new Exception("origin and destindation is empty");
 	
 	@Override
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
-			BillingHistoryInput input) {
+			BillingHistoryInput input, Map<String, Object> reportParams) { // Peak rate 2nd Feb 2021
 		String fromDateInvoiceStr = ReportDateUtil.getFromDate(input
 				.getFromInvoiceDate());
 		String toDateInvoiceStr = ReportDateUtil.getToDate(input
@@ -6884,7 +6887,7 @@ throw new Exception("origin and destindation is empty");
 					input.getDrillDownDestination(),
 					isPeakRate); // Peak rate 2nd Feb 2021
 		} else {
-			return processTicketsForSummary(tickets, params, isPeakRate); // Peak rate 2nd Feb 2021
+			return processTicketsForSummary(tickets, reportParams, isPeakRate); // Peak rate 2nd Feb 2021
 		}
 	}
 	
@@ -6911,7 +6914,7 @@ throw new Exception("origin and destindation is empty");
 		return summarys;
 }*/
 	
-	private List<Summary> processTicketsForSummary(List<Ticket> tickets, Map<String, String> params,
+	private List<Summary> processTicketsForSummary(List<Ticket> tickets, Map<String, Object> reportParams,
 			String isPeakRate) { // Peak rate 2nd Feb 2021
 		List<Summary> returnSummaryList = new ArrayList<Summary>();
 		if (tickets == null || tickets.isEmpty()) {
@@ -6984,7 +6987,40 @@ throw new Exception("origin and destindation is empty");
 			summary.setTruckDriverInfo(truckDriverInfo);*/
 			
 			returnSummaryList.add(summary);
-		}	
+		}
+		
+		// Peak rate 2nd Feb 2021
+		Long peakRateCount = 0l;
+		Long regularRateCount = 0l;
+		String rateTypeCountQuery = "select count(obj) from Billing_New obj where obj.ticket in ("
+			+ ticketIds.toString()+")";
+		String rateTypeCountQueryCondn = " and obj.isPeakRate=";
+		
+		List<Summary> rateTypeCountSummary = genericDAO.executeSimpleQuery(rateTypeCountQuery 
+				+ rateTypeCountQueryCondn + "'Y'");
+		for (Object obj : rateTypeCountSummary) {						
+			peakRateCount = (Long)obj;
+		}
+		
+		rateTypeCountSummary = genericDAO.executeSimpleQuery(rateTypeCountQuery 
+				+ rateTypeCountQueryCondn + "'N'");
+		for (Object obj : rateTypeCountSummary) {						
+			regularRateCount = (Long)obj;
+		}
+		
+		// Peak rate 2nd Feb 2021
+		List<Map<String, Object>> rateTypeCountMapList = new ArrayList<Map<String, Object>>();
+		Map<String, Object> rateTypeCountMap = new HashMap<String, Object>();
+		rateTypeCountMap.put("rateType", "Regular Rate");
+		rateTypeCountMap.put("count", regularRateCount);
+		rateTypeCountMapList.add(rateTypeCountMap);
+		rateTypeCountMap = new HashMap<String, Object>();
+		rateTypeCountMap.put("rateType", "Peak Rate");
+		rateTypeCountMap.put("count", peakRateCount);
+		rateTypeCountMapList.add(rateTypeCountMap);
+		
+		JRMapCollectionDataSource jrMap = new JRMapCollectionDataSource(rateTypeCountMapList);
+		reportParams.put("rateTypeCountMap", jrMap);
 	
 		return returnSummaryList;
 	}

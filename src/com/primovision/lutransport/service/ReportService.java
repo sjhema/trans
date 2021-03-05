@@ -1,6 +1,7 @@
 package com.primovision.lutransport.service;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,7 +63,7 @@ public interface ReportService {
 			SubcontractorReportInput input);
 	public List<NetReportWrapper> generateNetReportData(SearchCriteria searchCriteria, NetReportInput input,HttpServletRequest request);
 	public List<Summary> generateSummaryNew(SearchCriteria criteria,
-			BillingHistoryInput input);
+			BillingHistoryInput input, Map<String, Object> reportParams); // Peak rate 2nd Feb 2021
 	public FuelDistributionReportWrapper generateFuelDistributionData(SearchCriteria searchCriteria, FuelDistributionReportInput input);
 	public TollDistributionReportWrapper generateTollDistributionData(SearchCriteria criteria, TollDistributionReportInput input);
 	public MileageLogReportWrapper generateMileageLogData(SearchCriteria criteria, MileageLogReportInput input);

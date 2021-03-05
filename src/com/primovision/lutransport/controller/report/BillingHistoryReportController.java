@@ -223,19 +223,6 @@ public class BillingHistoryReportController extends BaseController {
 			String truckDriverReportUrl = StringUtils.replace(requestUrl.toString(), "search.do", "truckDriverReport.do");
 			params.put("truckDriverReportUrl", truckDriverReportUrl);
 			
-			// Peak rate 2nd Feb 2021
-			List<Map<String, Object>> rateTypeCountMapList = new ArrayList<Map<String, Object>>();
-			Map<String, Object> rateTypeCountMap = new HashMap<String, Object>();
-			rateTypeCountMap.put("rateType", "Regular Rate");
-			rateTypeCountMap.put("count", 5);
-			rateTypeCountMapList.add(rateTypeCountMap);
-			rateTypeCountMap = new HashMap<String, Object>();
-			rateTypeCountMap.put("rateType", "Peak Rate");
-			rateTypeCountMap.put("count", 100);
-			rateTypeCountMapList.add(rateTypeCountMap); 
-			JRMapCollectionDataSource jrMap = new JRMapCollectionDataSource(rateTypeCountMapList);
-			params.put("rateTypeCountMap", jrMap);
-			
 			if (StringUtils.isEmpty(type))
 				type = "html";
 			response.setContentType(MimeUtil.getContentType(type));
@@ -297,9 +284,9 @@ public class BillingHistoryReportController extends BaseController {
 
 	}
 	
-	private List<Summary> generateSummaryNew(SearchCriteria criteria, Map<String,Object> params, 
+	private List<Summary> generateSummaryNew(SearchCriteria criteria, Map<String, Object> params, 
 			BillingHistoryInput input) {
-		List<Summary> list = reportService.generateSummaryNew(criteria, input);
+		List<Summary> list = reportService.generateSummaryNew(criteria, input, params);
 		populateParams(params, input, true);
 		return list;
 	}
@@ -405,18 +392,6 @@ public class BillingHistoryReportController extends BaseController {
 					 }
 					 summarylist.add(summary);
 					}*/
-	 			// Peak rate 2nd Feb 2021
- 				List<Map<String, Object>> rateTypeCountMapList = new ArrayList<Map<String, Object>>();
- 				Map<String, Object> rateTypeCountMap = new HashMap<String, Object>();
- 				rateTypeCountMap.put("rateType", "Regular Rate");
- 				rateTypeCountMap.put("count", 5);
- 				rateTypeCountMapList.add(rateTypeCountMap);
- 				rateTypeCountMap = new HashMap<String, Object>();
- 				rateTypeCountMap.put("rateType", "Peak Rate");
- 				rateTypeCountMap.put("count", 100);
- 				rateTypeCountMapList.add(rateTypeCountMap); 
- 				JRMapCollectionDataSource jrMap = new JRMapCollectionDataSource(rateTypeCountMapList);
- 				params.put("rateTypeCountMap", jrMap);
 	 				
 	 			if (StringUtils.isEmpty(type))
 					type = "xlsx";
