@@ -173,7 +173,7 @@ DECLARE  Unload_date_var varchar(225);
 
 DECLARE  bill_batch_date_var varchar(225);
 
-DECLARE is_peak_rate varchar(15);
+DECLARE isPeakRate varchar(15);
 
 
 DECLARE masterCursor CURSOR for select id,driver_company,driver_payrate,entered_by,bill_batch,destination_ticket,landfill_gross,landfill_tare,
@@ -232,7 +232,7 @@ invoice_number,company_loc,custmr_id,is_peak_rate
 into FAmount,DemmurageCharge,fuelSurcharge,Minimumbillablegrossweight,FRate,
 
 TonnagePremium,TOtAmount,EffectiveGrossWt,EffectiveNetWt,EffectiveTareWt,EffectiveTonsWt,invoice_dates,
-invoice_numbers,compnay_locations,customer_ids,is_peak_rate
+invoice_numbers,compnay_locations,customer_ids,isPeakRate
 
 from invoice_detail where id=inv_id;
 
@@ -294,7 +294,7 @@ transfer_grosss,transfer_nets,transfer_tares,origin_tickets,transfer_tons,Proces
 
 OriginName,UnitNumber,TerminalName,tickets_id,TonnagePremium,TotAmount,TrailerNumber,transfer_time_ins,
 tranfer_time_outs,Unload_date_var,null,destinations,origins,drivercompany_name,drivercompany_id,
-unload_dates,driverPayRate,is_peak_rate);
+unload_dates,driverPayRate,isPeakRate);
 
 
 SET SubcontractorName=null;

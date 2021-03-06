@@ -1451,6 +1451,7 @@ public class ReportServiceImpl implements ReportService {
 				// Peak rate 2nd Feb 2021
 				Object[] derivedRateInfo = deriveBillingRate(ticket, billingRate);
 				boolean isPeakRate = (Boolean)derivedRateInfo[0];
+				billing.setIsPeakRate(BooleanUtils.toString(isPeakRate, "Y", "N"));
 				Double derivedRate = (Double)derivedRateInfo[1];
 				
 				// billing.setCustomer(billingRate.getCustomername().getName());
@@ -1579,7 +1580,6 @@ public class ReportServiceImpl implements ReportService {
 					// Peak rate 2nd Feb 2021
 					//billing.setRate(billingRate.getValue());
 					billing.setRate(derivedRate);
-					billing.setIsPeakRate(BooleanUtils.toString(isPeakRate, "Y", "N"));
 					
 				// Change to 8.35 - 28th Dec 2016
 					billing.setAmount((billing.getEffectiveNetWt() / 8.35)
