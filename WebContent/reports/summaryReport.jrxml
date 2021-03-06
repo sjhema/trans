@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summaryReport" pageWidth="1250" pageHeight="595" orientation="Landscape" columnWidth="1210" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="160"/>
+	<property name="ireport.y" value="137"/>
 	<subDataset name="rateTypeCountGraphDataset">
 		<field name="rateType" class="java.lang.String"/>
 		<field name="count" class="java.lang.Long"/>
@@ -621,7 +621,7 @@
 					<reportElement x="30" y="47" width="481" height="236"/>
 					<chartTitle/>
 					<chartSubtitle/>
-					<chartLegend/>
+					<chartLegend position="Bottom"/>
 				</chart>
 				<pieDataset>
 					<dataset>
@@ -631,9 +631,9 @@
 					</dataset>
 					<keyExpression><![CDATA[$F{rateType}]]></keyExpression>
 					<valueExpression><![CDATA[$F{count}]]></valueExpression>
-					<labelExpression><![CDATA[$F{rateType} + ": " + ($F{count}).toString()]]></labelExpression>
+					<labelExpression><![CDATA[$F{rateType} + " load count: " + ($F{count}).toString()]]></labelExpression>
 				</pieDataset>
-				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} ({2})">
+				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} load count ({2})">
 					<plot/>
 					<itemLabel color="#000000" backgroundColor="#FFFFFF">
 						<font size="10"/>

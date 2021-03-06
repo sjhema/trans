@@ -616,7 +616,7 @@
 					<reportElement x="17" y="47" width="540" height="280"/>
 					<chartTitle/>
 					<chartSubtitle/>
-					<chartLegend/>
+					<chartLegend position="Bottom"/>
 				</chart>
 				<pieDataset>
 					<dataset>
@@ -626,9 +626,9 @@
 					</dataset>
 					<keyExpression><![CDATA[$F{rateType}]]></keyExpression>
 					<valueExpression><![CDATA[$F{count}]]></valueExpression>
-					<labelExpression><![CDATA[$F{rateType} + ": " + ($F{count}).toString()]]></labelExpression>
+					<labelExpression><![CDATA[$F{rateType} + " load count: " + ($F{count}).toString()]]></labelExpression>
 				</pieDataset>
-				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} ({2})">
+				<pie3DPlot isShowLabels="true" legendLabelFormat="{0} load count ({2})">
 					<plot/>
 					<itemLabel color="#000000" backgroundColor="#FFFFFF">
 						<font size="10"/>
