@@ -33,4 +33,7 @@ where t_origin='Western Acceptance'
 and t_destination='Bresco'
 and rate = 13.43;
 
+UPDATE `lutransport`.`business_object` 
+SET `URL`='/reportuser/report/billinghistory/start.do,/reportuser/report/billinghistory/search.do,/reportuser/report/billinghistory/export.do,/reportuser/report/billinghistory/truckDriverReport.do,/reportuser/report/billinghistory/ajax.do' 
+WHERE `ID`='3012';
 
