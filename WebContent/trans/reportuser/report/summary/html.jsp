@@ -1,4 +1,5 @@
 <%@ include file="/common/taglibs.jsp"%>
+
 <%@ page import="net.sf.jasperreports.engine.*" %>
 <%@ page import="net.sf.jasperreports.engine.util.*" %>
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
@@ -6,10 +7,14 @@
 <%@ page import="net.sf.jasperreports.j2ee.servlets.ImageServlet" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.io.*" %>
+
+<%@ page import="com.primovision.lutransport.core.util.ReportUtil"%>
+
 <%
 	//Peak rate 2nd Feb 2021
 	//JasperPrint jasperPrint = (JasperPrint)request.getAttribute("jasperPrint");
-	JasperPrint jasperPrint = (JasperPrint)request.getSession().getAttribute(ImageServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE);
+	//JasperPrint jasperPrint = (JasperPrint)request.getSession().getAttribute(ImageServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE);
+	JasperPrint jasperPrint = ReportUtil.getJasperPrint(request);
 	
 	JRHtmlExporter exporter = new JRHtmlExporter();
 	exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
@@ -30,3 +35,11 @@
 	//Peak rate 2nd Feb 2021
 	//request.removeAttribute("jasperPrint");
 %>
+
+<script language="javascript">
+	jQuery.ajax({
+		url:'${ctx}/reportuser/report/billinghistory/ajax.do?action=removeJasperPrint', 
+		success: function( data ) {
+		}
+	});
+</script>

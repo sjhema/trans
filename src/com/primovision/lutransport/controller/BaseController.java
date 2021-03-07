@@ -26,6 +26,7 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
 import com.google.gson.Gson;
 import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.core.util.ReportUtil;
 import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.Language;
 import com.primovision.lutransport.model.Role;
@@ -35,6 +36,8 @@ import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 import com.primovision.lutransport.service.AuditService;
 import com.primovision.lutransport.service.AuthenticationService;
+
+import net.sf.jasperreports.engine.JasperPrint;
 
 @SuppressWarnings("unchecked")
 public class BaseController {
@@ -286,8 +289,20 @@ public class BaseController {
 
 	protected String processAjaxRequest(HttpServletRequest request,
 			String action, Model model) {
+		if ("removeJasperPrint".equalsIgnoreCase(action)) {
+			return removeJasperPrint(request);
+		}
+		
 		Gson gson = new Gson();
 		return gson.toJson("");
+	}
+	
+	protected String removeJasperPrint(HttpServletRequest request) {
+		return ReportUtil.removeJasperPrint(request, getClass().getName());
+	}
+	
+	protected void addJasperPrint(HttpServletRequest request, JasperPrint jp) {
+		ReportUtil.addJasperPrint(request, jp, getClass().getName());
 	}
 	
 	protected boolean hasPrivByBOName(HttpServletRequest request, String boName) {
