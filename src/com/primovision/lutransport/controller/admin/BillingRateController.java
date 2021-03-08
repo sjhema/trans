@@ -36,6 +36,7 @@ import com.primovision.lutransport.model.BillingRate;
 import com.primovision.lutransport.model.Customer;
 import com.primovision.lutransport.model.DemurrageCharges;
 import com.primovision.lutransport.model.FuelSurchargePadd;
+import com.primovision.lutransport.model.LoadingFee;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.StaticData;
@@ -69,7 +70,7 @@ public class BillingRateController extends CRUDController<BillingRate>{
 		binder.registerCustomEditor(TonnagePremium.class, new AbstractModelEditor(TonnagePremium.class));
 		binder.registerCustomEditor(DemurrageCharges.class, new AbstractModelEditor(DemurrageCharges.class));
 		binder.registerCustomEditor(Customer.class, new AbstractModelEditor(Customer.class));
-		
+		binder.registerCustomEditor(LoadingFee.class, new AbstractModelEditor(LoadingFee.class));
 	}
 	
 	/*
@@ -127,6 +128,7 @@ public class BillingRateController extends CRUDController<BillingRate>{
 		model.addAttribute("padds", genericDAO.findAll(FuelSurchargePadd.class));
 		model.addAttribute("tonnages", genericDAO.findAll(TonnagePremium.class));
 		model.addAttribute("demurrage", genericDAO.findAll(DemurrageCharges.class));
+		model.addAttribute("loadingFees", genericDAO.findAll(LoadingFee.class));
 		/*
 		 * Subcontractor Rate Type: Per Load/Per Ton
 		 */

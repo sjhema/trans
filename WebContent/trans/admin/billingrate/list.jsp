@@ -147,6 +147,7 @@ function getOriginLoad(){
 			<primo:staticdatacolumn headerText="Fuel Surcharge Weekly Rate" dataField="fuelsurchargeweeklyRate" dataType="YES_NO"/>
 			<primo:textcolumn headerText="Surcharge Per Ton" dataField="surchargePerTon"/>
 			<primo:textcolumn headerText="Surcharge Amount" dataField="surchargeAmount"/>
+			<primo:textcolumn headerText="Loading Fee" dataField="loadingFee.code" />
 			
 			<!--Peak rate 2nd Feb 2021-->
 			<primo:textcolumn headerText="Peak Rate" dataField="peakRate"/>

@@ -35,6 +35,10 @@ public class BillingRate extends AbstractBaseModel {
 	private TonnagePremium tonnagePremium;
 	
 	@ManyToOne
+	@JoinColumn(name="loading_fee")
+	private LoadingFee loadingFee;
+	
+	@ManyToOne
 	@JoinColumn(name="customer_name")
 	private Customer customername;
 	
@@ -421,5 +425,13 @@ public Date getValidFromTemp() {
 	// Peak rate 2nd Feb 2021
 	public void setPeakRateValidTo(String peakRateValidTo) {
 		this.peakRateValidTo = peakRateValidTo;
+	}
+
+	public LoadingFee getLoadingFee() {
+		return loadingFee;
+	}
+
+	public void setLoadingFee(LoadingFee loadingFee) {
+		this.loadingFee = loadingFee;
 	}
 }

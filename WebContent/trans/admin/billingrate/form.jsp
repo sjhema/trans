@@ -244,6 +244,14 @@ function formatDate1(){
                     <form:option value="byPeakRate">Format8_Peak Rate</form:option>
             </form:select>
             </td>
+            <td class="form-left">Loading Fee</td>
+			<td align="${left}">
+				<form:select cssClass="flat" path="loadingFee" style="min-width:154px; max-width:154px">
+					<form:option value="">-----Please Select----</form:option>
+					<form:options items="${loadingFees}" itemValue="id" itemLabel="code" />
+				</form:select>
+				<br><form:errors path="loadingFee" cssClass="errorMessage" />
+			</td>
 		</TR>
 		<tr class="table-heading">
 			<td colspan="4"><b>Rate Details</b>
