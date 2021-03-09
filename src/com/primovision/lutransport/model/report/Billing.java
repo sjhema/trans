@@ -106,6 +106,9 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 	@Column(name="total_amount")
 	Double totAmt = 0.0;
 	
+	@Column(name="loading_fee")
+	Double loadingFee = 0.0;
+	
 	@Column(name="driver")
 	private String driver;
 	
@@ -515,6 +518,14 @@ public class Billing extends AbstractBaseModel implements ReportModel {
 
 	public void setIsPeakRate(String isPeakRate) {
 		this.isPeakRate = isPeakRate;
+	}
+	
+	public Double getLoadingFee() {
+		return loadingFee;
+	}
+
+	public void setLoadingFee(Double loadingFee) {
+		this.loadingFee = loadingFee;
 	}
 
 	@Transient

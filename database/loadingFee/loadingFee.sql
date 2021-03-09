@@ -35,3 +35,15 @@ ADD CONSTRAINT `loading_fee_fk`
   REFERENCES `lutransport`.`loading_fee` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+-----------------------
+
+ALTER TABLE `lutransport`.`invoice_detail` 
+ADD COLUMN `loading_fee` DOUBLE NULL DEFAULT 0.0 COMMENT '' AFTER `is_peak_rate`;
+
+ALTER TABLE `lutransport`.`invoice_detail_new` 
+ADD COLUMN `loading_fee` DOUBLE NULL DEFAULT 0.0 COMMENT '' AFTER `is_peak_rate`;
+
+
+  
+  
+  
