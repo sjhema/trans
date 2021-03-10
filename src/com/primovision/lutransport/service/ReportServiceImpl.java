@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -47,6 +48,7 @@ import com.primovision.lutransport.model.FuelLog;
 import com.primovision.lutransport.model.FuelSurchargePadd;
 import com.primovision.lutransport.model.FuelSurchargeWeeklyRate;
 import com.primovision.lutransport.model.Invoice;
+import com.primovision.lutransport.model.LoadingFee;
 import com.primovision.lutransport.model.Location;
 import com.primovision.lutransport.model.LocationDistance;
 import com.primovision.lutransport.model.MileageLog;
@@ -1203,6 +1205,8 @@ public class ReportServiceImpl implements ReportService {
 		double sumAmount = 0.0;
 		double sumFuelSurcharge = 0.0;
 		double sumTonnage = 0.0;
+		// Loading fee 10th Mar 2021
+		double sumLoadingFee = 0.0;
 		double sumDemmurage = 0.0;
 		double sumTotal = 0.0;
 		Map<String, List<BillingRate>> billingMap = new HashMap<String, List<BillingRate>>();
@@ -1229,6 +1233,8 @@ public class ReportServiceImpl implements ReportService {
 				sumAmount += billing.getAmount();
 				sumFuelSurcharge += billing.getFuelSurcharge();
 				sumTonnage += billing.getTonnagePremium();
+				// Loading Fee changes 10th Mar 2021
+				sumLoadingFee += billing.getLoadingFee();
 				sumDemmurage += billing.getDemurrageCharge();
 				// sumTotal+=billing.getTotAmt();
 				if (ticket.getCreatedBy() != null) {
@@ -1774,6 +1780,15 @@ public class ReportServiceImpl implements ReportService {
 				billing.setTonnagePremium(MathUtil.roundUp(
 						billing.getTonnagePremium(), 2));
 				
+				// Loading fee changes 10th Mar 2021
+				if (billingRate.getLoadingFee() != null 
+						&& StringUtils.isNotEmpty(billingRate.getLoadingFee().getCode())) {
+					Double loadingRate = billingRate.getLoadingFee().getRate();
+					billing.setLoadingFee(billing.getEffectiveTonsWt() * loadingRate);
+				}
+				sumLoadingFee += billing.getLoadingFee();
+				billing.setLoadingFee(MathUtil.roundUp(billing.getLoadingFee(), 2));
+				
 				if(billingRate.getDemmurageCharge()!=null){
 				if (billingRate.getDemmurageCharge().getDemurragecode() != null) {
 					Integer chargeAfterTime = billingRate.getDemmurageCharge().getChargeAfter();							
@@ -1866,7 +1881,8 @@ public class ReportServiceImpl implements ReportService {
 			}
 			double amount = billing.getAmount() + billing.getFuelSurcharge()
 					+ billing.getDemurrageCharge()
-					+ billing.getTonnagePremium();
+					+ billing.getTonnagePremium()
+					+ billing.getLoadingFee(); // Loading fee changes 10th Mar 2021
 			
 			billing.setTotAmt(amount);
 			summarys.add(billing);
@@ -1882,12 +1898,18 @@ public class ReportServiceImpl implements ReportService {
 		sumDemmurage = MathUtil.roundUp(sumDemmurage, 2);
 		sumTonnage = MathUtil.roundUp(sumTonnage, 2);
 		sumGallon = MathUtil.roundUp(sumGallon, 2);
-
-		sumTotal = sumAmount + sumFuelSurcharge + sumDemmurage + sumTonnage;
+		// Loading fee changes 10th Mar 2021
+		sumLoadingFee = MathUtil.roundUp(sumLoadingFee, 2);
+		
+		// Loading fee changes 10th Mar 2021
+		sumTotal = sumAmount + sumFuelSurcharge + sumDemmurage + sumTonnage + sumLoadingFee;
+		
 		wrapper.setSumBillableTon(sumBillableTon);
 		wrapper.setSumOriginTon(sumOriginTon);
 		wrapper.setSumDestinationTon(sumDestinationTon);
 		wrapper.setSumTonnage(sumTonnage);
+		// Loading fee changes 10th Mar 2021
+		wrapper.setSumLoadingFee(sumLoadingFee);
 		wrapper.setSumDemmurage(sumDemmurage);
 		wrapper.setSumNet(sumNet);
 		wrapper.setSumAmount(sumAmount);
@@ -2123,6 +2145,8 @@ throw new Exception("origin and destindation is empty");
 			invoice.setSumNet(wrapper.getSumNet());
 			invoice.setSumFuelSurcharge(wrapper.getSumFuelSurcharge());
 			invoice.setSumTonnage(wrapper.getSumTonnage());
+			// Loading fee changes 10th Mar 2021
+			invoice.setSumLoadingFee(wrapper.getSumLoadingFee());
 			invoice.setSumDemmurage(wrapper.getSumDemmurage());
 			invoice.setSumTotal(wrapper.getSumTotal());
 			invoice.setSumAmount(wrapper.getSumAmount());

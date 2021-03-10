@@ -36,6 +36,8 @@ ADD CONSTRAINT `loading_fee_fk`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 -----------------------
+ALTER TABLE `lutransport`.`invoices` 
+ADD COLUMN `sum_loading_fee` DOUBLE NULL COMMENT '' AFTER `sum_gallon`;
 
 ALTER TABLE `lutransport`.`invoice_detail` 
 ADD COLUMN `loading_fee` DOUBLE NULL DEFAULT 0.0 COMMENT '' AFTER `is_peak_rate`;

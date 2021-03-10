@@ -11,6 +11,8 @@ public class BillingWrapper {
 	double sumAmount=0.0;
 	double sumFuelSurcharge=0.0;
 	double sumTonnage=0.0;
+	// Loading fee changes 10th Mar 2021
+	double sumLoadingFee = 0.0;
 	double sumDemmurage=0.0;
 	double sumTotal=0.0;
 	int totalRowCount=0;
@@ -123,7 +125,12 @@ public class BillingWrapper {
 	public void setTotalRowCount(int totalRowCount) {
 		this.totalRowCount = totalRowCount;
 	}
-	
-	
 
+	public double getSumLoadingFee() {
+		return sumLoadingFee;
+	}
+
+	public void setSumLoadingFee(double sumLoadingFee) {
+		this.sumLoadingFee = sumLoadingFee;
+	}
 }

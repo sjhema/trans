@@ -60,6 +60,10 @@ public class Invoice extends AbstractBaseModel {
 	@Column(name="sum_tonnage")
 	private Double sumTonnage=0.0;
 	
+	// Loading fee changes 10th Mar 2021
+	@Column(name="sum_loading_fee")
+	private Double sumLoadingFee = 0.0;
+	
 	@Column(name="sum_gallon")
 	private Double sumGallon=0.0;
 
@@ -195,5 +199,13 @@ public class Invoice extends AbstractBaseModel {
 
 	public void setSumDestinationTon(Double sumDestinationTon) {
 		this.sumDestinationTon = sumDestinationTon;
+	}
+
+	public Double getSumLoadingFee() {
+		return sumLoadingFee;
+	}
+
+	public void setSumLoadingFee(Double sumLoadingFee) {
+		this.sumLoadingFee = sumLoadingFee;
 	}
 }

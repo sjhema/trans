@@ -728,6 +728,8 @@ public class BillingReportController extends ReportController<Billing> {
 		params.put("sumOriginTon", wrapper.getSumOriginTon());
 		params.put("sumDestinationTon", wrapper.getSumDestinationTon());
 		params.put("sumTonnage", wrapper.getSumTonnage());
+		// Loading fee changes 10th Mar 2021
+		params.put("sumLoadingFee", wrapper.getSumLoadingFee());
 		params.put("sumTotal", wrapper.getSumTotal());
 		params.put("sumDemurrage", wrapper.getSumDemmurage());
 		params.put("sumNet", wrapper.getSumNet());
