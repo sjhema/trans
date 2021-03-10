@@ -261,7 +261,9 @@ public class UploadInvoiceController extends CRUDController<Invoice> {
 				params.put("sumBillableTon", invoice.getSumBillableTon());
 				params.put("sumOriginTon", invoice.getSumOriginTon());
 				params.put("sumDestinationTon", invoice.getSumDestinationTon());
-				params.put("sumTonnage", invoice.getSumTonnage());				
+				params.put("sumTonnage", invoice.getSumTonnage());	
+				// Loading fee change 10th Mar 2021
+				params.put("sumLoadingFee", invoice.getSumLoadingFee());	
 				params.put("sumTotal", invoice.getSumTotal());
 				params.put("sumDemurrage", invoice.getSumDemmurage());
 				params.put("sumNet", invoice.getSumNet());
