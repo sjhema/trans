@@ -45,6 +45,9 @@ ADD COLUMN `loading_fee` DOUBLE NULL DEFAULT 0.0 COMMENT '' AFTER `is_peak_rate`
 ALTER TABLE `lutransport`.`invoice_detail_new` 
 ADD COLUMN `loading_fee` DOUBLE NULL DEFAULT 0.0 COMMENT '' AFTER `is_peak_rate`;
 
+update lutransport.invoices
+set sum_loading_fee = 0.0
+where sum_loading_fee is null;
 
   
   
