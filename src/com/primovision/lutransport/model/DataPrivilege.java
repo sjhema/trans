@@ -32,11 +32,6 @@ public class DataPrivilege extends AbstractBaseModel {
 	private String empCatPrivNames;
 	@Transient
 	private String[] privilegeArrEmpCat;
-	
-	/*@Transient
-	private String[] privilegeArrEmpCatPayrollReport;
-	@Transient
-	private String[] privilegeArrEmpCatManageEmployee;*/
 
 	public String getEmpCatPriv() {
 		return empCatPriv;
@@ -77,26 +72,6 @@ public class DataPrivilege extends AbstractBaseModel {
 	public void setBo(BusinessObject bo) {
 		this.bo = bo;
 	}
-
-	/*@Transient
-	public String[] getPrivilegeArrEmpCatPayrollReport() {
-		return privilegeArrEmpCatPayrollReport;
-	}
-
-	@Transient
-	public void setPrivilegeArrEmpCatPayrollReport(String[] privilegeArrEmpCatPayrollReport) {
-		this.privilegeArrEmpCatPayrollReport = privilegeArrEmpCatPayrollReport;
-	}
-
-	@Transient
-	public String[] getPrivilegeArrEmpCatManageEmployee() {
-		return privilegeArrEmpCatManageEmployee;
-	}
-
-	@Transient
-	public void setPrivilegeArrEmpCatManageEmployee(String[] privilegeArrEmpCatManageEmployee) {
-		this.privilegeArrEmpCatManageEmployee = privilegeArrEmpCatManageEmployee;
-	}*/
 
 	@Transient
 	public String[] getPrivilegeArrEmpCat() {
