@@ -12,9 +12,12 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import org.apache.commons.beanutils.NestedNullException;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.primovision.lutransport.model.AbstractBaseModel;
+import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.User;
 import com.primovision.lutransport.service.AuthenticationService;
@@ -45,6 +48,13 @@ public final class Datatable extends BodyTagSupport {
 	private boolean exportCsv;
 	private boolean displayPrint;
 	
+	private String insertableParams = StringUtils.EMPTY;
+	private String editableParams = StringUtils.EMPTY;
+	private String deletableParams = StringUtils.EMPTY;
+	private String exportableParams = StringUtils.EMPTY;
+	
+	private boolean hasEditable = true;
+	private boolean hasDeletable = true;
 	
 	private String cssClass = null;
 	private String bgColor = null;
@@ -74,13 +84,57 @@ public final class Datatable extends BodyTagSupport {
 		return urlContext;
 	}
 
-
-
 	public void setUrlContext(String urlContext) {
 		this.urlContext = urlContext;
 	}
 
+	public String getInsertableParams() {
+		return insertableParams;
+	}
 
+	public void setInsertableParams(String insertableParams) {
+		this.insertableParams = insertableParams;
+	}
+
+	public String getEditableParams() {
+		return editableParams;
+	}
+
+	public void setEditableParams(String editableParams) {
+		this.editableParams = editableParams;
+	}
+
+	public String getDeletableParams() {
+		return deletableParams;
+	}
+
+	public void setDeletableParams(String deletableParams) {
+		this.deletableParams = deletableParams;
+	}
+
+	public String getExportableParams() {
+		return exportableParams;
+	}
+
+	public void setExportableParams(String exportableParams) {
+		this.exportableParams = exportableParams;
+	}
+
+	public boolean isHasEditable() {
+		return hasEditable;
+	}
+
+	public void setHasEditable(boolean hasEditable) {
+		this.hasEditable = hasEditable;
+	}
+
+	public boolean isHasDeletable() {
+		return hasDeletable;
+	}
+
+	public void setHasDeletable(boolean hasDeletable) {
+		this.hasDeletable = hasDeletable;
+	}
 
 	/**
 	 * @return the id
@@ -603,6 +657,18 @@ public final class Datatable extends BodyTagSupport {
 		}
 		return objRet;
 	}
+	
+	private void evaluateDataPrivileges(AuthenticationService authenticationService, User user) {
+		DataPrivilege dp = authenticationService.retrieveDataPrivilege(user, "/"+urlContext);
+		if (dp != null) {
+			if (StringUtils.isNotEmpty(dp.getHasEditable())) {
+				hasEditable = BooleanUtils.toBoolean(dp.getHasEditable(), "Y", "N");
+			}
+			if (StringUtils.isNotEmpty(dp.getHasDeletable())) {
+				hasDeletable = BooleanUtils.toBoolean(dp.getHasDeletable(), "Y", "N");
+			}
+		}
+	}
 
 	/*------------------------------------------------------------------------------
 	 * Helpers
@@ -618,6 +684,8 @@ public final class Datatable extends BodyTagSupport {
 		User user = (User)pageContext.getSession().getAttribute("userInfo");
 		AuthenticationService authenticationService = (AuthenticationService)SpringAppContext.getBean("authenticationService");
 		try {
+			evaluateDataPrivileges(authenticationService, user);
+			
 			drawToolbar();
 			drawTableStart();
 			drawHeaderRow();
@@ -629,7 +697,8 @@ public final class Datatable extends BodyTagSupport {
 				objOut = this.pageContext.getOut();
 				if (editable) {
 					String url = "/"+urlContext+"/edit.do";
-					if (authenticationService.hasUserPermission(user, url)) {
+					if (authenticationService.hasUserPermission(user, url)
+							&& hasEditable) {
 						editColumn = new ImageColumn();
 						editColumn.setImageSrc(pageContext.getAttribute("resourceCtx")+"/images/edit.png");
 						editColumn.setImageBorder(0);
@@ -640,7 +709,8 @@ public final class Datatable extends BodyTagSupport {
 				}
 				if (deletable) {
 					String url = "/"+urlContext+"/delete.do";
-					if (authenticationService.hasUserPermission(user, url)) {
+					if (authenticationService.hasUserPermission(user, url)
+							&& hasDeletable) {
 						deleteColumn = new ImageColumn();
 						deleteColumn.setImageSrc(pageContext.getAttribute("resourceCtx")+"/images/delete.png");
 						deleteColumn.setPageContext(this.pageContext);
@@ -654,20 +724,42 @@ public final class Datatable extends BodyTagSupport {
 					checkBoxColumn.setPageContext(this.pageContext);
 					this.columns.add(0, checkBoxColumn);
 				}
+				
+				String idValueHolder = "__ID__";
+				String baseUrl = pageContext.getAttribute("ctx")+"/"+urlContext;
+				String idParams = "?id="+idValueHolder;
+				
+				String baseEditUrl = baseUrl+"/edit.do" + idParams;
+				if (StringUtils.isNotEmpty(editableParams)) {
+					baseEditUrl += ("&" + editableParams);
+				}
+				
+				String baseDeleteUrl = baseUrl+"/delete.do" + idParams;
+				if (StringUtils.isNotEmpty(deletableParams)) {
+					baseDeleteUrl += ("&" + deletableParams);
+				}
+				
 				for (int i = 0; i < baseObjects.size(); i++) {
 					if ((i % 2) == 0)
 						objOut.println("<tr class=\"even\">");
 					else
 						objOut.println("<tr>");
+					
 					iterCol = null;
 					this.currItem = baseObjects.get(i);
-					if (editColumn!=null)
-						editColumn.setLinkUrl(pageContext.getAttribute("ctx")+"/"+urlContext+"/edit.do?id="+PropertyUtils.getProperty(currItem, "id"));
-					if (deleteColumn!=null)
-						deleteColumn.setLinkUrl("javascript:confirmDelete('"+pageContext.getAttribute("ctx")+"/"+urlContext+"/delete.do?id="+PropertyUtils.getProperty(currItem, "id")+"');");
-//						deleteColumn.setLinkUrl(pageContext.getAttribute("ctx")+"/"+urlContext+"/delete.do?id="+PropertyUtils.getProperty(currItem, "id"));
+					String idStr = String.valueOf(PropertyUtils.getProperty(currItem, "id"));
+					
+					if (editColumn!=null) {
+						editColumn.setLinkUrl(baseEditUrl.replace(idValueHolder, idStr));
+					}
+					
+					if (deleteColumn!=null) {
+						deleteColumn.setLinkUrl("javascript:confirmDelete('"+baseDeleteUrl.replace(idValueHolder, idStr)+"');");
+						//deleteColumn.setLinkUrl(pageContext.getAttribute("ctx")+"/"+urlContext+"/delete.do?id="+PropertyUtils.getProperty(currItem, "id"));
+					}
+					
 					if (multipleDelete) {
-						checkBoxColumn.setBodyContent("<input type=\"checkbox\" id=\"objId\" name=\"id\"	value=\""+PropertyUtils.getProperty(currItem, "id")+"\" />");
+						checkBoxColumn.setBodyContent("<input type=\"checkbox\" id=\"objId\" name=\"id\"	value=\""+idStr+"\" />");
 					}
 					for (iterCol = this.columns.iterator(); iterCol.hasNext();) {
 						objCol = null;
@@ -808,14 +900,16 @@ public final class Datatable extends BodyTagSupport {
 			String locale=(String)pageContext.getSession().getAttribute("lang");
 			if (editable) {
 				String url = "/"+urlContext+"/edit.do";
-				if (authenticationService.hasUserPermission(user, url)) {
+				if (authenticationService.hasUserPermission(user, url)
+						&& hasEditable) {
 					objOut.println("<th width=\"30\">"+CacheUtil.getText("messageResourceCache","label_Edit_"+locale)+"</th>");
 					additionalColumn++;
 				}
 			}
 			if (deletable) {
 				String url = "/"+urlContext+"/delete.do";
-				if (authenticationService.hasUserPermission(user, url)){
+				if (authenticationService.hasUserPermission(user, url)
+						&& hasDeletable){
 					objOut.println("<th  width=\"30\">"+CacheUtil.getText("messageResourceCache","label_Delete_"+locale)+"</th>");
 					additionalColumn++;
 				}
@@ -843,13 +937,17 @@ public final class Datatable extends BodyTagSupport {
 			objOut.write("<table width=\"100%\"><tr><td>");
 			if (insertable) {
 				String url = "/"+urlContext+"/create.do";
-				if (authenticationService.hasUserPermission(user, url))
-					objOut.write("<a href=\""+pageContext.getAttribute("ctx")+"/"+urlContext+"/create.do\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/add.png\" border=\"0\" title=\"Add\" class=\"toolbarButton\"/></a>&nbsp;");
+				if (authenticationService.hasUserPermission(user, url)) {
+					if (StringUtils.isNotEmpty(insertableParams)) {
+						url += ("?" + insertableParams);
+					}
+					objOut.write("<a href=\""+pageContext.getAttribute("ctx")+url+"\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/add.png\" border=\"0\" title=\"Add\" class=\"toolbarButton\"/></a>&nbsp;");
+				}
 			}
 			if (multipleDelete) {
 				String url = "/"+urlContext+"/bulkdelete.do";
 				if (authenticationService.hasUserPermission(user, url))
-					objOut.write("<a href=\"#\" onclick=\"javascript:removeData();\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/delete.png\" border=\"0\" title=\"Delete\" class=\"toolbarButton\"/></a>&nbsp;");
+					objOut.write("<a href=\"#\" onclick=\"javascript:removeData();\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/delete.png\" border=\"0\" title=\"Bulk Delete\" class=\"toolbarButton\"/></a>&nbsp;");
 			}
 			if (searcheable) {
 				String url = "/"+urlContext+"/search.do";
@@ -860,18 +958,27 @@ public final class Datatable extends BodyTagSupport {
 			if (displayPrint) {		
 				objOut.write("<a href=\"print.do\" onClick=\"smallPopup(this.href);return false;\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/print.png\" border=\"0\" class=\"toolbarButton\"/></a>&nbsp;");
 			}
-			String url = "/"+urlContext+"/export.do";
-			if (authenticationService.hasUserPermission(user, url)) {
+			
+			String exportTypeValueHolder = "__EXPORT_TYPE__";
+			String exportTypeParams = "?type="+exportTypeValueHolder;
+			String exportUrl = "/"+urlContext+"/export.do";
+			if (authenticationService.hasUserPermission(user, exportUrl)) {
+				exportUrl = (pageContext.getAttribute("ctx") + exportUrl + exportTypeParams);
+				if (StringUtils.isNotEmpty(exportableParams)) {
+					exportUrl += ("&" + exportableParams);
+				}
+				
 				if (exportPdf) {
-					objOut.write("<a href=\""+pageContext.getAttribute("ctx")+"/"+urlContext+"/export.do?type=pdf\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/pdf.png\" border=\"0\" class=\"toolbarButton\"/></a>&nbsp;");
+					objOut.write("<a href=\""+exportUrl.replace(exportTypeValueHolder, "pdf")+"\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/pdf.png\" border=\"0\" class=\"toolbarButton\"/></a>&nbsp;");
 				}
 				if (exportXls) {
-					objOut.write("<a href=\""+pageContext.getAttribute("ctx")+"/"+urlContext+"/export.do?type=xls\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/excel.png\" border=\"0\" class=\"toolbarButton\"/></a>");
+					objOut.write("<a href=\""+exportUrl.replace(exportTypeValueHolder, "xls")+"\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/excel.png\" border=\"0\" class=\"toolbarButton\"/></a>");
 				}
 				if (exportCsv) {
-					objOut.write("<a href=\""+pageContext.getAttribute("ctx")+"/"+urlContext+"/export.do?type=csv\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/csv.png\" border=\"0\" class=\"toolbarButton\"/></a>");
+					objOut.write("<a href=\""+exportUrl.replace(exportTypeValueHolder, "csv")+"\"><img src=\""+pageContext.getAttribute("resourceCtx")+"/images/csv.png\" border=\"0\" class=\"toolbarButton\"/></a>");
 				}
 			}
+			
 			objOut.write("</td></tr></table>");
 		} catch (IOException IoEx) {
 			throw new JspException("Error: Writing empty paging!", IoEx);

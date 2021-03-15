@@ -37,4 +37,14 @@ INSERT INTO `lutransport`.`data_privilege`
 (`id`, `created_at`, `created_by`, `status`, `data_type`, `privilege`, `role_id`, `business_object_id`)
 VALUES ('3', '2021-02-23 11:27:22', '1', '1', 'EMP_CAT', '2,3,6', '3', 6013); -- REPORTUSER payroll report
 
+--------------------
+
+ALTER TABLE `lutransport`.`data_privilege` 
+DROP COLUMN `data_type`,
+CHANGE COLUMN `privilege` `emp_cat_priv` VARCHAR(255) NULL DEFAULT NULL COMMENT '' ,
+ADD COLUMN `has_editable` VARCHAR(15) NULL DEFAULT NULL COMMENT '' AFTER `business_object_id`,
+ADD COLUMN `has_deletable` VARCHAR(15) NULL DEFAULT NULL COMMENT '' AFTER `has_editable`;
+
+ALTER TABLE `lutransport`.`data_privilege`
+ADD CONSTRAINT `data_privilege_UNIQUE` UNIQUE KEY(role_id, business_object_id);
 

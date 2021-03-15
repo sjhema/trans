@@ -6,20 +6,28 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang.StringUtils;
-
 import org.springframework.stereotype.Controller;
 
 import org.springframework.ui.ModelMap;
+
 import org.springframework.validation.BindingResult;
+
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.primovision.lutransport.controller.CRUDController;
+import com.primovision.lutransport.controller.editor.AbstractModelEditor;
+import com.primovision.lutransport.core.util.CoreUtil;
 
 import com.primovision.lutransport.model.BusinessObject;
 import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.Role;
+import com.primovision.lutransport.model.SearchCriteria;
 import com.primovision.lutransport.model.hr.EmployeeCatagory;
 
 @Controller
@@ -30,64 +38,128 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 	}
 	
 	@Override
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		super.initBinder(binder);
+		
+		binder.registerCustomEditor(BusinessObject.class, new AbstractModelEditor(BusinessObject.class));
+		binder.registerCustomEditor(Role.class, new AbstractModelEditor(Role.class));
+	}
+	
+	private void setupCommon(ModelMap model, HttpServletRequest request) {
+		List<String> empCatNames = retrieveEmpCatNames();
+		model.addAttribute("empCatNames", empCatNames);
+		
+		List<BusinessObject> boList = getProtectedBO();
+		model.addAttribute("boList", boList);
+	}
+	
+	@Override
 	public void setupCreate(ModelMap model, HttpServletRequest request) {
 		super.setupCreate(model, request);
 		
-		String query = "select obj from EmployeeCatagory obj where obj.status=1 order by obj.name";
-		List<EmployeeCatagory> empCategories = genericDAO.executeSimpleQuery(query);
-		List<String> empCatNames = new ArrayList<String>();
-		for (EmployeeCatagory anEmpCat : empCategories) {
-			empCatNames.add(anEmpCat.getName());
-		}
-		model.addAttribute("empCatNames", empCatNames);
+		setupCommon(model, request);
 		
-		String roleId = request.getParameter("roleId");
+		DataPrivilege entity = (DataPrivilege) model.get("modelObject");
+		entity.setPrivilegeArrEmpCat(new String[0]);
+		
+		Long roleId = null;
+		Role role = entity.getRole();
+		if (role == null || role.getId() == null) {
+			String roleIdStr = request.getParameter("roleId");
+			if (StringUtils.isNotEmpty(roleIdStr)) {
+				roleId = Long.valueOf(roleIdStr);
+			}
+		} else if (StringUtils.isEmpty(role.getName())) {
+			roleId = role.getId();
+		}
+		if (roleId != null) {
+			role = genericDAO.getById(Role.class, roleId);
+			entity.setRole(role);
+		}
+	}
+	
+	@Override
+	public void setupList(ModelMap model, HttpServletRequest request) {
+		populateSearchCriteria(request, request.getParameterMap());
+		
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		String roleId = (String) criteria.getSearchMap().get("role.id");
+		model.addAttribute("roleId", roleId);
+		
 		Role role = genericDAO.getById(Role.class, Long.valueOf(roleId));
+		model.addAttribute("roleName", role.getName());
+	}
+	
+	@Override
+	public String list(ModelMap model, HttpServletRequest request) {
+		setupList(model, request);
 		
-		DataPrivilege entity = (DataPrivilege)model.get("modelObject");
-		entity.setRole(role);
+		SearchCriteria criteria = (SearchCriteria) request.getSession().getAttribute("searchCriteria");
+		criteria.setPageSize(25);
 		
-		List<DataPrivilege> dataPrivilegeList = retrieveDataPrivileges(role.getId());
-		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
-			entity.setPrivilegeArrEmpCatPayrollReport(new String[0]);
-			entity.setPrivilegeArrEmpCatManageEmployee(new String[0]);
-			return;
-		}
-		
+		List<EmployeeCatagory> empCategories = retrieveEmpCatagories();
+		List<DataPrivilege> dataPrivilegeList = genericDAO.search(DataPrivilege.class, criteria);
 		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
-			String privilege = aDataPrivilege.getPrivilege();
-			if (StringUtils.isEmpty(privilege)) {
+			String empCatPrivilege = aDataPrivilege.getEmpCatPriv();
+			if (StringUtils.isEmpty(empCatPrivilege)) {
 				continue;
 			}
 			
-			if (StringUtils.equals(DataPrivilege.DATA_TYPE_EMP_CAT, aDataPrivilege.getDataType())) {
-				populateEmpCatPrivilege(entity, aDataPrivilege, empCategories);
-			}
-		}
-	}
-	
-	private void populateEmpCatPrivilege(DataPrivilege entity, DataPrivilege aDataPrivilege, List<EmployeeCatagory> empCategories) {
-		String empCatPrivilege = aDataPrivilege.getPrivilege();
-		if (StringUtils.isEmpty(empCatPrivilege)) {
-			return;
+			List<String> empCatNamesList = buildEmpCatNamesList(empCategories, empCatPrivilege);
+			aDataPrivilege.setEmpCatPrivNames(CoreUtil.toString(empCatNamesList));
 		}
 		
-		List<String> accessibleEmpCats = new ArrayList<String>();
-		String[] empCatIdArr = empCatPrivilege.split(",");
-		for (String empCatId : empCatIdArr) {
-			accessibleEmpCats.add(retrieveEmpCatName(empCategories, empCatId));
-		}
-		String[] accessibleEmpCatsArr = accessibleEmpCats.toArray(new String[0]);
-			
-		long boId = aDataPrivilege.getBo().getId().longValue();
-		if (boId == payrollReportBOId) {
-			entity.setPrivilegeArrEmpCatPayrollReport(accessibleEmpCatsArr);
-		} else if (boId == manageEmployeeBOId) {
-			entity.setPrivilegeArrEmpCatManageEmployee(accessibleEmpCatsArr);
-		}
+		model.addAttribute("list", genericDAO.search(getEntityClass(), criteria,  "bo.objectName asc", null, null));
+		return urlContext + "/list";
 	}
 	
-	private String retrieveEmpCatName(List<EmployeeCatagory> empCategories, String id) {
+	@Override
+	public String delete(@ModelAttribute("modelObject") DataPrivilege entity,
+			BindingResult bindingResult, HttpServletRequest request) {
+		String listParams = constructListParams(entity);
+		
+		super.delete(entity, bindingResult, request);
+		
+		return "redirect:/" + urlContext + "/list.do" + listParams;
+	}
+	
+	private String constructListParams(DataPrivilege entity) {
+		return "?role.id=" + entity.getRole().getId();
+	}
+	
+	private List<String> buildEmpCatNamesList(List<EmployeeCatagory> empCategories, String empCatPrivilege) {
+		List<String> empCatNamesList = new ArrayList<String>();
+		String[] empCatIdArr = empCatPrivilege.split(",");
+		for (String empCatId : empCatIdArr) {
+			empCatNamesList.add(extractEmpCatName(empCategories, empCatId));
+		}
+		return empCatNamesList;
+	}
+	
+	@Override
+	public void setupUpdate(ModelMap model, HttpServletRequest request) {
+		setupCommon(model, request);
+		
+		DataPrivilege entity = (DataPrivilege) model.get("modelObject");
+		populateEmpCatPrivilegeNames(entity);
+	}
+	
+	private void populateEmpCatPrivilegeNames(DataPrivilege entity) {
+		String empCatPriv = entity.getEmpCatPriv();
+		if (StringUtils.isEmpty(empCatPriv)) {
+			entity.setPrivilegeArrEmpCat(new String[0]);
+			return;
+		} 
+		
+		List<EmployeeCatagory> empCategories = retrieveEmpCatagories();
+		
+		List<String> accessibleEmpCats = buildEmpCatNamesList(empCategories, empCatPriv);
+		String[] accessibleEmpCatsArr = accessibleEmpCats.toArray(new String[0]);
+		entity.setPrivilegeArrEmpCat(accessibleEmpCatsArr);
+	}
+	
+	private String extractEmpCatName(List<EmployeeCatagory> empCategories, String id) {
 		String empCatName = StringUtils.EMPTY;
 		Long empCatId = Long.valueOf(id);
 		for (EmployeeCatagory anEmpCat : empCategories) {
@@ -96,6 +168,21 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 			}
 		}
 		return empCatName;
+	}
+	
+	private List<String> retrieveEmpCatNames() {
+		List<EmployeeCatagory> empCategories = retrieveEmpCatagories();
+		List<String> empCatNames = new ArrayList<String>();
+		for (EmployeeCatagory anEmpCat : empCategories) {
+			empCatNames.add(anEmpCat.getName());
+		}
+		return empCatNames;
+	}
+	
+	private List<EmployeeCatagory> retrieveEmpCatagories() {
+		String query = "select obj from EmployeeCatagory obj where obj.status=1 order by obj.name";
+		List<EmployeeCatagory> empCategories = genericDAO.executeSimpleQuery(query);
+		return empCategories;
 	}
 	
 	private String buildEmpCatPrivilege(String[] privilegeArr) {
@@ -118,51 +205,43 @@ public class DataPrivilegeController extends CRUDController<DataPrivilege> {
 		return empCatList.get(0);
 	}
 	
-	private List<DataPrivilege> retrieveDataPrivileges(Long roleId) {
-		String query = "select obj from DataPrivilege obj where obj.status=1"
-				+ " and role=" + roleId;
-				//+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'";
-		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
-		return dataPrivilegeList;
-	}
-	
-	private void deleteDataPrivileges(Long roleId) {
-		List<DataPrivilege> dataPrivilegeList = retrieveDataPrivileges(roleId);
-		for (DataPrivilege aDataPrivilege : dataPrivilegeList) {
-			genericDAO.delete(aDataPrivilege);
+	private void validateSave(DataPrivilege entity, BindingResult bindingResult, HttpServletRequest request) {
+		if (entity.getBo() == null || entity.getBo().getId() == null) {
+			bindingResult.rejectValue("bo.id", "error.select.option", null, null);
 		}
 	}
+	
 	@Override
-	public String save(HttpServletRequest request, DataPrivilege entity,
-			BindingResult bindingResult, ModelMap model) {
-		Role role = entity.getRole();
-		deleteDataPrivileges(role.getId());
-		
-		saveEmpCatDataPrivileges(request, role, entity);
-		
-		return "redirect:/admin/access/role/list.do";
-	}
-	
-	private void saveEmpCatDataPrivileges(HttpServletRequest request, Role role, DataPrivilege entity) {
-		String empCatDataType = DataPrivilege.DATA_TYPE_EMP_CAT;
-		String privilege = buildEmpCatPrivilege(entity.getPrivilegeArrEmpCatPayrollReport());
-		save(request, role, payrollReportBOId, empCatDataType, privilege);
-		privilege = buildEmpCatPrivilege(entity.getPrivilegeArrEmpCatManageEmployee());
-		save(request, role, manageEmployeeBOId, empCatDataType, privilege);
-	}
-	
-	private void save(HttpServletRequest request, Role role, long boId, String dataType, String privilege) {
-		if (StringUtils.isEmpty(privilege)) {
-			return;
+	public String save(HttpServletRequest request,
+			@ModelAttribute("modelObject") DataPrivilege entity, BindingResult bindingResult, ModelMap model) {
+		validateSave(entity, bindingResult, request);
+		try {
+			getValidator().validate(entity, bindingResult);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			log.warn("Error in validation :" + e);
 		}
 		
-		DataPrivilege entity = new DataPrivilege();
-		entity.setDataType(dataType);
-		entity.setRole(role);
-		BusinessObject bo = genericDAO.getById(BusinessObject.class, Long.valueOf(boId));
-		entity.setBo(bo);
-		entity.setPrivilege(privilege);
-		setModifier(request, entity);
-		genericDAO.save(entity);
+		if (bindingResult.hasErrors()) {
+			setupCreate(model, request);
+			return urlContext + "/form";
+		}
+		
+		String empCatPrivilege = buildEmpCatPrivilege(entity.getPrivilegeArrEmpCat());
+		entity.setEmpCatPriv(empCatPrivilege);
+		
+		if (StringUtils.isEmpty(entity.getHasDeletable())) {
+			entity.setHasDeletable(null);
+		}
+		if (StringUtils.isEmpty(entity.getHasEditable())) {
+			entity.setHasEditable(null);
+		}
+		
+		beforeSave(request, entity, model);
+		genericDAO.saveOrUpdate(entity);
+		cleanUp(request);
+		
+		String listParams = constructListParams(entity);
+		return "redirect:/" + urlContext + "/list.do" + listParams;
 	}
 }

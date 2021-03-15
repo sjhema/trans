@@ -2,6 +2,7 @@ package com.primovision.lutransport.controller;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import com.google.gson.Gson;
 import com.primovision.lutransport.core.dao.GenericDAO;
 import com.primovision.lutransport.core.util.ReportUtil;
+import com.primovision.lutransport.model.BusinessObject;
 import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.Language;
 import com.primovision.lutransport.model.Role;
@@ -41,8 +43,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 
 @SuppressWarnings("unchecked")
 public class BaseController {
-	protected static DecimalFormat decimalFormat = new DecimalFormat(
-			"######.000");
+	protected static DecimalFormat decimalFormat = new DecimalFormat("######.000");
 	
 	// Driver, Mechanic, Loader/Tipper employee categories
 	protected static final String defaultAccessibleEmpCategories = "2,3,6";
@@ -50,8 +51,7 @@ public class BaseController {
 	protected static final long payrollReportBOId = 6013l;
 	protected static final long manageEmployeeBOId = 2031l;
 
-	protected static Logger log = Logger
-			.getLogger("com.primovision.lutransport.controller");
+	protected static Logger log = Logger.getLogger("com.primovision.lutransport.controller");
 
 	@Autowired
 	private AuditService auditService;
@@ -125,16 +125,13 @@ public class BaseController {
 		
 		String query = "select obj from DataPrivilege obj where obj.status=1"
 				+ " and role=" + roleId
-				+ " and dataType=" + "'" + DataPrivilege.DATA_TYPE_EMP_CAT + "'"
 				+ " and bo=" + boId;
 		List<DataPrivilege> dataPrivilegeList = genericDAO.executeSimpleQuery(query);
-		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()) {
+		if (dataPrivilegeList == null || dataPrivilegeList.isEmpty()
+				|| StringUtils.isEmpty(dataPrivilegeList.get(0).getEmpCatPriv())) {
 			accessibleEmpCategoryIds = defaultAccessibleEmpCategories;
 		} else {
-			accessibleEmpCategoryIds = dataPrivilegeList.get(0).getPrivilege();
-			if (StringUtils.isEmpty(accessibleEmpCategoryIds)) {
-				accessibleEmpCategoryIds = defaultAccessibleEmpCategories;
-			}
+			accessibleEmpCategoryIds = dataPrivilegeList.get(0).getEmpCatPriv();
 		}
 		
 		if (accessibleEmpCategoryIds.indexOf(',') == -1) {
@@ -160,7 +157,7 @@ public class BaseController {
 	}
 	
 	protected String deriveAccessibleEmpCategoryIds(HttpServletRequest request) {
-		return StringUtils.EMPTY;
+		return defaultAccessibleEmpCategories;
 	}
 	
 	protected boolean addAccessibleEmployeeCategoriesCriteria(HttpServletRequest request, SearchCriteria criteria) {
@@ -172,17 +169,16 @@ public class BaseController {
 		
 		String accessibleEmpCategories = deriveAccessibleEmpCategoryIds(request);
 		if (StringUtils.isNotEmpty(accessibleEmpCategories)) {
-			added = true;
 			criteria.getSearchMap().put("catagory.id", accessibleEmpCategories);
+			added = true;
 		}
 		return added;
 	}
 	
 	protected void removeAccessibleEmpCatCrietria(boolean addedAccessibleEmpCatCriteria, SearchCriteria criteria) {
-		if (!addedAccessibleEmpCatCriteria) {
-			return;
+		if (addedAccessibleEmpCatCriteria) {
+			criteria.getSearchMap().remove("catagory.id");
 		}
-		criteria.getSearchMap().remove("catagory.id");
 	}
 
 	protected List<StaticData> listStaticData(String staticDataType) {
@@ -316,5 +312,15 @@ public class BaseController {
 	
 	protected void addError(HttpServletRequest request, String error) {
 		request.getSession().setAttribute("error", error);
+	}
+	
+	protected String getProtectedBOIds() {
+		return payrollReportBOId + "," + manageEmployeeBOId;
+	}
+	
+	protected List<BusinessObject> getProtectedBO() {
+		String protectedBOIds = getProtectedBOIds();
+		List<BusinessObject> boList = genericDAO.findByCommaSeparatedIds(BusinessObject.class, protectedBOIds);
+		return boList;
 	}
 }

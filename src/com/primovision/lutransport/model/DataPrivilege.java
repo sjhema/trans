@@ -11,15 +11,15 @@ import javax.persistence.Transient;
 @Table(name = "data_privilege")
 @SuppressWarnings("serial")
 public class DataPrivilege extends AbstractBaseModel {
-	@Transient
-	public static final String DATA_TYPE_EMP_CAT = "EMP_CAT";
-	
-	@Column(name = "data_type")
-	private String dataType;
-	
-	@Column(name = "privilege")
-	private String privilege;
+	@Column(name = "emp_cat_priv")
+	private String empCatPriv;
 
+	@Column(name = "has_editable")
+	private String hasEditable;
+	
+	@Column(name = "has_deletable")
+	private String hasDeletable;
+	
 	@ManyToOne
 	@JoinColumn(name = "role_id")
 	private Role role;
@@ -29,24 +29,37 @@ public class DataPrivilege extends AbstractBaseModel {
 	private BusinessObject bo;
 	
 	@Transient
+	private String empCatPrivNames;
+	@Transient
+	private String[] privilegeArrEmpCat;
+	
+	/*@Transient
 	private String[] privilegeArrEmpCatPayrollReport;
 	@Transient
-	private String[] privilegeArrEmpCatManageEmployee;
+	private String[] privilegeArrEmpCatManageEmployee;*/
 
-	public String getDataType() {
-		return dataType;
+	public String getEmpCatPriv() {
+		return empCatPriv;
 	}
 
-	public void setDataType(String dataType) {
-		this.dataType = dataType;
+	public void setEmpCatPriv(String empCatPriv) {
+		this.empCatPriv = empCatPriv;
 	}
 
-	public String getPrivilege() {
-		return privilege;
+	public String getHasEditable() {
+		return hasEditable;
 	}
 
-	public void setPrivilege(String privilege) {
-		this.privilege = privilege;
+	public void setHasEditable(String hasEditable) {
+		this.hasEditable = hasEditable;
+	}
+	
+	public String getHasDeletable() {
+		return hasDeletable;
+	}
+
+	public void setHasDeletable(String hasDeletable) {
+		this.hasDeletable = hasDeletable;
 	}
 
 	public Role getRole() {
@@ -65,7 +78,7 @@ public class DataPrivilege extends AbstractBaseModel {
 		this.bo = bo;
 	}
 
-	@Transient
+	/*@Transient
 	public String[] getPrivilegeArrEmpCatPayrollReport() {
 		return privilegeArrEmpCatPayrollReport;
 	}
@@ -83,5 +96,25 @@ public class DataPrivilege extends AbstractBaseModel {
 	@Transient
 	public void setPrivilegeArrEmpCatManageEmployee(String[] privilegeArrEmpCatManageEmployee) {
 		this.privilegeArrEmpCatManageEmployee = privilegeArrEmpCatManageEmployee;
+	}*/
+
+	@Transient
+	public String[] getPrivilegeArrEmpCat() {
+		return privilegeArrEmpCat;
+	}
+
+	@Transient
+	public void setPrivilegeArrEmpCat(String[] privilegeArrEmpCat) {
+		this.privilegeArrEmpCat = privilegeArrEmpCat;
+	}
+
+	@Transient
+	public String getEmpCatPrivNames() {
+		return empCatPrivNames;
+	}
+
+	@Transient
+	public void setEmpCatPrivNames(String empCatPrivNames) {
+		this.empCatPrivNames = empCatPrivNames;
 	}
 }

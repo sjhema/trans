@@ -2,10 +2,13 @@ package com.primovision.lutransport.service;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.primovision.lutransport.core.dao.GenericDAO;
+import com.primovision.lutransport.model.BusinessObject;
+import com.primovision.lutransport.model.DataPrivilege;
 import com.primovision.lutransport.model.Role;
 import com.primovision.lutransport.model.User;
 
@@ -43,6 +46,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		if (users != null && users.size() > 0)
 			return true;
 		return false;
+	}
+	
+	@Override
+	public DataPrivilege retrieveDataPrivilege(User user, String url) {
+		if (user == null || StringUtils.isEmpty(url)) {
+			return null;
+		}
+		
+		if (url.indexOf("?") != -1) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+		log.debug("URL is : " + url);
+		
+		String query = "select dp from DataPrivilege dp where dp.role.id= " + user.getRole().getId()
+				+ " and dp.bo.url like '%" + url + "%'";
+		List<DataPrivilege> dpList = genericDAO.executeSimpleQuery(query.toString());
+		if (dpList == null || dpList.isEmpty()) {
+			return null;
+		} else {
+			return dpList.get(0);
+		}
 	}
 	
 	@Override
