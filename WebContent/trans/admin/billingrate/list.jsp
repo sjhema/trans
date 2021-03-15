@@ -108,6 +108,24 @@ function getOriginLoad(){
 			</td>		
 		</tr>
 		<tr>
+			<td align="${left}" class="first"><label>Loading Fee</label></td>
+			<td align="${left}">
+				<select id="loadingFee" name="loadingFee" style="min-width:154px; max-width:154px">
+					<option value="">------<primo:label code="Please Select"/>------</option>
+					<c:set var="yesSelected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['loadingFee'] == '!null'}">
+						<c:set var="yesSelected" value="selected"/>
+					</c:if>
+					<c:set var="noSelected" value=""/>
+					<c:if test="${sessionScope.searchCriteria.searchMap['loadingFee'] == 'null'}">
+						<c:set var="noSelected" value="selected"/>
+					</c:if>
+					<option value="!null" ${yesSelected}>Yes</option>
+					<option value="null" ${noSelected}>No</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td align="${left}"></td>
 			<td align="${left}"><input type="button"
 				onclick="document.forms['searchForm'].submit();" value="Search" />
