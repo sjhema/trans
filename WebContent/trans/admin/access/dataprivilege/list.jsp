@@ -1,6 +1,6 @@
 <%@include file="/common/taglibs.jsp"%>
 <h3>
-	<primo:label code="Manage Data Access for ${roleName}" />
+	Manage Data Access for ${roleName}
 </h3>
 <br />
 <form:form name="dataAccessServiceForm" id="dataAccessServiceForm">
@@ -16,5 +16,8 @@
 	</primo:datatable>
 	<%session.setAttribute("columnPropertyList", pageContext.getAttribute("columnPropertyList"));%>
 </form:form>
+<br/>
+<input type="button" value="<primo:label code="Back"/>" class="flat"
+					onClick="document.location.href='../role/list.do?rst=1'" />
 
 

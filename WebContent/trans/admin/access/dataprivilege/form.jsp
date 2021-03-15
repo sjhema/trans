@@ -1,12 +1,12 @@
 <%@ include file="/common/taglibs.jsp"%>
 
-<h3><primo:label code="Manage Data Access Privilege"/></h3>
+<h3>Manage Data Access for ${modelObject.role.name}</h3>
 <form:form action="save.do" name="dataAccessPrivilegeForm" commandName="modelObject" method="post">
 	<form:hidden path="id" id="id" />
 	<form:hidden path="role.id" id="roleId" />
 	<table width="100%" id="form-table">
 		<tr class="table-heading">
-			<td colspan="2"><b><primo:label code="Add/Update Data Access Privilege" /></b></td>
+			<td colspan="2"><b><primo:label code="Add/Update Data Access" /></b></td>
 		</tr>
 		<tr>
 			<td class="form-left">
